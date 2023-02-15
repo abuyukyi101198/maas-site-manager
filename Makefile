@@ -6,7 +6,7 @@ postgresql
 endef
 
 install-dependencies:
-	sudo apt -y install $(PACKAGES)
+	sudo -E DEBIAN_FRONTEND=noninteractive apt -y install $(PACKAGES)
 .PHONY: install-dependencies
 
 

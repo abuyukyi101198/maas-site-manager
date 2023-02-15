@@ -12,14 +12,14 @@ order_by_type = false
 profile = 'black'
 use_parentheses = true
 
+[tool.pytest.ini_options]
+testpaths = [
+  "msm/"
+]
+
 [tool.mypy]
 install_types = true
 non_interactive = true
 strict = true
 warn_return_any = true
 warn_unused_configs = true
-
-[tool.pytest.ini_options]
-testpaths = [
-  "msm/"
-]

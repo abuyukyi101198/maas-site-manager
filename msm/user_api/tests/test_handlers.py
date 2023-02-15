@@ -1,3 +1,8 @@
+from datetime import (
+    datetime,
+    timedelta,
+)
+
 from fastapi.testclient import TestClient
 import pytest
 
@@ -20,3 +25,18 @@ async def test_list_sites(
     response = user_app_client.get("/sites")
     assert response.status_code == 200
     assert response.json() == sites
+
+
+@pytest.mark.asyncio
+async def test_create_token(user_app_client: TestClient) -> None:
+    seconds = 100
+    response = user_app_client.post(
+        "/tokens", json={"count": 5, "duration": seconds}
+    )
+    assert response.status_code == 200
+    result = response.json()
+    assert datetime.fromisoformat(result["expiration"]) < (
+        datetime.utcnow() + timedelta(seconds=seconds)
+    )
+
+    assert len(result["tokens"]) == 5
