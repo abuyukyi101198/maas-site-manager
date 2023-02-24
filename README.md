@@ -34,3 +34,11 @@ cd site-manager-frontend
 yarn  # install dependencies
 yarn run dev
 ```
+
+## How to run tests
+
+### End to end
+
+```bash
+yarn playwright test
+```
