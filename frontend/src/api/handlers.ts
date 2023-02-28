@@ -6,6 +6,7 @@ export const getSites = async () => {
     const response = await api.get(urls.sites);
     return response.data;
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error(error);
   }
 };

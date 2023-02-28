@@ -1,4 +1,3 @@
-import MockDate from "mockdate";
 import timezoneMock from "timezone-mock";
 import { vi } from "vitest";
 

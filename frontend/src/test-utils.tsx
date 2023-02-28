@@ -23,6 +23,6 @@ const customRender: (ui: ReactElement, options?: Omit<RenderOptions, "wrapper">)
   options?: Omit<RenderOptions, "wrapper">,
 ) => render(ui, { wrapper: Providers, ...options });
 
-export * from "@testing-library/react";
+export { screen, within, waitFor } from "@testing-library/react";
 export { customRender as render };
 export { Providers };
