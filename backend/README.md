@@ -76,5 +76,5 @@ Database schema setup will happen automatically at application startup.
 The application can be run via
 
 ```
-tox -e run
+tox -e run run
 ```
