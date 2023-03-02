@@ -1,0 +1,11 @@
+@use "sass:math";
+
+// Vanilla settings:
+$grid-max-width: math.div(1920, 16) * 1rem;
+
+$breakpoint-x-large: 1440px;
+$breakpoint-xx-large: 1920px;
+
+// TODO: uncomment and use local assets path once implemented
+// https://warthogs.atlassian.net/browse/MAASENG-1448
+// $assets-path: "/assets/fonts/";

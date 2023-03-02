@@ -10,7 +10,14 @@ export default defineConfig({
   server: { port: Number(process.env.VITE_UI_PORT) },
   css: {
     preprocessorOptions: {
-      scss: { additionalData: `@import "node_modules/vanilla-framework"; @include vanilla;` },
+      scss: {
+        additionalData: `
+          @use "sass:math";
+          @import "./src/settings.scss";
+          @import "node_modules/vanilla-framework";
+          @include vanilla;
+        `,
+      },
     },
   },
 });
