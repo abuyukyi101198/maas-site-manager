@@ -19,8 +19,8 @@ describe("Placeholder", () => {
 
   it("does not return placeholder styles when isLoading is false", () => {
     const { rerender } = render(<Placeholder>Placeholder children</Placeholder>);
-    expect(screen.queryByTestId("placeholder")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/loading/i)).not.toBeInTheDocument();
     rerender(<Placeholder isLoading>Placeholder children</Placeholder>);
-    expect(screen.getByTestId("placeholder")).toBeInTheDocument();
+    expect(screen.getByLabelText(/loading/i)).toBeInTheDocument();
   });
 });

@@ -23,12 +23,11 @@ const Placeholder = ({ text, children, className, isLoading = false }: Props) =>
   if (isLoading) {
     return (
       <span
-        aria-hidden={true}
+        aria-label="loading"
         className={classNames("p-placeholder", className)}
-        data-testid="placeholder"
         style={{ animationDelay: `${delay}ms` }}
       >
-        {text || children}
+        <span aria-hidden="true">{text || children}</span>
       </span>
     );
   }
