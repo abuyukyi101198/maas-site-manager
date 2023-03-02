@@ -21,7 +21,7 @@ const SitesTableControls = ({
           <SitesCount data={data} isLoading={isLoading} /> MAAS Regions
         </h2>
       </Col>
-      <Col className="u-flex u-flex-end u-flex-column" size={2}>
+      <Col className="u-flex u-flex--align-end u-flex--column" size={2}>
         <ColumnsVisibilityControl columns={allColumns} />
       </Col>
     </Row>
