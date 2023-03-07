@@ -1,6 +1,7 @@
 from os import environ
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from . import _base
 from .. import PACKAGE
@@ -16,14 +17,28 @@ DEFAULT_DB_DSN = (
     + f"{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/{POSTGRES_DB}"
 )
 
+# TODO: make config dynamic and allow env vars
+origins = [
+    "http://localhost:8405",
+    "http://127.0.0.1:8405",
+]
+
 
 def create_app(db_dsn: str = DEFAULT_DB_DSN) -> FastAPI:
     db = Database(db_dsn)
     app = FastAPI(
+        title="MAAS Site Manager",
         name=PACKAGE.project_name,
         version=PACKAGE.version,
         on_startup=[db.connect],
         on_shutdown=[db.disconnect],
+    )
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
     app.state.db = db
     app.router.add_api_route("/", _base.root, methods=["GET"])
