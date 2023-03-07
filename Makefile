@@ -35,7 +35,7 @@ ci-build: # will run the frontend build targets
 ci-lint: ci-backend-lint  # ci-frontend-lint  # TODO: linter not set up, uncomment later
 .PHONY: ci-lint
 
-ci-test: ci-backend-test  # ci-frontend-tests  # TODO: tests not yet working, uncomment later
+ci-test: ci-backend-test ci-frontend-test
 .PHONY: ci-test
 
 

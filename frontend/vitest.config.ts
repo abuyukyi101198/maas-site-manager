@@ -1,4 +1,4 @@
-import { defineConfig, configDefaults } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react-swc";
 
 export default defineConfig({
