@@ -1,7 +1,7 @@
 import { getApiUrl } from "./utils";
 
 const urls = {
-  sites: getApiUrl("/api/sites"),
+  sites: getApiUrl("/sites"),
 };
 
 export default urls;
