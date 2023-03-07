@@ -169,9 +169,11 @@ const SitesTable = ({
   );
 
   const [rowSelection, setRowSelection] = useState({});
+  // wrap the empty array in useMemo to avoid re-rendering the empty table on every render
+  const noItems = useMemo<Site[]>(() => [], []);
 
   const table = useReactTable<Site>({
-    data: data?.items || [],
+    data: data?.items || noItems,
     columns,
     state: {
       rowSelection,
