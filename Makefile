@@ -32,7 +32,7 @@ ci-dep: ci-backend-dep ci-frontend-dep
 ci-build: # will run the frontend build targets
 .PHONY: ci-build ci-frontend-build
 
-ci-lint: ci-backend-lint  # ci-frontend-lint  # TODO: linter not set up, uncomment later
+ci-lint: ci-backend-lint ci-frontend-lint
 .PHONY: ci-lint
 
 ci-test: ci-backend-test ci-frontend-test
@@ -67,7 +67,7 @@ ci-frontend-build:  # nothing to do since everything is run in tox envs
 .PHONY: ci-frontend-build
 
 ci-frontend-lint:
-	cd frontend && yarn run lint
+	cd frontend && yarnpkg run lint
 .PHONY: ci-frontend-lint
 
 ci-frontend-test:
