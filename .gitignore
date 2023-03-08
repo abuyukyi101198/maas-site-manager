@@ -42,3 +42,5 @@ logs
 /backend/.tox
 /backend/build
 
+# CI
+junit*.xml

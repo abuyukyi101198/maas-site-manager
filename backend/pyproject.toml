@@ -16,6 +16,8 @@ use_parentheses = true
 testpaths = [
   "msm/"
 ]
+junit_logging = 'all'
+junit_suite_name = 'maas-site-manager backend tests'
 
 [tool.mypy]
 install_types = true

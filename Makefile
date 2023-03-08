@@ -48,29 +48,29 @@ ci-backend-build:  # nothing to do since everything is run in tox envs
 .PHONY: ci-backend-build
 
 ci-backend-lint:
-	cd backend && tox -e lint,check
+	env -C backend tox -e lint,check
 .PHONY: ci-backend-lint
 
 ci-backend-test:
-	cd backend && tox -e test
+	env -C backend tox -e test -- --junit-xml=../junit-backend.xml
 .PHONY: ci-test
 
 
 # Frontend CI targets
 
 ci-frontend-dep: install-frontend-dependencies
-	cd frontend && yarnpkg install
+	env -C frontend yarnpkg install
 .PHONY: ci-frontend-dep
 
-ci-frontend-build:  # nothing to do since everything is run in tox envs
-	cd frontend && yarnpkg run build
+ci-frontend-build:
+	env -C frontend yarnpkg run build
 .PHONY: ci-frontend-build
 
 ci-frontend-lint:
-	cd frontend && yarnpkg run lint
+	env -C frontend yarnpkg run lint
 .PHONY: ci-frontend-lint
 
 ci-frontend-test:
-	cd frontend && yarnpkg run test --  --silent run
+	env -C frontend VITEST_JUNIT_SUITE_NAME='maas-site-manager frontend tests' yarnpkg run test --silent --reporter=junit --reporter=default --outputFile.junit=../junit-frontend.xml run
 .PHONY: ci-test
 
