@@ -1,8 +1,13 @@
+const path = require("path");
+
 module.exports = {
   root: true,
-  plugins: ["prettier"],
+  plugins: ["prettier", "no-relative-import-paths"],
   extends: [
     "react-app", // Use the recommended rules from CRA.
+    "plugin:import/errors",
+    "plugin:import/warnings",
+    "plugin:import/typescript",
     "eslint-config-prettier", // Ensure this is last in the list.
   ],
   parserOptions: {
@@ -14,10 +19,22 @@ module.exports = {
   },
   rules: {
     "prettier/prettier": "error",
+    "no-relative-import-paths/no-relative-import-paths": [
+      "warn",
+      { allowSameFolder: true, rootDir: "frontend/src", prefix: "@" },
+    ],
   },
   settings: {
     react: {
       version: "detect",
+    },
+    "import/resolver": {
+      typescript: {
+        alias: { "@": path.resolve(__dirname, "src") },
+      },
+      node: {
+        extensions: [".js", ".jsx", ".ts", ".tsx"],
+      },
     },
   },
   globals: {

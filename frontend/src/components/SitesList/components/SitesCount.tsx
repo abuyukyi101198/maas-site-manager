@@ -1,7 +1,7 @@
 import pluralize from "pluralize";
 
-import type { UseSitesQueryResult } from "../../../hooks/api";
-import Placeholder from "../../Placeholder";
+import Placeholder from "@/components/Placeholder";
+import type { UseSitesQueryResult } from "@/hooks/api";
 
 const SitesCount = ({ data, isLoading }: Pick<UseSitesQueryResult, "data" | "isLoading">) =>
   isLoading ? (

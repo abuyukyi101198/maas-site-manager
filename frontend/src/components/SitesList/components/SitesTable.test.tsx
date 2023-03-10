@@ -1,10 +1,10 @@
-import timezoneMock from "timezone-mock";
+import * as timezoneMock from "timezone-mock";
 import { vi } from "vitest";
 
-import { siteFactory } from "../../../mocks/factories";
-import { render, screen, within } from "../../../test-utils";
-
 import SitesTable from "./SitesTable";
+
+import { siteFactory } from "@/mocks/factories";
+import { render, screen, within } from "@/test-utils";
 
 beforeEach(() => {
   vi.useFakeTimers();

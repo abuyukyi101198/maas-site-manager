@@ -2,9 +2,9 @@ import { useState } from "react";
 
 import { Pagination } from "@canonical/react-components";
 
-import { useSitesQuery } from "../../hooks/api";
-
 import SitesTable from "./components/SitesTable";
+
+import { useSitesQuery } from "@/hooks/api";
 
 const DEFAULT_PAGE_SIZE = 50;
 

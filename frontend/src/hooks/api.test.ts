@@ -1,12 +1,12 @@
 import { renderHook, waitFor } from "@testing-library/react";
 
-import urls from "../api/urls";
-import { siteFactory } from "../mocks/factories";
-import { createMockSitesResolver } from "../mocks/resolvers";
-import { createMockGetServer } from "../mocks/server";
-import { Providers } from "../test-utils";
-
 import { useSitesQuery } from "./api";
+
+import urls from "@/api/urls";
+import { siteFactory } from "@/mocks/factories";
+import { createMockSitesResolver } from "@/mocks/resolvers";
+import { createMockGetServer } from "@/mocks/server";
+import { Providers } from "@/test-utils";
 
 const sitesData = siteFactory.buildList(2);
 const mockServer = createMockGetServer(urls.sites, createMockSitesResolver(sitesData));

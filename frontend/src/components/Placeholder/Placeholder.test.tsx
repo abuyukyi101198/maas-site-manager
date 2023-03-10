@@ -1,6 +1,6 @@
-import { render, screen } from "../../test-utils";
-
 import Placeholder from "./Placeholder";
+
+import { render, screen } from "@/test-utils";
 
 describe("Placeholder", () => {
   it("always hides placeholder text passed as a text prop", () => {

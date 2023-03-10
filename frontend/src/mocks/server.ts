@@ -2,9 +2,9 @@
 import { rest } from "msw";
 import { setupServer } from "msw/node";
 
-import urls from "../api/urls";
-
 import { createMockSitesResolver } from "./resolvers";
+
+import urls from "@/api/urls";
 
 const createMockGetServer = (endpoint: string, resolver: ReturnType<typeof createMockSitesResolver>) =>
   setupServer(rest.get(endpoint, resolver));

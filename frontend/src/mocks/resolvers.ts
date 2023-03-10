@@ -1,8 +1,8 @@
 import type { RestRequest, restContext, ResponseResolver } from "msw";
 
-import type { GetSitesQueryParams } from "../api/handlers";
-
 import { siteFactory } from "./factories";
+
+import type { GetSitesQueryParams } from "api/handlers";
 
 export const sitesList = siteFactory.buildList(155);
 

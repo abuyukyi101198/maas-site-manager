@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import dotenv from "dotenv";
+import * as path from "path";
 
 dotenv.config({ path: "../.env" });
 
@@ -8,6 +9,9 @@ dotenv.config({ path: "../.env" });
 export default defineConfig({
   plugins: [react()],
   server: { port: Number(process.env.VITE_UI_PORT) },
+  resolve: {
+    alias: { "@": path.resolve(__dirname, "src") },
+  },
   css: {
     preprocessorOptions: {
       scss: {

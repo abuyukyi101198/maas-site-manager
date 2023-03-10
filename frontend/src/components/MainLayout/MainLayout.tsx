@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 
 import "./MainLayout.scss";
-import Navigation from "../Navigation";
+import Navigation from "@/components/Navigation";
 
 const MainLayout: React.FC = () => (
   <div className="l-application">

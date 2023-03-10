@@ -14,12 +14,13 @@ import { utcToZonedTime } from "date-fns-tz";
 import pick from "lodash/fp/pick";
 import useLocalStorageState from "use-local-storage-state";
 
-import type { SitesQueryResult } from "../../../api/types";
-import type { UseSitesQueryResult } from "../../../hooks/api";
-import { getCountryName } from "../../../utils";
+import SitesTableControls from "./SitesTableControls";
+
+import type { SitesQueryResult } from "@/api/types";
+import type { UseSitesQueryResult } from "@/hooks/api";
+import { getCountryName } from "@/utils";
 
 import "./SitesTable.scss";
-import SitesTableControls from "./SitesTableControls";
 
 const createAccessor =
   <T, K extends keyof T>(keys: K[] | K) =>

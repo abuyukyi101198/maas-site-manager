@@ -1,7 +1,7 @@
-import { siteFactory } from "../../../mocks/factories";
-import { render, screen } from "../../../test-utils";
-
 import SitesCount from "./SitesCount";
+
+import { siteFactory } from "@/mocks/factories";
+import { render, screen } from "@/test-utils";
 
 it("displays plural sites count", () => {
   const total = 11;

@@ -2,7 +2,7 @@ import Chance from "chance";
 import { Factory } from "fishery";
 import { uniqueNamesGenerator, adjectives, colors, animals } from "unique-names-generator";
 
-import type { Site } from "../api/types";
+import type { Site } from "api/types";
 
 const connections: Site["connection"][] = ["stable", "lost", "stale", "unstable"];
 

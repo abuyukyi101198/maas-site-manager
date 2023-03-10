@@ -2,11 +2,11 @@ import { useState } from "react";
 
 import { Row, Col, SearchBox } from "@canonical/react-components";
 
-import type { UseSitesQueryResult } from "../../../hooks/api";
-
 import ColumnsVisibilityControl from "./ColumnsVisibilityControl";
 import SitesCount from "./SitesCount";
 import type { SitesColumn } from "./SitesTable";
+
+import type { UseSitesQueryResult } from "@/hooks/api";
 
 const SitesTableControls = ({
   data,

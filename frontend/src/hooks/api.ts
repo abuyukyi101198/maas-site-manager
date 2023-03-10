@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 
-import type { GetSitesQueryParams } from "../api/handlers";
-import { getSites } from "../api/handlers";
-import type { SitesQueryResult } from "../api/types";
+import type { GetSitesQueryParams } from "@/api/handlers";
+import { getSites } from "@/api/handlers";
+import type { SitesQueryResult } from "@/api/types";
 
 export type UseSitesQueryResult = ReturnType<typeof useSitesQuery>;
 

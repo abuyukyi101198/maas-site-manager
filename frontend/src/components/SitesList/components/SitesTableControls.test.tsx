@@ -1,6 +1,6 @@
-import { render, screen } from "../../../test-utils";
-
 import SitesTableControls from "./SitesTableControls";
+
+import { render, screen } from "@/test-utils";
 
 it("displays correct total number of sites", () => {
   render(<SitesTableControls allColumns={[]} data={{ items: [], total: 3, page: 1, size: 0 }} isLoading={false} />);

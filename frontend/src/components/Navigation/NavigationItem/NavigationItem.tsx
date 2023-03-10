@@ -3,8 +3,8 @@ import { useId } from "react";
 import { Icon } from "@canonical/react-components";
 import { Link } from "react-router-dom";
 
-import type { NavLink } from "../types";
-import { isSelected } from "../utils";
+import type { NavLink } from "@/components/Navigation/types";
+import { isSelected } from "@/components/Navigation/utils";
 
 type Props = {
   navLink: NavLink;
