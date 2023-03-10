@@ -1,10 +1,11 @@
 import "./App.scss";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-import router from "./router";
+import routes from "./routes";
 
 const queryClient = new QueryClient();
+const router = createBrowserRouter(routes);
 
 const App: React.FC = () => {
   return (

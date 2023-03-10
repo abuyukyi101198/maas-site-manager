@@ -17,6 +17,7 @@ import useLocalStorageState from "use-local-storage-state";
 import SitesTableControls from "./SitesTableControls";
 
 import type { SitesQueryResult } from "@/api/types";
+import { isDev } from "@/constants";
 import type { UseSitesQueryResult } from "@/hooks/api";
 import { getCountryName } from "@/utils";
 
@@ -188,9 +189,9 @@ const SitesTable = ({
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    debugTable: true,
-    debugHeaders: true,
-    debugColumns: true,
+    debugTable: isDev,
+    debugHeaders: isDev,
+    debugColumns: isDev,
   });
 
   return (
