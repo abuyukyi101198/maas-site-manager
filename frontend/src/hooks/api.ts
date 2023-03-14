@@ -6,9 +6,9 @@ import type { SitesQueryResult } from "@/api/types";
 
 export type UseSitesQueryResult = ReturnType<typeof useSitesQuery>;
 
-export const useSitesQuery = ({ page, size }: GetSitesQueryParams) =>
+export const useSitesQuery = ({ page, size }: GetSitesQueryParams, queryText?: string) =>
   useQuery<SitesQueryResult>({
-    queryKey: ["sites", page, size],
-    queryFn: () => getSites({ page, size }),
+    queryKey: ["sites", page, size, queryText],
+    queryFn: () => getSites({ page, size }, queryText),
     keepPreviousData: true,
   });

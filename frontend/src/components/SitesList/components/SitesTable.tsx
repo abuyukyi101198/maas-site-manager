@@ -30,7 +30,10 @@ const SitesTable = ({
   data,
   isFetchedAfterMount,
   isLoading,
-}: Pick<UseSitesQueryResult, "data" | "isLoading" | "isFetchedAfterMount">) => {
+  setSearchText,
+}: Pick<UseSitesQueryResult, "data" | "isLoading" | "isFetchedAfterMount"> & {
+  setSearchText: (text: string) => void;
+}) => {
   const [columnVisibility, setColumnVisibility] = useLocalStorageState("sitesTableColumnVisibility", {
     defaultValue: {},
   });
@@ -188,7 +191,12 @@ const SitesTable = ({
 
   return (
     <>
-      <SitesTableControls allColumns={table.getAllLeafColumns()} data={data} isLoading={isLoading} />
+      <SitesTableControls
+        allColumns={table.getAllLeafColumns()}
+        data={data}
+        isLoading={isLoading}
+        setSearchText={setSearchText}
+      />
       <table aria-label="sites" className="sites-table">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (

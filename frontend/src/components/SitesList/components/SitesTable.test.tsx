@@ -17,14 +17,28 @@ afterEach(() => {
 });
 
 it("displays an empty sites table", () => {
-  render(<SitesTable data={{ items: [], total: 0, page: 1, size: 0 }} isFetchedAfterMount={true} isLoading={false} />);
+  render(
+    <SitesTable
+      data={{ items: [], total: 0, page: 1, size: 0 }}
+      isFetchedAfterMount={true}
+      isLoading={false}
+      setSearchText={() => {}}
+    />,
+  );
 
   expect(screen.getByRole("table", { name: /sites/i })).toBeInTheDocument();
 });
 
 it("displays rows with details for each site", () => {
   const items = siteFactory.buildList(1);
-  render(<SitesTable data={{ items, total: 1, page: 1, size: 1 }} isFetchedAfterMount={true} isLoading={false} />);
+  render(
+    <SitesTable
+      data={{ items, total: 1, page: 1, size: 1 }}
+      isFetchedAfterMount={true}
+      isLoading={false}
+      setSearchText={() => {}}
+    />,
+  );
 
   expect(screen.getByRole("table", { name: /sites/i })).toBeInTheDocument();
 
@@ -39,7 +53,12 @@ it("displays correctly paginated results", () => {
   const pageLength = 50;
   const items = siteFactory.buildList(pageLength);
   render(
-    <SitesTable data={{ items, total: 100, page: 1, size: pageLength }} isFetchedAfterMount={true} isLoading={false} />,
+    <SitesTable
+      data={{ items, total: 100, page: 1, size: pageLength }}
+      isFetchedAfterMount={true}
+      isLoading={false}
+      setSearchText={() => {}}
+    />,
   );
 
   const tableBody = screen.getAllByRole("rowgroup")[1];
@@ -52,7 +71,12 @@ it("displays correct local time", () => {
 
   const item = siteFactory.build({ timezone: "CET" });
   render(
-    <SitesTable data={{ items: [item], total: 1, page: 1, size: 1 }} isFetchedAfterMount={true} isLoading={false} />,
+    <SitesTable
+      data={{ items: [item], total: 1, page: 1, size: 1 }}
+      isFetchedAfterMount={true}
+      isLoading={false}
+      setSearchText={() => {}}
+    />,
   );
 
   expect(screen.getByRole("table", { name: /sites/i })).toBeInTheDocument();
@@ -62,7 +86,12 @@ it("displays correct local time", () => {
 it("displays full name of the country", () => {
   const item = siteFactory.build({ address: { countrycode: "GB" } });
   render(
-    <SitesTable data={{ items: [item], total: 1, page: 1, size: 1 }} isFetchedAfterMount={true} isLoading={false} />,
+    <SitesTable
+      data={{ items: [item], total: 1, page: 1, size: 1 }}
+      isFetchedAfterMount={true}
+      isLoading={false}
+      setSearchText={() => {}}
+    />,
   );
 
   expect(screen.getByText("United Kingdom")).toBeInTheDocument();

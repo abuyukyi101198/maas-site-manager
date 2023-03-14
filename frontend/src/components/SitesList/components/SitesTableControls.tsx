@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import { Row, Col, SearchBox } from "@canonical/react-components";
 
 import ColumnsVisibilityControl from "./ColumnsVisibilityControl";
@@ -12,8 +10,11 @@ const SitesTableControls = ({
   data,
   isLoading,
   allColumns,
-}: { allColumns: SitesColumn[] } & Pick<UseSitesQueryResult, "data" | "isLoading">) => {
-  const [searchText, setSearchText] = useState("");
+  setSearchText,
+}: { allColumns: SitesColumn[]; setSearchText: (text: string) => void } & Pick<
+  UseSitesQueryResult,
+  "data" | "isLoading"
+>) => {
   const handleSearchInput = (inputValue: string) => {
     setSearchText(inputValue);
   };
@@ -26,12 +27,7 @@ const SitesTableControls = ({
         </h2>
       </Col>
       <Col size={8}>
-        <SearchBox
-          externallyControlled
-          onChange={handleSearchInput}
-          placeholder="Search and filter"
-          value={searchText}
-        />
+        <SearchBox externallyControlled onChange={handleSearchInput} placeholder="Search and filter" />
       </Col>
       <Col className="u-flex u-flex--align-end u-flex--column" size={2}>
         <ColumnsVisibilityControl columns={allColumns} />
