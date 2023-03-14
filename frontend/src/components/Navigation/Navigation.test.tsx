@@ -1,9 +1,8 @@
-import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 
 import Navigation from "./Navigation";
 
-import { render, screen } from "@/test-utils";
+import { render, screen, userEvent } from "@/test-utils";
 
 describe("Navigation", () => {
   it("displays navigation", () => {

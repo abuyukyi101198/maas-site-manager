@@ -5,6 +5,7 @@ import { Pagination } from "@canonical/react-components";
 import SitesTable from "./components/SitesTable";
 
 import { useSitesQuery } from "@/hooks/api";
+import useDebounce from "@/hooks/useDebouncedValue";
 import { parseSearchTextToQueryParams } from "@/utils";
 
 const DEFAULT_PAGE_SIZE = 50;
@@ -13,9 +14,11 @@ const SitesList = () => {
   const [page, setPage] = useState(0);
   const [size] = useState(DEFAULT_PAGE_SIZE);
   const [searchText, setSearchText] = useState("");
+  const debounceSearchText = useDebounce(searchText);
+
   const { data, isLoading, isFetchedAfterMount } = useSitesQuery(
     { page: `${page}`, size: `${size}` },
-    parseSearchTextToQueryParams(searchText),
+    parseSearchTextToQueryParams(debounceSearchText),
   );
 
   useEffect(() => {

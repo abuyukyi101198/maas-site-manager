@@ -44,5 +44,7 @@ const renderWithMemoryRouter = (ui: ReactElement, options?: MemoryRenderOptions)
 
 export { screen, within, waitFor } from "@testing-library/react";
 export { customRender as render };
+export { renderHook } from "@testing-library/react-hooks";
+export { default as userEvent } from "@testing-library/user-event";
 export { renderWithMemoryRouter };
 export { Providers };
