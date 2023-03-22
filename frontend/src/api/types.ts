@@ -2,7 +2,7 @@ export type Site = {
   identifier: string;
   name: string;
   url: string; // <full URL including protocol>,
-  connection: "stable" | "unstable" | "stale" | "lost";
+  connection: "stable" | "lost" | "unknown";
   last_seen: string; // <ISO 8601 date>,
   address: {
     countrycode: string; // <alpha2 country code>,

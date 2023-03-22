@@ -2,4 +2,35 @@
   thead th:first-child {
     width: 3rem;
   }
+  th.connection {
+    padding-left: 1.5rem;
+  }
+  td.connection {
+    padding-left: 0;
+    .connection__text {
+      padding-left: 1.5rem;
+    }
+  }
+  .status-icon {
+    display: inline-block;
+    position: relative;
+    padding-left: 1.5rem;
+  }
+  .status-icon::before {
+    content: "\00B7";
+    font-size: 5rem;
+    position: absolute;
+    left: 0;
+    top: -6px;
+    color: transparent;
+  }
+  .status-icon.is-lost::before {
+    color: #c7162b;
+  }
+  .status-icon.is-stable::before {
+    color: #0e8420;
+  }
+  .status-icon.is-unknown::before {
+    color: #cdcdcd;
+  }
 }

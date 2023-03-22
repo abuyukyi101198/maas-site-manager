@@ -4,7 +4,7 @@ import { uniqueNamesGenerator, adjectives, colors, animals } from "unique-names-
 
 import type { Site, Token } from "@/api/types";
 
-const connections: Site["connection"][] = ["stable", "lost", "stale", "unstable"];
+export const connections: Site["connection"][] = ["stable", "lost", "unknown"];
 
 export const siteFactory = Factory.define<Site>(({ sequence }) => {
   const chance = new Chance(`maas-${sequence}`);

@@ -6,6 +6,7 @@ import type { ColumnDef, Column } from "@tanstack/react-table";
 import pick from "lodash/fp/pick";
 import useLocalStorageState from "use-local-storage-state";
 
+import ConnectionInfo from "./ConnectionInfo";
 import SitesTableControls from "./SitesTableControls";
 
 import type { SitesQueryResult } from "@/api/types";
@@ -87,16 +88,14 @@ const SitesTable = ({
         accessorFn: createAccessor(["connection", "last_seen"]),
         header: () => (
           <>
-            <div>connection</div>
-            <div className="u-text--muted">last seen</div>
+            <div className="connection__text">connection</div>
+            <div className="connection__text u-text--muted">last seen</div>
           </>
         ),
-        cell: ({ getValue }) => (
-          <>
-            <div>{getValue().connection}</div>
-            <div className="u-text--muted">{getValue().last_seen}</div>
-          </>
-        ),
+        cell: ({ getValue }) => {
+          const { connection, last_seen } = getValue();
+          return connection ? <ConnectionInfo connection={connection} lastSeen={last_seen} /> : null;
+        },
       },
       {
         id: "address",
@@ -201,7 +200,7 @@ const SitesTable = ({
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <th colSpan={header.colSpan} key={header.id}>
+                  <th className={`${header.column.id}`} colSpan={header.colSpan} key={header.id}>
                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                     {header.column.getCanResize() && (
                       <div
@@ -224,7 +223,11 @@ const SitesTable = ({
               return (
                 <tr key={row.id}>
                   {row.getVisibleCells().map((cell) => {
-                    return <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>;
+                    return (
+                      <td className={`${cell.column.id}`} key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    );
                   })}
                 </tr>
               );
