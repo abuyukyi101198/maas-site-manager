@@ -4,7 +4,28 @@ from datetime import (
 )
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import (
+    BaseModel,
+    EmailStr,
+    SecretStr,
+)
+from pydantic.fields import Field
+
+
+class CreateUser(BaseModel):
+    """
+    A MAAS Site Manager User
+    """
+
+    email: EmailStr = Field(title="email@example.com")
+    full_name: str
+    # use password.get_secret_value() to retrieve the value
+    password: SecretStr = Field(min_length=8, max_length=50)
+    disabled: bool
+
+
+class User(CreateUser):
+    id: int
 
 
 class CreateSite(BaseModel):
@@ -13,8 +34,8 @@ class CreateSite(BaseModel):
     """
 
     name: str
-    identifier: str
     city: str | None
+    country: str | None
     latitude: str | None
     longitude: str | None
     note: str | None
@@ -39,9 +60,8 @@ class CreateSiteData(BaseModel):
     """
 
     site_id: int
-    total_machines: int
-    # TODO: might include more states in future
-    occupied_machines: int  # TODO: name might change
+    allocated_machines: int
+    deployed_machines: int
     ready_machines: int
     error_machines: int
     last_seen: datetime

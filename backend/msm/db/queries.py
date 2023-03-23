@@ -66,6 +66,7 @@ def filters_from_arguments(
 async def get_filtered_sites(
     session: AsyncSession,
     city: list[str] | None = [],
+    country: list[str] | None = [],
     name: list[str] | None = [],
     note: list[str] | None = [],
     region: list[str] | None = [],
@@ -76,6 +77,7 @@ async def get_filtered_sites(
     filters = filters_from_arguments(
         Site,
         city=city,
+        country=country,
         name=name,
         note=note,
         region=region,
@@ -86,8 +88,8 @@ async def get_filtered_sites(
     stmt = select(
         Site.c.id,
         Site.c.name,
-        Site.c.identifier,
         Site.c.city,
+        Site.c.country,
         Site.c.latitude,
         Site.c.longitude,
         Site.c.note,
@@ -106,7 +108,6 @@ async def get_sites(session: AsyncSession) -> Iterable[SiteSchema]:
     stmt = select(
         Site.c.id,
         Site.c.name,
-        Site.c.identifier,
         Site.c.city,
         Site.c.latitude,
         Site.c.longitude,

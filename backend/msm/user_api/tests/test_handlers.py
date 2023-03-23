@@ -22,22 +22,23 @@ async def test_list_sites(
     site1 = {
         "id": 1,
         "name": "LondonHQ",
-        "identifier": "site one",
         "city": "London",
+        "country": "gb",
         "latitude": "51.509865",
         "longitude": "-0.118092",
         "note": "the first site",
         "region": "Blue Fin Bldg",
         "street": "110 Southwark St",
-        "timezone": "GMT",
+        "timezone": "0.00",
         "url": "https://londoncalling.example.com",
     }
     site2 = site1.copy()
     site2["id"] = 2
-    site2["identifier"] = "site two"
     site2["name"] = "BerlinHQ"
+    site2["timezone"] = "+1.00"
     site2["city"] = "Berlin"
-    await fixture.create("site", [site1, site2])
+    site2["country"] = "de"
+    await fixture.create("sites", [site1, site2])
     response = user_app_client.get("/sites?city=onDo")  # vs London
     assert response.status_code == 200
     assert response.json() == [site1]
@@ -76,7 +77,7 @@ async def test_list_tokens(
             "expiration": datetime.fromisoformat("2023-02-23T11:28:54.382456"),
         },
     ]
-    await fixture.create("token", tokens)
+    await fixture.create("tokens", tokens)
     response = user_app_client.get("/tokens")
     assert response.status_code == 200
     assert len(response.json()) == 2

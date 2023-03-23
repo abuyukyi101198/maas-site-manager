@@ -1,0 +1,23 @@
+COPY sites(id, city, country, latitude, longitude, name, note, region, street, timezone, url)
+FROM '/sites.csv'
+DELIMITER ','
+QUOTE '"'
+CSV HEADER;
+
+COPY tokens(site_id, value, expiration)
+FROM '/tokens.csv'
+DELIMITER ','
+QUOTE '"'
+CSV HEADER;
+
+COPY users(email, full_name, disabled, password)
+FROM '/users.csv'
+DELIMITER ','
+QUOTE '"'
+CSV HEADER;
+
+COPY site_data(site_id, allocated_machines, deployed_machines, ready_machines, error_machines, last_seen)
+FROM '/site_data.csv'
+DELIMITER ','
+QUOTE '"'
+CSV HEADER;
