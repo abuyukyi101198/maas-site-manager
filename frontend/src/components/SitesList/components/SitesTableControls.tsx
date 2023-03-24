@@ -1,9 +1,10 @@
-import { Row, Col, SearchBox } from "@canonical/react-components";
+import { Row, Col, SearchBox, Button, Icon } from "@canonical/react-components";
 
 import ColumnsVisibilityControl from "./ColumnsVisibilityControl";
 import SitesCount from "./SitesCount";
 import type { SitesColumn } from "./SitesTable";
 
+import { useAppContext } from "@/context";
 import type { UseSitesQueryResult } from "@/hooks/api";
 
 const SitesTableControls = ({
@@ -18,6 +19,8 @@ const SitesTableControls = ({
   const handleSearchInput = (inputValue: string) => {
     setSearchText(inputValue);
   };
+  const { rowSelection, setSidebar } = useAppContext();
+  const isRemoveDisabled = Object.keys(rowSelection).length <= 0;
 
   return (
     <Row>
@@ -26,8 +29,18 @@ const SitesTableControls = ({
           <SitesCount data={data} isLoading={isLoading} />
         </h2>
       </Col>
-      <Col size={8}>
+      <Col size={6}>
         <SearchBox externallyControlled onChange={handleSearchInput} placeholder="Search and filter" />
+      </Col>
+      <Col className="u-flex u-flex--align-end u-flex--column" size={2}>
+        <Button
+          appearance="negative"
+          disabled={isRemoveDisabled}
+          onClick={() => setSidebar("removeRegions")}
+          type="button"
+        >
+          <Icon light name="delete" /> Remove
+        </Button>
       </Col>
       <Col className="u-flex u-flex--align-end u-flex--column" size={2}>
         <ColumnsVisibilityControl columns={allColumns} />

@@ -11,7 +11,7 @@ test("can open and close token generate form", async ({ page }) => {
   await expect(page.getByRole("form", { name: /Generate new enrollment tokens/i })).toBeHidden();
 });
 
-test("token create form persists its open state when navigating back", async ({ page }) => {
+test("token create form is closed when navigating away", async ({ page }) => {
   await page.getByRole("button", { name: /Generate tokens/i }).click();
   await expect(page.getByRole("form", { name: /Generate new enrollment tokens/i })).toBeVisible();
 
@@ -30,7 +30,7 @@ test("token create form persists its open state when navigating back", async ({ 
     .click();
 
   await page.goBack();
-  await expect(page.getByRole("form", { name: /Generate new enrollment tokens/i })).toBeVisible();
+  await expect(page.getByRole("form", { name: /Generate new enrollment tokens/i })).toBeHidden();
 });
 
 test("closes and clears the form after creating the token", async ({ page }) => {

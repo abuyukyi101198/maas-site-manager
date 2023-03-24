@@ -4,7 +4,7 @@ import urls from "@/api/urls";
 import { siteFactory } from "@/mocks/factories";
 import { createMockSitesResolver } from "@/mocks/resolvers";
 import { createMockGetServer } from "@/mocks/server";
-import { render, screen, waitFor, within } from "@/test-utils";
+import { render, renderWithMemoryRouter, screen, userEvent, waitFor, within } from "@/test-utils";
 
 const sites = siteFactory.buildList(2);
 const mockServer = createMockGetServer(urls.sites, createMockSitesResolver(sites));
@@ -36,4 +36,15 @@ it("displays populated sites table", async () => {
   within(tableBody)
     .getAllByRole("row")
     .forEach((row, i) => expect(row).toHaveTextContent(new RegExp(sites[i].name, "i")));
+});
+
+it("remove button is disabled if no row is selected", async () => {
+  renderWithMemoryRouter(<SitesList />);
+  expect(screen.getByRole("button", { name: /Remove/i })).toBeDisabled();
+});
+
+it("remove button is enabled if a row is selected", async () => {
+  renderWithMemoryRouter(<SitesList />);
+  await userEvent.click(screen.getByRole("checkbox", { name: /select all/i }));
+  await waitFor(() => expect(screen.getByRole("button", { name: /Remove/i })).toBeEnabled());
 });

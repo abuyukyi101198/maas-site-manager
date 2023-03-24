@@ -24,3 +24,10 @@ test("can hide table columns", async ({ page }) => {
   expect(refreshedColumnHeaders).toHaveCount(columnsCount - 1);
   await expect(refreshedColumnHeaders).toHaveText(["", /name/i, /country/i, /local time/i, /machines/i]);
 });
+
+test("opens remove regions panel if remove button is pressed", async ({ page }) => {
+  await expect(page.getByRole("dialog", { name: /Remove regions/i })).not.toBeVisible();
+  await page.getByRole("checkbox", { name: /select all/i }).click({ force: true });
+  await page.getByRole("button", { name: /Remove/i }).click();
+  await expect(page.getByRole("dialog", { name: /Remove regions/i })).toBeVisible();
+});

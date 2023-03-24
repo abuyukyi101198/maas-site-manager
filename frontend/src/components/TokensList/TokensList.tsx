@@ -1,7 +1,10 @@
 import { Button, Col, Row } from "@canonical/react-components";
-import { Link } from "react-router-dom";
+
+import { useAppContext } from "@/context";
 
 const TokensList = () => {
+  const { setSidebar } = useAppContext();
+
   return (
     <section>
       <Row>
@@ -14,9 +17,9 @@ const TokensList = () => {
           <div className="u-flex u-flex--justify-end">
             <Button>Export</Button>
             <Button appearance="negative">Delete</Button>
-            <Link className="p-button--positive" role="button" state={{ sidebar: true }} to="">
+            <Button className="p-button--positive" onClick={() => setSidebar("createToken")} type="button">
               Generate tokens
-            </Link>
+            </Button>
           </div>
         </Col>
       </Row>

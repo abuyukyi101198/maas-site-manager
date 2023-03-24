@@ -7,6 +7,8 @@ import { render } from "@testing-library/react";
 import type { MemoryRouterProps } from "react-router-dom";
 import { MemoryRouter } from "react-router-dom";
 
+import { AppContextProvider } from "./context";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -24,9 +26,11 @@ const makeProvidersWithMemoryRouter =
   (memoryRouterProps: MemoryRouterProps) =>
   ({ children }: { children: React.ReactNode }) => {
     return (
-      <QueryClientProvider client={queryClient}>
-        <MemoryRouter {...memoryRouterProps}>{children}</MemoryRouter>
-      </QueryClientProvider>
+      <Providers>
+        <MemoryRouter {...memoryRouterProps}>
+          <AppContextProvider>{children}</AppContextProvider>
+        </MemoryRouter>
+      </Providers>
     );
   };
 

@@ -2,12 +2,12 @@ import { useId } from "react";
 
 import { Button, Input, Label, Notification } from "@canonical/react-components";
 import { Field, Formik, Form } from "formik";
-import { Link, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 
 import "./TokensCreate.scss";
 import { humanIntervalToISODuration } from "./utils";
 
+import { useAppContext } from "@/context";
 import { useTokensMutation } from "@/hooks/api";
 
 const initialValues = {
@@ -41,8 +41,8 @@ const TokensCreate = () => {
   const headingId = useId();
   const expiresId = useId();
   const amountId = useId();
-  const navigate = useNavigate();
   const tokensMutation = useTokensMutation();
+  const { setSidebar } = useAppContext();
   const handleSubmit = async (
     { amount, expires }: TokensCreateFormValues,
     { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
@@ -54,7 +54,7 @@ const TokensCreate = () => {
     // TODO: update the tokens list once fetching tokens from API is implemented
     // https://warthogs.atlassian.net/browse/MAASENG-1474
     setSubmitting(false);
-    navigate("/tokens", { state: { sidebar: false } });
+    setSidebar(null);
   };
 
   return (
@@ -92,9 +92,9 @@ const TokensCreate = () => {
             </p>
             <hr className="tokens-create__separator" />
             <div className="tokens-create__buttons">
-              <Link className="p-button" role="button" state={{ sidebar: false }} to="tokens">
+              <Button onClick={() => setSidebar(null)} type="button">
                 Cancel
-              </Link>
+              </Button>
               <Button
                 appearance="positive"
                 disabled={!dirty || !isValid || tokensMutation.isLoading || isSubmitting}

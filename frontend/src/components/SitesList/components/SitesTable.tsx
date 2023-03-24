@@ -1,8 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 
-import { Input } from "@canonical/react-components";
 import { useReactTable, flexRender, getCoreRowModel } from "@tanstack/react-table";
-import type { ColumnDef, Column } from "@tanstack/react-table";
+import type { ColumnDef, Column, Getter, Row } from "@tanstack/react-table";
 import pick from "lodash/fp/pick";
 import useLocalStorageState from "use-local-storage-state";
 
@@ -11,9 +10,9 @@ import SitesTableControls from "./SitesTableControls";
 
 import type { SitesQueryResult } from "@/api/types";
 import { isDev } from "@/constants";
+import { useAppContext } from "@/context";
 import type { UseSitesQueryResult } from "@/hooks/api";
 import { getCountryName, getTimeByUTCOffset, getTimezoneUTCString } from "@/utils";
-
 import "./SitesTable.scss";
 
 const createAccessor =
@@ -37,35 +36,53 @@ const SitesTable = ({
     defaultValue: {},
   });
 
+  const { rowSelection, setRowSelection } = useAppContext();
+
+  // clear selection on unmount
+  useEffect(() => {
+    return () => setRowSelection({});
+  }, [setRowSelection]);
+
   const columns = useMemo<SitesColumnDef[]>(
     () => [
       {
         id: "select",
+        accessorKey: "name",
         header: ({ table }) => (
-          <div>
-            <Input
+          <label className="p-checkbox">
+            <input
+              aria-checked={table.getIsSomeRowsSelected() || table.getIsSomePageRowsSelected() ? "mixed" : undefined}
+              aria-label="select all"
+              className="p-checkbox__input"
               type="checkbox"
               {...{
-                checked: table.getIsAllRowsSelected(),
-                indeterminate: table.getIsSomeRowsSelected(),
-                onChange: table.getToggleAllRowsSelectedHandler(),
+                checked:
+                  table.getIsSomePageRowsSelected() ||
+                  table.getIsSomeRowsSelected() ||
+                  table.getIsAllPageRowsSelected(),
+                onChange: table.getToggleAllPageRowsSelectedHandler(),
               }}
             />
-          </div>
+            <span className="p-checkbox__label" />
+          </label>
         ),
-        cell: ({ row }) => (
-          <div>
-            <Input
-              type="checkbox"
-              {...{
-                checked: row.getIsSelected(),
-                disabled: !row.getCanSelect(),
-                indeterminate: row.getIsSomeSelected(),
-                onChange: row.getToggleSelectedHandler(),
-              }}
-            />
-          </div>
-        ),
+        cell: ({ row, getValue }: { row: Row<Site>; getValue: Getter<Site["name"]> }) => {
+          return (
+            <label className="p-checkbox">
+              <input
+                aria-label={getValue()}
+                className="p-checkbox__input"
+                type="checkbox"
+                {...{
+                  checked: row.getIsSelected(),
+                  disabled: !row.getCanSelect(),
+                  onChange: row.getToggleSelectedHandler(),
+                }}
+              />
+              <span className="p-checkbox__label" />
+            </label>
+          );
+        },
       },
       {
         id: "name",
@@ -164,19 +181,28 @@ const SitesTable = ({
     [],
   );
 
-  const [rowSelection, setRowSelection] = useState({});
   // wrap the empty array in useMemo to avoid re-rendering the empty table on every render
   const noItems = useMemo<Site[]>(() => [], []);
-
+  const pageCount = data && "total" in data ? Math.ceil(data.total / data.size) : 0;
+  const pageIndex = data && "page" in data ? data.page : 0;
+  const pageSize = data && "size" in data ? data.size : 0;
   const table = useReactTable<Site>({
     data: data?.items || noItems,
     columns,
     state: {
       rowSelection,
       columnVisibility,
+      pagination: {
+        pageIndex,
+        pageSize,
+      },
     },
+    getRowId: (row) => row.identifier,
+    manualPagination: true,
+    pageCount,
     onColumnVisibilityChange: setColumnVisibility,
     enableRowSelection: true,
+    enableMultiRowSelection: true,
     onRowSelectionChange: setRowSelection,
     enableColumnResizing: false,
     columnResizeMode: "onChange",
