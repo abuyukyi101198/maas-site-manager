@@ -5,15 +5,24 @@ from datetime import (
     datetime,
     timedelta,
 )
-from typing import TYPE_CHECKING
+from typing import (
+    Any,
+    Sequence,
+    Type,
+    TYPE_CHECKING,
+    TypeVar,
+)
 from uuid import UUID
 
 from sqlalchemy import (
+    func,
+    Row,
     select,
     Table,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from .. import MAX_PAGE_SIZE
 from ..schema import (
     Site as SiteSchema,
     Token as TokenSchema,
@@ -63,8 +72,29 @@ def filters_from_arguments(
                 yield clause
 
 
+DerivedSchema = TypeVar("DerivedSchema", SiteSchema, TokenSchema)
+
+
+def extract_count_and_results(
+    schema: Type[DerivedSchema],
+    db_results: Sequence[Row[tuple[Any, Any, Any, Any, Any]]],
+) -> tuple[int, Iterable[DerivedSchema]]:
+    """
+    Extract the count and result from a paginated query using a window function
+    """
+    schema_objects = (schema(**row._asdict()) for row in db_results)
+    count: int = 0
+    try:
+        count = db_results[0][0]
+    except IndexError:
+        count = 0
+    return count, list(schema_objects)
+
+
 async def get_filtered_sites(
     session: AsyncSession,
+    offset: int = 0,
+    limit: int = MAX_PAGE_SIZE,
     city: list[str] | None = [],
     country: list[str] | None = [],
     name: list[str] | None = [],
@@ -73,7 +103,7 @@ async def get_filtered_sites(
     street: list[str] | None = [],
     timezone: list[str] | None = [],
     url: list[str] | None = [],
-) -> Iterable[SiteSchema]:
+) -> tuple[int, Iterable[SiteSchema]]:
     filters = filters_from_arguments(
         Site,
         city=city,
@@ -85,47 +115,52 @@ async def get_filtered_sites(
         timezone=timezone,
         url=url,
     )
-    stmt = select(
-        Site.c.id,
-        Site.c.name,
-        Site.c.city,
-        Site.c.country,
-        Site.c.latitude,
-        Site.c.longitude,
-        Site.c.note,
-        Site.c.region,
-        Site.c.street,
-        Site.c.timezone,
-        Site.c.url,
+    stmt = (
+        select(
+            # use a window function to get the count before limit
+            # will be added as the first item of every results
+            func.count().over(),  # type: ignore[no-untyped-call]
+            Site.c.id,
+            Site.c.name,
+            Site.c.city,
+            Site.c.country,
+            Site.c.latitude,
+            Site.c.longitude,
+            Site.c.note,
+            Site.c.region,
+            Site.c.street,
+            Site.c.timezone,
+            Site.c.url,
+        )
+        .select_from(Site)
+        .limit(limit)
+        .offset(offset)
     )
     for clause in filters:
-        stmt = stmt.where(clause)  # type: ignore
+        stmt = stmt.where(clause)  # type: ignore[arg-type]
+
     result = await session.execute(stmt)
-    return (SiteSchema(**row._asdict()) for row in result.all())
+    return extract_count_and_results(SiteSchema, result.all())
 
 
-async def get_sites(session: AsyncSession) -> Iterable[SiteSchema]:
-    stmt = select(
-        Site.c.id,
-        Site.c.name,
-        Site.c.city,
-        Site.c.latitude,
-        Site.c.longitude,
-        Site.c.note,
-        Site.c.region,
-        Site.c.street,
-        Site.c.timezone,
-        Site.c.url,
-    )
-    result = await session.execute(stmt)
-    return (SiteSchema(**row._asdict()) for row in result.all())
-
-
-async def get_tokens(session: AsyncSession) -> Iterable[TokenSchema]:
+async def get_tokens(
+    session: AsyncSession,
+    offset: int = 0,
+    limit: int = MAX_PAGE_SIZE,
+) -> tuple[int, Iterable[TokenSchema]]:
     result = await session.execute(
-        select(Token.c.id, Token.c.site_id, Token.c.value, Token.c.expiration)
+        select(
+            func.count().over(),  # type: ignore[no-untyped-call]
+            Token.c.id,
+            Token.c.site_id,
+            Token.c.value,
+            Token.c.expiration,
+        )
+        .select_from(Token)
+        .offset(offset)
+        .limit(limit)
     )
-    return (TokenSchema(**row._asdict()) for row in result.all())
+    return extract_count_and_results(TokenSchema, result.all())
 
 
 async def create_tokens(

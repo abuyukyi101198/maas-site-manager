@@ -1,7 +1,10 @@
-from typing import Iterable
+from typing import (
+    AsyncIterable,
+    Iterable,
+)
 
 from fastapi import FastAPI
-from fastapi.testclient import TestClient
+from httpx import AsyncClient
 import pytest
 
 from ..db import Database
@@ -15,6 +18,7 @@ def user_app(db: Database) -> Iterable[FastAPI]:
 
 
 @pytest.fixture
-def user_app_client(user_app: FastAPI) -> Iterable[TestClient]:
+async def user_app_client(user_app: FastAPI) -> AsyncIterable[AsyncClient]:
     """Client for the user API."""
-    yield TestClient(user_app)
+    async with AsyncClient(app=user_app, base_url="http://test") as client:
+        yield client

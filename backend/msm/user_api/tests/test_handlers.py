@@ -3,21 +3,23 @@ from datetime import (
     timedelta,
 )
 
-from fastapi.testclient import TestClient
+# from fastapi.testclient import TestClient
+from httpx import AsyncClient
 import pytest
 
 from ...testing.db import Fixture
 
 
-def test_root(user_app_client: TestClient) -> None:
-    response = user_app_client.get("/")
+@pytest.mark.asyncio
+async def test_root(user_app_client: AsyncClient) -> None:
+    response = await user_app_client.get("/")
     assert response.status_code == 200
     assert response.json() == {"version": "0.0.1"}
 
 
 @pytest.mark.asyncio
 async def test_list_sites(
-    user_app_client: TestClient, fixture: Fixture
+    user_app_client: AsyncClient, fixture: Fixture
 ) -> None:
     site1 = {
         "id": 1,
@@ -35,19 +37,40 @@ async def test_list_sites(
     site2 = site1.copy()
     site2["id"] = 2
     site2["name"] = "BerlinHQ"
-    site2["timezone"] = "+1.00"
+    site2["timezone"] = "1.00"
     site2["city"] = "Berlin"
     site2["country"] = "de"
     await fixture.create("sites", [site1, site2])
-    response = user_app_client.get("/sites?city=onDo")  # vs London
-    assert response.status_code == 200
-    assert response.json() == [site1]
+    page1 = await user_app_client.get("/sites")
+    assert page1.status_code == 200
+    assert page1.json() == {
+        "page": 1,
+        "size": 20,
+        "total": 2,
+        "items": [site1, site2],
+    }
+    filtered = await user_app_client.get("/sites?city=onDo")  # vs London
+    assert filtered.status_code == 200
+    assert filtered.json() == {
+        "page": 1,
+        "size": 20,
+        "total": 1,
+        "items": [site1],
+    }
+    paginated = await user_app_client.get("/sites?page=2&size=1")
+    assert paginated.status_code == 200
+    assert paginated.json() == {
+        "page": 2,
+        "size": 1,
+        "total": 2,
+        "items": [site2],
+    }
 
 
 @pytest.mark.asyncio
-async def test_create_token(user_app_client: TestClient) -> None:
+async def test_create_token(user_app_client: AsyncClient) -> None:
     seconds = 100
-    response = user_app_client.post(
+    response = await user_app_client.post(
         "/tokens", json={"count": 5, "duration": seconds}
     )
     assert response.status_code == 200
@@ -55,13 +78,12 @@ async def test_create_token(user_app_client: TestClient) -> None:
     assert datetime.fromisoformat(result["expiration"]) < (
         datetime.utcnow() + timedelta(seconds=seconds)
     )
-
     assert len(result["tokens"]) == 5
 
 
 @pytest.mark.asyncio
 async def test_list_tokens(
-    user_app_client: TestClient, fixture: Fixture
+    user_app_client: AsyncClient, fixture: Fixture
 ) -> None:
     tokens = [
         {
@@ -78,6 +100,7 @@ async def test_list_tokens(
         },
     ]
     await fixture.create("tokens", tokens)
-    response = user_app_client.get("/tokens")
+    response = await user_app_client.get("/tokens")
     assert response.status_code == 200
-    assert len(response.json()) == 2
+    assert response.json()["total"] == 2
+    assert len(response.json()["items"]) == 2

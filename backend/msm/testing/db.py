@@ -84,6 +84,16 @@ class Fixture:
             await session.commit()
             return [row._asdict() for row in result]
 
+    async def select_all(
+        self,
+        table: str,
+    ) -> list[dict[str, Any]]:
+        """Take a peak what is in there"""
+        async with self.db.session() as session:
+            result = await session.execute(METADATA.tables[table].select())
+            await session.commit()
+            return [row._asdict() for row in result]
+
 
 @pytest.fixture
 def fixture(db: Database) -> Iterator[Fixture]:

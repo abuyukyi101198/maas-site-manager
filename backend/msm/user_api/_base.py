@@ -6,12 +6,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from .. import (
     __version__,
+    DEFAULT_PAGE_SIZE,
+    MAX_PAGE_SIZE,
     schema,
 )
 from ..db import (
     db_session,
     queries,
 )
+
+
+async def pagination_parameters(
+    page: int = Query(default=1, gte=1),
+    size: int = Query(default=DEFAULT_PAGE_SIZE, lte=MAX_PAGE_SIZE, gte=1),
+) -> dict[str, int]:
+    """Make parameters for pagination accessible as a dict"""
+    return {"page": page, "size": size, "offset": (page - 1) * size}
 
 
 async def root() -> dict[str, str]:
@@ -28,27 +38,43 @@ async def sites(
     | None = Query(default=None, title="Filter for timezones"),
     url: list[str] | None = Query(default=None, title="Filter for urls"),
     session: AsyncSession = Depends(db_session),
-) -> list[schema.Site]:
+    pagination_params: dict[str, int] = Depends(pagination_parameters),
+) -> schema.PaginatedSites:
     """Return all sites"""
-    return list(
-        await queries.get_filtered_sites(
-            session,
-            city,
-            name,
-            note,
-            region,
-            street,
-            timezone,
-            url,
-        )
+    total, results = await queries.get_filtered_sites(
+        session,
+        pagination_params["offset"],
+        pagination_params["size"],
+        city,
+        name,
+        note,
+        region,
+        street,
+        timezone,
+        url,
+    )
+    return schema.PaginatedSites(
+        total=total,
+        page=pagination_params["page"],
+        size=pagination_params["size"],
+        items=list(results),
     )
 
 
 async def tokens(
     session: AsyncSession = Depends(db_session),
-) -> list[schema.Token]:
+    pagination_params: dict[str, int] = Depends(pagination_parameters),
+) -> schema.PaginatedTokens:
     """Return all tokens"""
-    return list(await queries.get_tokens(session))
+    total, results = await queries.get_tokens(
+        session, pagination_params["offset"], pagination_params["size"]
+    )
+    return schema.PaginatedTokens(
+        total=total,
+        page=pagination_params["page"],
+        size=pagination_params["size"],
+        items=list(results),
+    )
 
 
 async def tokens_post(
