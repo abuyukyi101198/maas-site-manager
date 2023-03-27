@@ -1,6 +1,11 @@
 .u-flex {
   display: flex !important;
 }
+.u-flex--large {
+  @media (min-width: $breakpoint-large) {
+    display: flex !important;
+  }
+}
 .u-flex--align-end {
   align-items: flex-end !important;
 }
@@ -9,6 +14,9 @@
 }
 .u-flex--column {
   flex-direction: column !important;
+}
+.u-flex--grow {
+  flex-grow: 1 !important;
 }
 .u-capitalize {
   text-transform: capitalize !important;
