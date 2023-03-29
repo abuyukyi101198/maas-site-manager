@@ -17,6 +17,7 @@
 @include vf-p-search-box;
 @include vf-p-form-tick-elements;
 @include vf-p-tooltips;
+@include vf-p-pagination;
 
 // icons
 @include vf-p-icons;
@@ -48,6 +49,7 @@
 @import "@/components/MainLayout/MainLayout";
 @import "@/components/Navigation/Navigation";
 @import "@/components/TokensCreate/TokensCreate";
+@import "@/components/SitesList/SitesTable/SitesTableControls/SitesTableControls";
 @import "@/components/SitesList/SitesTable/SitesTableControls/ColumnsVisibilityControl/ColumnsVisibilityControl";
 @import "@/components/SitesList/SitesTable/SitesTable";
 @import "@/components/Placeholder/Placeholder";
