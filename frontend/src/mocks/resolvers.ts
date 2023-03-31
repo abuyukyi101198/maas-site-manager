@@ -80,7 +80,19 @@ export const createMockGetEnrollmentRequestsResolver =
     return res(ctx.json(response));
   };
 
+type PostEnrollmentRequestsResponseResolver = ResponseResolver<RestRequest<PostTokensData>, typeof restContext>;
+export const createMockPostEnrollmentRequestsResolver =
+  (): PostEnrollmentRequestsResponseResolver => async (req, res, ctx) => {
+    const { ids, accept } = await req.json();
+    if (ids && typeof accept === "boolean") {
+      return res(ctx.status(204));
+    } else {
+      return res(ctx.status(400));
+    }
+  };
+
 export const getSites = rest.get(urls.sites, createMockSitesResolver());
 export const postTokens = rest.post(urls.tokens, createMockTokensResolver());
 export const getTokens = rest.get(urls.tokens, createMockGetTokensResolver());
 export const getEnrollmentRequests = rest.get(urls.enrollmentRequests, createMockGetEnrollmentRequestsResolver());
+export const patchEnrollmentRequests = rest.patch(urls.enrollmentRequests, createMockPostEnrollmentRequestsResolver());

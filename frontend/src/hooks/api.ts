@@ -1,7 +1,13 @@
+import type { UseMutationOptions } from "@tanstack/react-query";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
-import type { GetEnrollmentRequestsQueryParams, GetSitesQueryParams, GetTokensQueryParams } from "@/api/handlers";
-import { getEnrollmentRequests, postTokens, getSites, getTokens } from "@/api/handlers";
+import type {
+  GetEnrollmentRequestsQueryParams,
+  GetSitesQueryParams,
+  GetTokensQueryParams,
+  PostEnrollmentRequestsData,
+} from "@/api/handlers";
+import { patchEnrollmentRequests, getEnrollmentRequests, postTokens, getSites, getTokens } from "@/api/handlers";
 import type { SitesQueryResult, PostTokensResult, EnrollmentRequestsQueryResult } from "@/api/types";
 
 export type UseSitesQueryResult = ReturnType<typeof useSitesQuery>;
@@ -34,3 +40,7 @@ export const useRequestsQuery = ({ page, size }: GetEnrollmentRequestsQueryParam
     keepPreviousData: true,
     refetchInterval: defaultRefetchInterval,
   });
+
+export const useEnrollmentRequestsMutation = (
+  options: UseMutationOptions<unknown, unknown, PostEnrollmentRequestsData, unknown>,
+) => useMutation(patchEnrollmentRequests, options);

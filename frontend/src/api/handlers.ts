@@ -62,3 +62,19 @@ export const getEnrollmentRequests = async (params: GetEnrollmentRequestsQueryPa
     console.error(error);
   }
 };
+
+export type PostEnrollmentRequestsData = {
+  ids: string[];
+  accept: boolean;
+};
+export const patchEnrollmentRequests = async (data: PostEnrollmentRequestsData) => {
+  if (!data?.ids || typeof data?.accept !== "boolean") {
+    throw Error("Missing required fields");
+  }
+  try {
+    const response = await api.patch(urls.enrollmentRequests, data);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

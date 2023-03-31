@@ -43,7 +43,7 @@ it("remove button is disabled if no row is selected", async () => {
   expect(screen.getByRole("button", { name: /Remove/i })).toBeDisabled();
 });
 
-it("remove button is enabled if a row is selected", async () => {
+it("remove button is enabled if some rows are selected", async () => {
   renderWithMemoryRouter(<SitesList />);
   await userEvent.click(screen.getByRole("checkbox", { name: /select all/i }));
   await waitFor(() => expect(screen.getByRole("button", { name: /Remove/i })).toBeEnabled());

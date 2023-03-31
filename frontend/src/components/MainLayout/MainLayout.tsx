@@ -1,3 +1,4 @@
+import type { PropsWithChildren } from "react";
 import { useEffect } from "react";
 
 import { Col, Row, usePrevious } from "@canonical/react-components";
@@ -14,7 +15,7 @@ export const sidebarLabels: Record<"removeRegions" | "createToken", string> = {
   createToken: "Generate tokens",
 };
 
-const Aside = ({ children, isOpen, ...props }: { children: React.ReactNode; isOpen: boolean }) => (
+const Aside = ({ children, isOpen, ...props }: PropsWithChildren<{ isOpen: boolean }>) => (
   <aside
     aria-hidden={!isOpen}
     className={classNames("l-aside", "is-maas-site-manager", { "is-collapsed": !isOpen })}
