@@ -1,9 +1,10 @@
 import { Notification } from "@canonical/react-components";
+import pluralize from "pluralize";
 import { useNavigate } from "react-router-dom";
 
 import type { PostEnrollmentRequestsData } from "@/api/handlers";
 
-const EnrollmentNotification = ({ accept }: Partial<PostEnrollmentRequestsData>) => {
+const EnrollmentNotification = ({ accept, ids }: Partial<PostEnrollmentRequestsData>) => {
   const navigate = useNavigate();
   return (
     <Notification
@@ -12,8 +13,8 @@ const EnrollmentNotification = ({ accept }: Partial<PostEnrollmentRequestsData>)
       severity="information"
       title={accept ? "Accepted" : "Denied"}
     >
-      {accept ? "Accepted" : "Denied"} enrolment request for maas-example-region. See more data of this region in the
-      Regions page.
+      {accept ? "Accepted" : "Denied"} enrolment request for {pluralize("MAAS regions", ids?.length, true)}. See more
+      data of this region in the Regions page.
     </Notification>
   );
 };
