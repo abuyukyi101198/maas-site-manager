@@ -78,7 +78,7 @@ ci-frontend-lint:
 .PHONY: ci-frontend-lint
 
 ci-frontend-test:
-	env -C frontend VITEST_JUNIT_SUITE_NAME='maas-site-manager frontend tests' yarnpkg run test --silent --reporter=junit --reporter=default --outputFile.junit=../junit-frontend.xml run
+	env -C frontend VITEST_JUNIT_SUITE_NAME='maas-site-manager frontend tests' yarnpkg run coverage --silent --reporter=junit --reporter=default --outputFile.junit=../junit-frontend.xml run
 .PHONY: ci-test
 
 ci-e2e-test:

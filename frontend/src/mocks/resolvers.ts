@@ -3,8 +3,8 @@ import type { RestRequest, restContext, ResponseResolver } from "msw";
 
 import { siteFactory, tokenFactory, enrollmentRequestFactory } from "./factories";
 
+import type { GetSitesQueryParams, PostTokensData } from "@/api/handlers";
 import urls from "@/api/urls";
-import type { GetSitesQueryParams, PostTokensData } from "api/handlers";
 
 export const sitesList = siteFactory.buildList(155);
 export const tokensList = tokenFactory.buildList(100);
@@ -96,3 +96,4 @@ export const postTokens = rest.post(urls.tokens, createMockTokensResolver());
 export const getTokens = rest.get(urls.tokens, createMockGetTokensResolver());
 export const getEnrollmentRequests = rest.get(urls.enrollmentRequests, createMockGetEnrollmentRequestsResolver());
 export const patchEnrollmentRequests = rest.patch(urls.enrollmentRequests, createMockPostEnrollmentRequestsResolver());
+export const allResolvers = [getSites, postTokens, getTokens, getEnrollmentRequests, patchEnrollmentRequests];

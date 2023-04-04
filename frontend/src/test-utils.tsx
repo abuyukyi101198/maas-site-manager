@@ -46,9 +46,10 @@ const renderWithMemoryRouter = (ui: ReactElement, options?: MemoryRenderOptions)
   return render(ui, { wrapper: Providers, ...options });
 };
 
-export { screen, within, waitFor } from "@testing-library/react";
+export { screen, within, waitFor, act } from "@testing-library/react";
 export { customRender as render };
 export { renderHook } from "@testing-library/react-hooks";
 export { default as userEvent } from "@testing-library/user-event";
 export { renderWithMemoryRouter };
 export { Providers };
+export { setupServer } from "msw/node";

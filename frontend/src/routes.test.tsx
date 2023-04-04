@@ -1,31 +1,36 @@
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 
-import urls from "./api/urls";
-import { siteFactory } from "./mocks/factories";
-import { createMockSitesResolver } from "./mocks/resolvers";
-import { createMockGetServer } from "./mocks/server";
-import routes from "./routes";
-import { render, waitFor } from "./test-utils";
+import { allResolvers } from "./mocks/resolvers";
+import routes, { routesConfig } from "./routes";
 
-const sites = siteFactory.buildList(1);
-const mockServer = createMockGetServer(urls.sites, createMockSitesResolver(sites));
+import { render, waitFor, setupServer } from "@/test-utils";
 
-beforeAll(() => {
-  mockServer.listen();
-});
-afterEach(() => {
-  mockServer.resetHandlers();
-});
-afterAll(() => {
-  mockServer.close();
-});
+const mockServer = setupServer(...allResolvers);
 
 describe("router", () => {
+  beforeAll(() => {
+    mockServer.listen();
+  });
+  afterEach(() => {
+    mockServer.resetHandlers();
+  });
+  afterAll(() => {
+    mockServer.close();
+  });
+
   it("redirects to the default route", async () => {
     const router = createMemoryRouter(routes);
     render(<RouterProvider router={router} />);
 
     expect(router.state.location.pathname).toEqual("/");
     await waitFor(() => expect(router.state.location.pathname).toEqual("/sites"));
+  });
+
+  Object.values(routesConfig).forEach(({ title, path }) => {
+    it(`displays correct document title for ${title} page`, async () => {
+      const router = createMemoryRouter(routes, { initialEntries: [path], initialIndex: 0 });
+      render(<RouterProvider router={router} />);
+      expect(document.title).toBe(`${title} | MAAS Site Manager`);
+    });
   });
 });

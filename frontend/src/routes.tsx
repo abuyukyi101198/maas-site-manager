@@ -6,6 +6,24 @@ import Requests from "@/pages/requests";
 import SitesList from "@/pages/sites";
 import Tokens from "@/pages/tokens/tokens";
 
+export const routesConfig = {
+  sites: {
+    path: "/sites",
+    title: "Regions",
+  },
+  requests: {
+    path: "/requests",
+    title: "Requests",
+  },
+  tokens: {
+    path: "/tokens",
+    title: "Tokens",
+  },
+} as const;
+
+type RoutesConfig = typeof routesConfig;
+export type RoutePath = RoutesConfig[keyof RoutesConfig]["path"];
+
 export const routes = createRoutesFromElements(
   <>
     <Route element={<Login />} path="/login" />
