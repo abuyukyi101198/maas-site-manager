@@ -23,11 +23,10 @@ Site = Table(
     Column("city", String(250)),
     # ISO 3166 Alpha2
     Column("country", String(2)),
-    # Decimal(8/6)/(9/6) = 16cm precision
-    Column("latitude", Numeric(precision=8, scale=6)),
-    Column("longitude", Numeric(precision=9, scale=6)),
+    Column("latitude", String(20)),
+    Column("longitude", String(20)),
     Column("name", String(250), unique=True),
-    Column("note", Text),
+    Column("note", Text()),
     Column("region", String(250)),
     Column("street", String(250)),
     # Timezones need be up to x.25 accuracy
