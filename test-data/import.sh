@@ -1,27 +1,45 @@
-#!/bin/sh
+#!/bin/bash -e
 #
 # This script imports the testdata from this directory into the postgres database
 #
-psql=psql
 envfile="../.env.dev"
 
-if ! command -v psql > /dev/null
-then
-  echo "The ${psql} command was not found. It is need it to import the data. Try:"
-  echo "apt-get install postgresql-client"
-  exit 1
+basedir="$(dirname "$0")"
+
+copy_cmd() {
+    local filename="$1"
+    local tabledef="$2"
+    cat <<EOF
+COPY $tabledef
+FROM STDIN
+DELIMITER ','
+QUOTE '"'
+CSV HEADER;
+$(< "$basedir/$filename")
+\.
+EOF
+}
+
+
+if ! command -v psql > /dev/null; then
+    cat >&2 <<EOF
+The psql command was not found. It is need it to import the data. Try:
+  apt-get install postgresql-client
+EOF
+    exit 1
 fi
 
-if ! test -s ${envfile}
-then
-  echo "Cannot source dev environment. Make sure ../.env.dev exists."
-  exit 1
+if [ -e "$envfile" ]; then
+    # shellcheck disable=SC1090
+    . "$envfile"
+else 
+    echo "Cannot source dev environment. Make sure ${envfile} exists." >&2
+    exit 1
 fi
-. ${envfile}
 
-docker compose cp users.csv postgres:/
-docker compose cp sites.csv postgres:/
-docker compose cp tokens.csv postgres:/
-docker compose cp site_data.csv postgres:/
-
-${psql} postgresql://"${POSTGRES_USER}":"${POSTGRES_PASSWORD}"@localhost:"${POSTGRES_PORT}"/"${POSTGRES_DB}" -f import.sql
+(
+    copy_cmd sites.csv 'site(id, city, country, latitude, longitude, name, note, region, street, timezone, url)'
+    copy_cmd tokens.csv 'token(site_id, value, expired, created)'
+    copy_cmd users.csv '"user"(email, full_name, disabled, password)'
+    copy_cmd site_data.csv 'site_data(site_id, allocated_machines, deployed_machines, ready_machines, error_machines, last_seen)'
+) | psql "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
