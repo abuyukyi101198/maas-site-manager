@@ -55,9 +55,12 @@ def db_setup(postgresql_proc: PostgreSQLExecutor) -> Iterator[TestDSN]:
 
 
 @pytest.fixture
-def db(db_setup: TestDSN) -> Iterator[Database]:
+def db(
+    request: pytest.FixtureRequest, db_setup: TestDSN
+) -> Iterator[Database]:
     """Set up the database schema."""
-    engine = create_engine(db_setup.sync_dsn)
+    echo = request.config.getoption("sqlalchemy_debug")
+    engine = create_engine(db_setup.sync_dsn, echo=echo)
     with engine.connect() as conn:
         with conn.begin():
             METADATA.create_all(conn)

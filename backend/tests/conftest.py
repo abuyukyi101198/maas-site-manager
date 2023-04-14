@@ -1,3 +1,5 @@
+import pytest
+
 from .fixtures.app import (
     user_app,
     user_app_client,
@@ -9,3 +11,11 @@ from .fixtures.db import (
 )
 
 __all__ = ["db", "db_setup", "user_app", "user_app_client", "fixture"]
+
+
+def pytest_addoption(parser: pytest.Parser) -> None:
+    parser.addoption(
+        "--sqlalchemy-debug",
+        help="print out SQLALchemy queries",
+        action="store_true",
+    )

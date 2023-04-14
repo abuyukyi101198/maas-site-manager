@@ -12,9 +12,13 @@ from msm.user_api import create_app
 
 
 @pytest.fixture
-def user_app(db: Database) -> Iterable[FastAPI]:
+def user_app(
+    request: pytest.FixtureRequest, db: Database
+) -> Iterable[FastAPI]:
     """The API for users."""
-    yield create_app(db.dsn)
+    app = create_app(db.dsn)
+    app.state.db._engine.echo = request.config.getoption("sqlalchemy_debug")
+    yield app
 
 
 @pytest.fixture

@@ -3,19 +3,12 @@ from datetime import (
     datetime,
     timedelta,
 )
-from typing import (
-    Any,
-    Sequence,
-    Type,
-    TypeVar,
-)
 from uuid import UUID
 
 from sqlalchemy import (
     case,
     func,
     Operators,
-    Row,
     select,
     Table,
 )
@@ -69,25 +62,6 @@ def filters_from_arguments(
                 yield clause
 
 
-DerivedSchema = TypeVar("DerivedSchema", SiteSchema, TokenSchema)
-
-
-def extract_count_and_results(
-    schema: Type[DerivedSchema],
-    db_results: Sequence[Row[tuple[Any, Any, Any, Any, Any, Any]]],
-) -> tuple[int, Iterable[DerivedSchema]]:
-    """
-    Extract the count and result from a paginated query using a window function
-    """
-    schema_objects = (schema(**row._asdict()) for row in db_results)
-    count: int = 0
-    try:
-        count = db_results[0][0]
-    except IndexError:
-        count = 0
-    return count, list(schema_objects)
-
-
 async def get_filtered_sites(
     session: AsyncSession,
     offset: int = 0,
@@ -101,22 +75,28 @@ async def get_filtered_sites(
     timezone: list[str] | None = [],
     url: list[str] | None = [],
 ) -> tuple[int, Iterable[SiteSchema]]:
-    filters = filters_from_arguments(
-        Site,
-        city=city,
-        country=country,
-        name=name,
-        note=note,
-        region=region,
-        street=street,
-        timezone=timezone,
-        url=url,
+    filters = list(
+        filters_from_arguments(
+            Site,
+            city=city,
+            country=country,
+            name=name,
+            note=note,
+            region=region,
+            street=street,
+            timezone=timezone,
+            url=url,
+        )
     )
+    count = (
+        await session.execute(
+            select(func.count())
+            .select_from(Site)
+            .where(*filters)  # type: ignore[arg-type]
+        )
+    ).scalar() or 0
     stmt = (
         select(
-            # use a window function to get the count before limit
-            # will be added as the first item of every results
-            func.count().over(),  # type: ignore[no-untyped-call]
             Site.c.id,
             Site.c.name,
             Site.c.city,
@@ -150,14 +130,13 @@ async def get_filtered_sites(
         .select_from(
             Site.join(SiteData, SiteData.c.site_id == Site.c.id, isouter=True)
         )
+        .where(*filters)  # type: ignore[arg-type]
+        .order_by(Site.c.id)
         .limit(limit)
         .offset(offset)
     )
-    for clause in filters:
-        stmt = stmt.where(clause)  # type: ignore[arg-type]
-
     result = await session.execute(stmt)
-    return extract_count_and_results(SiteSchema, result.all())
+    return count, [SiteSchema(**row._asdict()) for row in result.all()]
 
 
 async def get_tokens(
@@ -165,9 +144,11 @@ async def get_tokens(
     offset: int = 0,
     limit: int = MAX_PAGE_SIZE,
 ) -> tuple[int, Iterable[TokenSchema]]:
+    count = (
+        await session.execute(select(func.count()).select_from(Token))
+    ).scalar() or 0
     result = await session.execute(
         select(
-            func.count().over(),  # type: ignore[no-untyped-call]
             Token.c.id,
             Token.c.site_id,
             Token.c.value,
@@ -175,10 +156,11 @@ async def get_tokens(
             Token.c.created,
         )
         .select_from(Token)
+        .order_by(Token.c.id)
         .offset(offset)
         .limit(limit)
     )
-    return extract_count_and_results(TokenSchema, result.all())
+    return count, [TokenSchema(**row._asdict()) for row in result.all()]
 
 
 async def create_tokens(
