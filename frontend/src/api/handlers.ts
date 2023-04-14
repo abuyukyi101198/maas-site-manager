@@ -1,3 +1,5 @@
+import * as Sentry from "@sentry/browser";
+
 import api from "./api";
 import urls from "./urls";
 
@@ -45,8 +47,7 @@ export const getSites = async (params: GetSitesQueryParams, queryText?: string) 
     });
     return response.data;
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(error);
+    Sentry.captureException(new Error("getSites failed", { cause: error }));
   }
 };
 
@@ -73,8 +74,7 @@ export const getTokens = async (params: GetTokensQueryParams) => {
     const response = await api.get(urls.tokens, { params });
     return response.data;
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(error);
+    Sentry.captureException(new Error("getTokens failed", { cause: error }));
   }
 };
 
@@ -84,8 +84,7 @@ export const getEnrollmentRequests = async (params: GetEnrollmentRequestsQueryPa
     const response = await api.get(urls.enrollmentRequests, { params });
     return response.data;
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(error);
+    Sentry.captureException(new Error("getEnrollmentRequests failed", { cause: error }));
   }
 };
 

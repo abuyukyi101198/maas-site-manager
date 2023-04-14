@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/browser";
 import { parseISO } from "date-fns";
 import { getTimezoneOffset, format, utcToZonedTime } from "date-fns-tz";
 import * as countries from "i18n-iso-countries";
@@ -61,7 +62,6 @@ export const copyToClipboard = (text: string, callback?: (text: string) => void)
       callback && callback(text);
     })
     .catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error("Error copying", error);
+      Sentry.captureException(new Error("copy to clipboard failed", { cause: error }));
     });
 };
