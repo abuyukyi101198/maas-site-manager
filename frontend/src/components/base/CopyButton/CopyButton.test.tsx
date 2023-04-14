@@ -1,5 +1,3 @@
-import { vi } from "vitest";
-
 import CopyButton from "./CopyButton";
 
 import { render, screen, userEvent } from "@/test-utils";

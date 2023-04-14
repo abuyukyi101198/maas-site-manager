@@ -1,5 +1,3 @@
-import { vi } from "vitest";
-
 import RemoveRegions from "./index";
 
 import { render, screen, userEvent } from "@/test-utils";

@@ -1,5 +1,3 @@
-import { vi } from "vitest";
-
 import TablePagination from "./TablePagination";
 
 import { render, screen, userEvent } from "@/test-utils";

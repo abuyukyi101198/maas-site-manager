@@ -1,5 +1,3 @@
-import { vi } from "vitest";
-
 import EnrollmentActions from "./EnrollmentActions";
 
 import type * as apiHooks from "@/hooks/api";

@@ -1,5 +1,3 @@
-import { vi } from "vitest";
-
 import useDebouncedValue from "./useDebouncedValue";
 
 import { renderHook } from "@/test-utils";

@@ -1,7 +1,17 @@
 import { configDefaults, coverageConfigDefaults, defineConfig } from "vitest/config";
+import AutoImport from "unplugin-auto-import/vite";
 import * as path from "path";
 
 export default defineConfig({
+  plugins: [
+    AutoImport({
+      imports: ["react", "react-router-dom", "vitest"],
+      dts: true,
+      eslintrc: {
+        enabled: true,
+      },
+    }),
+  ],
   resolve: {
     alias: { "@": path.resolve(__dirname, "src") },
   },

@@ -1,6 +1,5 @@
 import { rest } from "msw";
 import { setupServer } from "msw/node";
-import { vi } from "vitest";
 
 import TokensCreate from "./TokensCreate";
 

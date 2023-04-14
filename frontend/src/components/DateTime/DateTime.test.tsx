@@ -1,5 +1,4 @@
 import * as timezoneMock from "timezone-mock";
-import { vi } from "vitest";
 
 import DateTime from "./DateTime";
 
