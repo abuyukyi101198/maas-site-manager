@@ -1,7 +1,7 @@
 import type { PropsWithChildren } from "react";
 import { useEffect } from "react";
 
-import { Col, Row, Strip, usePrevious } from "@canonical/react-components";
+import { Col, Row, Strip, useOnEscapePressed, usePrevious } from "@canonical/react-components";
 import classNames from "classnames";
 import { Outlet, useLocation } from "react-router-dom";
 
@@ -19,19 +19,25 @@ export const sidebarLabels: Record<"removeRegions" | "createToken", string> = {
   createToken: "Generate tokens",
 };
 
-const Aside = ({ children, isOpen, ...props }: PropsWithChildren<{ isOpen: boolean }>) => (
-  <aside
-    aria-hidden={!isOpen}
-    className={classNames("l-aside", "is-maas-site-manager", { "is-collapsed": !isOpen })}
-    id="aside-panel"
-    role="dialog"
-    {...props}
-  >
-    <Row>
-      <Col size={12}>{children}</Col>
-    </Row>
-  </aside>
-);
+type AsideProps = PropsWithChildren<Pick<ReturnType<typeof useAppContext>, "sidebar" | "setSidebar">>;
+const Aside = ({ children, sidebar, setSidebar, ...props }: AsideProps) => {
+  useOnEscapePressed(() => {
+    setSidebar(null);
+  });
+  return (
+    <aside
+      aria-hidden={!sidebar}
+      className={classNames("l-aside", "is-maas-site-manager", { "is-collapsed": !sidebar })}
+      id="aside-panel"
+      role="dialog"
+      {...props}
+    >
+      <Row>
+        <Col size={12}>{children}</Col>
+      </Row>
+    </aside>
+  );
+};
 
 const getPageTitle = (pathname: RoutePath) => {
   const title = Object.values(routesConfig).find(({ path }) => path === pathname)?.title;
@@ -85,7 +91,7 @@ const MainLayout: React.FC = () => {
             </div>
           </div>
         </main>
-        <Aside aria-label={sidebar ? sidebarLabels[sidebar] : undefined} isOpen={!!sidebar}>
+        <Aside aria-label={sidebar ? sidebarLabels[sidebar] : undefined} setSidebar={setSidebar} sidebar={sidebar}>
           {!!sidebar && sidebar === "createToken" ? (
             <TokensCreate />
           ) : !!sidebar && sidebar === "removeRegions" ? (

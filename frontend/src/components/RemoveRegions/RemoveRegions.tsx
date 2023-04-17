@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 import { Button, Icon, Input, useId } from "@canonical/react-components";
 import { Field, Form, Formik } from "formik";
+import pluralize from "pluralize";
 import * as Yup from "yup";
 
 import { useAppContext } from "@/context";
@@ -41,7 +42,8 @@ const RemoveRegions = () => {
   const id = useId();
   const confirmTextId = `confirm-text-${id}`;
   const headingId = `heading-${id}`;
-  const expectedConfirmTextValue = `remove ${regionsCount} regions`;
+  const regionsCountText = pluralize("regions", regionsCount || 0, !!regionsCount);
+  const expectedConfirmTextValue = `remove ${regionsCountText}`;
   const handleSubmit = () => {
     // TODO: integrate with delete regions endpoint
   };
@@ -63,24 +65,24 @@ const RemoveRegions = () => {
         <Form aria-labelledby={headingId} className="tokens-create" noValidate>
           <div className="tokens-create">
             <h3 className="tokens-create__heading p-heading--4" id={headingId}>
-              Remove <strong> {regionsCount} regions</strong> from Site Manager
+              Remove <strong> {regionsCountText}</strong> from Site Manager
             </h3>
             <p>
               The deletion of data is irreversible. You can re-enrol the MAAS region again through the enrolment
               process.
             </p>
             <p id={confirmTextId}>
-              Type <strong>remove {regionsCount} regions</strong> to confirm.
+              Type <strong>remove {regionsCountText}</strong> to confirm.
             </p>
             <Field
               aria-labelledby={confirmTextId}
               as={Input}
               error={touched.confirmText && errors.confirmText}
               name="confirmText"
-              placeholder={`remove ${regionsCount} regions`}
+              placeholder={`remove ${regionsCountText}`}
               type="text"
             />
-            <Button onClick={() => setSidebar(null)} type="button">
+            <Button appearance="base" onClick={() => setSidebar(null)} type="button">
               Cancel
             </Button>
             <Button

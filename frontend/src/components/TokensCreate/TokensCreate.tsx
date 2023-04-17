@@ -91,7 +91,7 @@ const TokensCreate = () => {
             </p>
             <hr className="tokens-create__separator" />
             <div className="tokens-create__buttons">
-              <Button onClick={() => setSidebar(null)} type="button">
+              <Button appearance="base" onClick={() => setSidebar(null)} type="button">
                 Cancel
               </Button>
               <Button

@@ -35,3 +35,13 @@ test("opens remove regions panel if remove button is pressed", async ({ page }) 
   await page.getByRole("button", { name: /Remove/i }).click();
   await expect(page.getByRole("dialog", { name: /Remove regions/i })).toBeVisible();
 });
+
+test("can close remove regions panel using Escape key", async ({ page }) => {
+  const dialog = page.getByRole("dialog", { name: /Remove regions/i });
+  await expect(dialog).not.toBeVisible();
+  await page.getByRole("checkbox", { name: /select all/i }).click({ force: true });
+  await page.getByRole("button", { name: /Remove/i }).click();
+  await expect(dialog).toBeVisible();
+  await dialog.press("Escape");
+  await expect(dialog).not.toBeVisible();
+});

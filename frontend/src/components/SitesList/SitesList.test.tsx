@@ -4,7 +4,7 @@ import urls from "@/api/urls";
 import { siteFactory } from "@/mocks/factories";
 import { createMockSitesResolver } from "@/mocks/resolvers";
 import { createMockGetServer } from "@/mocks/server";
-import { render, renderWithMemoryRouter, screen, userEvent, waitFor, within } from "@/test-utils";
+import { renderWithMemoryRouter, screen, userEvent, waitFor, within } from "@/test-utils";
 
 const sites = siteFactory.buildList(2);
 const mockServer = createMockGetServer(urls.sites, createMockSitesResolver(sites));
@@ -20,13 +20,13 @@ afterAll(() => {
 });
 
 it("displays loading text", () => {
-  render(<SitesList />);
+  renderWithMemoryRouter(<SitesList />);
 
   expect(within(screen.getByRole("table", { name: /sites/i })).getByText(/loading/i)).toBeInTheDocument();
 });
 
 it("displays populated sites table", async () => {
-  render(<SitesList />);
+  renderWithMemoryRouter(<SitesList />);
 
   expect(screen.getByRole("table", { name: /sites/i })).toBeInTheDocument();
 

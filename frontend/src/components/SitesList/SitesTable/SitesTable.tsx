@@ -9,6 +9,7 @@ import ConnectionInfo from "./ConnectionInfo/ConnectionInfo";
 import SitesTableControls from "./SitesTableControls/SitesTableControls";
 
 import type { SitesQueryResult } from "@/api/types";
+import ExternalLink from "@/components/ExternalLink";
 import NoRegions from "@/components/NoRegions";
 import { isDev } from "@/constants";
 import { useAppContext } from "@/context";
@@ -96,7 +97,7 @@ const SitesTable = ({
         cell: ({ getValue }) => (
           <>
             <div>{getValue().name}</div>
-            <div className="u-text--muted">{getValue().url}</div>
+            <ExternalLink to={getValue().url || ""}>{getValue().url}</ExternalLink>
           </>
         ),
       },

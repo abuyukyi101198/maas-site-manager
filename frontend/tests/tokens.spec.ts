@@ -15,6 +15,14 @@ test("can open and close token generate form", async ({ page }) => {
   await expect(page.getByRole("form", { name: /Generate new enrolment tokens/i })).toBeHidden();
 });
 
+test("can close token generate dialog using Escape key", async ({ page }) => {
+  await page.getByRole("button", { name: /Generate tokens/i }).click();
+  const dialog = await page.getByRole("dialog", { name: /generate tokens/i });
+  expect(dialog).toBeVisible();
+  await dialog.press("Escape");
+  await expect(dialog).toBeHidden();
+});
+
 test("token create form is closed when navigating away", async ({ page }) => {
   await page.getByRole("button", { name: /Generate tokens/i }).click();
   await expect(page.getByRole("form", { name: /Generate new enrolment tokens/i })).toBeVisible();

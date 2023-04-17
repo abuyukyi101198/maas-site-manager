@@ -6,7 +6,7 @@ import urls from "@/api/urls";
 import { enrollmentRequestFactory, siteFactory, sitesQueryResultFactory } from "@/mocks/factories";
 import { createMockGetEnrollmentRequestsResolver } from "@/mocks/resolvers";
 import { createMockGetServer } from "@/mocks/server";
-import { render, renderWithMemoryRouter, screen, within } from "@/test-utils";
+import { renderWithMemoryRouter, screen, within } from "@/test-utils";
 
 const enrollmentRequests = enrollmentRequestFactory.buildList(2);
 const mockServer = createMockGetServer(
@@ -45,7 +45,7 @@ it("displays an empty sites table", () => {
 
 it("displays rows with details for each site", () => {
   const items = siteFactory.buildList(1);
-  render(
+  renderWithMemoryRouter(
     <SitesTable
       data={sitesQueryResultFactory.build({ items, total: 1, page: 1, size: 1 })}
       isFetchedAfterMount={true}
@@ -66,7 +66,7 @@ it("displays rows with details for each site", () => {
 it("displays correctly paginated results", () => {
   const pageLength = 50;
   const items = siteFactory.buildList(pageLength);
-  render(
+  renderWithMemoryRouter(
     <SitesTable
       data={sitesQueryResultFactory.build({ items, total: 100, page: 1, size: pageLength })}
       isFetchedAfterMount={true}
@@ -84,7 +84,7 @@ it("displays correct local time", () => {
   vi.setSystemTime(date);
 
   const item = siteFactory.build({ timezone: 1 });
-  render(
+  renderWithMemoryRouter(
     <SitesTable
       data={sitesQueryResultFactory.build({ items: [item], total: 1, page: 1, size: 1 })}
       isFetchedAfterMount={true}
@@ -99,7 +99,7 @@ it("displays correct local time", () => {
 
 it("displays full name of the country", () => {
   const item = siteFactory.build({ address: { countrycode: "GB" } });
-  render(
+  renderWithMemoryRouter(
     <SitesTable
       data={sitesQueryResultFactory.build({ items: [item], total: 1, page: 1, size: 1 })}
       isFetchedAfterMount={true}
