@@ -14,7 +14,7 @@ export default defineConfig({
   plugins: [
     react(),
     AutoImport({
-      imports: ["react", "react-router-dom"],
+      imports: ["react", "react-router-dom", "vitest"],
       dts: true,
       eslintrc: {
         enabled: true,
