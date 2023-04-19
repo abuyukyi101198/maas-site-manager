@@ -1,5 +1,4 @@
 from contextlib import asynccontextmanager
-from os import environ
 from typing import AsyncGenerator
 
 from fastapi import FastAPI
@@ -8,25 +7,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from . import _base
 from .. import PACKAGE
 from ..db import Database
-
-POSTGRES_HOST = environ.get("POSTGRES_HOST")
-POSTGRES_PORT = environ.get("POSTGRES_PORT")
-POSTGRES_DB = environ.get("POSTGRES_DB")
-POSTGRES_USER = environ.get("POSTGRES_USER")
-POSTGRES_PASSWORD = environ.get("POSTGRES_PASSWORD")
-DEFAULT_DB_DSN = (
-    "postgresql+asyncpg://"
-    + f"{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/{POSTGRES_DB}"
-)
-
-# TODO: make config dynamic and allow env vars
-origins = [
-    "http://localhost:8405",
-    "http://127.0.0.1:8405",
-]
+from ..settings import SETTINGS
 
 
-def create_app(db_dsn: str = DEFAULT_DB_DSN) -> FastAPI:
+def create_app(db_dsn: str | None = None) -> FastAPI:
+    """Create the FastAPI WSGI application."""
+    if db_dsn is None:
+        db_dsn = str(SETTINGS.db_dsn)
+
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         await db.connect()
@@ -42,7 +30,7 @@ def create_app(db_dsn: str = DEFAULT_DB_DSN) -> FastAPI:
     )
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=origins,
+        allow_origins=SETTINGS.allowed_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
