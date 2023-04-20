@@ -12,7 +12,7 @@ import usePagination from "@/hooks/usePagination";
 const DEFAULT_PAGE_SIZE = 50;
 
 const TokensList = () => {
-  const { setSidebar } = useAppContext();
+  const { setSidebar, rowSelection } = useAppContext();
   const [totalDataCount, setTotalDataCount] = useState(0);
   const { page, debouncedPage, size, handleNextClick, handlePreviousClick, handlePageSizeChange, setPage } =
     usePagination(DEFAULT_PAGE_SIZE, totalDataCount);
@@ -30,8 +30,10 @@ const TokensList = () => {
       <Row>
         <Col size={12}>
           <div className="u-flex u-flex--justify-end">
-            <Button>Export</Button>
-            <Button appearance="negative">Delete</Button>
+            <Button disabled={!Object.keys(rowSelection).length}>Export</Button>
+            <Button appearance="negative" disabled={!Object.keys(rowSelection).length}>
+              Delete
+            </Button>
             <Button className="p-button--positive" onClick={() => setSidebar("createToken")} type="button">
               Generate tokens
             </Button>

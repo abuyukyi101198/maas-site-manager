@@ -12,7 +12,7 @@ export const navItems: NavLink[] = [
   {
     label: "Regions",
     url: "/sites",
-    icon: "maas",
+    icon: "machines",
   },
 ];
 

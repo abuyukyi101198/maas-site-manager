@@ -73,6 +73,7 @@ const TokensCreate = () => {
               error={touched.amount && errors.amount}
               id={amountId}
               name="amount"
+              placeholder="1"
               required
               type="text"
             />
@@ -82,6 +83,7 @@ const TokensCreate = () => {
               error={touched.expires && errors.expires}
               id={expiresId}
               name="expires"
+              placeholder="12 hours"
               required
               type="text"
             />

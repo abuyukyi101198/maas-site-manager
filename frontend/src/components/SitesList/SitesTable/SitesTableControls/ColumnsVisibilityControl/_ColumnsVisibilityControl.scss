@@ -4,9 +4,8 @@
   }
   label {
     padding: 0 $sph--large $sph--x-small $sph--large;
-    text-transform: capitalize;
     width: 100%;
-    text-indent: 0;
+    text-indent: 0
   }
 }
 
@@ -15,7 +14,6 @@
   padding-left: $spv--small;
   text-align: left;
   width: 100%;
-  text-transform: capitalize;
 
   i[class*="p-icon"]:last-child {
     margin-left: 0;

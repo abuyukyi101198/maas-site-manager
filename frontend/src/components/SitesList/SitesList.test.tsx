@@ -38,13 +38,55 @@ it("displays populated sites table", async () => {
     .forEach((row, i) => expect(row).toHaveTextContent(new RegExp(sites[i].name, "i")));
 });
 
-it("remove button is disabled if no row is selected", async () => {
+it("disables the 'remove' button if no rows are selected", async () => {
   renderWithMemoryRouter(<SitesList />);
   expect(screen.getByRole("button", { name: /Remove/i })).toBeDisabled();
 });
 
-it("remove button is enabled if some rows are selected", async () => {
+it("enables the 'remove' button if some rows are selected", async () => {
   renderWithMemoryRouter(<SitesList />);
   await userEvent.click(screen.getByRole("checkbox", { name: /select all/i }));
   await waitFor(() => expect(screen.getByRole("button", { name: /Remove/i })).toBeEnabled());
+});
+
+it("can hide and unhide columns", async () => {
+  renderWithMemoryRouter(<SitesList />);
+  expect(screen.getByRole("columnheader", { name: /Connection/i })).toBeInTheDocument();
+
+  await userEvent.click(screen.getByRole("button", { name: "Columns" }));
+  await userEvent.click(screen.getByRole("checkbox", { name: /Connection/i }));
+
+  expect(screen.getByRole("checkbox", { name: "3 out of 4 selected" })).toBeInTheDocument();
+  expect(screen.queryByRole("columnheader", { name: /Connection/i })).not.toBeInTheDocument();
+
+  await userEvent.click(screen.getByRole("checkbox", { name: /Connection/i }));
+
+  expect(screen.getByRole("checkbox", { name: "4 out of 4 selected" })).toBeInTheDocument();
+  expect(screen.getByRole("columnheader", { name: /Connection/i })).toBeInTheDocument();
+});
+
+it("can hide and unhide all columns", async () => {
+  renderWithMemoryRouter(<SitesList />);
+
+  expect(screen.getByRole("columnheader", { name: /Connection/i })).toBeInTheDocument();
+  expect(screen.getByRole("columnheader", { name: /Country/i })).toBeInTheDocument();
+  expect(screen.getByRole("columnheader", { name: /Local time/i })).toBeInTheDocument();
+  expect(screen.getByRole("columnheader", { name: /Machines/i })).toBeInTheDocument();
+
+  await userEvent.click(screen.getByRole("button", { name: "Columns" }));
+  await userEvent.click(screen.getByRole("checkbox", { name: "4 out of 4 selected" }));
+
+  expect(screen.getByRole("checkbox", { name: "0 out of 4 selected" })).toBeInTheDocument();
+
+  expect(screen.queryByRole("columnheader", { name: /Connection/i })).not.toBeInTheDocument();
+  expect(screen.queryByRole("columnheader", { name: /Country/i })).not.toBeInTheDocument();
+  expect(screen.queryByRole("columnheader", { name: /Local time/i })).not.toBeInTheDocument();
+  expect(screen.queryByRole("columnheader", { name: /Machines/i })).not.toBeInTheDocument();
+
+  await userEvent.click(screen.getByRole("checkbox", { name: "0 out of 4 selected" }));
+
+  expect(screen.getByRole("columnheader", { name: /Connection/i })).toBeInTheDocument();
+  expect(screen.getByRole("columnheader", { name: /Country/i })).toBeInTheDocument();
+  expect(screen.getByRole("columnheader", { name: /Local time/i })).toBeInTheDocument();
+  expect(screen.getByRole("columnheader", { name: /Machines/i })).toBeInTheDocument();
 });

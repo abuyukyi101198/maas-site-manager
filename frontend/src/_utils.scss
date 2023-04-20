@@ -24,6 +24,12 @@
 .u-capitalize {
   text-transform: capitalize !important;
 }
+.u-no-border {
+  border: 0 !important;
+}
+.u-no-line-height {
+  line-height: 0 !important;
+}
 .u-padding-top--medium {
   padding-top: $spv--medium !important;
 }

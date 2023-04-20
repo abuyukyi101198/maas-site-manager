@@ -33,6 +33,7 @@
 @include vf-p-icon-status-waiting-small;
 @include vf-p-icon-status-succeeded-small;
 @include vf-p-icon-settings;
+@include vf-p-icon-machines;
 @include vf-p-icon-submit-bug;
 @include vf-p-icon-comments;
 
@@ -42,6 +43,7 @@
 @include vf-u-vertically-center;
 @include vf-u-hide;
 @include vf-u-align;
+@include vf-u-margin-collapse;
 
 // layout
 @include vf-l-application;
@@ -66,3 +68,4 @@
 @import "@/components/base/CopyButton/CopyButton";
 @import "@/components/base/TablePagination/TablePagination";
 @import "@/components/base/PaginationBar/PaginationBar";
+@import "@/components/base/TooltipButton/TooltipButton";

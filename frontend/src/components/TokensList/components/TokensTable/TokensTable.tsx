@@ -8,6 +8,8 @@ import pick from "lodash/fp/pick";
 
 import type { Token } from "@/api/types";
 import CopyButton from "@/components/base/CopyButton";
+import TooltipButton from "@/components/base/TooltipButton";
+import { useAppContext } from "@/context";
 import type { useTokensQueryResult } from "@/hooks/api";
 import { copyToClipboard } from "@/utils";
 
@@ -88,7 +90,15 @@ const TokensTable = ({
         header: () => <div>Time until expiration</div>,
         cell: ({ getValue }) => {
           const { expires } = getValue();
-          return <div>{expires ? formatDistanceStrict(new Date(expires), new Date()) : null}</div>;
+          return (
+            <TooltipButton
+              iconName=""
+              message={expires ? format(new Date(expires), "yyyy-MM-dd HH:mm") : null}
+              position="btm-center"
+            >
+              {expires ? formatDistanceStrict(new Date(expires), new Date()) : null}
+            </TooltipButton>
+          );
         },
       },
       {
@@ -103,7 +113,12 @@ const TokensTable = ({
     ],
     [handleTokenCopy, isTokenCopied],
   );
-  const [rowSelection, setRowSelection] = useState({});
+  const { rowSelection, setRowSelection } = useAppContext();
+
+  // clear selection on unmount
+  useEffect(() => {
+    return () => setRowSelection({});
+  }, [setRowSelection]);
   const noItems = useMemo<Token[]>(() => [], []);
 
   const tokenTable = useReactTable<Token>({
