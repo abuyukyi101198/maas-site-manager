@@ -1,5 +1,5 @@
 import type { ChangeEvent } from "react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 import { Button, Icon, Input } from "@canonical/react-components";
 
@@ -42,6 +42,10 @@ const TablePagination = ({
     }
   };
 
+  useEffect(() => {
+    setPageNumber(currentPage);
+  }, [currentPage]);
+
   const handleInputBlur = () => {
     setPageNumber(currentPage);
     setError("");
@@ -49,12 +53,10 @@ const TablePagination = ({
 
   const handleNextClick = () => {
     onNextClick();
-    setPageNumber((prev) => (prev ? prev + 1 : undefined));
   };
 
   const handlePreviousClick = () => {
     onPreviousClick();
-    setPageNumber((prev) => (prev ? prev - 1 : undefined));
   };
 
   return (
