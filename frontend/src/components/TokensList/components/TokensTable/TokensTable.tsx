@@ -93,7 +93,7 @@ const TokensTable = ({
           return (
             <TooltipButton
               iconName=""
-              message={expires ? format(new Date(expires), "yyyy-MM-dd HH:mm") : null}
+              message={expires ? `${format(new Date(expires), "yyyy-MM-dd HH:mm")} (UTC)` : null}
               position="btm-center"
             >
               {expires ? formatDistanceStrict(new Date(expires), new Date()) : null}
