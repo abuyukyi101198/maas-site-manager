@@ -6,7 +6,6 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     MetaData,
-    Numeric,
     Table,
     Text,
 )
@@ -27,8 +26,7 @@ Site = Table(
     Column("note", Text),
     Column("region", Text),
     Column("street", Text),
-    # Timezones need be up to x.25 accuracy
-    Column("timezone", Numeric(precision=3, scale=2)),
+    Column("timezone", Text),
     Column("url", Text),
 )
 

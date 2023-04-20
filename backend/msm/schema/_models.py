@@ -10,8 +10,13 @@ from pydantic import (
     SecretStr,
 )
 from pydantic.fields import Field
+import pytz
+from strenum import StrEnum
 
 from ._pagination import PaginatedResults
+
+# Enum with timezones accepted by pytz.
+TimeZone = StrEnum("TimeZone", pytz.all_timezones)
 
 
 class CreateUser(BaseModel):
@@ -43,7 +48,7 @@ class CreateSite(BaseModel):
     note: str | None
     region: str | None
     street: str | None
-    timezone: str | None
+    timezone: TimeZone | None  # type: ignore
     url: str
     # TODO: we will need to add tags
 

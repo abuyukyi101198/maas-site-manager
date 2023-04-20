@@ -82,7 +82,7 @@ async def get_filtered_sites(
     note: list[str] | None = None,
     region: list[str] | None = None,
     street: list[str] | None = None,
-    timezone: list[float] | None = None,
+    timezone: list[str] | None = None,
     url: list[str] | None = None,
 ) -> tuple[int, Iterable[SiteSchema]]:
     filters = filters_from_arguments(

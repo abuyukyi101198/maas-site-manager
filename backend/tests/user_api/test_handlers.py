@@ -50,17 +50,20 @@ async def test_list_sites(
         "note": "the first site",
         "region": "Blue Fin Bldg",
         "street": "110 Southwark St",
-        "timezone": "0.00",
+        "timezone": "Europe/London",
         "url": "https://londoncalling.example.com",
     }
     site2 = site1.copy()
-    site2["name"] = "BerlinHQ"
-    site2["timezone"] = "1.00"
-    site2["city"] = "Berlin"
-    site2["country"] = "de"
+    site2.update(
+        {
+            "name": "BerlinHQ",
+            "timezone": "Europe/Berlin",
+            "city": "Berlin",
+            "country": "de",
+        }
+    )
     sites = await fixture.create("site", [site1, site2])
     for site in sites:
-        site["timezone"] = str(site["timezone"])
         site["stats"] = None
     page1 = await user_app_client.get("/sites")
     assert page1.status_code == 200
@@ -101,18 +104,21 @@ async def test_list_sites_filter_timezone(
         "note": "the first site",
         "region": "Blue Fin Bldg",
         "street": "110 Southwark St",
-        "timezone": "3.00",
+        "timezone": "Europe/London",
         "url": "https://londoncalling.example.com",
     }
     site2 = site1.copy()
-    site2["name"] = "BerlinHQ"
-    site2["timezone"] = "1.00"
-    site2["city"] = "Berlin"
-    site2["country"] = "de"
+    site2.update(
+        {
+            "name": "BerlinHQ",
+            "timezone": "Europe/Berlin",
+            "city": "Berlin",
+            "country": "de",
+        }
+    )
     [created_site, _] = await fixture.create("site", [site1, site2])
-    created_site["timezone"] = str(created_site["timezone"])
     created_site["stats"] = None
-    page1 = await user_app_client.get("/sites?timezone=3.0")
+    page1 = await user_app_client.get("/sites?timezone=Europe/London")
     assert page1.status_code == 200
     assert page1.json() == {
         "page": 1,
@@ -138,7 +144,7 @@ async def test_list_sites_with_stats(
                 "note": "the first site",
                 "region": "Blue Fin Bldg",
                 "street": "110 Southwark St",
-                "timezone": "0.00",
+                "timezone": "Europe/London",
                 "url": "https://londoncalling.example.com",
             }
         ],
@@ -159,7 +165,6 @@ async def test_list_sites_with_stats(
     del site_data["id"]
     del site_data["site_id"]
     site_data["last_seen"] = site_data["last_seen"].isoformat()
-    site["timezone"] = str(site["timezone"])
     site["stats"] = site_data
 
     page = await user_app_client.get("/sites")

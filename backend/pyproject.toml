@@ -19,7 +19,9 @@ requires-python = ">=3.10"
 dependencies = [
   "fastapi",
   "pydantic[email]",
+  "pytz",
   "SQLAlchemy[postgresql_asyncpg]",
+  "StrEnum", # emulate enum.StrEnum, which is available in Python3.11
 ]
 [project.optional-dependencies]
 testing = [
@@ -59,9 +61,10 @@ junit_logging = "all"
 junit_suite_name = "maas-site-manager backend tests"
 
 [tool.mypy]
+ignore_missing_imports = true
 install_types = true
 non_interactive = true
-strict = true
 plugins = [
   "pydantic.mypy"
 ]
+strict = true
