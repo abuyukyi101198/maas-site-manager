@@ -37,6 +37,14 @@ yarn run dev
 
 ## Project conventions
 
+## CSS
+
+### Mobile-first approach
+
+We first write CSS styles specifically for mobile devices, and then progressively enhance them for larger screen sizes using min-width media queries.
+
+Single and consistent direction of media queries (min-width) makes the code easier to read and maintain.
+
 ## Testing
 
 We use [Playwright](https://playwright.dev/) for end-to-end tests and [Vitest](https://vitest.dev/) for unit/integration tests. We prefer integration testing over unit testing as we focus on user-centric testing and avoid testing implementation details. That makes changes and refactoring easier and helps ensure that things continue to work as expected for the end user.
