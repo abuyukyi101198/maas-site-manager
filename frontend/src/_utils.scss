@@ -12,17 +12,28 @@
 .u-flex--justify-end {
   justify-content: flex-end !important;
 }
+.u-flex--justify-between {
+  justify-content: space-between !important;
+}
 .u-flex--column {
   flex-direction: column !important;
+}
+.u-flex--column-x-small {
+  @media (max-width: $breakpoint-x-small) {
+    flex-direction: column !important;
+  }
 }
 .u-flex--grow {
   flex-grow: 1 !important;
 }
-.u-flex--between {
-  justify-content: space-between !important;
+.u-flex--wrap {
+  flex-wrap: wrap !important;
 }
 .u-capitalize {
   text-transform: capitalize !important;
+}
+.u-no-wrap {
+  white-space: nowrap !important;
 }
 .u-no-border {
   border: 0 !important;

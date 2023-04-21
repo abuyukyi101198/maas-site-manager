@@ -1,5 +1,6 @@
 .table-pagination {
   position: relative;
+  margin-right: $sph--x-large;
 
   @media screen and (max-width: $breakpoint-small) {
     margin-bottom: $spv--large;

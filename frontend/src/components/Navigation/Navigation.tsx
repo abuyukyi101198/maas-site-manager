@@ -62,7 +62,7 @@ const Navigation = (): JSX.Element => {
         className={classNames("l-navigation", { "is-collapsed": isCollapsed, "is-pinned": !isCollapsed })}
       >
         <div className="l-navigation__drawer">
-          <div className="p-panel is-dark u-flex u-flex--column u-flex--between">
+          <div className="p-panel is-dark u-flex u-flex--column u-flex--justify-between">
             <span>
               <div className="p-panel__header is-sticky">
                 <NavigationBanner>

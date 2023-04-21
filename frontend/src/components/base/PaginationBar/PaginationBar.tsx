@@ -1,7 +1,7 @@
 import type { ChangeEvent } from "react";
 import { useMemo } from "react";
 
-import { Col, Row, Select } from "@canonical/react-components";
+import { Select } from "@canonical/react-components";
 
 import type { AppPaginationProps } from "@/components/base/TablePagination/TablePagination";
 import TablePagination from "@/components/base/TablePagination/TablePagination";
@@ -48,13 +48,12 @@ const PaginationBar = ({
   };
 
   return (
-    <Row className="pagination-bar">
-      <Col medium={6} size={7} small={4}>
-        <p className="pagination-bar__description">
-          Showing {getDisplayedDataCount()} out of {totalItems} {dataContext}
-        </p>
-      </Col>
-      <Col medium={3} size={3} small={4}>
+    <section className="pagination-bar u-flex u-flex--justify-between u-flex--wrap">
+      <strong className="pagination-bar__description">
+        Showing {getDisplayedDataCount()} out of {totalItems} {dataContext}
+      </strong>
+
+      <div className="u-flex u-flex--wrap u-flex--column-x-small pagination-bar__right">
         <TablePagination
           currentPage={currentPage}
           isLoading={isLoading}
@@ -64,8 +63,7 @@ const PaginationBar = ({
           setCurrentPage={setCurrentPage}
           totalItems={totalItems}
         />
-      </Col>
-      <Col medium={3} size={2} small={4}>
+
         <Select
           aria-label="Tokens per page"
           name="Tokens per page"
@@ -73,8 +71,8 @@ const PaginationBar = ({
           options={pageOptions}
           value={itemsPerPage}
         />
-      </Col>
-    </Row>
+      </div>
+    </section>
   );
 };
 
