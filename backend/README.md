@@ -131,4 +131,4 @@ There are CSV files available that can be used as test data.
 If you are running the app in docker you can easily load those
 
 - export the `POSTGRES_*` environment vars as needed
-- run the loading script `../testdata/import.sh`
+- run the loading script `../test-data/import.sh`
