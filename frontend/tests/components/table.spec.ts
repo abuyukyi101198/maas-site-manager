@@ -30,7 +30,7 @@ for (const pageWithTable of pagesWithTable) {
     const selectAll = await page.getByRole("checkbox", { name: /select all/i });
     const tableBodyCheckboxes = await page.locator("tbody").getByRole("checkbox").all();
     // click a single item on the first page
-    await await page.locator("tbody").getByRole("checkbox").first().click({ force: true });
+    await page.locator("tbody").getByRole("checkbox").first().click({ force: true });
     await page.getByRole("button", { name: "next page" }).click();
     await expect(selectAll).toHaveAttribute("aria-checked", "mixed");
     // click partially checked select all checkbox on the second page
