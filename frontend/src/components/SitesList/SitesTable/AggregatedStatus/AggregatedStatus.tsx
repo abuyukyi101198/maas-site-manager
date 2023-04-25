@@ -45,7 +45,7 @@ const AggregatedStatus = ({ stats }: { stats: Stats }) => {
           }
         >
           <Meter
-            className="u-no-margin--bottom"
+            className="u-no-margin--bottom u-no-padding"
             data={[
               { color: "black", value: deployed_machines },
               { color: color.link, value: allocated_machines },
