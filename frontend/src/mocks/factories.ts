@@ -40,12 +40,10 @@ export const siteFactory = Factory.define<Site>(({ sequence }) => {
     url: `http://${name}.${chance.tld()}`,
     connection: connectionFactory.build(),
     last_seen: new Date(chance.date({ year: 2023 })).toISOString(),
-    address: {
-      countrycode: chance.country(), // <alpha2 country code>,
-      city: chance.city(),
-      zip: chance.zip(),
-      street: chance.address(),
-    },
+    country: chance.country(), // <alpha2 country code>,
+    city: chance.city(),
+    zip: chance.zip(),
+    street: chance.address(),
     timezone: chance.timezone().utc[0],
     stats: statsFactory.build(),
   };
@@ -64,7 +62,7 @@ export const tokenFactory = Factory.define<Token>(({ sequence }) => {
   return {
     id: `${sequence}`,
     site_id: `${chance.integer({ min: 0, max: 100 })}`,
-    token: chance.hash({ length: 64 }),
+    value: chance.hash({ length: 64 }),
     expires: new Date(chance.date({ year: 2024 })).toISOString(), //<ISO 8601 date string>,
     created: new Date(chance.date({ year: 2023 })).toISOString(), //<ISO 8601 date string>
   };

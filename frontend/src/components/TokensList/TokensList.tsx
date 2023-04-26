@@ -122,7 +122,7 @@ const TokensList = () => {
           </Col>
         </Row>
         <PaginationBar
-          currentPage={page + 1}
+          currentPage={page}
           dataContext="tokens"
           handlePageSizeChange={handlePageSizeChange}
           isLoading={isLoading}

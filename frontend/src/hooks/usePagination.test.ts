@@ -6,10 +6,10 @@ describe("usePagination", () => {
   const samplePageSize = 50;
   const sampleTotalCount = 200;
 
-  it("initializes the page to 0 when called", () => {
+  it("initializes the page to 1 when called", () => {
     const { result } = renderHook(() => usePagination(samplePageSize, sampleTotalCount));
 
-    expect(result.current.page).toBe(0);
+    expect(result.current.page).toBe(1);
   });
 
   it("next and previous page functions work correctly", () => {
@@ -19,13 +19,13 @@ describe("usePagination", () => {
       result.current.handleNextClick();
     });
 
-    expect(result.current.page).toBe(1);
+    expect(result.current.page).toBe(2);
 
     hookAct(() => {
       result.current.handlePreviousClick();
     });
 
-    expect(result.current.page).toBe(0);
+    expect(result.current.page).toBe(1);
   });
 
   it("should reset page count after page size is changed", () => {
@@ -36,6 +36,6 @@ describe("usePagination", () => {
       result.current.handlePageSizeChange(10);
     });
 
-    expect(result.current.page).toBe(0);
+    expect(result.current.page).toBe(1);
   });
 });

@@ -43,7 +43,7 @@ it("should display table with tokens", async () => {
   expect(within(tableBody).getAllByRole("row")).toHaveLength(tokens.length);
   within(tableBody)
     .getAllByRole("row")
-    .forEach((row, idx) => expect(row).toHaveTextContent(new RegExp(tokens[idx].token, "i")));
+    .forEach((row, idx) => expect(row).toHaveTextContent(new RegExp(tokens[idx].value, "i")));
 });
 
 it("should display a token count description", () => {

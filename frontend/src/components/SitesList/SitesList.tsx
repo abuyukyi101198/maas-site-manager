@@ -11,7 +11,7 @@ import { parseSearchTextToQueryParams } from "@/utils";
 const DEFAULT_PAGE_SIZE = 50;
 
 const SitesList = () => {
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [size] = useState(DEFAULT_PAGE_SIZE);
   const [searchText, setSearchText] = useState("");
   const debounceSearchText = useDebounce(searchText);
@@ -22,7 +22,7 @@ const SitesList = () => {
   );
 
   useEffect(() => {
-    setPage(0);
+    setPage(1);
   }, [searchText]);
 
   return (
@@ -34,11 +34,11 @@ const SitesList = () => {
         setSearchText={setSearchText}
       />
       <Pagination
-        currentPage={page + 1}
+        currentPage={page}
         disabled={isLoading}
         itemsPerPage={size}
         paginate={(page) => {
-          setPage(page - 1);
+          setPage(page);
         }}
         totalItems={data?.total || 0}
       />

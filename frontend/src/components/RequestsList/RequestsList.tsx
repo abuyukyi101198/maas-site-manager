@@ -30,7 +30,7 @@ const Requests: React.FC = () => {
       <Row>
         <Col size={12}>
           <PaginationBar
-            currentPage={page + 1}
+            currentPage={page}
             dataContext="open enrolment requests"
             handlePageSizeChange={handlePageSizeChange}
             isLoading={isLoading}

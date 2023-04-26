@@ -36,7 +36,7 @@ export const createMockSitesResolver =
     const searchParams = new URLSearchParams(req.url.search);
     const page = Number(searchParams.get("page"));
     const size = Number(searchParams.get("size"));
-    const itemsPage = sites.slice(page * Number(size), (page + 1) * size);
+    const itemsPage = sites.slice((page - 1) * size, page * size);
     const response = {
       items: itemsPage,
       page,
@@ -68,7 +68,7 @@ export const createMockGetTokensResolver =
     const searchParams = new URLSearchParams(req.url.search);
     const page = Number(searchParams.get("page"));
     const size = Number(searchParams.get("size"));
-    const itemsPage = tokens.slice(page * Number(size), (page + 1) * size);
+    const itemsPage = tokens.slice((page - 1) * size, page * size);
 
     const response = {
       items: itemsPage,
@@ -94,7 +94,7 @@ export const createMockGetEnrollmentRequestsResolver =
     const searchParams = new URLSearchParams(req.url.search);
     const page = Number(searchParams.get("page"));
     const size = Number(searchParams.get("size"));
-    const itemsPage = enrollmentRequests.slice(page * Number(size), (page + 1) * size);
+    const itemsPage = enrollmentRequests.slice((page - 1) * size, page * size);
 
     const response = {
       items: itemsPage,

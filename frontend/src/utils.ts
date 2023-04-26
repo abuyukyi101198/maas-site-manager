@@ -28,10 +28,10 @@ export const parseSearchTextToQueryParams = (text: string) => {
   return parsedText;
 };
 
-export const customParamSerializer = (params: Record<string, string>, queryText?: string) => {
+export const customParamSerializer = (params: Record<string, string | number>, queryText?: string) => {
   return (
     Object.entries(Object.assign({}, params))
-      .map(([key, value]) => `${key}=${value}`)
+      .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
       .join("&") + `${queryText ? "&" + queryText : ""}`
   );
 };

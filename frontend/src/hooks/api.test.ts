@@ -27,7 +27,7 @@ afterAll(() => {
 });
 
 it("should return sites", async () => {
-  const { result } = renderHook(() => useSitesQuery({ page: "0", size: "2" }), { wrapper: Providers });
+  const { result } = renderHook(() => useSitesQuery({ page: "1", size: "2" }), { wrapper: Providers });
 
   await waitFor(() => expect(result.current.isFetchedAfterMount).toBe(true));
 
@@ -35,7 +35,7 @@ it("should return sites", async () => {
 });
 
 it("should return tokens", async () => {
-  const { result } = renderHook(() => useTokensQuery({ page: "0", size: "2" }), { wrapper: Providers });
+  const { result } = renderHook(() => useTokensQuery({ page: "1", size: "2" }), { wrapper: Providers });
 
   await waitFor(() => expect(result.current.isFetchedAfterMount).toBe(true));
 

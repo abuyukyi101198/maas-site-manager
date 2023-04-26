@@ -56,8 +56,8 @@ export const useRequestsQuery = ({ page, size }: GetEnrollmentRequestsQueryParam
 
 export const useRequestsCountQuery = () =>
   useQuery<EnrollmentRequestsQueryResult>({
-    queryKey: ["requests", "0", "1"],
-    queryFn: () => getEnrollmentRequests({ page: "0", size: "1" }),
+    queryKey: ["requests", "1", "1"],
+    queryFn: () => getEnrollmentRequests({ page: "1", size: "1" }),
     keepPreviousData: true,
     refetchInterval: defaultRefetchInterval,
   });

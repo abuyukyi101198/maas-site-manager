@@ -88,7 +88,7 @@ const SitesTable = ({
       },
       {
         id: "connection",
-        accessorFn: createAccessor(["connection", "last_seen"]),
+        accessorFn: createAccessor("stats"),
         header: () => (
           <>
             <div className="connection__text">connection</div>
@@ -96,13 +96,13 @@ const SitesTable = ({
           </>
         ),
         cell: ({ getValue }) => {
-          const { connection, last_seen } = getValue();
-          return connection ? <ConnectionInfo connection={connection} lastSeen={last_seen} /> : null;
+          const { stats } = getValue();
+          return stats ? <ConnectionInfo connection={stats.connection} lastSeen={stats.last_seen} /> : null;
         },
       },
       {
         id: "address",
-        accessorFn: createAccessor("address"),
+        accessorFn: createAccessor(["country", "city", "zip", "street"]),
         header: () => (
           <>
             <div>country</div>
@@ -110,11 +110,10 @@ const SitesTable = ({
           </>
         ),
         cell: ({ getValue }) => {
-          const { address } = getValue();
-          const { countrycode, city, zip, street } = address || {};
+          const { country, city, zip, street } = getValue();
           return (
             <>
-              <div>{countrycode ? getCountryName(countrycode) : ""}</div>
+              <div>{country ? getCountryName(country) : ""}</div>
               <div className="u-text--muted">
                 {street}, {city}, {zip}
               </div>

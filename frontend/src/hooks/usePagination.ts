@@ -3,7 +3,7 @@ import { useState } from "react";
 import useDebouncedValue from "./useDebouncedValue";
 
 function usePagination(pageSize: number, totalItems: number) {
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [size, setSize] = useState(pageSize);
   const debouncedPage = useDebouncedValue(page);
 
@@ -13,10 +13,10 @@ function usePagination(pageSize: number, totalItems: number) {
   };
 
   const handlePreviousClick = () => {
-    setPage((prev) => (prev === 0 ? 0 : prev - 1));
+    setPage((prev) => (prev === 1 ? 1 : prev - 1));
   };
 
-  const resetPageCount = () => setPage(0);
+  const resetPageCount = () => setPage(1);
 
   const handlePageSizeChange = (size: number) => {
     setSize(size);

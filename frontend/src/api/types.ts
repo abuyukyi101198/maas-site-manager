@@ -18,12 +18,10 @@ export type Site = {
   url: string; // <full URL including protocol>,
   connection: Stats["connection"];
   last_seen: string; // <ISO 8601 date>,
-  address: {
-    countrycode: string; // <alpha2 country code>,
-    city: string;
-    zip: string;
-    street: string;
-  };
+  country: string; // <alpha2 country code>,
+  city: string;
+  zip: string;
+  street: string;
   timezone: string; // IANA time zone name,
   stats: Stats;
 };
@@ -40,7 +38,7 @@ export type SitesQueryResult = PaginatedQueryResult<Site>;
 export type Token = {
   id: string;
   site_id: Site["id"] | null;
-  token: string;
+  value: string;
   expires: string; //<ISO 8601 date string>,
   created: string; //<ISO 8601 date string>
 };

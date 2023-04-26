@@ -52,10 +52,10 @@ const TokensTable = ({
         id: "select",
         accessorKey: "token",
         header: ({ table }) => <SelectAllCheckbox table={table} />,
-        cell: ({ row, getValue }: { row: Row<Token>; getValue: Getter<Token["token"]> }) => (
+        cell: ({ row, getValue }: { row: Row<Token>; getValue: Getter<Token["value"]> }) => (
           <label className="p-checkbox--inline">
             <input
-              aria-label={`select ${getValue()}`}
+              aria-label={getValue()}
               className="p-checkbox__input"
               type="checkbox"
               {...{
@@ -71,13 +71,13 @@ const TokensTable = ({
       {
         id: "token",
         header: () => <div>Token</div>,
-        accessorFn: createAccessor("token"),
+        accessorFn: createAccessor("value"),
         cell: ({ getValue }) => {
-          const { token } = getValue();
+          const { value } = getValue();
           return (
-            <div className="token-cell" onClick={() => handleTokenCopy(token!)}>
-              <span className="token-text">{token}</span>
-              <CopyButton isCopied={isTokenCopied(token!)} value={token || ""} />
+            <div className="token-cell" onClick={() => handleTokenCopy(value!)}>
+              <span className="token-text">{value}</span>
+              <CopyButton isCopied={isTokenCopied(value!)} value={value || ""} />
             </div>
           );
         },

@@ -94,7 +94,7 @@ it("displays correct local time", () => {
 });
 
 it("displays full name of the country", () => {
-  const item = siteFactory.build({ address: { countrycode: "GB" } });
+  const item = siteFactory.build({ country: "GB" });
   renderWithMemoryRouter(
     <SitesTable
       data={sitesQueryResultFactory.build({ items: [item], total: 1, page: 1, size: 1 })}
