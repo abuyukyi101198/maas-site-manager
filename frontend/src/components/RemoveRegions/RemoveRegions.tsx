@@ -60,6 +60,7 @@ const RemoveRegions = () => {
       initialValues={initialValues}
       onSubmit={handleSubmit}
       validate={createHandleValidate({ expectedConfirmTextValue })}
+      validateOnBlur={false}
     >
       {({ isSubmitting, errors, touched, isValid, dirty }) => (
         <Form aria-labelledby={headingId} className="tokens-create" noValidate>

@@ -19,10 +19,18 @@ it("if the correct phrase has been entered the 'Remove' button becomes enabled."
   expect(screen.getByRole("button", { name: /Remove/i })).toBeEnabled();
 });
 
-it("if the confirmation string is not correct and the user unfoxuses the input field a error state is shown.", async () => {
+it("if the confirmation string is not correct and the user unfocuses the input field a error state is shown.", async () => {
   render(<RemoveRegions />);
   expect(screen.getByRole("button", { name: /Remove/i })).toBeDisabled();
   await userEvent.type(screen.getByRole("textbox"), "incorrect string{tab}");
   expect(screen.getByText(/Confirmation string is not correct/i)).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: /Remove/i })).toBeDisabled();
+});
+
+it("does not display error message on blur if the value has not chagned", async () => {
+  render(<RemoveRegions />);
+  expect(screen.getByRole("button", { name: /Remove/i })).toBeDisabled();
+  await userEvent.type(screen.getByRole("textbox"), "{tab}");
+  expect(screen.queryByText(/Confirmation string is not correct/i)).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: /Remove/i })).toBeDisabled();
 });

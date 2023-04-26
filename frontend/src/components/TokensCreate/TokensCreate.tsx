@@ -1,6 +1,7 @@
 import { useId } from "react";
 
 import { Button, Input, Label, Notification } from "@canonical/react-components";
+import type { FormikHelpers } from "formik";
 import { Field, Formik, Form } from "formik";
 import * as Yup from "yup";
 
@@ -44,7 +45,7 @@ const TokensCreate = () => {
   const { setSidebar } = useAppContext();
   const handleSubmit = async (
     { amount, expires }: TokensCreateFormValues,
-    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
+    { setSubmitting }: FormikHelpers<TokensCreateFormValues>,
   ) => {
     await tokensMutation.mutateAsync({
       amount: Number(amount),
@@ -64,7 +65,12 @@ const TokensCreate = () => {
       {tokensMutation.isError && (
         <Notification severity="negative">There was an error generating the token(s).</Notification>
       )}
-      <Formik initialValues={initialValues} onSubmit={handleSubmit} validationSchema={TokensCreateSchema}>
+      <Formik
+        initialValues={initialValues}
+        onSubmit={handleSubmit}
+        validateOnBlur={false}
+        validationSchema={TokensCreateSchema}
+      >
         {({ isSubmitting, errors, touched, isValid, dirty }) => (
           <Form aria-labelledby={headingId} className="tokens-create" noValidate>
             <Label htmlFor={amountId}>Amount of tokens to generate</Label>
