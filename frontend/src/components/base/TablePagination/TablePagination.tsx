@@ -34,10 +34,9 @@ const TablePagination = ({
         setError(`${valueAsNumber} is not a valid page`);
       } else {
         setError("");
-        setCurrentPage(valueAsNumber - 1);
+        setCurrentPage(valueAsNumber);
       }
     } else {
-      setPageNumber(undefined);
       setError("Enter a page number.");
     }
   };

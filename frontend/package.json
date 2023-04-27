@@ -8,6 +8,8 @@
     "test": "vitest",
     "coverage": "vitest run --coverage",
     "preview": "vite preview",
+    "playwright-test": "playwright test",
+    "playwright-ui": "playwright test --ui",
     "lint": "npmPkgJsonLint . && tsc && eslint . --ext .ts,.tsx",
     "lint-fix": "eslint . --ext .ts,.tsx --fix",
     "upgrade-all": "yarn-upgrade-all -E"
