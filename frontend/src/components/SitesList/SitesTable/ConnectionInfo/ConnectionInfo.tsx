@@ -31,7 +31,6 @@ const ConnectionInfo = ({ connection, lastSeen }: ConnectionInfoProps) => {
   return (
     <>
       <TooltipButton
-        iconName=""
         message={
           connection === "unknown" ? (
             "Haven't received a heartbeat from this region yet"

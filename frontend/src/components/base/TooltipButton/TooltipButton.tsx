@@ -15,7 +15,7 @@ const TooltipButton = ({
   "aria-label": ariaLabel,
   buttonProps,
   children,
-  iconName = "information",
+  iconName,
   iconProps,
   message,
   ...tooltipProps

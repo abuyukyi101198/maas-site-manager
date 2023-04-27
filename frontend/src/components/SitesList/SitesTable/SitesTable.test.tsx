@@ -127,3 +127,33 @@ it("displays correct number of deployed machines", () => {
 
   expect(screen.getByText("100 of 1000 deployed")).toBeInTheDocument();
 });
+
+it("if name is not unique a warning is displayed.", async () => {
+  const itemUnique = siteFactory.build({
+    name_unique: true,
+  });
+  const { rerender } = renderWithMemoryRouter(
+    <SitesTable
+      data={sitesQueryResultFactory.build({ items: [itemUnique], total: 1, page: 1, size: 1 })}
+      isFetchedAfterMount={true}
+      isLoading={false}
+      setSearchText={() => {}}
+    />,
+  );
+
+  expect(screen.queryByRole("button", { name: /warning - name is not unique/i })).not.toBeInTheDocument();
+
+  const itemNonUnique = siteFactory.build({
+    name_unique: false,
+  });
+  rerender(
+    <SitesTable
+      data={sitesQueryResultFactory.build({ items: [itemNonUnique], total: 1, page: 1, size: 1 })}
+      isFetchedAfterMount={true}
+      isLoading={false}
+      setSearchText={() => {}}
+    />,
+  );
+
+  expect(screen.getByRole("button", { name: /warning - name is not unique/i })).toBeInTheDocument();
+});

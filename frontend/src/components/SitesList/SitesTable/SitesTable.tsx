@@ -14,6 +14,7 @@ import type { SitesQueryResult } from "@/api/types";
 import ExternalLink from "@/components/ExternalLink";
 import NoRegions from "@/components/NoRegions";
 import SelectAllCheckbox from "@/components/SelectAllCheckbox";
+import TooltipButton from "@/components/base/TooltipButton/TooltipButton";
 import { isDev } from "@/constants";
 import { useAppContext } from "@/context";
 import type { UseSitesQueryResult } from "@/hooks/api";
@@ -73,19 +74,37 @@ const SitesTable = ({
       },
       {
         id: "name",
-        accessorFn: createAccessor(["name", "url"]),
+        accessorFn: createAccessor(["name", "url", "name_unique"]),
         header: () => (
           <>
             <div>Name</div>
             <div className="u-text--muted">URL</div>
           </>
         ),
-        cell: ({ getValue }) => (
-          <>
-            <div>{getValue().name}</div>
-            <ExternalLink to={getValue().url || ""}>{getValue().url}</ExternalLink>
-          </>
-        ),
+        cell: ({ getValue }) => {
+          return (
+            <>
+              <div>
+                {getValue().name}&nbsp;
+                {!getValue().name_unique ? (
+                  <TooltipButton
+                    buttonProps={{ "aria-label": "warning - name is not unique" }}
+                    iconName="warning"
+                    iconProps={{ className: "u-no-margin--left" }}
+                    message={
+                      <>
+                        This MAAS name is not unique in Site Manager.
+                        <br />
+                        You can change this name in the MAAS region itself.
+                      </>
+                    }
+                  ></TooltipButton>
+                ) : null}
+              </div>
+              <ExternalLink to={getValue().url || ""}>{getValue().url}</ExternalLink>
+            </>
+          );
+        },
       },
       {
         id: "connection",

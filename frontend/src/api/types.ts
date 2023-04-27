@@ -15,6 +15,7 @@ export type Stats = {
 export type Site = {
   id: string;
   name: string;
+  name_unique: boolean;
   url: string; // <full URL including protocol>,
   country: string; // <alpha2 country code>,
   city: string;

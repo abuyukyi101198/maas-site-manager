@@ -39,6 +39,7 @@ export const siteFactory = Factory.define<Site>(({ sequence }) => {
   return {
     id: `${sequence}`,
     name,
+    name_unique: chance.bool(),
     url: `http://${name}.${chance.tld()}`,
     country: chance.country(), // <alpha2 country code>,
     city: chance.city(),
