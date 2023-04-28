@@ -1,6 +1,7 @@
 import * as Sentry from "@sentry/browser";
 
 import api from "./api";
+import type { Token } from "./types";
 import urls from "./urls";
 
 import { customParamSerializer } from "@/utils";
@@ -50,10 +51,10 @@ export const getSites = async (params: GetSitesQueryParams, queryText?: string) 
 export type PostTokensData = {
   amount: number;
   name?: string;
-  expires: string; // <ISO 8601 date string>,
+  duration: string; // <ISO 8601 duration string>,
 };
 export const postTokens = async (data: PostTokensData) => {
-  if (!data?.amount || !data?.expires) {
+  if (!data?.amount || !data?.duration) {
     throw Error("Missing required fields");
   }
   try {
@@ -74,7 +75,7 @@ export const getTokens = async (params: GetTokensQueryParams) => {
   }
 };
 
-export const deleteTokens = async (data: string[]) => {
+export const deleteTokens = async (data: Token["id"][]) => {
   if (data.length === 0) {
     throw Error("No tokens selected");
   }

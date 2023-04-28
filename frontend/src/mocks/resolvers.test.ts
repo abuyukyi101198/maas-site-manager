@@ -1,7 +1,7 @@
 import axios from "axios";
 
 import urls from "@/api/urls";
-import { tokenFactory } from "@/mocks/factories";
+import { durationFactory } from "@/mocks/factories";
 import { createMockTokensResolver } from "@/mocks/resolvers";
 import { createMockPostServer } from "@/mocks/server";
 
@@ -18,11 +18,9 @@ afterAll(() => {
 });
 
 describe("mock post tokens server", () => {
-  it("returns list of tokens based on the request data", async () => {
+  it("returns list of tokens", async () => {
     const amount = 1;
-    const { expires } = tokenFactory.build({ expires: "2021-01-01" });
-    const result = await axios.post(urls.tokens, { expires, amount });
+    const result = await axios.post(urls.tokens, { duration: durationFactory.build(), amount });
     expect(result.data.items).toHaveLength(amount);
-    expect(result.data.items[0]).toEqual(expect.objectContaining({ expires }));
   });
 });

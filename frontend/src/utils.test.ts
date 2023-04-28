@@ -1,4 +1,18 @@
-import { customParamSerializer, getTimezoneUTCString, parseSearchTextToQueryParams, getTimeInTimezone } from "./utils";
+import {
+  customParamSerializer,
+  getTimezoneUTCString,
+  parseSearchTextToQueryParams,
+  getTimeInTimezone,
+  formatDistanceToNow,
+} from "./utils";
+
+beforeEach(() => {
+  vi.useFakeTimers();
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 describe("parseSearchTextToQueryParams tests", () => {
   it('should modify search params from "label:value" to "label=value"', () => {
@@ -56,6 +70,20 @@ describe("getTimeInTimezone", () => {
   ].forEach(([timezone, expected]) => {
     it(`returns ${expected} for ${timezone}`, () => {
       const result = getTimeInTimezone(new Date("2000-01-01T12:00:00Z"), timezone);
+      expect(result).toBe(expected);
+    });
+  });
+});
+
+describe("formatDistanceToNow", () => {
+  const date = new Date("Fri Apr 21 2023 12:00:00 GMT+0100 (GMT)");
+  [
+    ["2023-04-21T10:30:00.000Z", "30 minutes ago"],
+    ["2023-04-21T11:15:00.000Z", "in 15 minutes"],
+  ].forEach(([time, expected]) => {
+    it(`returns ${expected} time distance for ${time}`, () => {
+      vi.setSystemTime(date);
+      const result = formatDistanceToNow(time);
       expect(result).toBe(expected);
     });
   });

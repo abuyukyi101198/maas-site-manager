@@ -48,7 +48,7 @@ const TokensList = () => {
   }, [data]);
 
   const handleTokenDelete = () => {
-    const selectedIds = isSuccess ? Object.keys(rowSelection).map((_, idx) => data.items[idx].id) : [];
+    const selectedIds = isSuccess ? Object.keys(rowSelection).map((_, idx) => Number(data.items[idx].id)) : [];
     tokensDeleteMutation.mutate(selectedIds);
   };
 

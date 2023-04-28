@@ -1,5 +1,5 @@
 import Chance from "chance";
-import { sub } from "date-fns";
+import { sub, add } from "date-fns";
 import { Factory } from "fishery";
 import { uniqueNamesGenerator, adjectives, colors, animals } from "unique-names-generator";
 
@@ -58,14 +58,16 @@ export const paginatedQueryResultFactory = <T extends unknown>() =>
 export const enrollmentRequestQueryResultFactory = paginatedQueryResultFactory<EnrollmentRequest>();
 export const sitesQueryResultFactory = paginatedQueryResultFactory<Site>();
 
+export const durationFactory = Factory.define<string>(() => "P7DT0H0M0S");
 export const tokenFactory = Factory.define<Token>(({ sequence }) => {
+  const now = new Date();
   const chance = new Chance(`maas-${sequence}`);
   return {
-    id: `${sequence}`,
+    id: sequence,
     site_id: `${chance.integer({ min: 0, max: 100 })}`,
     value: chance.hash({ length: 64 }),
-    expires: new Date(chance.date({ year: 2024 })).toISOString(), //<ISO 8601 date string>,
-    created: new Date(chance.date({ year: 2023 })).toISOString(), //<ISO 8601 date string>
+    expired: new Date(chance.date({ min: add(now, { seconds: 1 }), max: add(now, { days: 1 }) })).toISOString(), //<ISO 8601 date string>,
+    created: new Date(chance.date({ min: sub(now, { minutes: 15 }), max: now })).toISOString(), //<ISO 8601 date string>
   };
 });
 

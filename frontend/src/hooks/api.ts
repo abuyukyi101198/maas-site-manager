@@ -1,5 +1,5 @@
 import type { UseMutationOptions, UseMutationResult } from "@tanstack/react-query";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 
 import type {
@@ -18,7 +18,13 @@ import {
   getSites,
   getTokens,
 } from "@/api/handlers";
-import type { SitesQueryResult, PostTokensResult, EnrollmentRequestsQueryResult, AccessToken } from "@/api/types";
+import type {
+  SitesQueryResult,
+  PostTokensResult,
+  EnrollmentRequestsQueryResult,
+  AccessToken,
+  Token,
+} from "@/api/types";
 
 export type UseSitesQueryResult = ReturnType<typeof useSitesQuery>;
 
@@ -40,10 +46,25 @@ export const useTokensQuery = ({ page, size }: GetTokensQueryParams) =>
     keepPreviousData: true,
   });
 
-export const useTokensMutation = () => useMutation(postTokens);
+export const useTokensCreateMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation(postTokens, {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tokens"] });
+    },
+  });
+};
 
-export const useDeleteTokensMutation = (options: UseMutationOptions<unknown, unknown, string[], unknown>) =>
-  useMutation(deleteTokens, options);
+export const useDeleteTokensMutation = (options: UseMutationOptions<unknown, unknown, Token["id"][], unknown>) => {
+  const queryClient = useQueryClient();
+  return useMutation(deleteTokens, {
+    ...options,
+    onSuccess: (...args) => {
+      options?.onSuccess?.(...args);
+      queryClient.invalidateQueries({ queryKey: ["tokens"] });
+    },
+  });
+};
 
 export type UseEnrollmentRequestsQueryResult = ReturnType<typeof useRequestsQuery>;
 export const useRequestsQuery = ({ page, size }: GetEnrollmentRequestsQueryParams) =>
@@ -64,7 +85,15 @@ export const useRequestsCountQuery = () =>
 
 export const useEnrollmentRequestsMutation = (
   options: UseMutationOptions<unknown, unknown, PostEnrollmentRequestsData, unknown>,
-) => useMutation(patchEnrollmentRequests, options);
+) => {
+  const queryClient = useQueryClient();
+  return useMutation(patchEnrollmentRequests, {
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["requests"] });
+      options?.onSuccess?.(...args);
+    },
+  });
+};
 export type ApiError = AxiosError<{
   detail?: string | Array<{ loc: string[]; msg: string; type: string }>;
 }>;

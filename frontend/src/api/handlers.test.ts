@@ -2,6 +2,7 @@ import { setupServer } from "msw/node";
 
 import { patchEnrollmentRequests, postTokens } from "./handlers";
 
+import { durationFactory } from "@/mocks/factories";
 import {
   postTokens as postTokensResolver,
   patchEnrollmentRequests as postEnrollmentRequestsResolver,
@@ -23,7 +24,7 @@ describe("postTokens handler", () => {
   it("requires name, amount and expiration time", async () => {
     // @ts-expect-error
     await expect(postTokens({})).rejects.toThrowError();
-    await expect(postTokens({ amount: 1, expires: "P0Y0M7DT0H0M0S" })).resolves.toEqual(
+    await expect(postTokens({ amount: 1, duration: durationFactory.build() })).resolves.toEqual(
       expect.objectContaining({
         items: expect.any(Array),
       }),

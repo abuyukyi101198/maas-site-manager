@@ -14,7 +14,7 @@ const tokensMutationMock = vi.fn();
 
 vi.mock("@/hooks/api", async (importOriginal) => {
   const original: typeof apiHooks = await importOriginal();
-  return { ...original, useTokensMutation: () => ({ mutateAsync: tokensMutationMock }) };
+  return { ...original, useTokensCreateMutation: () => ({ mutateAsync: tokensMutationMock }) };
 });
 
 beforeAll(() => {
@@ -67,7 +67,7 @@ it("can generate enrolment tokens", async () => {
   expect(tokensMutationMock).toHaveBeenCalledTimes(1);
   expect(tokensMutationMock).toHaveBeenCalledWith({
     amount: 1,
-    expires: "P7DT0H0M0S",
+    duration: "P7DT0H0M0S",
   });
 });
 

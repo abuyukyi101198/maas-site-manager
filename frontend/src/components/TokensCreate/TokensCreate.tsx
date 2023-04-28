@@ -8,7 +8,7 @@ import * as Yup from "yup";
 import { humanIntervalToISODuration } from "./utils";
 
 import { useAppContext } from "@/context";
-import { useTokensMutation } from "@/hooks/api";
+import { useTokensCreateMutation } from "@/hooks/api";
 
 const initialValues = {
   amount: "",
@@ -41,18 +41,16 @@ const TokensCreate = () => {
   const headingId = useId();
   const expiresId = useId();
   const amountId = useId();
-  const tokensMutation = useTokensMutation();
+  const tokensCreateMutation = useTokensCreateMutation();
   const { setSidebar } = useAppContext();
   const handleSubmit = async (
     { amount, expires }: TokensCreateFormValues,
     { setSubmitting }: FormikHelpers<TokensCreateFormValues>,
   ) => {
-    await tokensMutation.mutateAsync({
+    await tokensCreateMutation.mutateAsync({
       amount: Number(amount),
-      expires: humanIntervalToISODuration(expires) as string,
+      duration: humanIntervalToISODuration(expires) as string,
     });
-    // TODO: update the tokens list once fetching tokens from API is implemented
-    // https://warthogs.atlassian.net/browse/MAASENG-1474
     setSubmitting(false);
     setSidebar(null);
   };
@@ -62,7 +60,7 @@ const TokensCreate = () => {
       <h3 className="tokens-create__heading p-heading--4" id={headingId}>
         Generate new enrolment tokens
       </h3>
-      {tokensMutation.isError && (
+      {tokensCreateMutation.isError && (
         <Notification severity="negative">There was an error generating the token(s).</Notification>
       )}
       <Formik
@@ -104,7 +102,7 @@ const TokensCreate = () => {
               </Button>
               <Button
                 appearance="positive"
-                disabled={!dirty || !isValid || tokensMutation.isLoading || isSubmitting}
+                disabled={!dirty || !isValid || tokensCreateMutation.isLoading || isSubmitting}
                 type="submit"
               >
                 Generate tokens

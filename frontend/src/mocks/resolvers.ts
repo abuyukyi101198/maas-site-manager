@@ -49,9 +49,9 @@ export const createMockSitesResolver =
 type TokensResponseResolver = ResponseResolver<RestRequest<PostTokensData>, typeof restContext>;
 export const createMockTokensResolver = (): TokensResponseResolver => async (req, res, ctx) => {
   let items;
-  const { amount, expires } = await req.json();
-  if (amount && expires) {
-    items = Array(amount).fill(tokenFactory.build({ expires }));
+  const { amount, duration } = await req.json();
+  if (amount && duration) {
+    items = Array(amount).fill(tokenFactory.build());
   } else {
     return res(ctx.status(400));
   }

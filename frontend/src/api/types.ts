@@ -35,10 +35,10 @@ export type PaginatedQueryResult<D extends unknown> = {
 export type SitesQueryResult = PaginatedQueryResult<Site>;
 
 export type Token = {
-  id: string;
+  id: number;
   site_id: Site["id"] | null;
   value: string;
-  expires: string; //<ISO 8601 date string>,
+  expired: string; //<ISO 8601 date string>,
   created: string; //<ISO 8601 date string>
 };
 export type PostTokensResult = PaginatedQueryResult<Token>;

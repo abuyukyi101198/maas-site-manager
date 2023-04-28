@@ -2,7 +2,6 @@ import { useCallback, useMemo, useState } from "react";
 
 import type { ColumnDef, Column, Row, Getter } from "@tanstack/react-table";
 import { flexRender, useReactTable, getCoreRowModel } from "@tanstack/react-table";
-import { format, formatDistanceStrict } from "date-fns";
 import pick from "lodash/fp/pick";
 
 import type { Token } from "@/api/types";
@@ -11,7 +10,7 @@ import CopyButton from "@/components/base/CopyButton";
 import TooltipButton from "@/components/base/TooltipButton";
 import { useAppContext } from "@/context";
 import type { useTokensQueryResult } from "@/hooks/api";
-import { copyToClipboard } from "@/utils";
+import { copyToClipboard, formatDistanceToNow, formatUTCDateString } from "@/utils";
 
 const createAccessor =
   <T, K extends keyof T>(keys: K[] | K) =>
@@ -84,16 +83,13 @@ const TokensTable = ({
       },
       {
         id: "expirationTime",
-        accessorFn: createAccessor("expires"),
+        accessorFn: createAccessor("expired"),
         header: () => <div>Time until expiration</div>,
         cell: ({ getValue }) => {
-          const { expires } = getValue();
+          const { expired } = getValue();
           return (
-            <TooltipButton
-              message={expires ? `${format(new Date(expires), "yyyy-MM-dd HH:mm")} (UTC)` : null}
-              position="btm-center"
-            >
-              {expires ? formatDistanceStrict(new Date(expires), new Date()) : null}
+            <TooltipButton message={expired ? `${formatUTCDateString(expired)} (UTC)` : null} position="btm-center">
+              {expired ? formatDistanceToNow(expired) : null}
             </TooltipButton>
           );
         },
@@ -104,7 +100,7 @@ const TokensTable = ({
         header: () => <div>Created (UTC)</div>,
         cell: ({ getValue }) => {
           const { created } = getValue();
-          return <div>{created ? format(new Date(created), "yyyy-MM-dd HH:mm") : null}</div>;
+          return <div>{created ? formatUTCDateString(created) : null}</div>;
         },
       },
     ],
@@ -119,7 +115,7 @@ const TokensTable = ({
     state: {
       rowSelection,
     },
-    getRowId: (row) => row.id,
+    getRowId: (row) => `${row.id}`,
     manualPagination: true,
     enableRowSelection: true,
     getCoreRowModel: getCoreRowModel(),
