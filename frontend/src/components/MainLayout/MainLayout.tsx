@@ -1,18 +1,18 @@
 import type { PropsWithChildren } from "react";
 import { useEffect } from "react";
 
-import { Col, Row, Strip, useOnEscapePressed, usePrevious } from "@canonical/react-components";
+import { Col, Row, useOnEscapePressed, usePrevious } from "@canonical/react-components";
 import classNames from "classnames";
 import { matchPath, Outlet, useLocation } from "react-router-dom";
+
+import SecondaryNavigation from "../SecondaryNavigation";
 
 import { routesConfig } from "@/base/routesConfig";
 import type { RoutePath } from "@/base/routesConfig";
 import DocumentTitle from "@/components/DocumentTitle/DocumentTitle";
 import Navigation from "@/components/Navigation";
-import NavigationBanner from "@/components/Navigation/NavigationBanner";
 import RemoveRegions from "@/components/RemoveRegions";
-import SecondaryNavigation from "@/components/SecondaryNavigation";
-import { useAppContext } from "@/context";
+import { useAppContext, useAuthContext } from "@/context";
 import TokensCreate from "@/pages/tokens/create";
 
 export const sidebarLabels: Record<"removeRegions" | "createToken", string> = {
@@ -45,35 +45,12 @@ const getPageTitle = (pathname: RoutePath) => {
   return title ? `${title} | MAAS Site Manager` : "MAAS Site Manager";
 };
 
-const LoginLayout: React.FC = () => {
-  const { pathname } = useLocation();
-  return (
-    <div className="l-application">
-      <header className="l-navigation-bar is-pinned">
-        <div className="p-panel is-dark">
-          <div className="p-panel__header">
-            <NavigationBanner />
-          </div>
-        </div>
-      </header>
-      <main className="l-main">
-        <h1 className="u-hide">{getPageTitle(pathname as RoutePath)}</h1>
-        <div className="l-main__content">
-          <Strip element="section" includeCol={false} shallow>
-            <Col size={12}>
-              <Outlet />
-            </Col>
-          </Strip>
-        </div>
-      </main>
-    </div>
-  );
-};
-
 const MainLayout: React.FC = () => {
   const { sidebar, setSidebar } = useAppContext();
   const { pathname } = useLocation();
   const previousPathname = usePrevious(pathname);
+  const { status } = useAuthContext();
+  const isLoggedIn = status === "authenticated";
 
   // close any open panels on route change
   useEffect(() => {
@@ -87,7 +64,7 @@ const MainLayout: React.FC = () => {
   return (
     <>
       <div className="l-application">
-        <Navigation />
+        <Navigation isLoggedIn={isLoggedIn} />
         <main className="l-main is-maas-site-manager">
           <h1 className="u-visually-hidden">{getPageTitle(pathname as RoutePath)}</h1>
           <div className={classNames("l-main__nav", { "is-open": isSideNavVisible })}>
@@ -119,7 +96,7 @@ const Layout = () => {
   return (
     <>
       <DocumentTitle>{getPageTitle(pathname as RoutePath)}</DocumentTitle>
-      {pathname === "/login" ? <LoginLayout /> : <MainLayout />}
+      <MainLayout />
     </>
   );
 };

@@ -32,10 +32,20 @@ export const navItemsBottom: NavLink[] = [
   { external: true, icon: "submit-bug", label: "Report a bug", url: "" }, // TODO: Replace this with actual link once known
 ];
 
-const Navigation = (): JSX.Element => {
+type NavProps = {
+  isLoggedIn: boolean;
+};
+
+const Navigation = ({ isLoggedIn }: NavProps): JSX.Element => {
   const [isCollapsed, setIsCollapsed] = useLocalStorageState<boolean>("appSideNavIsCollapsed", { defaultValue: true });
   const location = useLocation();
   const path = location.pathname;
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setIsCollapsed(true);
+    }
+  }, [isLoggedIn, setIsCollapsed]);
 
   return (
     <>
@@ -59,7 +69,10 @@ const Navigation = (): JSX.Element => {
       </header>
       <nav
         aria-label="main"
-        className={classNames("l-navigation", { "is-collapsed": isCollapsed, "is-pinned": !isCollapsed })}
+        className={classNames("l-navigation", {
+          "is-collapsed": isCollapsed,
+          "is-pinned": !isCollapsed,
+        })}
       >
         <div className="l-navigation__drawer">
           <div className="p-panel is-dark u-flex u-flex--column u-flex--justify-between">
@@ -71,11 +84,13 @@ const Navigation = (): JSX.Element => {
                   </div>
                 </NavigationBanner>
               </div>
-              <div className="p-panel__content">
-                <NavigationList hasIcons isDark items={navItems} path={path} />
-                <NavigationList hasIcons isDark items={settingsNavItems} path={path} />
-                <NavigationList hasIcons isDark items={navItemsAccount} path={path} />
-              </div>
+              {isLoggedIn && (
+                <div className="p-panel__content">
+                  <NavigationList hasIcons isDark items={navItems} path={path} />
+                  <NavigationList hasIcons isDark items={settingsNavItems} path={path} />
+                  <NavigationList hasIcons isDark items={navItemsAccount} path={path} />
+                </div>
+              )}
             </span>
             <NavigationList hasIcons hideDivider isDark items={navItemsBottom} path={path} />
           </div>
