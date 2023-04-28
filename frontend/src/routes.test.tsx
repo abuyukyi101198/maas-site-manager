@@ -1,8 +1,7 @@
-import { createMemoryRouter, RouterProvider } from "react-router-dom";
-
 import { allResolvers } from "./mocks/resolvers";
 
-import { routesConfig } from "@/base/routesConfig";
+import { pages } from "@/base/routesConfig";
+import { createMemoryRouter, RouterProvider } from "@/router";
 import routes from "@/routes";
 import { render, screen, waitFor, setupServer } from "@/test-utils";
 
@@ -29,7 +28,7 @@ describe("router", () => {
     await waitFor(() => expect(router.state.location.pathname).toEqual("/sites"));
   });
 
-  Object.values(routesConfig).forEach(({ title, path }) => {
+  pages.forEach(({ title, path }) => {
     it(`displays correct document title for ${title} page`, async () => {
       const router = createMemoryRouter(routes, { initialEntries: [path], initialIndex: 0 });
       render(<RouterProvider router={router} />);

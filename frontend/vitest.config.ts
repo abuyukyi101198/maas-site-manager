@@ -5,7 +5,7 @@ import * as path from "path";
 export default defineConfig({
   plugins: [
     AutoImport({
-      imports: ["react", "react-router-dom", "vitest"],
+      imports: ["react", "vitest"],
       dts: true,
       eslintrc: {
         enabled: true,

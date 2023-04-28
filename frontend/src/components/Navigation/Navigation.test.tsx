@@ -1,4 +1,4 @@
-import Navigation, { navItems, navItemsBottom, settingsNavItems } from "./Navigation";
+import Navigation, { navItemsBottom, navItems, settingsNavItems } from "./Navigation";
 
 import { renderWithMemoryRouter, screen, userEvent } from "@/test-utils";
 
@@ -15,28 +15,6 @@ describe("Navigation", () => {
       const currentMenuItem = screen.getByRole("link", { current: "page", name: label });
       expect(currentMenuItem).toBeInTheDocument();
     });
-  });
-
-  // TODO: enable once side navigation secondary panel is implemented
-  // https://warthogs.atlassian.net/browse/MAASENG-1508
-  it.skip("highlights 'Settings' when active", () => {
-    const { rerender } = renderWithMemoryRouter(<Navigation isLoggedIn />);
-
-    let currentMenuItem = screen.getAllByRole("link", { current: "page" })[0];
-    expect(currentMenuItem).toBeInTheDocument();
-    expect(currentMenuItem).toHaveTextContent("Settings");
-
-    rerender(<Navigation isLoggedIn />);
-
-    currentMenuItem = screen.getAllByRole("link", { current: "page" })[0];
-    expect(currentMenuItem).toBeInTheDocument();
-    expect(currentMenuItem).toHaveTextContent("Settings");
-
-    rerender(<Navigation isLoggedIn />);
-
-    currentMenuItem = screen.getAllByRole("link", { current: "page" })[0];
-    expect(currentMenuItem).toBeInTheDocument();
-    expect(currentMenuItem).toHaveTextContent("Settings");
   });
 
   it("is collapsed by default", () => {

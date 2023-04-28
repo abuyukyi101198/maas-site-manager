@@ -1,45 +1,57 @@
 import { useId } from "react";
 
 import { Icon } from "@canonical/react-components";
-import { Link } from "react-router-dom";
 
+import type { RoutePath } from "@/base/routesConfig";
+import ExternalLink from "@/components/ExternalLink/ExternalLink";
 import type { NavLink } from "@/components/Navigation/types";
 import { isSelected } from "@/components/Navigation/utils";
+import { Link } from "@/router";
 
 type Props = {
   navLink: NavLink;
-  path: string;
+  path: RoutePath;
 };
+
+const LinkContent = ({ navLink }: { navLink: NavLink }) => (
+  <>
+    {navLink.icon ? (
+      typeof navLink.icon === "string" ? (
+        <Icon className="p-side-navigation__icon" light name={navLink.icon} />
+      ) : (
+        <>{navLink.icon}</>
+      )
+    ) : null}
+    <span className="p-side-navigation__label">{navLink.label}</span>
+  </>
+);
 
 const NavigationItem = ({ navLink, path }: Props): JSX.Element => {
   const id = useId();
+  const linkProps = {
+    className: "p-side-navigation__link",
+    id: `${navLink.label}-${id}`,
+    onClick: (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+      // removing the focus from the link element after click
+      // this allows the side navigation to collapse on mouseleave
+      event.currentTarget.blur();
+    },
+  };
+
   return (
     <li
       aria-labelledby={`${navLink.label}-${id}`}
       className={`p-side-navigation__item${isSelected(path, navLink) ? " is-selected" : ""}`}
     >
-      <Link
-        aria-current={!navLink.external && isSelected(path, navLink) ? "page" : undefined}
-        className="p-side-navigation__link"
-        id={`${navLink.label}-${id}`}
-        onClick={(event) => {
-          // removing the focus from the link element after click
-          // this allows the side navigation to collapse on mouseleave
-          event.currentTarget.blur();
-        }}
-        rel={navLink.external ? "noreferrer noopener" : ""}
-        target={navLink.external ? "_blank" : ""}
-        to={navLink.url}
-      >
-        {navLink.icon ? (
-          typeof navLink.icon === "string" ? (
-            <Icon className="p-side-navigation__icon" light name={navLink.icon} />
-          ) : (
-            <>{navLink.icon}</>
-          )
-        ) : null}
-        <span className="p-side-navigation__label">{navLink.label}</span>
-      </Link>
+      {!navLink.external ? (
+        <Link {...linkProps} aria-current={isSelected(path, navLink) ? "page" : undefined} to={navLink.url}>
+          <LinkContent navLink={navLink} />
+        </Link>
+      ) : (
+        <ExternalLink {...linkProps} to={navLink.url}>
+          <LinkContent navLink={navLink} />
+        </ExternalLink>
+      )}
     </li>
   );
 };

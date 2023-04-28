@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 
 import { Accordion, Button, Col, Row, Notification } from "@canonical/react-components";
 import pluralize from "pluralize";
-import { Link } from "react-router-dom";
 
 import TokensTable from "./components/TokensTable/TokensTable";
 
@@ -13,6 +12,7 @@ import PaginationBar from "@/components/base/PaginationBar";
 import { useAppContext } from "@/context";
 import { useDeleteTokensMutation, useTokensQuery } from "@/hooks/api";
 import usePagination from "@/hooks/usePagination";
+import { Link } from "@/router";
 
 const DEFAULT_PAGE_SIZE = 50;
 

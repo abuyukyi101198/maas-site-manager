@@ -3,7 +3,6 @@ import { useEffect } from "react";
 
 import { Col, Row, useOnEscapePressed, usePrevious } from "@canonical/react-components";
 import classNames from "classnames";
-import { matchPath, Outlet, useLocation } from "react-router-dom";
 
 import SecondaryNavigation from "../SecondaryNavigation";
 
@@ -14,6 +13,7 @@ import Navigation from "@/components/Navigation";
 import RemoveRegions from "@/components/RemoveRegions";
 import { useAppContext, useAuthContext } from "@/context";
 import TokensCreate from "@/pages/tokens/create";
+import { matchPath, Outlet, useLocation } from "@/router";
 
 export const sidebarLabels: Record<"removeRegions" | "createToken", string> = {
   removeRegions: "Remove regions",
@@ -59,7 +59,7 @@ const MainLayout: React.FC = () => {
     }
   }, [pathname, previousPathname, setSidebar]);
 
-  const isSideNavVisible = matchPath("settings/*", pathname);
+  const isSideNavVisible = matchPath("/settings/*", pathname);
 
   return (
     <>

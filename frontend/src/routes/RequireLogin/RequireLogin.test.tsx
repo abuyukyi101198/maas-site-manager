@@ -1,14 +1,13 @@
-import * as reactRouter from "react-router";
-
 import RequireLogin from "./RequireLogin";
 
 import api from "@/api";
 import { AuthContextProvider } from "@/context";
+import * as router from "@/router";
 import { renderWithMemoryRouter } from "@/test-utils";
 
 it("should redirect to login page if user is not authenticated", () => {
   const navigate = vi.fn();
-  vi.spyOn(reactRouter, "useNavigate").mockImplementation(() => navigate);
+  vi.spyOn(router, "useNavigate").mockImplementation(() => navigate);
   renderWithMemoryRouter(
     <AuthContextProvider apiClient={api}>
       <RequireLogin />

@@ -1,10 +1,12 @@
 import classNames from "classnames";
-import type { Location } from "react-router-dom";
-import { matchPath, Link, useLocation } from "react-router-dom";
+
+import type { RoutePath } from "@/base/routesConfig";
+import { matchPath, Link, useLocation } from "@/router";
+import type { Location } from "@/router";
 
 export type NavItem = {
   label: string;
-  path?: string;
+  path?: RoutePath;
   items?: NavItem[];
 };
 
@@ -81,7 +83,7 @@ const SideNavigationItem = ({ item }: ItemProps) => {
   );
 };
 
-export const secondaryNavItems = [
+export const secondaryNavItems: NavItem[] = [
   {
     label: "Enrollment",
     items: [

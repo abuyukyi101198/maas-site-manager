@@ -1,5 +1,6 @@
 import { Col, Row, Strip } from "@canonical/react-components";
-import { useLocation } from "react-router-dom";
+
+import { useLocation } from "@/router";
 
 const NotFound = () => {
   const location = useLocation();

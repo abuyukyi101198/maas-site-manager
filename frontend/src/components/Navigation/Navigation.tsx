@@ -1,14 +1,15 @@
 import { Button } from "@canonical/react-components";
 import classNames from "classnames";
-import { useLocation } from "react-router-dom";
 import useLocalStorageState from "use-local-storage-state";
 
 import NavigationBanner from "./NavigationBanner";
 import NavigationCollapseToggle from "./NavigationCollapseToggle";
 import NavigationList from "./NavigationList";
-import type { NavLink } from "./types";
+import type { ExternalNavLink, LocalNavLink } from "./types";
 
-export const navItems: NavLink[] = [
+import { useLocation } from "@/router";
+
+export const navItems: LocalNavLink[] = [
   {
     label: "Regions",
     url: "/sites",
@@ -16,7 +17,7 @@ export const navItems: NavLink[] = [
   },
 ];
 
-export const settingsNavItems: NavLink[] = [
+export const settingsNavItems: LocalNavLink[] = [
   {
     label: "Settings",
     url: "/settings",
@@ -24,9 +25,9 @@ export const settingsNavItems: NavLink[] = [
   },
 ];
 
-const navItemsAccount = [{ label: "Log out", url: "/logout" }];
+const navItemsAccount: LocalNavLink[] = [{ label: "Log out", url: "/logout" }];
 
-export const navItemsBottom: NavLink[] = [
+export const navItemsBottom: ExternalNavLink[] = [
   { external: true, icon: "information", label: "Documentation", url: "https://maas.io/docs" },
   { external: true, icon: "comments", label: "Community", url: "https://discourse.maas.io/" },
   { external: true, icon: "submit-bug", label: "Report a bug", url: "" }, // TODO: Replace this with actual link once known

@@ -74,6 +74,13 @@ module.exports = {
             message: "Avoid enums, use const or string literal instead",
           },
         ],
+        "no-restricted-imports": [
+          "error",
+          {
+            name: "react-router-dom",
+            message: 'Use strictly typed "@/router" import instead of "react-router-dom"',
+          },
+        ],
         "@typescript-eslint/consistent-type-imports": 2,
         "import/namespace": "off",
         "import/no-named-as-default": 0,

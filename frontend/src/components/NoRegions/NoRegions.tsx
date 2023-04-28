@@ -1,9 +1,8 @@
-import { Link } from "react-router-dom";
-
 import docsUrls from "@/base/docsUrls";
 import ExternalLink from "@/components/ExternalLink";
 import TableCaption from "@/components/TableCaption";
 import { useRequestsCountQuery } from "@/hooks/api";
+import { Link } from "@/router";
 
 const NoRegions = () => {
   const { data, isSuccess } = useRequestsCountQuery();
@@ -21,7 +20,7 @@ const NoRegions = () => {
             </ExternalLink>
           </TableCaption.Description>
           <TableCaption.Description>
-            <Link className="p-button--positive" to="/requests">
+            <Link className="p-button--positive" to="/settings/requests">
               Go to Requests Page
             </Link>
           </TableCaption.Description>
@@ -36,7 +35,7 @@ const NoRegions = () => {
             </ExternalLink>
           </TableCaption.Description>
           <TableCaption.Description>
-            <Link className="p-button--positive" to="/tokens">
+            <Link className="p-button--positive" to="/settings/tokens">
               Go to Tokens page
             </Link>
           </TableCaption.Description>

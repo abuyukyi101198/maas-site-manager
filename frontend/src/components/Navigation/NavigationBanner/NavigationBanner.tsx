@@ -1,10 +1,9 @@
-import { Link, useLocation } from "react-router-dom";
-
 import { isSelected } from "@/components/Navigation/utils";
+import { Link, useLocation } from "@/router";
 
 const NavigationBanner = ({ children }: { children?: React.ReactNode }): JSX.Element => {
   const location = useLocation();
-  const homepageLink = { url: "/", label: "Homepage" };
+  const homepageLink = { url: "/", label: "Homepage" } as const;
   return (
     <>
       <Link

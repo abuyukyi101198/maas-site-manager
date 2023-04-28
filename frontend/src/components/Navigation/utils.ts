@@ -1,10 +1,14 @@
-import { matchPath } from "react-router-dom";
-
 import type { NavLink, NavItem, NavGroup } from "./types";
 
-export const isSelected = (path: string, link: NavLink): boolean => {
+import type { RoutePath } from "@/base/routesConfig";
+import { matchPath } from "@/router";
+
+export const isSelected = (path: RoutePath, link: NavLink): boolean => {
+  if (link.external) {
+    return false;
+  }
   // Use the provided highlight(s) or just use the url.
-  let highlights = link.highlight || link.url;
+  let highlights: RoutePath | RoutePath[] = link.highlight || link.url;
   // If the provided highlights aren't an array then make them one so that we
   // can loop over them.
   if (!Array.isArray(highlights)) {

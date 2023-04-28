@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright"; // 1
-import { protectedRoutes, publicRoutes } from "@/base/routesConfig";
+import { protectedPages, publicPages } from "@/base/routesConfig";
 import { adminAuthFile } from "./constants";
 
 const a11yTest = async ({ title, path }: { title: string; path: string }) =>
@@ -20,9 +20,9 @@ const a11yTest = async ({ title, path }: { title: string; path: string }) =>
 
 test.describe("protected routes", () => {
   test.use({ storageState: adminAuthFile });
-  Object.values(protectedRoutes).forEach(a11yTest);
+  Object.values(protectedPages).forEach(a11yTest);
 });
 
 test.describe("public routes", () => {
-  Object.values(publicRoutes).forEach(a11yTest);
+  Object.values(publicPages).forEach(a11yTest);
 });

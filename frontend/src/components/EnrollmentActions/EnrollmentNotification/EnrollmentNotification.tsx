@@ -1,8 +1,8 @@
 import { Notification } from "@canonical/react-components";
 import pluralize from "pluralize";
-import { useNavigate } from "react-router-dom";
 
 import type { PostEnrollmentRequestsData } from "@/api/handlers";
+import { useNavigate } from "@/router";
 
 const EnrollmentNotification = ({ accept, ids }: Partial<PostEnrollmentRequestsData>) => {
   const navigate = useNavigate();

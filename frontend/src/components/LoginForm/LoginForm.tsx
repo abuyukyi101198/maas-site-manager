@@ -3,10 +3,10 @@ import { useCallback, useEffect } from "react";
 import { Notification, Col, Row, Strip, Input, useId, Label, Card, Button } from "@canonical/react-components";
 import type { FormikHelpers } from "formik";
 import { Field, Form, Formik } from "formik";
-import { useNavigate, useSearchParams } from "react-router-dom";
 import * as Yup from "yup";
 
 import { useAuthContext } from "@/context";
+import { useNavigate, useSearchParams } from "@/router";
 
 const initialValues = {
   username: "",

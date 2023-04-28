@@ -1,11 +1,22 @@
-export type NavLink = {
+import type { RoutePath } from "@/base/routesConfig";
+
+type BaseNavLink = {
   adminOnly?: boolean;
   external?: boolean;
-  highlight?: string | string[];
   icon?: string | React.ReactNode;
   label: string;
-  url: string;
 };
+export type ExternalNavLink = BaseNavLink & {
+  external: true;
+  url: string;
+  highlight?: RoutePath | RoutePath[];
+};
+export type LocalNavLink = BaseNavLink & {
+  external?: false;
+  url: RoutePath;
+  highlight?: RoutePath | RoutePath[];
+};
+export type NavLink = ExternalNavLink | LocalNavLink;
 
 export type NavGroup = {
   navLinks: NavLink[];

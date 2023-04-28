@@ -1,11 +1,11 @@
 import "./App.scss";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import { AppContextProvider, AuthContextProvider } from "./context";
 import routes from "./routes";
 
 import apiClient from "@/api";
+import { createBrowserRouter, RouterProvider } from "@/router";
 
 const queryClient = new QueryClient();
 const router = createBrowserRouter(routes);

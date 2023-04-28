@@ -1,8 +1,9 @@
+/* eslint-disable no-restricted-imports */
 import type { LinkProps } from "react-router-dom";
 import { Link } from "react-router-dom";
 
-const ExternalLink = ({ to, children }: LinkProps) => (
-  <Link rel="noreferrer noopener" target="_blank" to={to}>
+const ExternalLink = ({ children, ...props }: LinkProps) => (
+  <Link {...props} rel="noreferrer noopener" target="_blank">
     {children}
   </Link>
 );

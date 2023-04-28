@@ -1,7 +1,6 @@
-import { BrowserRouter } from "react-router-dom";
-
 import NavigationBanner from "./NavigationBanner";
 
+import { BrowserRouter } from "@/router";
 import { screen, render } from "@/test-utils";
 
 describe("Navigation Banner", () => {
