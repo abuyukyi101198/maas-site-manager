@@ -4,13 +4,12 @@ import { useEffect } from "react";
 import { Col, Row, useOnEscapePressed, usePrevious } from "@canonical/react-components";
 import classNames from "classnames";
 
-import SecondaryNavigation from "../SecondaryNavigation";
-
 import { routesConfig } from "@/base/routesConfig";
 import type { RoutePath } from "@/base/routesConfig";
 import DocumentTitle from "@/components/DocumentTitle/DocumentTitle";
 import Navigation from "@/components/Navigation";
 import RemoveRegions from "@/components/RemoveRegions";
+import SecondaryNavigation from "@/components/SecondaryNavigation";
 import { useAppContext, useAuthContext } from "@/context";
 import TokensCreate from "@/pages/tokens/create";
 import { matchPath, Outlet, useLocation } from "@/router";

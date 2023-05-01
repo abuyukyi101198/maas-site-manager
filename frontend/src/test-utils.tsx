@@ -5,9 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { RenderOptions, RenderResult } from "@testing-library/react";
 import { screen, render } from "@testing-library/react";
 
-import { AppContextProvider, AuthContextProvider } from "./context";
-
 import apiClient from "@/api";
+import { AppContextProvider, AuthContextProvider } from "@/context";
 import type { MemoryRouterProps } from "@/router";
 import { MemoryRouter } from "@/router";
 
