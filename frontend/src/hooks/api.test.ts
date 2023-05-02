@@ -2,7 +2,7 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { rest } from "msw";
 import { setupServer } from "msw/node";
 
-import { useSitesQuery, useTokensQuery } from "./api";
+import { useSitesQuery, useTokensQuery } from "./react-query";
 
 import urls from "@/api/urls";
 import { siteFactory, tokenFactory } from "@/mocks/factories";

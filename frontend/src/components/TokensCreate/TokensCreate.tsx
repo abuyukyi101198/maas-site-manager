@@ -8,7 +8,7 @@ import * as Yup from "yup";
 import { humanIntervalToISODuration } from "./utils";
 
 import { useAppContext } from "@/context";
-import { useTokensCreateMutation } from "@/hooks/api";
+import { useTokensCreateMutation } from "@/hooks/react-query";
 
 const initialValues = {
   amount: "",

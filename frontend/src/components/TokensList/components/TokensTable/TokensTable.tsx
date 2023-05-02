@@ -9,7 +9,7 @@ import SelectAllCheckbox from "@/components/SelectAllCheckbox";
 import CopyButton from "@/components/base/CopyButton";
 import TooltipButton from "@/components/base/TooltipButton";
 import { useAppContext } from "@/context";
-import type { useTokensQueryResult } from "@/hooks/api";
+import type { useTokensQueryResult } from "@/hooks/react-query";
 import { copyToClipboard, formatDistanceToNow, formatUTCDateString } from "@/utils";
 
 const createAccessor =

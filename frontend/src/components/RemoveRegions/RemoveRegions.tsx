@@ -1,11 +1,13 @@
 import { useEffect } from "react";
 
 import { Button, Icon, Input, useId } from "@canonical/react-components";
+import type { FormikHelpers } from "formik";
 import { Field, Form, Formik } from "formik";
 import pluralize from "pluralize";
 import * as Yup from "yup";
 
 import { useAppContext } from "@/context";
+import { useSiteQueryData } from "@/hooks/react-query";
 
 const initialValues = {
   confirmText: "",
@@ -34,17 +36,20 @@ const createHandleValidate =
 const RemoveRegions = () => {
   const { rowSelection } = useAppContext();
   const { setSidebar } = useAppContext();
-  const handleDeleteSites = () => {
-    // TODO: integrate with delete sites endpoint
-    setSidebar(null);
-  };
   const regionsCount = rowSelection && Object.keys(rowSelection).length;
   const id = useId();
   const confirmTextId = `confirm-text-${id}`;
   const headingId = `heading-${id}`;
-  const regionsCountText = pluralize("regions", regionsCount || 0, !!regionsCount);
+  const site = useSiteQueryData(Object.keys(rowSelection)?.[0]);
+  const regionName = site?.name;
+  const regionsCountText = regionsCount === 1 ? regionName : pluralize("regions", regionsCount || 0, !!regionsCount);
   const expectedConfirmTextValue = `remove ${regionsCountText}`;
-  const handleSubmit = () => {
+  const handleSubmit = (
+    _values: RemoveRegionsFormValues,
+    { setSubmitting }: FormikHelpers<RemoveRegionsFormValues>,
+  ) => {
+    setSubmitting(false);
+    setSidebar(null);
     // TODO: integrate with delete regions endpoint
   };
 
@@ -60,9 +65,8 @@ const RemoveRegions = () => {
       initialValues={initialValues}
       onSubmit={handleSubmit}
       validate={createHandleValidate({ expectedConfirmTextValue })}
-      validateOnBlur={false}
     >
-      {({ isSubmitting, errors, touched, isValid, dirty }) => (
+      {({ isSubmitting, errors, touched, dirty, submitCount }) => (
         <Form aria-labelledby={headingId} className="tokens-create" noValidate>
           <div className="tokens-create">
             <h3 className="tokens-create__heading p-heading--4" id={headingId}>
@@ -78,7 +82,7 @@ const RemoveRegions = () => {
             <Field
               aria-labelledby={confirmTextId}
               as={Input}
-              error={touched.confirmText && errors.confirmText}
+              error={submitCount > 0 && touched.confirmText && errors.confirmText}
               name="confirmText"
               placeholder={`remove ${regionsCountText}`}
               type="text"
@@ -86,12 +90,7 @@ const RemoveRegions = () => {
             <Button appearance="base" onClick={() => setSidebar(null)} type="button">
               Cancel
             </Button>
-            <Button
-              appearance="negative"
-              disabled={!dirty || !isValid || isSubmitting}
-              onClick={handleDeleteSites}
-              type="button"
-            >
+            <Button appearance="negative" disabled={!dirty || isSubmitting} type="submit">
               <Icon light name="delete" /> Remove
             </Button>
           </div>

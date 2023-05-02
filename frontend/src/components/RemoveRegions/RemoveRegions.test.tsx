@@ -11,20 +11,22 @@ vi.mock("@/context", () => ({
   }),
 }));
 
-it("if the correct phrase has been entered the 'Remove' button becomes enabled.", async () => {
+it("submit button should not be disabled when something has been typed", async () => {
   render(<RemoveRegions />);
+  const errorMessage = /Confirmation string is not correct/i;
   expect(screen.getByRole("button", { name: /Remove/i })).toBeDisabled();
-  await userEvent.type(screen.getByRole("textbox"), "remove 2 regions");
-  expect(screen.queryByText(/Confirmation string is not correct/i)).not.toBeInTheDocument();
+  await userEvent.type(screen.getByRole("textbox"), "invalid text");
+  expect(screen.queryByText(errorMessage)).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: /Remove/i })).toBeEnabled();
 });
 
-it("if the confirmation string is not correct and the user unfocuses the input field a error state is shown.", async () => {
+it("validation error is shown after user attempts submission", async () => {
   render(<RemoveRegions />);
-  expect(screen.getByRole("button", { name: /Remove/i })).toBeDisabled();
+  const errorMessage = /Confirmation string is not correct/i;
   await userEvent.type(screen.getByRole("textbox"), "incorrect string{tab}");
-  expect(screen.getByText(/Confirmation string is not correct/i)).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: /Remove/i })).toBeDisabled();
+  expect(screen.queryByText(errorMessage)).not.toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: /Remove/i }));
+  expect(screen.getByText(errorMessage)).toBeInTheDocument();
 });
 
 it("does not display error message on blur if the value has not chagned", async () => {
@@ -33,4 +35,15 @@ it("does not display error message on blur if the value has not chagned", async 
   await userEvent.type(screen.getByRole("textbox"), "{tab}");
   expect(screen.queryByText(/Confirmation string is not correct/i)).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: /Remove/i })).toBeDisabled();
+});
+
+it("validation error is hidden on change if the user already attempted submission", async () => {
+  render(<RemoveRegions />);
+  const errorMessage = /Confirmation string is not correct/i;
+  await userEvent.type(screen.getByRole("textbox"), "incorrect string");
+  await userEvent.click(screen.getByRole("button", { name: /Remove/i }));
+  expect(screen.getByText(errorMessage)).toBeInTheDocument();
+  await userEvent.clear(screen.getByRole("textbox"));
+  await userEvent.type(screen.getByRole("textbox"), "remove 2 regions");
+  expect(screen.queryByText(errorMessage)).not.toBeInTheDocument();
 });

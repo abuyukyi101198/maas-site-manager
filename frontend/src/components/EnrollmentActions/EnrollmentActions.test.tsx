@@ -1,6 +1,6 @@
 import EnrollmentActions from "./EnrollmentActions";
 
-import type * as apiHooks from "@/hooks/api";
+import type * as apiHooks from "@/hooks/react-query";
 import { render, screen, within } from "@/test-utils";
 
 const enrollmentRequestsMutationMock = vi.fn();
@@ -13,7 +13,7 @@ it("displays enrollment action buttons", () => {
 });
 
 it("can display an error message on request error", () => {
-  vi.mock("@/hooks/api", async (importOriginal) => {
+  vi.mock("@/hooks/react-query", async (importOriginal) => {
     const original: typeof apiHooks = await importOriginal();
     return {
       ...original,

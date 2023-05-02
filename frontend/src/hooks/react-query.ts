@@ -24,6 +24,7 @@ import type {
   EnrollmentRequestsQueryResult,
   AccessToken,
   Token,
+  Site,
 } from "@/api/types";
 
 export type UseSitesQueryResult = ReturnType<typeof useSitesQuery>;
@@ -37,6 +38,22 @@ export const useSitesQuery = ({ page, size }: GetSitesQueryParams, queryText?: s
     keepPreviousData: true,
     refetchInterval: defaultRefetchInterval,
   });
+
+// return single site data from query cache
+export const useSiteQueryData = (id: Site["id"]): Site | null => {
+  const queryClient = useQueryClient();
+  // query cache data for all pages
+  // this is to ensure we can request a site that is not on the current page
+  const queryDataList = queryClient.getQueriesData<SitesQueryResult>({
+    queryKey: ["sites"],
+    exact: false,
+    type: "all",
+  });
+  // reduce to a single list
+  const sites = queryDataList.reduce((acc, [_key, data]) => [...acc, ...(data?.items ?? [])], [] as Site[]);
+  const site = sites.find((site: any) => site.id === id);
+  return site || null;
+};
 
 export type useTokensQueryResult = ReturnType<typeof useTokensQuery>;
 export const useTokensQuery = ({ page, size }: GetTokensQueryParams) =>

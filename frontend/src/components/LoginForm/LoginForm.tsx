@@ -70,6 +70,7 @@ const LoginForm = () => {
               <Formik<LoginFormValues>
                 initialValues={initialValues}
                 onSubmit={handleSubmit}
+                validateOnBlur={false}
                 validationSchema={LoginFormSchema}
               >
                 {({ isSubmitting, errors, touched, isValid, dirty }) => (

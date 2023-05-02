@@ -10,7 +10,7 @@ import { routesConfig } from "@/base/routesConfig";
 import ExternalLink from "@/components/ExternalLink";
 import PaginationBar from "@/components/base/PaginationBar";
 import { useAppContext } from "@/context";
-import { useDeleteTokensMutation, useTokensQuery } from "@/hooks/api";
+import { useDeleteTokensMutation, useTokensQuery } from "@/hooks/react-query";
 import usePagination from "@/hooks/usePagination";
 import { Link } from "@/router";
 

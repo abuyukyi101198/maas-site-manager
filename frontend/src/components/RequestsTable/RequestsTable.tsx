@@ -11,7 +11,7 @@ import SelectAllCheckbox from "@/components/SelectAllCheckbox";
 import TableCaption from "@/components/TableCaption";
 import { isDev } from "@/constants";
 import { useAppContext } from "@/context";
-import type { UseEnrollmentRequestsQueryResult } from "@/hooks/api";
+import type { UseEnrollmentRequestsQueryResult } from "@/hooks/react-query";
 
 export type EnrollmentRequestsColumnDef = ColumnDef<EnrollmentRequest, EnrollmentRequest[keyof EnrollmentRequest]>;
 export type EnrollmentRequestsColumn = Column<EnrollmentRequest, unknown>;

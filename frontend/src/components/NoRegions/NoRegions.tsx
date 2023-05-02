@@ -1,7 +1,7 @@
 import docsUrls from "@/base/docsUrls";
 import ExternalLink from "@/components/ExternalLink";
 import TableCaption from "@/components/TableCaption";
-import { useRequestsCountQuery } from "@/hooks/api";
+import { useRequestsCountQuery } from "@/hooks/react-query";
 import { Link } from "@/router";
 
 const NoRegions = () => {

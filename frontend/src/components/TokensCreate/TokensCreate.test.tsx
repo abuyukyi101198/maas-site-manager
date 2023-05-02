@@ -4,7 +4,7 @@ import { setupServer } from "msw/node";
 import TokensCreate from "./TokensCreate";
 
 import urls from "@/api/urls";
-import type * as apiHooks from "@/hooks/api";
+import type * as apiHooks from "@/hooks/react-query";
 import { createMockTokensResolver } from "@/mocks/resolvers";
 import { renderWithMemoryRouter, screen, userEvent } from "@/test-utils";
 
@@ -12,7 +12,7 @@ const mockServer = setupServer(rest.post(urls.tokens, createMockTokensResolver()
 
 const tokensMutationMock = vi.fn();
 
-vi.mock("@/hooks/api", async (importOriginal) => {
+vi.mock("@/hooks/react-query", async (importOriginal) => {
   const original: typeof apiHooks = await importOriginal();
   return { ...original, useTokensCreateMutation: () => ({ mutateAsync: tokensMutationMock }) };
 });

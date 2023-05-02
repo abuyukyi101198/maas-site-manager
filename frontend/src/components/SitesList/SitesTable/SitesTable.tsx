@@ -17,7 +17,7 @@ import SelectAllCheckbox from "@/components/SelectAllCheckbox";
 import TooltipButton from "@/components/base/TooltipButton/TooltipButton";
 import { isDev } from "@/constants";
 import { useAppContext } from "@/context";
-import type { UseSitesQueryResult } from "@/hooks/api";
+import type { UseSitesQueryResult } from "@/hooks/react-query";
 import { getAllMachines, getCountryName, getTimezoneUTCString, getTimeInTimezone } from "@/utils";
 
 const createAccessor =

@@ -4,8 +4,8 @@ import React, { createContext, useContext, useReducer } from "react";
 import type { AxiosInstance } from "axios";
 import useLocalStorageState from "use-local-storage-state";
 
-import { useLoginMutation } from "@/hooks/api";
-import type { LoginError } from "@/hooks/api";
+import { useLoginMutation } from "@/hooks/react-query";
+import type { LoginError } from "@/hooks/react-query";
 
 type AuthStatus = "initial" | "authenticated" | "unauthorised";
 

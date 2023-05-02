@@ -4,7 +4,7 @@ import { Pagination } from "@canonical/react-components";
 
 import SitesTable from "./SitesTable";
 
-import { useSitesQuery } from "@/hooks/api";
+import { useSitesQuery } from "@/hooks/react-query";
 import useDebounce from "@/hooks/useDebouncedValue";
 import { parseSearchTextToQueryParams } from "@/utils";
 

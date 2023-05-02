@@ -3,7 +3,7 @@ import { Button, Notification } from "@canonical/react-components";
 import EnrollmentNotification from "./EnrollmentNotification";
 
 import { useAppContext } from "@/context";
-import { useEnrollmentRequestsMutation } from "@/hooks/api";
+import { useEnrollmentRequestsMutation } from "@/hooks/react-query";
 
 const EnrollmentActions: React.FC = () => {
   const { rowSelection, setRowSelection } = useAppContext();

@@ -5,7 +5,7 @@ import SitesCount from "./SitesCount";
 
 import type { SitesColumn } from "@/components/SitesList/SitesTable/SitesTable";
 import { useAppContext } from "@/context";
-import type { UseSitesQueryResult } from "@/hooks/api";
+import type { UseSitesQueryResult } from "@/hooks/react-query";
 
 const SitesTableControls = ({
   data,

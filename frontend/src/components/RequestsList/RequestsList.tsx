@@ -5,7 +5,7 @@ import { Col, Row } from "@canonical/react-components";
 import EnrollmentActions from "@/components/EnrollmentActions";
 import RequestsTable from "@/components/RequestsTable";
 import PaginationBar from "@/components/base/PaginationBar";
-import { useRequestsQuery } from "@/hooks/api";
+import { useRequestsQuery } from "@/hooks/react-query";
 import usePagination from "@/hooks/usePagination";
 
 const DEFAULT_PAGE_SIZE = 50;
