@@ -4,36 +4,24 @@ This is the frontend for the [MAAS Site Manager Project](https://launchpad.net/m
 
 ## How to run a development environment
 
-First start the backend
+The quickest way to get started is run frontend with mock backend which is enabled by default.
 
 ```bash
-$LP_USERNAME=your-username
-sudo apt-get install tox
-
-git clone https://code.launchpad.net/~maas-committers/maas-site-manager/+git/site-manager
-
-cd site-manager
-
-docker run --rm -it \
-    -p 5432:5432 \
-    -e POSTGRES_PASSWORD=pass \
-    --name postgres \
-    postgres:14
-
-tox -e run
+yarn dev
 ```
 
-Then run this frontend
+### Using a local backend
+
+Setup local environment variables
 
 ```bash
-git clone https://code.launchpad.net/~maas-committers/maas-site-manager/+git/site-manager-frontend
-cd site-manager-frontend
-
-# TODO, possibly edit an env/config file to point to a local backend
-
-yarn  # install dependencies
-yarn run dev
+cp .env.development .env.local.development
 ```
+
+Set `VITE_USE_MOCK_DATA` to `false` in `.env.local.development`.
+
+Start the backend
+[MAAS Site Manager Backend Readme](/backend/README.md).
 
 ## Project conventions
 

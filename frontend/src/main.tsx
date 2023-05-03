@@ -6,10 +6,10 @@ import * as ReactDOM from "react-dom/client";
 import packageInfo from "../package.json";
 
 import App from "./App";
-import { isDev } from "./constants";
+import { useMockData } from "./constants";
 
 /* c8 ignore next 4 */
-if (isDev) {
+if (useMockData) {
   const { worker } = await import("./mocks/browser");
   await worker.start();
 }

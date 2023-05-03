@@ -12,6 +12,7 @@ const commitHash = require("child_process").execSync("git rev-parse --short HEAD
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  envDir: "../",
   define: { "import.meta.env.VITE_APP_VERSION": JSON.stringify(commitHash) },
   plugins: [
     react(),
