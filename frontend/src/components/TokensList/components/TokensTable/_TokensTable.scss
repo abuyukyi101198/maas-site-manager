@@ -3,6 +3,22 @@
   th {
     vertical-align: middle;
   }
+  
+  thead th {
+    position: sticky;
+    top: -#{$spv--medium};
+    background-color: white;
+    z-index: 1;
+    padding-top: $spv--large;
+
+    @media only screen and (min-width: $breakpoint-small){
+      top: calc($header-height-medium - $spv--medium);
+    }
+
+    @media only screen and (min-width: $breakpoint-large) {
+      top: calc($header-height-large - $spv--medium);
+    }
+  }
 
   thead th:first-child {
     width: 3rem;

@@ -1,9 +1,46 @@
+$header-height-medium: 34.6875rem;
+$header-height-large: 23.4375rem;
+$instructions-height-medium: 10.9375rem;
+
 .tokens-list-header {
+  display: grid;
+
   @media only screen and (min-width: $breakpoint-small) {
+    height: $header-height-medium;
     position: sticky;
-    top: -0.75rem;
+    top: -#{$spv--medium};
     background-color: white;
     z-index: 1;
-    padding-top: 0.75rem;
+    padding-top: $spv--medium;
+  }
+
+  @media only screen and (min-width: $breakpoint-large) {
+    height: $header-height-large;
+  }
+
+  .tokens-list-certificate {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: $spv--small;
+    overflow-x: auto;
+    white-space: nowrap;
+    margin-bottom: $spv--large * 2;
+
+    @media only screen and (min-width: $breakpoint-large) {
+      width: fit-content;
+    }
+  }
+
+  .tokens-list-instructions {
+    height: $instructions-height-medium;
+
+    @media only screen and (min-width: $breakpoint-large) {
+      height: auto;
+    }
+  }
+
+  .pagination-bar {
+    margin-bottom: 0;
   }
 }
