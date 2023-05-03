@@ -24,7 +24,7 @@ def create_app(db_dsn: str | None = None) -> FastAPI:
     db = Database(db_dsn)
     app = FastAPI(
         title="MAAS Site Manager",
-        name=PACKAGE.project_name,
+        name=PACKAGE.name,
         version=PACKAGE.version,
         lifespan=lifespan,
     )

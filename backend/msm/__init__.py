@@ -1,4 +1,4 @@
-from pkg_resources import get_distribution
+from importlib.metadata import distribution
 
 __all__ = [
     "PACKAGE",
@@ -6,6 +6,6 @@ __all__ = [
 ]
 
 
-PACKAGE = get_distribution("msm")
+PACKAGE = distribution("msm")
 
 __version__ = PACKAGE.version
