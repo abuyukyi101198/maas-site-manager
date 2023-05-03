@@ -62,6 +62,7 @@ async def test_list_sites(
         "street": "110 Southwark St",
         "timezone": "Europe/London",
         "url": "https://londoncalling.example.com",
+        "accepted": True,
     }
     site2 = site1.copy()
     site2.update(
@@ -75,6 +76,9 @@ async def test_list_sites(
     sites = await fixture.create("site", [site1, site2])
     for site in sites:
         site["stats"] = None
+        del site["created"]
+        del site["accepted"]
+
     page1 = await authenticated_user_app_client.get("/sites")
     assert page1.status_code == 200
     assert page1.json() == {
@@ -104,6 +108,48 @@ async def test_list_sites(
 
 
 @pytest.mark.asyncio
+async def test_list_sites_only_accepted(
+    authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
+) -> None:
+    site1 = {
+        "name": "LondonHQ",
+        "city": "London",
+        "country": "gb",
+        "latitude": "51.509865",
+        "longitude": "-0.118092",
+        "note": "the first site",
+        "region": "Blue Fin Bldg",
+        "street": "110 Southwark St",
+        "timezone": "Europe/London",
+        "url": "https://londoncalling.example.com",
+        "accepted": True,
+    }
+    site2 = site1.copy()
+    site2.update(
+        {
+            "name": "BerlinHQ",
+            "timezone": "Europe/Berlin",
+            "city": "Berlin",
+            "country": "de",
+            "accepted": False,
+        }
+    )
+    created_site, _ = await fixture.create("site", [site1, site2])
+    created_site["stats"] = None
+    del created_site["created"]
+    del created_site["accepted"]
+
+    page1 = await authenticated_user_app_client.get("/sites")
+    assert page1.status_code == 200
+    assert page1.json() == {
+        "page": 1,
+        "size": 20,
+        "total": 1,
+        "items": [created_site],
+    }
+
+
+@pytest.mark.asyncio
 async def test_list_sites_filter_timezone(
     authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
 ) -> None:
@@ -118,6 +164,7 @@ async def test_list_sites_filter_timezone(
         "street": "110 Southwark St",
         "timezone": "Europe/London",
         "url": "https://londoncalling.example.com",
+        "accepted": True,
     }
     site2 = site1.copy()
     site2.update(
@@ -130,6 +177,8 @@ async def test_list_sites_filter_timezone(
     )
     [created_site, _] = await fixture.create("site", [site1, site2])
     created_site["stats"] = None
+    del created_site["created"]
+    del created_site["accepted"]
     page1 = await authenticated_user_app_client.get(
         "/sites?timezone=Europe/London"
     )
@@ -160,6 +209,7 @@ async def test_list_sites_with_stats(
                 "street": "110 Southwark St",
                 "timezone": "Europe/London",
                 "url": "https://londoncalling.example.com",
+                "accepted": True,
             }
         ],
     )
@@ -180,6 +230,8 @@ async def test_list_sites_with_stats(
     del site_data["site_id"]
     site_data["last_seen"] = site_data["last_seen"].isoformat()
     site["stats"] = site_data
+    del site["created"]
+    del site["accepted"]
 
     page = await authenticated_user_app_client.get("/sites")
     assert page.status_code == 200
@@ -291,6 +343,7 @@ async def test_sites_fails_without_login(
             "street": "110 Southwark St",
             "timezone": "Europe/London",
             "url": "https://londoncalling.example.com",
+            "accepted": True,
         }
     ]
     await fixture.create("site", site)

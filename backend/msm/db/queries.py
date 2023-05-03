@@ -107,6 +107,7 @@ async def get_filtered_sites(
     street: list[str] | None = None,
     timezone: list[str] | None = None,
     url: list[str] | None = None,
+    accepted: bool | None = None,
 ) -> tuple[int, Iterable[SiteSchema]]:
     filters = filters_from_arguments(
         Site,
@@ -119,6 +120,8 @@ async def get_filtered_sites(
         timezone=timezone,
         url=url,
     )
+    if accepted is not None:
+        filters.append(Site.c.accepted == accepted)
     count = (
         await session.execute(
             select(func.count())

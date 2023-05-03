@@ -52,6 +52,7 @@ async def sites(
         session,
         offset=pagination_params.offset,
         limit=pagination_params.size,
+        accepted=True,  # only list accepted sites here
         **filter_params._asdict(),
     )
     return PaginatedSites(

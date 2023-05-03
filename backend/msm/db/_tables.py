@@ -1,6 +1,8 @@
+from datetime import datetime
 from uuid import uuid4
 
 from sqlalchemy import (
+    Boolean,
     Column,
     ForeignKey,
     Integer,
@@ -27,6 +29,8 @@ Site = Table(
     Column("street", Text),
     Column("timezone", Text),
     Column("url", Text),
+    Column("accepted", Boolean, nullable=False, index=True, default=False),
+    Column("created", DateTime, nullable=False, default=datetime.utcnow),
 )
 
 
@@ -49,7 +53,7 @@ Token = Table(
         "value", UUID(as_uuid=True), nullable=False, index=True, default=uuid4
     ),
     Column("expired", DateTime, nullable=False),
-    Column("created", DateTime, nullable=False),
+    Column("created", DateTime, nullable=False, default=datetime.utcnow),
 )
 
 
