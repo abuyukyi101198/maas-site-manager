@@ -11,6 +11,17 @@ const mockServer = createMockGetServer(
   urls.enrollmentRequests,
   createMockGetEnrollmentRequestsResolver(enrollmentRequests),
 );
+const paginationProps = {
+  currentPage: 1,
+  dataContext: "MAAS Regions",
+  handlePageSizeChange: vi.fn,
+  isLoading: false,
+  itemsPerPage: 1,
+  onNextClick: vi.fn,
+  onPreviousClick: vi.fn,
+  setCurrentPage: vi.fn,
+  totalItems: 1,
+};
 
 beforeEach(() => {
   vi.useFakeTimers();
@@ -32,7 +43,11 @@ it("displays an empty sites table", () => {
       data={sitesQueryResultFactory.build()}
       isFetchedAfterMount={true}
       isLoading={false}
-      setSearchText={() => {}}
+      paginationProps={{
+        ...paginationProps,
+        totalItems: 0,
+      }}
+      setSearchText={vi.fn()}
     />,
   );
 
@@ -46,7 +61,10 @@ it("displays rows with details for each site", () => {
       data={sitesQueryResultFactory.build({ items, total: 1, page: 1, size: 1 })}
       isFetchedAfterMount={true}
       isLoading={false}
-      setSearchText={() => {}}
+      paginationProps={{
+        ...paginationProps,
+      }}
+      setSearchText={vi.fn()}
     />,
   );
 
@@ -67,7 +85,12 @@ it("displays correctly paginated results", () => {
       data={sitesQueryResultFactory.build({ items, total: 100, page: 1, size: pageLength })}
       isFetchedAfterMount={true}
       isLoading={false}
-      setSearchText={() => {}}
+      paginationProps={{
+        ...paginationProps,
+        itemsPerPage: pageLength,
+        totalItems: 100,
+      }}
+      setSearchText={vi.fn()}
     />,
   );
 
@@ -85,7 +108,10 @@ it("displays correct local time", () => {
       data={sitesQueryResultFactory.build({ items: [item], total: 1, page: 1, size: 1 })}
       isFetchedAfterMount={true}
       isLoading={false}
-      setSearchText={() => {}}
+      paginationProps={{
+        ...paginationProps,
+      }}
+      setSearchText={vi.fn()}
     />,
   );
 
@@ -100,7 +126,10 @@ it("displays full name of the country", () => {
       data={sitesQueryResultFactory.build({ items: [item], total: 1, page: 1, size: 1 })}
       isFetchedAfterMount={true}
       isLoading={false}
-      setSearchText={() => {}}
+      paginationProps={{
+        ...paginationProps,
+      }}
+      setSearchText={vi.fn()}
     />,
   );
 
@@ -121,7 +150,10 @@ it("displays correct number of deployed machines", () => {
       data={sitesQueryResultFactory.build({ items: [item], total: 1, page: 1, size: 1 })}
       isFetchedAfterMount={true}
       isLoading={false}
-      setSearchText={() => {}}
+      paginationProps={{
+        ...paginationProps,
+      }}
+      setSearchText={vi.fn()}
     />,
   );
 
@@ -137,7 +169,10 @@ it("if name is not unique a warning is displayed.", async () => {
       data={sitesQueryResultFactory.build({ items: [itemUnique], total: 1, page: 1, size: 1 })}
       isFetchedAfterMount={true}
       isLoading={false}
-      setSearchText={() => {}}
+      paginationProps={{
+        ...paginationProps,
+      }}
+      setSearchText={vi.fn()}
     />,
   );
 
@@ -151,9 +186,33 @@ it("if name is not unique a warning is displayed.", async () => {
       data={sitesQueryResultFactory.build({ items: [itemNonUnique], total: 1, page: 1, size: 1 })}
       isFetchedAfterMount={true}
       isLoading={false}
-      setSearchText={() => {}}
+      paginationProps={{
+        ...paginationProps,
+      }}
+      setSearchText={vi.fn()}
     />,
   );
 
   expect(screen.getByRole("button", { name: /warning - name is not unique/i })).toBeInTheDocument();
+});
+
+it("displays a pagination bar with the table", () => {
+  const items = siteFactory.buildList(2);
+  renderWithMemoryRouter(
+    <SitesTable
+      data={sitesQueryResultFactory.build({ items, total: 2, page: 1, size: 10 })}
+      isFetchedAfterMount={true}
+      isLoading={false}
+      paginationProps={{
+        ...paginationProps,
+        itemsPerPage: 10,
+        totalItems: 2,
+      }}
+      setSearchText={vi.fn()}
+    />,
+  );
+
+  expect(screen.getByText(/Showing 2 out of 2 MAAS Regions/i)).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: /next page/i })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: /previous page/i })).toBeInTheDocument();
 });

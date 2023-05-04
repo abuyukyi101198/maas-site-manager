@@ -14,6 +14,8 @@ import type { SitesQueryResult } from "@/api/types";
 import ExternalLink from "@/components/ExternalLink";
 import NoRegions from "@/components/NoRegions";
 import SelectAllCheckbox from "@/components/SelectAllCheckbox";
+import type { PaginationBarProps } from "@/components/base/PaginationBar/PaginationBar";
+import PaginationBar from "@/components/base/PaginationBar/PaginationBar";
 import TooltipButton from "@/components/base/TooltipButton/TooltipButton";
 import { isDev } from "@/constants";
 import { useAppContext } from "@/context";
@@ -34,8 +36,10 @@ const SitesTable = ({
   isFetchedAfterMount,
   isLoading,
   setSearchText,
+  paginationProps,
 }: Pick<UseSitesQueryResult, "data" | "isLoading" | "isFetchedAfterMount"> & {
   setSearchText: (text: string) => void;
+  paginationProps: PaginationBarProps;
 }) => {
   const [columnVisibility, setColumnVisibility] = useLocalStorageState("sitesTableColumnVisibility", {
     defaultValue: {},
@@ -224,6 +228,17 @@ const SitesTable = ({
         data={data}
         isLoading={isLoading}
         setSearchText={setSearchText}
+      />
+      <PaginationBar
+        currentPage={paginationProps.currentPage}
+        dataContext={paginationProps.dataContext}
+        handlePageSizeChange={paginationProps.handlePageSizeChange}
+        isLoading={paginationProps.isLoading}
+        itemsPerPage={paginationProps.itemsPerPage}
+        onNextClick={paginationProps.onNextClick}
+        onPreviousClick={paginationProps.onPreviousClick}
+        setCurrentPage={paginationProps.setCurrentPage}
+        totalItems={paginationProps.totalItems}
       />
       <table aria-label="sites" className="sites-table">
         <thead>

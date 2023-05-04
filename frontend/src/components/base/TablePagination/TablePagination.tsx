@@ -57,13 +57,14 @@ const TablePagination = ({
   const handlePreviousClick = () => {
     onPreviousClick();
   };
+  const noItems = totalItems === 0;
 
   return (
     <nav aria-label="pagination" className="table-pagination">
       <Button
         appearance="base"
         aria-label="previous page"
-        disabled={currentPage === 1 || isLoading}
+        disabled={currentPage === 1 || isLoading || noItems}
         hasIcon
         onClick={handlePreviousClick}
       >
@@ -85,7 +86,7 @@ const TablePagination = ({
       <Button
         appearance="base"
         aria-label="next page"
-        disabled={currentPage === totalPages || isLoading}
+        disabled={currentPage === totalPages || isLoading || noItems}
         hasIcon
         onClick={handleNextClick}
       >

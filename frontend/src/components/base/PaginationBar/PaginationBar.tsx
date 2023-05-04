@@ -6,7 +6,7 @@ import { Select } from "@canonical/react-components";
 import type { AppPaginationProps } from "@/components/base/TablePagination/TablePagination";
 import TablePagination from "@/components/base/TablePagination/TablePagination";
 
-type TokensTableControlProps = AppPaginationProps & {
+export type PaginationBarProps = AppPaginationProps & {
   handlePageSizeChange: (size: number) => void;
   dataContext: string;
   setCurrentPage: (page: number) => void;
@@ -23,7 +23,7 @@ const PaginationBar = ({
   dataContext,
   setCurrentPage,
   isLoading,
-}: TokensTableControlProps) => {
+}: PaginationBarProps) => {
   const pageCounts = useMemo(() => [20, 30, 50], []);
   const pageOptions = useMemo(
     () => pageCounts.map((pageCount) => ({ label: `${pageCount}/page`, value: pageCount })),
