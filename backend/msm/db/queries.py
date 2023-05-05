@@ -20,21 +20,23 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..schema import (
-    MAX_PAGE_SIZE,
-    Site as SiteSchema,
-    Token as TokenSchema,
-    UserWithPassword as UserPWSchema,
-)
+from ..schema import MAX_PAGE_SIZE
 from ._tables import (
     Site,
     SiteData,
     Token,
     User,
 )
+from .models import (
+    Site as SiteSchema,
+    Token as TokenSchema,
+    UserWithPassword as UserWithPasswordSchema,
+)
 
 
-async def get_user(session: AsyncSession, email: str) -> UserPWSchema | None:
+async def get_user(
+    session: AsyncSession, email: str
+) -> UserWithPasswordSchema | None:
     """
     Gets a user by its unique identifier: their email
     """
@@ -50,7 +52,7 @@ async def get_user(session: AsyncSession, email: str) -> UserPWSchema | None:
     )
     if result := await session.execute(stmt):
         if user := result.one_or_none():
-            return UserPWSchema(**user._asdict())
+            return UserWithPasswordSchema(**user._asdict())
     return None
 
 

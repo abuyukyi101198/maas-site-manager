@@ -4,7 +4,7 @@ from typing import AsyncGenerator
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from . import _base
+from . import _handlers
 from .. import PACKAGE
 from ..db import Database
 from ..settings import SETTINGS
@@ -36,12 +36,16 @@ def create_app(db_dsn: str | None = None) -> FastAPI:
         allow_headers=["*"],
     )
     app.state.db = db
-    app.router.add_api_route("/", _base.root, methods=["GET"])
-    app.router.add_api_route("/sites", _base.sites, methods=["GET"])
-    app.router.add_api_route("/tokens", _base.tokens, methods=["GET"])
-    app.router.add_api_route("/tokens", _base.tokens_post, methods=["POST"])
+    app.router.add_api_route("/", _handlers.root, methods=["GET"])
+    app.router.add_api_route("/sites", _handlers.sites, methods=["GET"])
+    app.router.add_api_route("/tokens", _handlers.tokens, methods=["GET"])
     app.router.add_api_route(
-        "/login", _base.login_for_access_token, methods=["POST"]
+        "/tokens", _handlers.tokens_post, methods=["POST"]
     )
-    app.router.add_api_route("/users/me", _base.read_users_me, methods=["GET"])
+    app.router.add_api_route(
+        "/login", _handlers.login_for_access_token, methods=["POST"]
+    )
+    app.router.add_api_route(
+        "/users/me", _handlers.read_users_me, methods=["GET"]
+    )
     return app

@@ -13,16 +13,10 @@ from ..db import (
     db_session,
     queries,
 )
+from ..db.models import User
 from ..schema import (
-    CreateTokensRequest,
-    CreateTokensResponse,
-    JSONWebToken,
-    PaginatedSites,
-    PaginatedTokens,
     pagination_params,
     PaginationParams,
-    User,
-    UserLoginRequest,
 )
 from ..settings import SETTINGS
 from ._forms import (
@@ -33,6 +27,14 @@ from ._jwt import (
     authenticate_user,
     create_access_token,
     get_authenticated_user,
+)
+from ._schema import (
+    CreateTokensRequest,
+    CreateTokensResponse,
+    JSONWebToken,
+    PaginatedSites,
+    PaginatedTokens,
+    UserLoginRequest,
 )
 
 
