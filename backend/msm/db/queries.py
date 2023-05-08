@@ -12,11 +12,13 @@ from uuid import UUID
 from sqlalchemy import (
     case,
     ColumnOperators,
+    delete,
     func,
     select,
     String,
     Table,
     Text,
+    update,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -33,6 +35,14 @@ from .models import (
     Token as TokenSchema,
     UserWithPassword as UserWithPasswordSchema,
 )
+
+
+class InvalidPendingSites(Exception):
+    """Raised when unknown pending site IDs are provided."""
+
+    def __init__(self, ids: Iterable[int]):
+        self.ids = sorted(ids)
+        super().__init__("Unknown pending sites")
 
 
 async def get_user(
@@ -200,6 +210,34 @@ async def get_pending_sites(
     )
     result = await session.execute(stmt)
     return count, [PendingSiteSchema(**row._asdict()) for row in result.all()]
+
+
+async def accept_reject_pending_sites(
+    session: AsyncSession,
+    ids: list[int],
+    accept: bool,
+) -> None:
+    site_ids = set(ids)
+    stmt = (
+        select(Site.c.id)
+        .select_from(Site)
+        .where(
+            Site.c.id.in_(site_ids),
+            Site.c.accepted == False,  # noqa
+        )
+    )
+    result = await session.execute(stmt)
+    pending_ids = set(row[0] for row in result.all())
+    if unknown_ids := site_ids - pending_ids:
+        raise InvalidPendingSites(unknown_ids)
+
+    if accept:
+        await session.execute(
+            update(Site).where(Site.c.id.in_(site_ids)).values(accepted=True)
+        )
+    else:
+        await session.execute(delete(Site).where(Site.c.id.in_(site_ids)))
+    return None
 
 
 async def get_tokens(

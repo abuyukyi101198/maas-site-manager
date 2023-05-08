@@ -14,6 +14,7 @@ from ..db import (
     queries,
 )
 from ..db.models import User
+from ..db.queries import InvalidPendingSites
 from ..schema import (
     pagination_params,
     PaginationParams,
@@ -35,6 +36,7 @@ from ._schema import (
     PaginatedPendingSites,
     PaginatedSites,
     PaginatedTokens,
+    PendingSitesActionRequest,
     UserLoginRequest,
 )
 
@@ -45,8 +47,8 @@ async def root() -> dict[str, str]:
 
 
 async def sites(
+    session: Annotated[AsyncSession, Depends(db_session)],
     authenticated_user: Annotated[User, Depends(get_authenticated_user)],
-    session: AsyncSession = Depends(db_session),
     pagination_params: PaginationParams = Depends(pagination_params),
     filter_params: SiteFilterParams = Depends(site_filter_parameters),
 ) -> PaginatedSites:
@@ -66,8 +68,8 @@ async def sites(
 
 
 async def pending_sites(
+    session: Annotated[AsyncSession, Depends(db_session)],
     authenticated_user: Annotated[User, Depends(get_authenticated_user)],
-    session: AsyncSession = Depends(db_session),
     pagination_params: PaginationParams = Depends(pagination_params),
 ) -> PaginatedPendingSites:
     """Return pending sites."""
@@ -84,9 +86,30 @@ async def pending_sites(
     )
 
 
-async def tokens(
+async def pending_sites_post(
+    session: Annotated[AsyncSession, Depends(db_session)],
     authenticated_user: Annotated[User, Depends(get_authenticated_user)],
-    session: AsyncSession = Depends(db_session),
+    action: PendingSitesActionRequest,
+) -> None:
+    """Accept or reject pending sites."""
+    try:
+        await queries.accept_reject_pending_sites(
+            session,
+            action.ids,
+            action.accept,
+        )
+    except InvalidPendingSites as error:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"message": str(error), "ids": error.ids},
+        )
+
+    return None
+
+
+async def tokens(
+    session: Annotated[AsyncSession, Depends(db_session)],
+    authenticated_user: Annotated[User, Depends(get_authenticated_user)],
     pagination_params: PaginationParams = Depends(pagination_params),
 ) -> PaginatedTokens:
     """Return all tokens"""
@@ -102,9 +125,9 @@ async def tokens(
 
 
 async def tokens_post(
+    session: Annotated[AsyncSession, Depends(db_session)],
     authenticated_user: Annotated[User, Depends(get_authenticated_user)],
     create_request: CreateTokensRequest,
-    session: AsyncSession = Depends(db_session),
 ) -> CreateTokensResponse:
     """
     Create one or more tokens.
@@ -119,8 +142,8 @@ async def tokens_post(
 
 
 async def login_for_access_token(
+    session: Annotated[AsyncSession, Depends(db_session)],
     user_login: UserLoginRequest,
-    session: AsyncSession = Depends(db_session),
 ) -> JSONWebToken:
     user = await authenticate_user(
         session, user_login.username, user_login.password
@@ -141,7 +164,7 @@ async def login_for_access_token(
 
 
 async def read_users_me(
+    session: Annotated[AsyncSession, Depends(db_session)],
     authenticated_user: Annotated[User, Depends(get_authenticated_user)],
-    session: AsyncSession = Depends(db_session),
 ) -> User:
     return authenticated_user

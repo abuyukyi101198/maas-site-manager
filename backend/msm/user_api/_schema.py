@@ -31,6 +31,13 @@ class CreateTokensResponse(BaseModel):
     tokens: list[UUID]
 
 
+class PendingSitesActionRequest(BaseModel):
+    """Request to accept/reject sites."""
+
+    ids: list[int]
+    accept: bool
+
+
 class PaginatedSites(PaginatedResults):
     items: list[Site]
 

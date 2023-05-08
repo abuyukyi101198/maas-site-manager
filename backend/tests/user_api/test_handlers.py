@@ -290,6 +290,67 @@ async def test_list_pending_sites(
 
 
 @pytest.mark.asyncio
+async def test_accept_pending_sites(
+    authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
+) -> None:
+    site = {
+        "name": "LondonHQ",
+        "url": "https://londoncalling.example.com",
+        "accepted": False,
+    }
+    [pending_site] = await fixture.create("site", [site])
+
+    response = await authenticated_user_app_client.post(
+        "/requests",
+        json={"ids": [pending_site["id"]], "accept": True},
+    )
+    assert response.status_code == 204
+    [created_site] = await fixture.get("site")
+    assert created_site["accepted"]
+
+
+@pytest.mark.asyncio
+async def test_reject_pending_sites(
+    authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
+) -> None:
+    site = {
+        "name": "LondonHQ",
+        "url": "https://londoncalling.example.com",
+        "accepted": False,
+    }
+    [pending_site] = await fixture.create("site", [site])
+
+    response = await authenticated_user_app_client.post(
+        "/requests",
+        json={"ids": [pending_site["id"]], "accept": False},
+    )
+    assert response.status_code == 204
+    assert await fixture.get("site") == []
+
+
+@pytest.mark.asyncio
+async def test_post_pending_sites_invalid_ids(
+    authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
+) -> None:
+    site = {
+        "name": "LondonHQ",
+        "url": "https://londoncalling.example.com",
+        "accepted": True,
+    }
+    [site] = await fixture.create("site", [site])
+    # unknown IDs and IDs for non-pending sites are invalid
+    ids = [site["id"], 10000]
+    response = await authenticated_user_app_client.post(
+        "/requests",
+        json={"ids": ids, "accept": True},
+    )
+    assert response.status_code == 400
+    assert response.json() == {
+        "detail": {"message": "Unknown pending sites", "ids": ids}
+    }
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize("time_format", ["ISO 8601", "Float"])
 async def test_token_time_format(
     time_format: str, authenticated_user_app_client: AuthAsyncClient

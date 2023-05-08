@@ -7,7 +7,10 @@ from typing import (
 import pytest
 from pytest_postgresql.executor import PostgreSQLExecutor
 from pytest_postgresql.janitor import DatabaseJanitor
-from sqlalchemy import create_engine
+from sqlalchemy import (
+    ColumnOperators,
+    create_engine,
+)
 
 from msm.db import (
     Database,
@@ -87,14 +90,18 @@ class Fixture:
             await session.commit()
             return [row._asdict() for row in result]
 
-    async def select_all(
+    async def get(
         self,
         table: str,
+        *filters: ColumnOperators,
     ) -> list[dict[str, Any]]:
         """Take a peak what is in there"""
         async with self.db.session() as session:
-            result = await session.execute(METADATA.tables[table].select())
-            await session.commit()
+            result = await session.execute(
+                METADATA.tables[table]
+                .select()
+                .where(*filters)  # type: ignore[arg-type]
+            )
             return [row._asdict() for row in result]
 
 

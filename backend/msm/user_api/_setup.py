@@ -43,6 +43,12 @@ def create_app(db_dsn: str | None = None) -> FastAPI:
     app.router.add_api_route(
         "/requests", _handlers.pending_sites, methods=["GET"]
     )
+    app.router.add_api_route(
+        "/requests",
+        _handlers.pending_sites_post,
+        methods=["POST"],
+        status_code=204,
+    )
     app.router.add_api_route("/sites", _handlers.sites, methods=["GET"])
     app.router.add_api_route("/tokens", _handlers.tokens, methods=["GET"])
     app.router.add_api_route(
