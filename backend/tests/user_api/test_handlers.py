@@ -2,6 +2,7 @@ from datetime import (
     datetime,
     timedelta,
 )
+from typing import Any
 
 from httpx import AsyncClient
 import pytest
@@ -21,6 +22,17 @@ def duration_format(delta: timedelta, time_format: str) -> str:
             return str(s)
         case _:
             raise ValueError(f"Invalid time format {time_format}")
+
+
+def site_details(**extra_details: Any) -> dict[str, Any]:
+    """Return sample details for creating a site."""
+    details = {
+        "name": "LondonHQ",
+        "url": "https://londoncalling.example.com",
+        "accepted": True,
+    }
+    details.update(extra_details)
+    return details
 
 
 @pytest.mark.asyncio
@@ -44,29 +56,13 @@ class TestSitesHandler:
     async def test_get(
         self, authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
     ) -> None:
-        site1 = {
-            "name": "LondonHQ",
-            "city": "London",
-            "country": "gb",
-            "latitude": "51.509865",
-            "longitude": "-0.118092",
-            "note": "the first site",
-            "region": "Blue Fin Bldg",
-            "street": "110 Southwark St",
-            "timezone": "Europe/London",
-            "url": "https://londoncalling.example.com",
-            "accepted": True,
-        }
-        site2 = site1.copy()
-        site2.update(
-            {
-                "name": "BerlinHQ",
-                "timezone": "Europe/Berlin",
-                "city": "Berlin",
-                "country": "de",
-            }
+        sites = await fixture.create(
+            "site",
+            [
+                site_details(city="London"),
+                site_details(name="BerlinHQ", city="Berlin"),
+            ],
         )
-        sites = await fixture.create("site", [site1, site2])
         for site in sites:
             site["stats"] = None
             del site["created"]
@@ -104,30 +100,13 @@ class TestSitesHandler:
     async def test_get_only_accepted(
         self, authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
     ) -> None:
-        site1 = {
-            "name": "LondonHQ",
-            "city": "London",
-            "country": "gb",
-            "latitude": "51.509865",
-            "longitude": "-0.118092",
-            "note": "the first site",
-            "region": "Blue Fin Bldg",
-            "street": "110 Southwark St",
-            "timezone": "Europe/London",
-            "url": "https://londoncalling.example.com",
-            "accepted": True,
-        }
-        site2 = site1.copy()
-        site2.update(
-            {
-                "name": "BerlinHQ",
-                "timezone": "Europe/Berlin",
-                "city": "Berlin",
-                "country": "de",
-                "accepted": False,
-            }
+        created_site, _ = await fixture.create(
+            "site",
+            [
+                site_details(),
+                site_details(name="BerlinHQ", accepted=False),
+            ],
         )
-        created_site, _ = await fixture.create("site", [site1, site2])
         created_site["stats"] = None
         del created_site["created"]
         del created_site["accepted"]
@@ -144,29 +123,13 @@ class TestSitesHandler:
     async def test_get_filter_timezone(
         self, authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
     ) -> None:
-        site1 = {
-            "name": "LondonHQ",
-            "city": "London",
-            "country": "gb",
-            "latitude": "51.509865",
-            "longitude": "-0.118092",
-            "note": "the first site",
-            "region": "Blue Fin Bldg",
-            "street": "110 Southwark St",
-            "timezone": "Europe/London",
-            "url": "https://londoncalling.example.com",
-            "accepted": True,
-        }
-        site2 = site1.copy()
-        site2.update(
-            {
-                "name": "BerlinHQ",
-                "timezone": "Europe/Berlin",
-                "city": "Berlin",
-                "country": "de",
-            }
+        [created_site, _] = await fixture.create(
+            "site",
+            [
+                site_details(timezone="Europe/London"),
+                site_details(name="BerlinHQ", timezone="Europe/Berlin"),
+            ],
         )
-        [created_site, _] = await fixture.create("site", [site1, site2])
         created_site["stats"] = None
         del created_site["created"]
         del created_site["accepted"]
@@ -184,24 +147,7 @@ class TestSitesHandler:
     async def test_get_with_stats(
         self, authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
     ) -> None:
-        [site] = await fixture.create(
-            "site",
-            [
-                {
-                    "name": "LondonHQ",
-                    "city": "London",
-                    "country": "gb",
-                    "latitude": "51.509865",
-                    "longitude": "-0.118092",
-                    "note": "the first site",
-                    "region": "Blue Fin Bldg",
-                    "street": "110 Southwark St",
-                    "timezone": "Europe/London",
-                    "url": "https://londoncalling.example.com",
-                    "accepted": True,
-                }
-            ],
-        )
+        [site] = await fixture.create("site", [site_details()])
         [site_data] = await fixture.create(
             "site_data",
             [
@@ -237,30 +183,13 @@ class TestPendingSitesHandler:
     async def test_get(
         self, authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
     ) -> None:
-        site1 = {
-            "name": "LondonHQ",
-            "city": "London",
-            "country": "gb",
-            "latitude": "51.509865",
-            "longitude": "-0.118092",
-            "note": "the first site",
-            "region": "Blue Fin Bldg",
-            "street": "110 Southwark St",
-            "timezone": "Europe/London",
-            "url": "https://londoncalling.example.com",
-            "accepted": True,
-        }
-        site2 = site1.copy()
-        site2.update(
-            {
-                "name": "BerlinHQ",
-                "timezone": "Europe/Berlin",
-                "city": "Berlin",
-                "country": "de",
-                "accepted": False,
-            }
+        _, pending_site = await fixture.create(
+            "site",
+            [
+                site_details(),
+                site_details(name="BerlinHQ", accepted=False),
+            ],
         )
-        _, pending_site = await fixture.create("site", [site1, site2])
 
         response = await authenticated_user_app_client.get("/requests")
         assert response.status_code == 200
@@ -281,12 +210,9 @@ class TestPendingSitesHandler:
     async def test_post_accept(
         self, authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
     ) -> None:
-        site = {
-            "name": "LondonHQ",
-            "url": "https://londoncalling.example.com",
-            "accepted": False,
-        }
-        [pending_site] = await fixture.create("site", [site])
+        [pending_site] = await fixture.create(
+            "site", [site_details(accepted=False)]
+        )
 
         response = await authenticated_user_app_client.post(
             "/requests",
@@ -299,12 +225,9 @@ class TestPendingSitesHandler:
     async def test_post_reject(
         self, authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
     ) -> None:
-        site = {
-            "name": "LondonHQ",
-            "url": "https://londoncalling.example.com",
-            "accepted": False,
-        }
-        [pending_site] = await fixture.create("site", [site])
+        [pending_site] = await fixture.create(
+            "site", [site_details(accepted=False)]
+        )
 
         response = await authenticated_user_app_client.post(
             "/requests",
@@ -316,12 +239,7 @@ class TestPendingSitesHandler:
     async def test_post_invalid_ids(
         self, authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
     ) -> None:
-        site = {
-            "name": "LondonHQ",
-            "url": "https://londoncalling.example.com",
-            "accepted": True,
-        }
-        [site] = await fixture.create("site", [site])
+        [site] = await fixture.create("site", [site_details()])
         # unknown IDs and IDs for non-pending sites are invalid
         ids = [site["id"], 10000]
         response = await authenticated_user_app_client.post(
