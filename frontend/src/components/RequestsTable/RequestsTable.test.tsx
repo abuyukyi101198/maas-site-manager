@@ -6,23 +6,21 @@ import { formatUTCDateString } from "@/utils";
 
 it("displays a loading text", () => {
   const { rerender } = renderWithMemoryRouter(
-    <RequestsTable data={enrollmentRequestQueryResultFactory.build()} isFetchedAfterMount={false} isLoading={true} />,
+    <RequestsTable data={enrollmentRequestQueryResultFactory.build()} error={undefined} isLoading={true} />,
   );
 
   const table = screen.getByRole("table", { name: /enrollment requests/i });
   expect(table).toBeInTheDocument();
   expect(within(table).getByText(/Loading/i)).toBeInTheDocument();
 
-  rerender(
-    <RequestsTable data={enrollmentRequestQueryResultFactory.build()} isFetchedAfterMount={true} isLoading={false} />,
-  );
+  rerender(<RequestsTable data={enrollmentRequestQueryResultFactory.build()} error={undefined} isLoading={false} />);
 
   expect(within(table).queryByText(/Loading/i)).not.toBeInTheDocument();
 });
 
 it("should show a message if there are no open enrolment requests", () => {
   renderWithMemoryRouter(
-    <RequestsTable data={enrollmentRequestQueryResultFactory.build()} isFetchedAfterMount={true} isLoading={false} />,
+    <RequestsTable data={enrollmentRequestQueryResultFactory.build()} error={undefined} isLoading={false} />,
   );
 
   const table = screen.getByRole("table", { name: /enrollment requests/i });
@@ -33,11 +31,7 @@ it("should show a message if there are no open enrolment requests", () => {
 it("displays enrollment request in each table row correctly", () => {
   const items = enrollmentRequestFactory.buildList(1);
   renderWithMemoryRouter(
-    <RequestsTable
-      data={enrollmentRequestQueryResultFactory.build({ items })}
-      isFetchedAfterMount={true}
-      isLoading={false}
-    />,
+    <RequestsTable data={enrollmentRequestQueryResultFactory.build({ items })} error={undefined} isLoading={false} />,
   );
 
   const tableBody = screen.getAllByRole("rowgroup")[1];

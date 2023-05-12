@@ -1,5 +1,9 @@
 import type { PropsWithChildren } from "react";
 
+import { Notification, Spinner } from "@canonical/react-components";
+
+import ErrorMessage from "@/components/ErrorMessage";
+
 type TableCationProps = PropsWithChildren;
 
 const TableCaption = ({ children }: TableCationProps) => (
@@ -10,7 +14,7 @@ const TableCaption = ({ children }: TableCationProps) => (
 
 const Title = ({ children }: TableCationProps) => (
   <div className="row">
-    <div className="col-start-large-4 u-align--left col-8 col-medium-4 col-small-3">
+    <div className="col-start-large-4 u-align--left col-8 col-medium-4">
       <p className="p-heading--4 u-no-margin--bottom">{children}</p>
     </div>
   </div>
@@ -18,13 +22,25 @@ const Title = ({ children }: TableCationProps) => (
 
 const Description = ({ children }: TableCationProps) => (
   <div className="row">
-    <div className="u-align--left col-start-large-4 col-8 col-medium-4 col-small-3">
+    <div className="u-align--left col-start-large-4 col-8 col-medium-4">
       <p>{children}</p>
     </div>
   </div>
 );
 
+const Error = ({ error }: React.ComponentProps<typeof ErrorMessage>) => (
+  <div className="row">
+    <div className="u-align--left col-start-large-4 col-8 col-medium-4">
+      <Notification severity="negative" title={<ErrorMessage error={error} />} />
+    </div>
+  </div>
+);
+
+const Loading = () => <Spinner text="Loading..." />;
+
 TableCaption.Title = Title;
 TableCaption.Description = Description;
+TableCaption.Loading = Loading;
+TableCaption.Error = Error;
 
 export default TableCaption;

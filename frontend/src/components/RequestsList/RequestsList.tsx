@@ -13,7 +13,7 @@ const Requests: React.FC = () => {
   const [totalDataCount, setTotalDataCount] = useState(0);
   const { page, debouncedPage, size, handleNextClick, handlePreviousClick, handlePageSizeChange, setPage } =
     usePagination(DEFAULT_PAGE_SIZE, totalDataCount);
-  const { data, isLoading, isFetchedAfterMount } = useRequestsQuery({
+  const { error, data, isLoading } = useRequestsQuery({
     page: `${debouncedPage}`,
     size: `${size}`,
   });
@@ -42,7 +42,7 @@ const Requests: React.FC = () => {
           />
         </Col>
         <Col size={12}>
-          <RequestsTable data={data} isFetchedAfterMount={isFetchedAfterMount} isLoading={isLoading} />
+          <RequestsTable data={data} error={error} isLoading={isLoading} />
         </Col>
       </Row>
     </section>

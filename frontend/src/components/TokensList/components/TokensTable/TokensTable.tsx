@@ -6,6 +6,7 @@ import pick from "lodash/fp/pick";
 
 import type { Token } from "@/api/types";
 import SelectAllCheckbox from "@/components/SelectAllCheckbox";
+import TableCaption from "@/components/TableCaption";
 import CopyButton from "@/components/base/CopyButton";
 import TooltipButton from "@/components/base/TooltipButton";
 import { useAppContext } from "@/context";
@@ -20,11 +21,7 @@ const createAccessor =
 export type TokenColumnDef = ColumnDef<Token, Partial<Token>>;
 export type TokenColumn = Column<Token, unknown>;
 
-const TokensTable = ({
-  data,
-  isFetchedAfterMount,
-  isLoading,
-}: Pick<useTokensQueryResult, "data" | "isLoading" | "isFetchedAfterMount">) => {
+const TokensTable = ({ data, error, isLoading }: Pick<useTokensQueryResult, "data" | "error" | "isLoading">) => {
   const [copiedText, setCopiedText] = useState("");
   const { rowSelection, setRowSelection } = useAppContext();
   const isTokenCopied = useCallback((token: string) => token === copiedText, [copiedText]);
@@ -135,8 +132,21 @@ const TokensTable = ({
           </tr>
         ))}
       </thead>
-      {isLoading && !isFetchedAfterMount ? (
-        <caption>Loading...</caption>
+      {error ? (
+        <TableCaption>
+          <TableCaption.Error error={error} />
+        </TableCaption>
+      ) : isLoading ? (
+        <TableCaption>
+          <TableCaption.Loading />
+        </TableCaption>
+      ) : tokenTable.getRowModel().rows.length < 1 ? (
+        <TableCaption>
+          <TableCaption.Title>No tokens available</TableCaption.Title>
+          <TableCaption.Description>
+            Generate new tokens and follow the instructions above to enrol MAAS regions.
+          </TableCaption.Description>
+        </TableCaption>
       ) : (
         <tbody>
           {tokenTable.getRowModel().rows.map((row) => (
@@ -148,14 +158,6 @@ const TokensTable = ({
           ))}
         </tbody>
       )}
-      {!isLoading && data?.items.length === 0 ? (
-        <caption className="empty-table-caption">
-          <div className="empty-table-caption__body">
-            <h2>No tokens available</h2>
-            <p className="p-heading--4">Generate new tokens and follow the instructions above to enrol MAAS regions.</p>
-          </div>
-        </caption>
-      ) : null}
     </table>
   );
 };

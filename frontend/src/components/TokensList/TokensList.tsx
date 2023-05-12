@@ -21,7 +21,7 @@ const TokensList = () => {
   const { page, debouncedPage, size, handleNextClick, handlePreviousClick, handlePageSizeChange, setPage } =
     usePagination(DEFAULT_PAGE_SIZE, totalDataCount);
 
-  const { data, isLoading, isFetchedAfterMount, isSuccess } = useTokensQuery({
+  const { error, data, isLoading, isSuccess } = useTokensQuery({
     page: `${debouncedPage}`,
     size: `${size}`,
   });
@@ -109,7 +109,7 @@ const TokensList = () => {
           totalItems={data?.total || 0}
         />
       </header>
-      <TokensTable data={data} isFetchedAfterMount={isFetchedAfterMount} isLoading={isLoading} />
+      <TokensTable data={data} error={error} isLoading={isLoading} />
     </section>
   );
 };

@@ -20,9 +20,9 @@ const columnHelper = createColumnHelper<EnrollmentRequest>();
 
 const RequestsTable = ({
   data,
-  isFetchedAfterMount,
+  error,
   isLoading,
-}: Pick<UseEnrollmentRequestsQueryResult, "data" | "isLoading" | "isFetchedAfterMount">) => {
+}: Pick<UseEnrollmentRequestsQueryResult, "data" | "error" | "isLoading">) => {
   const { rowSelection, setRowSelection } = useAppContext();
 
   // clear selection on unmount
@@ -106,8 +106,14 @@ const RequestsTable = ({
             </tr>
           ))}
         </thead>
-        {isLoading && !isFetchedAfterMount ? (
-          <caption>Loading...</caption>
+        {error ? (
+          <TableCaption>
+            <TableCaption.Error error={error} />
+          </TableCaption>
+        ) : isLoading ? (
+          <TableCaption>
+            <TableCaption.Loading />
+          </TableCaption>
         ) : table.getRowModel().rows.length < 1 ? (
           <TableCaption>
             <TableCaption.Title>No outstanding requests</TableCaption.Title>

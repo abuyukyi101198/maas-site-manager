@@ -1,5 +1,3 @@
-import * as Sentry from "@sentry/browser";
-
 import api from "./api";
 import type { Token } from "./types";
 import urls from "./urls";
@@ -44,7 +42,7 @@ export const getSites = async (params: GetSitesQueryParams, queryText?: string) 
     });
     return response.data;
   } catch (error) {
-    Sentry.captureException(new Error("getSites failed", { cause: error }));
+    throw error;
   }
 };
 
@@ -71,7 +69,7 @@ export const getTokens = async (params: GetTokensQueryParams) => {
     const response = await api.get(urls.tokens, { params });
     return response.data;
   } catch (error) {
-    Sentry.captureException(new Error("getTokens failed", { cause: error }));
+    throw error;
   }
 };
 
@@ -92,7 +90,7 @@ export const getEnrollmentRequests = async (params: GetEnrollmentRequestsQueryPa
     const response = await api.get(urls.enrollmentRequests, { params });
     return response.data;
   } catch (error) {
-    Sentry.captureException(new Error("getEnrollmentRequests failed", { cause: error }));
+    throw error;
   }
 };
 

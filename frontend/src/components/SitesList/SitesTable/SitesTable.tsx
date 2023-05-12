@@ -14,6 +14,7 @@ import type { SitesQueryResult } from "@/api/types";
 import ExternalLink from "@/components/ExternalLink";
 import NoRegions from "@/components/NoRegions";
 import SelectAllCheckbox from "@/components/SelectAllCheckbox";
+import TableCaption from "@/components/TableCaption/TableCaption";
 import type { PaginationBarProps } from "@/components/base/PaginationBar/PaginationBar";
 import PaginationBar from "@/components/base/PaginationBar/PaginationBar";
 import TooltipButton from "@/components/base/TooltipButton/TooltipButton";
@@ -33,11 +34,11 @@ export type SitesColumn = Column<Site, unknown>;
 
 const SitesTable = ({
   data,
-  isFetchedAfterMount,
   isLoading,
+  error,
   setSearchText,
   paginationProps,
-}: Pick<UseSitesQueryResult, "data" | "isLoading" | "isFetchedAfterMount"> & {
+}: Pick<UseSitesQueryResult, "data" | "isLoading" | "error"> & {
   setSearchText: (text: string) => void;
   paginationProps: PaginationBarProps;
 }) => {
@@ -229,17 +230,7 @@ const SitesTable = ({
         isLoading={isLoading}
         setSearchText={setSearchText}
       />
-      <PaginationBar
-        currentPage={paginationProps.currentPage}
-        dataContext={paginationProps.dataContext}
-        handlePageSizeChange={paginationProps.handlePageSizeChange}
-        isLoading={paginationProps.isLoading}
-        itemsPerPage={paginationProps.itemsPerPage}
-        onNextClick={paginationProps.onNextClick}
-        onPreviousClick={paginationProps.onPreviousClick}
-        setCurrentPage={paginationProps.setCurrentPage}
-        totalItems={paginationProps.totalItems}
-      />
+      <PaginationBar {...paginationProps} />
       <table aria-label="sites" className="sites-table">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -254,8 +245,14 @@ const SitesTable = ({
             </tr>
           ))}
         </thead>
-        {isLoading && !isFetchedAfterMount ? (
-          <caption>Loading...</caption>
+        {error ? (
+          <TableCaption>
+            <TableCaption.Error error={error} />
+          </TableCaption>
+        ) : isLoading ? (
+          <TableCaption>
+            <TableCaption.Loading />
+          </TableCaption>
         ) : table.getRowModel().rows.length < 1 ? (
           <NoRegions />
         ) : (

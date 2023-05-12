@@ -16,7 +16,7 @@ const SitesList = () => {
   const [searchText, setSearchText] = useState("");
   const debounceSearchText = useDebounce(searchText);
 
-  const { data, isLoading, isFetchedAfterMount } = useSitesQuery(
+  const { error, data, isLoading } = useSitesQuery(
     { page: `${debouncedPage}`, size: `${size}` },
     parseSearchTextToQueryParams(debounceSearchText),
   );
@@ -35,7 +35,7 @@ const SitesList = () => {
     <div>
       <SitesTable
         data={data}
-        isFetchedAfterMount={isFetchedAfterMount}
+        error={error}
         isLoading={isLoading}
         paginationProps={{
           currentPage: page,
