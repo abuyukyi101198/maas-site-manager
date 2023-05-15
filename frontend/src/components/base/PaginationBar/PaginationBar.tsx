@@ -66,8 +66,8 @@ const PaginationBar = ({
           />
 
           <Select
-            aria-label="Tokens per page"
-            name="Tokens per page"
+            aria-label="Items per page"
+            name="Items per page"
             onChange={handleSizeChange}
             options={pageOptions}
             value={itemsPerPage}

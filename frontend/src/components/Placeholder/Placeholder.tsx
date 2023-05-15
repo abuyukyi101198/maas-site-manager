@@ -23,6 +23,7 @@ const Placeholder = ({ text, children, className, isLoading = false }: Props) =>
       <span
         aria-label="loading"
         className={classNames("p-placeholder", className)}
+        role="progressbar"
         style={{ animationDelay: `${delay}ms` }}
       >
         <span aria-hidden="true">{text || children}</span>
