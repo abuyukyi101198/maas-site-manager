@@ -28,6 +28,7 @@ def site_details(**extra_details: Any) -> dict[str, Any]:
     """Return sample details for creating a site."""
     details = {
         "name": "LondonHQ",
+        "name_unique": True,
         "url": "https://londoncalling.example.com",
         "accepted": True,
     }

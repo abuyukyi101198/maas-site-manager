@@ -23,7 +23,8 @@ Site = Table(
     Column("country", Text),  # ISO 3166 Alpha2
     Column("latitude", Text),
     Column("longitude", Text),
-    Column("name", Text, unique=True),
+    Column("name", Text),
+    Column("name_unique", Boolean),
     Column("note", Text),
     Column("region", Text),
     Column("street", Text),

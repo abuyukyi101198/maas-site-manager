@@ -26,6 +26,7 @@ class Site(BaseModel):
 
     id: int
     name: str
+    name_unique: bool
     city: str | None
     country: str | None = Field(min_length=2, max_length=2)
     latitude: str | None

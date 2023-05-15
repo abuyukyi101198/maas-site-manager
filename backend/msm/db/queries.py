@@ -150,6 +150,7 @@ async def get_sites(
         select(
             Site.c.id,
             Site.c.name,
+            Site.c.name_unique,
             Site.c.city,
             Site.c.country,
             Site.c.latitude,
