@@ -5,6 +5,14 @@
   padding: $spv--small 0;
   margin-bottom: $spv--large;
 
+  .p-form--inline {
+      width: 100%;
+  }
+  
+  label {
+    margin-bottom: 0;
+  }
+
   .pagination-bar__description {
     margin: 0;
     padding: 0;
@@ -12,6 +20,8 @@
 
   .pagination-bar__right {
     width: 100%;
+    margin-left: auto;
+    margin-right: 0;
 
     @media screen and (min-width: $breakpoint-small) {
       width: auto;

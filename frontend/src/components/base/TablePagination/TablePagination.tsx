@@ -70,7 +70,9 @@ const TablePagination = ({
       >
         <Icon className="u__left-rotate" name="chevron-down" />
       </Button>
-      <strong>Page</strong>
+      <label>
+        <strong>Page</strong>
+      </label>
       <Input
         aria-label="current page"
         className="current-page"
@@ -82,7 +84,9 @@ const TablePagination = ({
         type="number"
         value={pageNumber}
       />
-      <strong className="u-no-wrap"> of {totalPages}</strong>
+      <label>
+        <strong className="u-no-wrap"> of {totalPages}</strong>
+      </label>
       <Button
         appearance="base"
         aria-label="next page"

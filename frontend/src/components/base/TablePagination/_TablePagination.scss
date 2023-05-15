@@ -3,9 +3,7 @@
   margin: 0 $sph--x-large $spv--large 0;
   display: flex;
   gap: $sph--small;
-  align-items: center;
   list-style: none;
-  padding: 0;
 
   @media screen and (min-width: $breakpoint-small) {
     margin-bottom: 0;
@@ -13,6 +11,7 @@
 
   button {
     margin: 0;
+    align-self: flex-start;
   }
 
   .u__left-rotate {
@@ -28,7 +27,7 @@
     margin-bottom: 0;
 
     .current-page {
-      width: 100%;
+      width: 3rem;
       min-width: 1.625rem;
       margin-bottom: 0;
       text-align: center;
@@ -49,10 +48,9 @@
     }
 
     .p-form-validation__message {
-      position: absolute;
-      left: 0.625rem;
-      margin-top: 0;
-      white-space: nowrap;
+      width: max-content;
+      margin-top: $sph--small;
+      margin-bottom: 0;
     }
   }
 }

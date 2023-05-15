@@ -49,28 +49,30 @@ const PaginationBar = ({
 
   return (
     <section className="pagination-bar u-flex u-flex--justify-between u-flex--wrap">
-      <strong className="pagination-bar__description">
-        Showing {getDisplayedDataCount()} out of {totalItems} {dataContext}
-      </strong>
+      <div className="p-form p-form--inline">
+        <strong className="pagination-bar__description">
+          Showing {getDisplayedDataCount()} out of {totalItems} {dataContext}
+        </strong>
 
-      <div className="u-flex u-flex--wrap u-flex--column-x-small pagination-bar__right">
-        <TablePagination
-          currentPage={currentPage}
-          isLoading={isLoading}
-          itemsPerPage={itemsPerPage}
-          onNextClick={onNextClick}
-          onPreviousClick={onPreviousClick}
-          setCurrentPage={setCurrentPage}
-          totalItems={totalItems}
-        />
+        <div className="u-flex u-flex--wrap u-flex--column-x-small pagination-bar__right">
+          <TablePagination
+            currentPage={currentPage}
+            isLoading={isLoading}
+            itemsPerPage={itemsPerPage}
+            onNextClick={onNextClick}
+            onPreviousClick={onPreviousClick}
+            setCurrentPage={setCurrentPage}
+            totalItems={totalItems}
+          />
 
-        <Select
-          aria-label="Tokens per page"
-          name="Tokens per page"
-          onChange={handleSizeChange}
-          options={pageOptions}
-          value={itemsPerPage}
-        />
+          <Select
+            aria-label="Tokens per page"
+            name="Tokens per page"
+            onChange={handleSizeChange}
+            options={pageOptions}
+            value={itemsPerPage}
+          />
+        </div>
       </div>
     </section>
   );
