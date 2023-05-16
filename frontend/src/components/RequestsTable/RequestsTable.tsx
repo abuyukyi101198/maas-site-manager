@@ -6,6 +6,7 @@ import type { Column, ColumnDef } from "@tanstack/react-table";
 import type { EnrollmentRequest } from "@/api/types";
 import docsUrls from "@/base/docsUrls";
 import DateTime from "@/components/DateTime";
+import DynamicTable from "@/components/DynamicTable/DynamicTable";
 import ExternalLink from "@/components/ExternalLink";
 import SelectAllCheckbox from "@/components/SelectAllCheckbox";
 import TableCaption from "@/components/TableCaption";
@@ -91,57 +92,55 @@ const RequestsTable = ({
   });
 
   return (
-    <>
-      <table aria-label="enrollment requests" className="sites-table">
-        <thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <th className={`${header.column.id}`} colSpan={header.colSpan} key={header.id}>
-                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                  </th>
-                );
-              })}
-            </tr>
-          ))}
-        </thead>
-        {error ? (
-          <TableCaption>
-            <TableCaption.Error error={error} />
-          </TableCaption>
-        ) : isLoading ? (
-          <TableCaption>
-            <TableCaption.Loading />
-          </TableCaption>
-        ) : table.getRowModel().rows.length < 1 ? (
-          <TableCaption>
-            <TableCaption.Title>No outstanding requests</TableCaption.Title>
-            <TableCaption.Description>
-              You have to request an enrolment in the site-manager-agent.
-              <br />
-              <ExternalLink to={docsUrls.enrollmentRequest}>Read more about it in the documentation.</ExternalLink>
-            </TableCaption.Description>
-          </TableCaption>
-        ) : (
-          <tbody>
-            {table.getRowModel().rows.map((row) => {
+    <DynamicTable aria-label="enrollment requests" className="sites-table">
+      <thead>
+        {table.getHeaderGroups().map((headerGroup) => (
+          <tr key={headerGroup.id}>
+            {headerGroup.headers.map((header) => {
               return (
-                <tr key={row.id}>
-                  {row.getVisibleCells().map((cell) => {
-                    return (
-                      <td className={`${cell.column.id}`} key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </td>
-                    );
-                  })}
-                </tr>
+                <th className={`${header.column.id}`} colSpan={header.colSpan} key={header.id}>
+                  {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                </th>
               );
             })}
-          </tbody>
-        )}
-      </table>
-    </>
+          </tr>
+        ))}
+      </thead>
+      {error ? (
+        <TableCaption>
+          <TableCaption.Error error={error} />
+        </TableCaption>
+      ) : isLoading ? (
+        <TableCaption>
+          <TableCaption.Loading />
+        </TableCaption>
+      ) : table.getRowModel().rows.length < 1 ? (
+        <TableCaption>
+          <TableCaption.Title>No outstanding requests</TableCaption.Title>
+          <TableCaption.Description>
+            You have to request an enrolment in the site-manager-agent.
+            <br />
+            <ExternalLink to={docsUrls.enrollmentRequest}>Read more about it in the documentation.</ExternalLink>
+          </TableCaption.Description>
+        </TableCaption>
+      ) : (
+        <DynamicTable.Body>
+          {table.getRowModel().rows.map((row) => {
+            return (
+              <tr key={row.id}>
+                {row.getVisibleCells().map((cell) => {
+                  return (
+                    <td className={`${cell.column.id}`} key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
+        </DynamicTable.Body>
+      )}
+    </DynamicTable>
   );
 };
 

@@ -6,17 +6,11 @@ $instructions-height-medium: 10.9375rem;
   display: grid;
 
   @media only screen and (min-width: $breakpoint-small) {
-    height: $header-height-medium;
-    position: sticky;
-    top: -#{$spv--medium};
     background-color: white;
     z-index: 1;
     padding-top: $spv--medium;
   }
 
-  @media only screen and (min-width: $breakpoint-large) {
-    height: $header-height-large;
-  }
 
   .tokens-list-certificate {
     display: grid;

@@ -1,7 +1,8 @@
 $connection-status-icon-width: 1.5rem;
 
 .sites-table {
-  thead th:first-child {
+  thead th:first-child,
+  tbody td:first-child {
     width: 3rem;
   }
 

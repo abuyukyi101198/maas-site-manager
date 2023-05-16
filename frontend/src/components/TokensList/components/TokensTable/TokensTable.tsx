@@ -5,6 +5,7 @@ import { flexRender, useReactTable, getCoreRowModel } from "@tanstack/react-tabl
 import pick from "lodash/fp/pick";
 
 import type { Token } from "@/api/types";
+import DynamicTable from "@/components/DynamicTable";
 import SelectAllCheckbox from "@/components/SelectAllCheckbox";
 import TableCaption from "@/components/TableCaption";
 import CopyButton from "@/components/base/CopyButton";
@@ -120,13 +121,14 @@ const TokensTable = ({ data, error, isLoading }: Pick<useTokensQueryResult, "dat
     enableMultiRowSelection: true,
     onRowSelectionChange: setRowSelection,
   });
+
   return (
-    <table aria-label="tokens" className="tokens-table">
+    <DynamicTable aria-label="tokens" className="tokens-table u-no-margin--bottom">
       <thead>
         {tokenTable.getHeaderGroups().map((headerGroup) => (
           <tr key={headerGroup.id}>
             {headerGroup.headers.map((header) => (
-              <th colSpan={header.colSpan} key={header.id}>
+              <th className={`tokens-table__col-${header.column.id}`} colSpan={header.colSpan} key={header.id}>
                 {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
               </th>
             ))}
@@ -149,17 +151,21 @@ const TokensTable = ({ data, error, isLoading }: Pick<useTokensQueryResult, "dat
           </TableCaption.Description>
         </TableCaption>
       ) : (
-        <tbody>
+        <DynamicTable.Body>
           {tokenTable.getRowModel().rows.map((row) => (
             <tr key={row.id}>
               {row.getVisibleCells().map((cell) => {
-                return <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>;
+                return (
+                  <td className={`tokens-table__col-${cell.column.id}`} key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                );
               })}
             </tr>
           ))}
-        </tbody>
+        </DynamicTable.Body>
       )}
-    </table>
+    </DynamicTable>
   );
 };
 

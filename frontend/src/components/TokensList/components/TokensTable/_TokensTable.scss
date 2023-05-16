@@ -5,49 +5,45 @@
   }
   
   thead th {
-    position: sticky;
     top: -#{$spv--medium};
-    background-color: white;
-    z-index: 1;
     padding-top: $spv--large;
-
-    @media only screen and (min-width: $breakpoint-small){
-      top: calc($header-height-medium - $spv--medium);
-    }
-
-    @media only screen and (min-width: $breakpoint-large) {
-      top: calc($header-height-large - $spv--medium);
-    }
   }
 
-  thead th:first-child {
+  thead th:first-child,
+  tbody td:first-child {
     width: 3rem;
   }
 
-  thead th:last-child {
+  thead th:last-child,
+  tbody td:last-child {
     width: 15rem;
   }
 
-  thead th:nth-child(3) {
+  thead th:nth-child(3),
+  tbody td:nth-child(3) {
     width: 15rem;
   }
 
   @media screen and (min-width: $breakpoint-small) and (max-width: $breakpoint-large) {
-    thead th:last-child {
+    thead th:last-child,
+    tbody td:last-child {
       width: 10rem;
     }
 
-    thead th:nth-child(3) {
+    thead th:nth-child(3),
+    tbody td:nth-child(3) {
       width: 10rem;
     }
   }
 
   @media screen and (max-width: $breakpoint-small) {
-    thead th:last-child {
+    thead th:last-child,
+    tbody td:last-child {
       width: auto;
     }
 
-    thead th:nth-child(3) {
+    thead th:nth-child(3),
+    tbody td:nth-child(3) {
       width: auto;
     }
   }

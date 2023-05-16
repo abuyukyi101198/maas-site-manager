@@ -11,6 +11,7 @@ import ConnectionInfo from "./ConnectionInfo";
 import SitesTableControls from "./SitesTableControls/SitesTableControls";
 
 import type { SitesQueryResult } from "@/api/types";
+import DynamicTable from "@/components/DynamicTable/DynamicTable";
 import ExternalLink from "@/components/ExternalLink";
 import NoRegions from "@/components/NoRegions";
 import SelectAllCheckbox from "@/components/SelectAllCheckbox";
@@ -230,7 +231,7 @@ const SitesTable = ({
         setSearchText={setSearchText}
       />
       <PaginationBar {...paginationProps} />
-      <table aria-label="sites" className="sites-table">
+      <DynamicTable aria-label="sites" className="sites-table">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
@@ -255,7 +256,7 @@ const SitesTable = ({
         ) : table.getRowModel().rows.length < 1 ? (
           <NoRegions />
         ) : (
-          <tbody>
+          <DynamicTable.Body>
             {table.getRowModel().rows.map((row) => {
               return (
                 <tr
@@ -272,9 +273,9 @@ const SitesTable = ({
                 </tr>
               );
             })}
-          </tbody>
+          </DynamicTable.Body>
         )}
-      </table>
+      </DynamicTable>
     </>
   );
 };
