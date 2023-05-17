@@ -14,10 +14,12 @@ from ..schema import TimeZone
 class SiteData(BaseModel):
     """Data for a site."""
 
+    total_machines: int
     allocated_machines: int
     deployed_machines: int
     ready_machines: int
     error_machines: int
+    other_machines: int
     last_seen: datetime
 
 

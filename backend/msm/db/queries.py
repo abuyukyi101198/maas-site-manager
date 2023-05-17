@@ -164,6 +164,14 @@ async def get_sites(
                 (
                     SiteData.c.site_id != None,  # noqa: E711
                     func.json_build_object(
+                        "total_machines",
+                        (
+                            SiteData.c.allocated_machines
+                            + SiteData.c.deployed_machines
+                            + SiteData.c.ready_machines
+                            + SiteData.c.error_machines
+                            + SiteData.c.other_machines
+                        ).label("total_machines"),
                         "allocated_machines",
                         SiteData.c.allocated_machines,
                         "deployed_machines",
@@ -172,6 +180,8 @@ async def get_sites(
                         SiteData.c.ready_machines,
                         "error_machines",
                         SiteData.c.error_machines,
+                        "other_machines",
+                        SiteData.c.other_machines,
                         "last_seen",
                         SiteData.c.last_seen,
                     ),

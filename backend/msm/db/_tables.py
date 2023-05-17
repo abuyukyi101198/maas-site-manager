@@ -69,5 +69,6 @@ SiteData = Table(
     Column("deployed_machines", Integer),
     Column("ready_machines", Integer),
     Column("error_machines", Integer),
+    Column("other_machines", Integer),
     Column("last_seen", DateTime),
 )

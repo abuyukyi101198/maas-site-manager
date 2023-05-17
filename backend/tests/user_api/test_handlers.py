@@ -158,6 +158,7 @@ class TestSitesHandler:
                     "deployed_machines": 20,
                     "ready_machines": 30,
                     "error_machines": 40,
+                    "other_machines": 5,
                     "last_seen": datetime.utcnow(),
                 }
             ],
@@ -165,6 +166,7 @@ class TestSitesHandler:
         del site_data["id"]
         del site_data["site_id"]
         site_data["last_seen"] = site_data["last_seen"].isoformat()
+        site_data["total_machines"] = 105
         site["stats"] = site_data
         del site["created"]
         del site["accepted"]
