@@ -70,9 +70,8 @@ const getByTextContent = (text: string | RegExp) => {
   });
 };
 
-export { screen, within, waitFor, act } from "@testing-library/react";
+export { screen, within, waitFor, act, renderHook } from "@testing-library/react";
 export { customRender as render };
-export { renderHook, act as hookAct } from "@testing-library/react-hooks";
 export { default as userEvent } from "@testing-library/user-event";
 export { renderWithMemoryRouter };
 export { Providers };

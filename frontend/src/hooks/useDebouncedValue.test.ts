@@ -1,17 +1,13 @@
 import useDebouncedValue from "./useDebouncedValue";
 
-import { renderHook } from "@/test-utils";
+import { act, renderHook } from "@/test-utils";
 
 describe("useDebouncedValue", () => {
-  beforeAll(() => {
+  beforeEach(() => {
     vi.useFakeTimers();
   });
 
   afterEach(() => {
-    vi.clearAllTimers();
-  });
-
-  afterAll(() => {
     vi.useRealTimers();
   });
 
@@ -21,12 +17,11 @@ describe("useDebouncedValue", () => {
         value: "value",
       },
     });
-
     expect(result.current).toBe("value");
-
-    await rerender({ value: "new-value" });
-    await vi.advanceTimersToNextTimer();
-
+    rerender({ value: "new-value" });
+    await act(async () => {
+      await vi.runAllTimersAsync();
+    });
     expect(result.current).toBe("new-value");
   });
 
@@ -37,12 +32,11 @@ describe("useDebouncedValue", () => {
         delay: 5,
       },
     });
-
     expect(result.current).toBe("value");
-
-    await rerender({ value: "new-value", delay: 5 });
-    await vi.advanceTimersByTime(5);
-
+    rerender({ value: "new-value", delay: 5 });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5);
+    });
     expect(result.current).toBe("new-value");
   });
 });

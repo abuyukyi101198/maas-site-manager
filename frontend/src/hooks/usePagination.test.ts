@@ -1,6 +1,6 @@
 import usePagination from "./usePagination";
 
-import { hookAct, renderHook } from "@/test-utils";
+import { renderHook, act } from "@/test-utils";
 
 describe("usePagination", () => {
   const samplePageSize = 50;
@@ -12,26 +12,22 @@ describe("usePagination", () => {
     expect(result.current.page).toBe(1);
   });
 
-  it("next and previous page functions work correctly", () => {
+  it("next and previous page functions work correctly", async () => {
     const { result } = renderHook(() => usePagination(samplePageSize, sampleTotalCount));
-
-    hookAct(() => {
+    await act(() => {
       result.current.handleNextClick();
     });
-
     expect(result.current.page).toBe(2);
-
-    hookAct(() => {
+    await act(() => {
       result.current.handlePreviousClick();
     });
-
     expect(result.current.page).toBe(1);
   });
 
-  it("should reset page count after page size is changed", () => {
+  it("should reset page count after page size is changed", async () => {
     const { result } = renderHook(() => usePagination(samplePageSize, sampleTotalCount));
 
-    hookAct(() => {
+    await act(() => {
       result.current.handleNextClick();
       result.current.handlePageSizeChange(10);
     });
