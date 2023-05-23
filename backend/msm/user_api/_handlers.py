@@ -19,6 +19,10 @@ from ..schema import (
     pagination_params,
     PaginationParams,
 )
+from ..schema._sorting import (
+    SortParam,
+    SortParamParser,
+)
 from ..settings import SETTINGS
 from ._forms import (
     site_filter_parameters,
@@ -41,6 +45,18 @@ from ._schema import (
     TokensPostResponse,
 )
 
+site_sort_parameters = SortParamParser(
+    fields=[
+        "name",
+        "name_unique",
+        "country",
+        "city",
+        "region",
+        "street",
+        "timezone",
+    ]
+)
+
 
 async def root_get(request: Request) -> RootGetResponse:
     """Root endpoint."""
@@ -52,10 +68,12 @@ async def sites_get(
     authenticated_user: Annotated[User, Depends(get_authenticated_user)],
     pagination_params: PaginationParams = Depends(pagination_params),
     filter_params: SiteFilterParams = Depends(site_filter_parameters),
+    sort_params: list[SortParam] = Depends(site_sort_parameters),
 ) -> SitesGetResponse:
     """Return accepted sites."""
     total, results = await queries.get_sites(
         session,
+        sort_params=sort_params,
         offset=pagination_params.offset,
         limit=pagination_params.size,
         **filter_params._asdict(),

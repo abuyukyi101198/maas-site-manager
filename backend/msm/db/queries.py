@@ -9,20 +9,24 @@ from typing import Any
 from uuid import UUID
 
 from sqlalchemy import (
+    asc,
     case,
     ColumnOperators,
     delete,
+    desc,
     func,
     select,
     String,
     Table,
     Text,
+    UnaryExpression,
     update,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.expression import FromClause
 
 from ..schema import MAX_PAGE_SIZE
+from ..schema._sorting import SortParam
 from ._tables import (
     Site,
     SiteData,
@@ -120,8 +124,18 @@ def filters_from_arguments(
     ]
 
 
+def order_by_from_arguments(
+    table: Table, sort_params: list[SortParam]
+) -> list[UnaryExpression[Any]]:
+    return [
+        asc(table.c[param.field]) if param.asc else desc(table.c[param.field])
+        for param in sort_params
+    ]
+
+
 async def get_sites(
     session: AsyncSession,
+    sort_params: list[SortParam],
     offset: int = 0,
     limit: int = MAX_PAGE_SIZE,
     city: list[str] | None = None,
@@ -145,6 +159,7 @@ async def get_sites(
         url=url,
     )
     filters.append(Site.c.accepted == True)  # noqa
+    order_by = order_by_from_arguments(table=Site, sort_params=sort_params)
     count = await row_count(session, Site, *filters)
     stmt = (
         select(
@@ -193,7 +208,7 @@ async def get_sites(
             Site.join(SiteData, SiteData.c.site_id == Site.c.id, isouter=True)
         )
         .where(*filters)  # type: ignore[arg-type]
-        .order_by(Site.c.id)
+        .order_by(*order_by)
         .limit(limit)
         .offset(offset)
     )

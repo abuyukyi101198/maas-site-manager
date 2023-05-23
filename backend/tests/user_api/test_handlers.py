@@ -4,7 +4,10 @@ from datetime import (
 )
 from typing import Any
 
-from httpx import AsyncClient
+from httpx import (
+    AsyncClient,
+    Response,
+)
 import pytest
 
 from msm import __version__
@@ -179,6 +182,70 @@ class TestSitesHandler:
             "total": 1,
             "items": [site],
         }
+
+    @pytest.mark.parametrize(
+        "query_params, expected_result",
+        [
+            ("sort_by=city-asc", ["London", "Milan", "Paris", "Rome"]),
+            (
+                "sort_by=city,name,name_unique,country,region,street,timezone",
+                ["London", "Milan", "Paris", "Rome"],
+            ),
+            ("sort_by=city-asc", ["London", "Milan", "Paris", "Rome"]),
+            ("sort_by=city-desc", ["Rome", "Paris", "Milan", "London"]),
+            (
+                "sort_by=country,city-desc",
+                ["Paris", "London", "Rome", "Milan"],
+            ),
+            ("sort_by=country,city-asc", ["Paris", "London", "Milan", "Rome"]),
+            ("page=2&size=2&sort_by=country,city-asc", ["Milan", "Rome"]),
+        ],
+    )
+    async def test_get_with_sorting(
+        self,
+        authenticated_user_app_client: AuthAsyncClient,
+        fixture: Fixture,
+        query_params: str,
+        expected_result: list[str],
+    ) -> None:
+        def extract_cities(resp: Response) -> list[str]:
+            return [site["city"] for site in resp.json()["items"]]
+
+        await fixture.create(
+            "site", [site_details(city="Milan", country="IT")]
+        )
+        await fixture.create(
+            "site", [site_details(city="Paris", country="FR")]
+        )
+        await fixture.create("site", [site_details(city="Rome", country="IT")])
+        await fixture.create(
+            "site", [site_details(city="London", country="GB")]
+        )
+
+        response = await authenticated_user_app_client.get(
+            "/sites", params=query_params
+        )
+        assert extract_cities(response) == expected_result
+
+    @pytest.mark.parametrize(
+        "query_params",
+        ["sort_by=id-asc", "sort_by=city,city", "sort_by=doesnotexist"],
+    )
+    async def test_get_with_invalid_sorting(
+        self,
+        authenticated_user_app_client: AuthAsyncClient,
+        fixture: Fixture,
+        query_params: str,
+    ) -> None:
+        await fixture.create(
+            "site", [site_details(city="Milan", country="IT")]
+        )
+
+        # not sortable
+        response = await authenticated_user_app_client.get(
+            "/sites", params=query_params
+        )
+        assert response.status_code == 400
 
 
 @pytest.mark.asyncio
