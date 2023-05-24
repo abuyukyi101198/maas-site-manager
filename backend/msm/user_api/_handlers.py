@@ -24,6 +24,7 @@ from ..schema._sorting import (
     SortParamParser,
 )
 from ..settings import SETTINGS
+from ._csv import CSVResponse
 from ._forms import (
     site_filter_parameters,
     SiteFilterParams,
@@ -141,6 +142,14 @@ async def tokens_get(
         size=pagination_params.size,
         items=list(results),
     )
+
+
+async def tokens_export_get(
+    session: Annotated[AsyncSession, Depends(db_session)],
+    authenticated_user: Annotated[User, Depends(get_authenticated_user)],
+) -> CSVResponse:
+    tokens = await queries.get_active_tokens(session)
+    return CSVResponse(content=tokens)
 
 
 async def tokens_post(

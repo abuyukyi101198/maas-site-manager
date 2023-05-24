@@ -1,11 +1,13 @@
-from collections.abc import Iterable
 from datetime import (
     datetime,
     timedelta,
 )
 from functools import reduce
 from operator import or_
-from typing import Any
+from typing import (
+    Any,
+    Iterable,
+)
 from uuid import UUID
 
 from sqlalchemy import (
@@ -145,7 +147,7 @@ async def get_sites(
     street: list[str] | None = None,
     timezone: list[str] | None = None,
     url: list[str] | None = None,
-) -> tuple[int, Iterable[SiteSchema]]:
+) -> tuple[int, list[SiteSchema]]:
     filters = filters_from_arguments(
         Site,
         city=city,
@@ -220,7 +222,7 @@ async def get_pending_sites(
     session: AsyncSession,
     offset: int = 0,
     limit: int | None = None,
-) -> tuple[int, Iterable[PendingSiteSchema]]:
+) -> tuple[int, list[PendingSiteSchema]]:
     filters = [Site.c.accepted == False]  # noqa
     count = await row_count(session, Site, *filters)
     stmt = (
@@ -273,7 +275,7 @@ async def get_tokens(
     session: AsyncSession,
     offset: int = 0,
     limit: int | None = None,
-) -> tuple[int, Iterable[TokenSchema]]:
+) -> tuple[int, list[TokenSchema]]:
     count = await row_count(session, Token)
     stmt = (
         select(
@@ -291,6 +293,22 @@ async def get_tokens(
         stmt = stmt.limit(limit)
     result = await session.execute(stmt)
     return count, [TokenSchema(**row._asdict()) for row in result.all()]
+
+
+async def get_active_tokens(session: AsyncSession) -> list[TokenSchema]:
+    result = await session.execute(
+        select(
+            Token.c.id,
+            Token.c.site_id,
+            Token.c.value,
+            Token.c.expired,
+            Token.c.created,
+        )
+        .select_from(Token)
+        .where(Token.c.expired > func.now())
+        .order_by(Token.c.id)
+    )
+    return [TokenSchema(**row._asdict()) for row in result.all()]
 
 
 async def create_tokens(

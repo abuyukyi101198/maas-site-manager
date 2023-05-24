@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import (
     Any,
+    AsyncGenerator,
     Iterator,
 )
 
@@ -11,6 +12,7 @@ from sqlalchemy import (
     ColumnOperators,
     create_engine,
 )
+from sqlalchemy.ext.asyncio.session import AsyncSession
 
 from msm.db import (
     Database,
@@ -70,6 +72,13 @@ def db(
         yield Database(db_setup.async_dsn)
         with conn.begin():
             METADATA.drop_all(conn)
+
+
+@pytest.fixture
+async def session(db: Database) -> AsyncGenerator[AsyncSession, None]:
+    """A database session."""
+    async with db.session() as session:
+        yield session
 
 
 class Fixture:

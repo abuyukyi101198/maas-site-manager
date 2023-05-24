@@ -9,15 +9,17 @@ from .fixtures.db import (
     db,
     db_setup,
     fixture,
+    session,
 )
 
 __all__ = [
+    "authenticated_user_app_client",
     "db",
     "db_setup",
-    "user_app",
-    "authenticated_user_app_client",
-    "user_app_client",
     "fixture",
+    "session",
+    "user_app",
+    "user_app_client",
 ]
 
 
