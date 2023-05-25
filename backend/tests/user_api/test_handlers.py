@@ -434,11 +434,12 @@ class TestLoginHandler:
 @pytest.mark.parametrize(
     "method,url",
     [
-        ("GET", "/sites"),
         ("GET", "/requests"),
         ("POST", "/requests"),
+        ("GET", "/sites"),
         ("GET", "/tokens"),
         ("POST", "/tokens"),
+        ("GET", "/tokens/export"),
         ("GET", "/users/me"),
     ],
 )
