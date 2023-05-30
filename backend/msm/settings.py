@@ -42,7 +42,11 @@ class Settings(BaseSettings):
 
     algorithm = "HS256"
 
-    access_token_expire_minutes = int(getenv("TOKEN_EXPIRATION_TIME", 30))
+    access_token_expire_minutes = int(getenv("MSM_TOKEN_EXPIRATION_TIME", 30))
+
+    lost_connection_threshold_seconds = int(
+        getenv("MSM_LOST_CONNECTION_THRESHOLD", 60)
+    )
 
 
 SETTINGS = Settings()

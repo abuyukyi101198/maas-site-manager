@@ -28,6 +28,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.expression import FromClause
 
 from ..schema import SortParam
+from ..settings import SETTINGS
 from ._tables import (
     Site,
     SiteData,
@@ -35,6 +36,7 @@ from ._tables import (
     User,
 )
 from .models import (
+    ConnectionStatus,
     PendingSite as PendingSiteSchema,
     Site as SiteSchema,
     Token as TokenSchema,
@@ -126,10 +128,10 @@ def filters_from_arguments(
 
 
 def order_by_from_arguments(
-    table: Table, sort_params: list[SortParam]
+    sort_params: list[SortParam],
 ) -> list[UnaryExpression[Any]]:
     return [
-        asc(table.c[param.field]) if param.asc else desc(table.c[param.field])
+        asc(param.field) if param.asc else desc(param.field)
         for param in sort_params
     ]
 
@@ -160,8 +162,11 @@ async def get_sites(
         url=url,
     )
     filters.append(Site.c.accepted == True)  # noqa
-    order_by = order_by_from_arguments(table=Site, sort_params=sort_params)
+    order_by = order_by_from_arguments(sort_params=sort_params)
     count = await row_count(session, Site, *filters)
+    connection_lost_timedelta = datetime.utcnow() - timedelta(
+        seconds=SETTINGS.lost_connection_threshold_seconds
+    )
     stmt = (
         select(
             Site.c.id,
@@ -176,6 +181,17 @@ async def get_sites(
             Site.c.street,
             Site.c.timezone,
             Site.c.url,
+            case(
+                (
+                    SiteData.c.site_id == None,  # noqa: E711
+                    ConnectionStatus.UNKNOWN,
+                ),
+                (
+                    SiteData.c.last_seen > connection_lost_timedelta,
+                    ConnectionStatus.STABLE,
+                ),
+                else_=ConnectionStatus.LOST,
+            ).label("connection_status"),
             case(
                 (
                     SiteData.c.site_id != None,  # noqa: E711
@@ -305,7 +321,7 @@ async def get_active_tokens(session: AsyncSession) -> list[TokenSchema]:
             Token.c.created,
         )
         .select_from(Token)
-        .where(Token.c.expired > func.now())
+        .where(Token.c.expired > datetime.utcnow())
         .order_by(Token.c.id)
     )
     return [TokenSchema(**row._asdict()) for row in result.all()]

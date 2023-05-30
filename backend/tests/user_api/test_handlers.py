@@ -11,6 +11,8 @@ from httpx import (
 import pytest
 
 from msm import __version__
+from msm.db.models import ConnectionStatus
+from msm.settings import SETTINGS
 
 from ..fixtures.app import AuthAsyncClient
 from ..fixtures.db import Fixture
@@ -69,10 +71,10 @@ class TestSitesHandler:
             commit=True,
         )
         for site in sites:
+            site["connection_status"] = ConnectionStatus.UNKNOWN
             site["stats"] = None
             del site["created"]
             del site["accepted"]
-
         page1 = await authenticated_user_app_client.get("/sites")
         assert page1.status_code == 200
         assert page1.json() == {
@@ -114,6 +116,7 @@ class TestSitesHandler:
             commit=True,
         )
         created_site["stats"] = None
+        created_site["connection_status"] = ConnectionStatus.UNKNOWN
         del created_site["created"]
         del created_site["accepted"]
 
@@ -138,6 +141,7 @@ class TestSitesHandler:
             commit=True,
         )
         created_site["stats"] = None
+        created_site["connection_status"] = ConnectionStatus.UNKNOWN
         del created_site["created"]
         del created_site["accepted"]
         page1 = await authenticated_user_app_client.get(
@@ -175,6 +179,7 @@ class TestSitesHandler:
         site_data["last_seen"] = site_data["last_seen"].isoformat()
         site_data["total_machines"] = 105
         site["stats"] = site_data
+        site["connection_status"] = ConnectionStatus.STABLE
         del site["created"]
         del site["accepted"]
 
@@ -187,12 +192,46 @@ class TestSitesHandler:
             "items": [site],
         }
 
+    async def test_get_connection_status(
+        self, authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
+    ) -> None:
+        [site] = await fixture.create("site", [site_details()])
+        await fixture.create(
+            "site_data",
+            [
+                {
+                    "site_id": site["id"],
+                    "allocated_machines": 10,
+                    "deployed_machines": 20,
+                    "ready_machines": 30,
+                    "error_machines": 40,
+                    "other_machines": 5,
+                    # Set last_seen to 1 second after the
+                    # lost_connection_threshold setting in order to test
+                    # that the connection is marked as lost
+                    "last_seen": datetime.utcnow()
+                    - timedelta(
+                        seconds=SETTINGS.lost_connection_threshold_seconds + 1
+                    ),
+                },
+            ],
+            commit=True,
+        )
+
+        page = await authenticated_user_app_client.get("/sites")
+        assert page.status_code == 200
+        assert (
+            page.json()["items"][0]["connection_status"]
+            == ConnectionStatus.LOST
+        )
+
     @pytest.mark.parametrize(
         "query_params, expected_result",
         [
             ("sort_by=city-asc", ["London", "Milan", "Paris", "Rome"]),
             (
-                "sort_by=city,name,name_unique,country,region,street,timezone",
+                "sort_by=city,name,name_unique,country,region,street,"
+                "timezone,connection_status",
                 ["London", "Milan", "Paris", "Rome"],
             ),
             ("sort_by=city-asc", ["London", "Milan", "Paris", "Rome"]),

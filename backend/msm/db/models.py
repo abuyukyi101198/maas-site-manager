@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import Enum
 from uuid import UUID
 
 from pydantic import (
@@ -9,6 +10,12 @@ from pydantic import (
 )
 
 from ..schema import TimeZone
+
+
+class ConnectionStatus(str, Enum):
+    STABLE = "stable"
+    LOST = "lost"
+    UNKNOWN = "unknown"
 
 
 class SiteData(BaseModel):
@@ -38,6 +45,7 @@ class Site(BaseModel):
     street: str | None
     timezone: TimeZone | None
     url: str
+    connection_status: ConnectionStatus
     stats: SiteData | None
 
 

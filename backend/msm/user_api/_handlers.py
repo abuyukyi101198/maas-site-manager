@@ -55,6 +55,7 @@ site_sort_parameters = SortParamParser(
         "region",
         "street",
         "timezone",
+        "connection_status",
     ]
 )
 
