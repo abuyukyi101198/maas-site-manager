@@ -59,7 +59,7 @@ ci-backend-lint:
 
 ci-backend-test:
 	env -C backend tox -e test -- --junit-xml=../junit-backend.xml
-.PHONY: ci-test
+.PHONY: ci-backend-test
 
 ci-backend-format:
 	env -C backend tox -e format
@@ -83,8 +83,8 @@ ci-frontend-lint:
 
 ci-frontend-test:
 	env -C frontend VITEST_JUNIT_SUITE_NAME='maas-site-manager frontend tests' yarnpkg run coverage --silent --reporter=junit --reporter=default --outputFile.junit=../junit-frontend.xml run
-.PHONY: ci-test
+.PHONY: ci-frontend-test
 
 ci-e2e-test:
 	env -C frontend PLAYWRIGHT_JUNIT_OUTPUT_NAME=../junit-e2e.xml npx playwright test --reporter=junit
-.PHONY: ci-test
+.PHONY: ci-e2e-test
