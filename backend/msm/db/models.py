@@ -73,7 +73,9 @@ class User(BaseModel):
 
     id: int
     email: EmailStr = Field(title="email@example.com")
+    username: str
     full_name: str
+    is_admin: bool
 
 
 class UserWithPassword(User):

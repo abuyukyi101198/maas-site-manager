@@ -40,8 +40,10 @@ User = Table(
     METADATA,
     Column("id", Integer, primary_key=True),
     Column("email", Text, unique=True, index=True),
+    Column("username", Text, unique=True, index=True),
     Column("full_name", Text),
     Column("password", Text),  # this is the hashed password
+    Column("is_admin", Boolean),
 )
 
 

@@ -88,8 +88,33 @@ async def authenticated_user_app_client(
         {
             "id": 1,
             "email": "admin@example.com",
+            "username": "admin",
             "full_name": "Admin",
             "password": phash,
+            "is_admin": False,
+        },
+        commit=True,
+    )
+    async with AuthAsyncClient(app=user_app, base_url="http://test") as client:
+        await client.login("admin@example.com", "admin")
+        yield client
+
+
+@pytest.fixture
+async def authenticated_admin_app_client(
+    user_app: FastAPI, fixture: Fixture
+) -> AsyncIterable[AuthAsyncClient]:
+    """Authenticated Client for the user API."""
+    phash = "$2b$12$iEPLFcNocyeUDgu2ywDVGeFHyrksI89bzSvdAwvU1N4zYFtofme3S"
+    await fixture.create(
+        "user",
+        {
+            "id": 1,
+            "email": "admin@example.com",
+            "username": "admin",
+            "full_name": "Admin",
+            "password": phash,
+            "is_admin": True,
         },
         commit=True,
     )

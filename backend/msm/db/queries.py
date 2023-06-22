@@ -40,6 +40,7 @@ from .models import (
     PendingSite as PendingSiteSchema,
     Site as SiteSchema,
     Token as TokenSchema,
+    User as UserSchema,
     UserWithPassword as UserWithPasswordSchema,
 )
 
@@ -74,8 +75,10 @@ async def get_user(
         select(
             User.c.id,
             User.c.email,
+            User.c.username,
             User.c.full_name,
             User.c.password,
+            User.c.is_admin,
         )
         .select_from(User)
         .where(User.c.email == email)
@@ -84,6 +87,31 @@ async def get_user(
         if user := result.one_or_none():
             return UserWithPasswordSchema(**user._asdict())
     return None
+
+
+async def get_users(
+    session: AsyncSession,
+    offset: int = 0,
+    limit: int | None = None,
+) -> tuple[int, list[UserSchema]]:
+    count = await row_count(session, User)
+    stmt = (
+        select(
+            User.c.id,
+            User.c.email,
+            User.c.username,
+            User.c.full_name,
+            User.c.password,
+            User.c.is_admin,
+        )
+        .select_from(User)
+        .order_by(User.c.id)
+        .offset(offset)
+    )
+    if limit is not None:
+        stmt = stmt.limit(limit)
+    result = await session.execute(stmt)
+    return count, [UserSchema(**row._asdict()) for row in result.all()]
 
 
 def filters_from_arguments(

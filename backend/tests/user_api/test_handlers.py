@@ -437,10 +437,11 @@ class TestLoginHandler:
     ) -> None:
         phash = "$2b$12$F5sgrhRNtWAOehcoVO.XK.oSvupmcg8.0T2jCHOTg15M8N8LrpRwS"
         userdata = {
-            "id": 1,
             "email": "admin@example.com",
+            "username": "admin",
             "full_name": "Admin",
             "password": phash,
+            "is_admin": False,
         }
         await fixture.create("user", userdata, commit=True)
         response = await user_app_client.post(
@@ -455,10 +456,11 @@ class TestLoginHandler:
     ) -> None:
         phash = "$2b$12$F5sgrhRNtWAOehcoVO.XK.oSvupmcg8.0T2jCHOTg15M8N8LrpRwS"
         userdata = {
-            "id": 1,
             "email": "admin@example.com",
+            "username": "admin",
             "full_name": "Admin",
             "password": phash,
+            "is_admin": False,
         }
         await fixture.create("user", userdata, commit=True)
 
@@ -467,6 +469,92 @@ class TestLoginHandler:
             json={"username": userdata["email"], "password": "incorrect_pass"},
         )
         assert fail_response.status_code == 401
+
+
+@pytest.mark.asyncio
+class TestUsersHandler:
+    async def test_users_get(
+        self, user_app_client: AsyncClient, fixture: Fixture
+    ) -> None:
+        phash1 = "$2b$12$F5sgrhRNtWAOehcoVO.XK.oSvupmcg8.0T2jCHOTg15M8N8LrpRwS"
+        phash2 = "$2b$12$iEPLFcNocyeUDgu2ywDVGeFHyrksI89bzSvdAwvU1N4zYFtofme3S"
+        users = await fixture.create(
+            "user",
+            [
+                {
+                    "email": "admin@example.com",
+                    "username": "admin",
+                    "full_name": "Admin",
+                    "password": phash1,
+                    "is_admin": True,
+                },
+                {
+                    "email": "admin2@example.com",
+                    "username": "admin2",
+                    "full_name": "Another MAAS Admin",
+                    "password": phash2,
+                    "is_admin": False,
+                },
+            ],
+            commit=True,
+        )
+        # the return data does not include passwords
+        for user in users:
+            user.pop("password")
+
+        response = await user_app_client.post(
+            "/login",
+            json={"username": "admin@example.com", "password": "admin"},
+        )
+        assert response.status_code == 200
+
+        user_list = await user_app_client.get(
+            "/users",
+            headers={
+                "Authorization": " ".join(
+                    [
+                        response.json()["token_type"].capitalize(),
+                        response.json()["access_token"],
+                    ]
+                )
+            },
+        )
+        assert user_list.status_code == 200
+        assert user_list.json()["total"] == len(users)
+        assert user_list.json()["items"] == users
+
+    async def test_users_pagination(
+        self, authenticated_admin_app_client: AuthAsyncClient, fixture: Fixture
+    ) -> None:
+        phash2 = "$2b$12$iEPLFcNocyeUDgu2ywDVGeFHyrksI89bzSvdAwvU1N4zYFtofme3S"
+        users = await fixture.create(
+            "user",
+            [
+                {
+                    "id": 2,
+                    "email": "admin2@example.com",
+                    "username": "admin2",
+                    "full_name": "Another MAAS Admin",
+                    "password": phash2,
+                    "is_admin": False,
+                },
+            ],
+            commit=True,
+        )
+        # the return data does not include passwords
+        for user in users:
+            user.pop("password")
+
+        paginated = await authenticated_admin_app_client.get(
+            "/users?page=2&size=1"
+        )
+        assert paginated.status_code == 200
+        assert paginated.json() == {
+            "page": 2,
+            "size": 1,
+            "total": 2,
+            "items": users,
+        }
 
 
 @pytest.mark.asyncio
@@ -480,6 +568,7 @@ class TestLoginHandler:
         ("POST", "/tokens"),
         ("GET", "/tokens/export"),
         ("GET", "/users/me"),
+        ("GET", "/users"),
     ],
 )
 async def test_handler_auth_required(
@@ -489,3 +578,19 @@ async def test_handler_auth_required(
     assert (
         response.status_code == 401
     ), f"Auth should be required for {method} {url}"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "method,url",
+    [
+        ("GET", "/users"),
+    ],
+)
+async def test_handler_admin_required(
+    authenticated_user_app_client: AuthAsyncClient, method: str, url: str
+) -> None:
+    response = await authenticated_user_app_client.request(method, url)
+    assert (
+        response.status_code == 403
+    ), f"Admin should be required for {method} {url}"

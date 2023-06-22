@@ -58,4 +58,5 @@ def create_app(db_dsn: str | None = None) -> FastAPI:
     app.router.add_api_route(
         "/users/me", _handlers.users_me_get, methods=["GET"]
     )
+    app.router.add_api_route("/users", _handlers.users_get, methods=["GET"])
     return app

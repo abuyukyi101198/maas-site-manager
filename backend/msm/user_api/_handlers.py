@@ -32,6 +32,7 @@ from ._forms import (
 from ._jwt import (
     authenticate_user,
     create_access_token,
+    get_authenticated_admin,
     get_authenticated_user,
 )
 from ._schema import (
@@ -44,6 +45,7 @@ from ._schema import (
     TokensGetResponse,
     TokensPostRequest,
     TokensPostResponse,
+    UsersGetResponse,
 )
 
 site_sort_parameters = SortParamParser(
@@ -190,6 +192,23 @@ async def login_post(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
     return LoginPostResponse(access_token=access_token, token_type="bearer")
+
+
+async def users_get(
+    session: Annotated[AsyncSession, Depends(db_session)],
+    authenticated_admin: Annotated[User, Depends(get_authenticated_admin)],
+    pagination_params: PaginationParams = Depends(pagination_params),
+) -> UsersGetResponse:
+    """Return all users"""
+    total, results = await queries.get_users(
+        session, pagination_params.offset, pagination_params.size
+    )
+    return UsersGetResponse(
+        total=total,
+        page=pagination_params.page,
+        size=pagination_params.size,
+        items=list(results),
+    )
 
 
 async def users_me_get(

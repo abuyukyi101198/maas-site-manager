@@ -10,6 +10,7 @@ from ..db.models import (
     PendingSite,
     Site,
     Token,
+    User,
 )
 from ..schema import PaginatedResults
 
@@ -70,3 +71,9 @@ class LoginPostResponse(BaseModel):
 
     access_token: str
     token_type: str
+
+
+class UsersGetResponse(PaginatedResults):
+    """List of existing users."""
+
+    items: list[User]
