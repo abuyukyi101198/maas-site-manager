@@ -2,9 +2,14 @@ from datetime import (
     datetime,
     timedelta,
 )
+from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import (
+    BaseModel,
+    Field,
+    root_validator,
+)
 
 from ..db.models import (
     PendingSite,
@@ -77,3 +82,19 @@ class UsersGetResponse(PaginatedResults):
     """List of existing users."""
 
     items: list[User]
+
+
+class UsersPatchRequest(BaseModel):
+    """User Edit Details request schema."""
+
+    full_name: str | None = None
+    email: str | None = None
+    password: str | None = Field(min_length=8, max_length=100)
+    confirm_password: str | None = Field(min_length=8, max_length=100)
+    is_admin: bool | None = None
+
+    @root_validator
+    def passwords_match(cls, values: Any) -> Any:
+        if values.get("password") != values.get("confirm_password"):
+            raise ValueError("Provided passwords do not match.")
+        return values

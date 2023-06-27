@@ -2,6 +2,7 @@ from datetime import (
     datetime,
     timedelta,
 )
+import random
 from typing import Any
 
 from httpx import (
@@ -39,6 +40,29 @@ def site_details(**extra_details: Any) -> dict[str, Any]:
     }
     details.update(extra_details)
     return details
+
+
+def random_sample_dict(
+    dictionary: dict[str, Any], requires: dict[str, dict[str, Any]] = {}
+) -> dict[str, Any]:
+    """
+    Generate a random subset of ${dictionary}.
+    If any keys in ${requires} are present in the sample,
+    the corresponding dict will also be included.
+    """
+    sample = dict(
+        [
+            (k, dictionary[k])
+            for k in random.choices(
+                list(dictionary.keys()),
+                k=random.randint(1, len(dictionary)),
+            )
+        ]
+    )
+    for k, v in requires.items():
+        if k in sample:
+            sample |= v
+    return sample
 
 
 @pytest.mark.asyncio
@@ -556,6 +580,58 @@ class TestUsersHandler:
             "items": users,
         }
 
+    async def test_users_patch_details(
+        self, authenticated_admin_app_client: AuthAsyncClient
+    ) -> None:
+        old_details = {
+            "id": 1,
+            "email": "admin@example.com",
+            "username": "admin",
+            "full_name": "Admin",
+            "password": "admin",
+            "confirm_password": "",
+            "is_admin": True,
+        }
+        new_details = random_sample_dict(
+            {
+                "full_name": "New Admin",
+                "email": "admin3@example.com",
+                "password": "New Password",
+                "is_admin": True,
+            },
+            requires={"password": {"confirm_password": "New Password"}},
+        )
+        response = await authenticated_admin_app_client.patch(
+            "/users/1", json=new_details
+        )
+
+        user_details = old_details | new_details
+        user_details.pop("password")
+        user_details.pop("confirm_password")
+        assert response.status_code == 200
+        assert response.json() == user_details
+
+    async def test_users_patch_demote_admin(
+        self, authenticated_admin_app_client: AuthAsyncClient
+    ) -> None:
+        response = await authenticated_admin_app_client.patch(
+            "/users/1", json={"is_admin": False}
+        )
+        assert response.status_code == 403
+        assert (
+            response.json()["detail"]["message"]
+            == "Admin users cannot demote themselves."
+        )
+
+    async def test_users_patch_missing_fields(
+        self, authenticated_admin_app_client: AuthAsyncClient
+    ) -> None:
+        response = await authenticated_admin_app_client.patch(
+            "/users/1", json={}
+        )
+        assert response.status_code == 422
+        assert response.json()["detail"]["message"] == "Request body empty."
+
     async def test_users_delete(
         self, authenticated_admin_app_client: AuthAsyncClient, fixture: Fixture
     ) -> None:
@@ -639,6 +715,7 @@ class TestUsersHandler:
         ("GET", "/tokens/export"),
         ("GET", "/users/me"),
         ("GET", "/users"),
+        ("PATCH", "/users/{id}"),
         ("DELETE", "/users/{id}"),
     ],
 )
@@ -654,7 +731,7 @@ async def test_handler_auth_required(
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "method,url",
-    [("GET", "/users"), ("DELETE", "/users/{id}")],
+    [("GET", "/users"), ("DELETE", "/users/{id}"), ("PATCH", "/users/{id}")],
 )
 async def test_handler_admin_required(
     authenticated_user_app_client: AuthAsyncClient, method: str, url: str

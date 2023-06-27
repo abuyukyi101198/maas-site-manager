@@ -41,6 +41,7 @@ from .models import (
     Site as SiteSchema,
     Token as TokenSchema,
     User as UserSchema,
+    UserUpdate as UserUpdateSchema,
     UserWithPassword as UserWithPasswordSchema,
 )
 
@@ -112,6 +113,25 @@ async def get_users(
         stmt = stmt.limit(limit)
     result = await session.execute(stmt)
     return count, [UserSchema(**row._asdict()) for row in result.all()]
+
+
+async def update_user(
+    session: AsyncSession, user_id: int, details: UserUpdateSchema
+) -> UserSchema:
+    patch_stmt = (
+        update(User)
+        .where(User.c.id == user_id)
+        .values({k: v for k, v in details.dict().items() if v is not None})
+        .returning(
+            User.c.id,
+            User.c.email,
+            User.c.username,
+            User.c.full_name,
+            User.c.is_admin,
+        )
+    )
+    result = await session.execute(patch_stmt)
+    return UserSchema(**result.one()._asdict())
 
 
 async def delete_user(session: AsyncSession, user_id: int) -> None:

@@ -83,3 +83,12 @@ class UserWithPassword(User):
 
     # use password.get_secret_value() to retrieve the value
     password: SecretStr = Field(min_length=8, max_length=100)
+
+
+class UserUpdate(BaseModel):
+    """User updatable fields"""
+
+    full_name: str | None
+    email: str | None
+    password: str | None
+    is_admin: bool | None

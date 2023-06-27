@@ -60,6 +60,9 @@ def create_app(db_dsn: str | None = None) -> FastAPI:
     )
     app.router.add_api_route("/users", _handlers.users_get, methods=["GET"])
     app.router.add_api_route(
+        "/users/{user_id}", _handlers.users_patch, methods=["PATCH"]
+    )
+    app.router.add_api_route(
         "/users/{user_id}",
         _handlers.users_delete,
         methods=["DELETE"],

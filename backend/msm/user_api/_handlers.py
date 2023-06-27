@@ -13,7 +13,10 @@ from ..db import (
     db_session,
     queries,
 )
-from ..db.models import User
+from ..db.models import (
+    User,
+    UserUpdate,
+)
 from ..db.queries import InvalidPendingSites
 from ..schema import (
     pagination_params,
@@ -46,6 +49,7 @@ from ._schema import (
     TokensPostRequest,
     TokensPostResponse,
     UsersGetResponse,
+    UsersPatchRequest,
 )
 
 site_sort_parameters = SortParamParser(
@@ -209,6 +213,32 @@ async def users_get(
         size=pagination_params.size,
         items=list(results),
     )
+
+
+async def users_patch(
+    session: Annotated[AsyncSession, Depends(db_session)],
+    get_authenticated_admin: Annotated[User, Depends(get_authenticated_admin)],
+    user_id: int,
+    patch_request: UsersPatchRequest,
+) -> User:
+    """Update the details for a user"""
+
+    if patch_request.is_admin is False:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"message": "Admin users cannot demote themselves."},
+        )
+
+    if all(v is None for v in patch_request.dict().values()):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"message": "Request body empty."},
+        )
+
+    user = await queries.update_user(
+        session, user_id, UserUpdate(**patch_request.dict())
+    )
+    return user
 
 
 async def users_delete(
