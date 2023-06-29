@@ -14,6 +14,7 @@ import pytest
 
 from msm.db import Database
 from msm.user_api import create_app
+from msm.user_api._jwt import get_password_hash
 
 from .db import Fixture
 
@@ -82,21 +83,20 @@ async def authenticated_user_app_client(
     user_app: FastAPI, fixture: Fixture
 ) -> AsyncIterable[AuthAsyncClient]:
     """Authenticated Client for the user API."""
-    phash = "$2b$12$F5sgrhRNtWAOehcoVO.XK.oSvupmcg8.0T2jCHOTg15M8N8LrpRwS"
+    password = "admin"
     await fixture.create(
         "user",
         {
-            "id": 1,
             "email": "admin@example.com",
             "username": "admin",
             "full_name": "Admin",
-            "password": phash,
+            "password": get_password_hash(password),
             "is_admin": False,
         },
         commit=True,
     )
     async with AuthAsyncClient(app=user_app, base_url="http://test") as client:
-        await client.login("admin@example.com", "admin")
+        await client.login("admin@example.com", password)
         yield client
 
 
@@ -105,19 +105,18 @@ async def authenticated_admin_app_client(
     user_app: FastAPI, fixture: Fixture
 ) -> AsyncIterable[AuthAsyncClient]:
     """Authenticated Client for the user API."""
-    phash = "$2b$12$iEPLFcNocyeUDgu2ywDVGeFHyrksI89bzSvdAwvU1N4zYFtofme3S"
+    password = "admin"
     await fixture.create(
         "user",
         {
-            "id": 1,
             "email": "admin@example.com",
             "username": "admin",
             "full_name": "Admin",
-            "password": phash,
+            "password": get_password_hash(password),
             "is_admin": True,
         },
         commit=True,
     )
     async with AuthAsyncClient(app=user_app, base_url="http://test") as client:
-        await client.login("admin@example.com", "admin")
+        await client.login("admin@example.com", password)
         yield client

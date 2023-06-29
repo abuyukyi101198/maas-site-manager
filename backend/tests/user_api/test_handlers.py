@@ -555,7 +555,6 @@ class TestUsersHandler:
             "user",
             [
                 {
-                    "id": 2,
                     "email": "admin2@example.com",
                     "username": "admin2",
                     "full_name": "Another MAAS Admin",
@@ -579,6 +578,98 @@ class TestUsersHandler:
             "total": 2,
             "items": users,
         }
+
+    async def test_users_password_change(
+        self, authenticated_user_app_client: AuthAsyncClient
+    ) -> None:
+        new_password = "new_admin_password"
+        response = await authenticated_user_app_client.post(
+            "/users/me/password",
+            json={
+                "current_password": "admin",
+                "new_password": new_password,
+                "confirm_password": new_password,
+            },
+        )
+        assert response.status_code == 200
+
+    async def test_users_password_too_short(
+        self, authenticated_user_app_client: AuthAsyncClient
+    ) -> None:
+        short_pass = "new"
+        response = await authenticated_user_app_client.post(
+            "/users/me/password",
+            json={
+                "current_password": "admin",
+                "new_password": short_pass,
+                "confirm_password": short_pass,
+            },
+        )
+        assert response.status_code == 422
+        assert (
+            response.json()["detail"][0]["msg"]
+            == "ensure this value has at least 8 characters"
+        )
+
+    async def test_users_password_too_long(
+        self, authenticated_user_app_client: AuthAsyncClient
+    ) -> None:
+        long_pass = "new" * 40
+
+        response = await authenticated_user_app_client.post(
+            "/users/me/password",
+            json={
+                "current_password": "admin",
+                "new_password": long_pass,
+                "confirm_password": long_pass,
+            },
+        )
+        assert response.status_code == 422
+        assert (
+            response.json()["detail"][0]["msg"]
+            == "ensure this value has at most 100 characters"
+        )
+
+    async def test_users_password_change_incorrect_pass(
+        self,
+        authenticated_user_app_client: AuthAsyncClient,
+    ) -> None:
+        new_password = "new_admin_password"
+        response = await authenticated_user_app_client.post(
+            "/users/me/password",
+            json={
+                "current_password": "wrong_password",
+                "new_password": new_password,
+                "confirm_password": new_password,
+            },
+        )
+        assert response.status_code == 400
+        assert (
+            response.json()["detail"]["message"]
+            == "Incorrect password for user."
+        )
+
+    async def test_users_password_change_missing_parameters(
+        self,
+        authenticated_user_app_client: AuthAsyncClient,
+    ) -> None:
+        response = await authenticated_user_app_client.post(
+            "/users/me/password",
+            json={},
+        )
+        assert response.status_code == 422
+        assert response.json()["detail"] == [
+            {
+                "loc": ["body", field],
+                "msg": "field required",
+                "type": "value_error.missing",
+            }
+            for field in [
+                "current_password",
+                "new_password",
+                "confirm_password",
+            ]
+        ]
 
     async def test_users_patch_details(
         self, authenticated_admin_app_client: AuthAsyncClient
@@ -640,7 +731,6 @@ class TestUsersHandler:
             "user",
             [
                 {
-                    "id": 2,
                     "email": "admin2@example.com",
                     "username": "admin2",
                     "full_name": "Another MAAS Admin",
@@ -682,7 +772,6 @@ class TestUsersHandler:
             "user",
             [
                 {
-                    "id": 2,
                     "email": "admin2@example.com",
                     "username": "admin2",
                     "full_name": "Another MAAS Admin",
@@ -713,8 +802,9 @@ class TestUsersHandler:
         ("GET", "/tokens"),
         ("POST", "/tokens"),
         ("GET", "/tokens/export"),
-        ("GET", "/users/me"),
         ("GET", "/users"),
+        ("GET", "/users/me"),
+        ("POST", "/users/me/password"),
         ("PATCH", "/users/{id}"),
         ("DELETE", "/users/{id}"),
     ],

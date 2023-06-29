@@ -84,6 +84,20 @@ class UsersGetResponse(PaginatedResults):
     items: list[User]
 
 
+class UsersPasswordPostRequest(BaseModel):
+    """User password change schema."""
+
+    current_password: str
+    new_password: str = Field(min_length=8, max_length=100)
+    confirm_password: str = Field(min_length=8, max_length=100)
+
+    @root_validator
+    def passwords_match(cls, values: Any) -> Any:
+        if values.get("new_password") != values.get("confirm_password"):
+            raise ValueError("Provided passwords do not match.")
+        return values
+
+
 class UsersPatchRequest(BaseModel):
     """User Edit Details request schema."""
 

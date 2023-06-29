@@ -115,6 +115,15 @@ async def get_users(
     return count, [UserSchema(**row._asdict()) for row in result.all()]
 
 
+async def update_user_password(
+    session: AsyncSession,
+    user_id: int,
+    password: str,
+) -> None:
+    stmt = update(User).where(User.c.id == user_id).values(password=password)
+    await session.execute(stmt)
+
+
 async def update_user(
     session: AsyncSession, user_id: int, details: UserUpdateSchema
 ) -> UserSchema:

@@ -37,6 +37,7 @@ from ._jwt import (
     create_access_token,
     get_authenticated_admin,
     get_authenticated_user,
+    get_password_hash,
 )
 from ._schema import (
     LoginPostRequest,
@@ -49,6 +50,7 @@ from ._schema import (
     TokensPostRequest,
     TokensPostResponse,
     UsersGetResponse,
+    UsersPasswordPostRequest,
     UsersPatchRequest,
 )
 
@@ -212,6 +214,27 @@ async def users_get(
         page=pagination_params.page,
         size=pagination_params.size,
         items=list(results),
+    )
+
+
+async def users_password_post(
+    session: Annotated[AsyncSession, Depends(db_session)],
+    authenticated_user: Annotated[User, Depends(get_authenticated_user)],
+    post_request: UsersPasswordPostRequest,
+) -> None:
+    """Modify the users password."""
+    if await authenticate_user(
+        session, authenticated_user.email, post_request.current_password
+    ):
+        await queries.update_user_password(
+            session,
+            authenticated_user.id,
+            get_password_hash(post_request.new_password),
+        )
+        return None
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail={"message": "Incorrect password for user."},
     )
 
 
