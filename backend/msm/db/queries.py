@@ -17,6 +17,7 @@ from sqlalchemy import (
     delete,
     desc,
     func,
+    insert,
     select,
     String,
     Table,
@@ -41,6 +42,7 @@ from .models import (
     Site as SiteSchema,
     Token as TokenSchema,
     User as UserSchema,
+    UserCreate as UserCreateSchema,
     UserUpdate as UserUpdateSchema,
     UserWithPassword as UserWithPasswordSchema,
 )
@@ -64,6 +66,22 @@ async def row_count(
         .where(*filters)  # type: ignore[arg-type]
     )
     return (await session.execute(stmt)).scalar() or 0
+
+
+async def user_exists(
+    session: AsyncSession, email: str, username: str
+) -> bool:
+    search = await session.execute(
+        select(User.c.id)
+        .select_from(User)
+        .filter(
+            or_(
+                User.c.email == email,
+                User.c.username == username,
+            )
+        )
+    )
+    return search.first() is not None
 
 
 async def get_user(
@@ -113,6 +131,23 @@ async def get_users(
         stmt = stmt.limit(limit)
     result = await session.execute(stmt)
     return count, [UserSchema(**row._asdict()) for row in result.all()]
+
+
+async def create_user(
+    session: AsyncSession, user_details: UserCreateSchema
+) -> UserSchema:
+    result = await session.execute(
+        insert(User).returning(
+            User.c.id,
+            User.c.email,
+            User.c.username,
+            User.c.full_name,
+            User.c.is_admin,
+        ),
+        [user_details.dict()],
+    )
+    user = result.one()
+    return UserSchema(**user._asdict())
 
 
 async def update_user_password(

@@ -86,6 +86,16 @@ class UserWithPassword(User):
     password: SecretStr = Field(min_length=8, max_length=100)
 
 
+class UserCreate(BaseModel):
+    """Creating a new user"""
+
+    email: str
+    username: str
+    full_name: str
+    password: str
+    is_admin: bool
+
+
 class UserUpdate(BaseModel):
     """User updatable fields"""
 

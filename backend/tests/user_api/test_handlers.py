@@ -465,7 +465,7 @@ class TestLoginHandler:
             "username": "admin",
             "full_name": "Admin",
             "password": phash,
-            "is_admin": False,
+            "is_admin": True,
         }
         await fixture.create("user", userdata, commit=True)
         response = await user_app_client.post(
@@ -484,7 +484,7 @@ class TestLoginHandler:
             "username": "admin",
             "full_name": "Admin",
             "password": phash,
-            "is_admin": False,
+            "is_admin": True,
         }
         await fixture.create("user", userdata, commit=True)
 
@@ -513,9 +513,9 @@ class TestUsersHandler:
                     "is_admin": True,
                 },
                 {
-                    "email": "admin2@example.com",
-                    "username": "admin2",
-                    "full_name": "Another MAAS Admin",
+                    "email": "user@example.com",
+                    "username": "user",
+                    "full_name": "MAAS User",
                     "password": phash2,
                     "is_admin": False,
                 },
@@ -553,15 +553,13 @@ class TestUsersHandler:
         phash2 = "$2b$12$iEPLFcNocyeUDgu2ywDVGeFHyrksI89bzSvdAwvU1N4zYFtofme3S"
         users = await fixture.create(
             "user",
-            [
-                {
-                    "email": "admin2@example.com",
-                    "username": "admin2",
-                    "full_name": "Another MAAS Admin",
-                    "password": phash2,
-                    "is_admin": False,
-                },
-            ],
+            {
+                "email": "user@example.com",
+                "username": "user",
+                "full_name": "MAAS User",
+                "password": phash2,
+                "is_admin": False,
+            },
             commit=True,
         )
         # the return data does not include passwords
@@ -578,6 +576,103 @@ class TestUsersHandler:
             "total": 2,
             "items": users,
         }
+
+    async def test_create_user(
+        self, authenticated_admin_app_client: AuthAsyncClient
+    ) -> None:
+        user_details = {
+            "full_name": "A MAAS User",
+            "username": "newuser",
+            "email": "newuser@example.com",
+            "is_admin": False,
+        }
+        response = await authenticated_admin_app_client.post(
+            "/users",
+            json=user_details
+            | {"password": "password", "confirm_password": "password"},
+        )
+        assert response.status_code == 200
+        assert response.json() == user_details | {"id": 2}
+
+    async def test_create_user_missing_fields(
+        self, authenticated_admin_app_client: AuthAsyncClient
+    ) -> None:
+        response = await authenticated_admin_app_client.post(
+            "/users",
+            json={},
+        )
+        assert response.status_code == 422
+        assert response.json()["detail"] == [
+            {
+                "loc": ["body", param],
+                "msg": "field required",
+                "type": "value_error.missing",
+            }
+            for param in [
+                "full_name",
+                "username",
+                "email",
+                "password",
+                "confirm_password",
+            ]
+        ]
+
+    async def test_create_user_password_unconfirmed(
+        self, authenticated_admin_app_client: AuthAsyncClient
+    ) -> None:
+        user_details = {
+            "full_name": "A MAAS User",
+            "username": "newuser",
+            "email": "user@example.com",
+            "password": "password",
+            "confirm_password": "",
+        }
+        response = await authenticated_admin_app_client.post(
+            "/users",
+            json=user_details,
+        )
+        assert response.status_code == 422
+        assert response.json()
+
+    async def test_create_user_email_taken(
+        self, authenticated_admin_app_client: AuthAsyncClient
+    ) -> None:
+        user_details = {
+            "full_name": "A New Admin",
+            "username": "newAdmin",
+            "email": "admin@example.com",
+            "password": "password",
+            "confirm_password": "password",
+        }
+        response = await authenticated_admin_app_client.post(
+            "/users",
+            json=user_details,
+        )
+        assert response.status_code == 400
+        assert (
+            response.json()["detail"]["message"]
+            == "Email or Username already in use."
+        )
+
+    async def test_create_user_username_taken(
+        self, authenticated_admin_app_client: AuthAsyncClient
+    ) -> None:
+        user_details = {
+            "full_name": "A New Admin",
+            "username": "admin",
+            "email": "newadmin@example.com",
+            "password": "password",
+            "confirm_password": "password",
+        }
+        response = await authenticated_admin_app_client.post(
+            "/users",
+            json=user_details,
+        )
+        assert response.status_code == 400
+        assert (
+            response.json()["detail"]["message"]
+            == "Email or Username already in use."
+        )
 
     async def test_users_password_change(
         self, authenticated_user_app_client: AuthAsyncClient
@@ -727,22 +822,19 @@ class TestUsersHandler:
         self, authenticated_admin_app_client: AuthAsyncClient, fixture: Fixture
     ) -> None:
         phash2 = "$2b$12$iEPLFcNocyeUDgu2ywDVGeFHyrksI89bzSvdAwvU1N4zYFtofme3S"
-        users = await fixture.create(
+        await fixture.create(
             "user",
             [
                 {
-                    "email": "admin2@example.com",
-                    "username": "admin2",
-                    "full_name": "Another MAAS Admin",
-                    "password": phash2,
+                    "email": "user@example.com",
+                    "username": "user",
+                    "full_name": "MAAS User",
                     "is_admin": False,
+                    "password": phash2,
                 },
             ],
             commit=True,
         )
-        # the return data does not include passwords
-        for user in users:
-            user.pop("password")
 
         response = await authenticated_admin_app_client.delete("/users/2")
         assert response.status_code == 204
@@ -768,28 +860,26 @@ class TestUsersHandler:
         self, authenticated_admin_app_client: AuthAsyncClient, fixture: Fixture
     ) -> None:
         phash2 = "$2b$12$iEPLFcNocyeUDgu2ywDVGeFHyrksI89bzSvdAwvU1N4zYFtofme3S"
-        users = await fixture.create(
+        await fixture.create(
             "user",
             [
                 {
-                    "email": "admin2@example.com",
-                    "username": "admin2",
-                    "full_name": "Another MAAS Admin",
+                    "email": "user@example.com",
+                    "username": "user",
+                    "full_name": "MAAS User",
                     "password": phash2,
                     "is_admin": False,
                 },
             ],
             commit=True,
         )
-        # the return data does not include passwords
-        for user in users:
-            user.pop("password")
 
         response = await authenticated_admin_app_client.delete("/users/1")
         assert response.status_code == 400
-        assert response.json() == {
-            "detail": {"message": "Cannot delete the current user."}
-        }
+        assert (
+            response.json()["detail"]["message"]
+            == "Cannot delete the current user."
+        )
 
 
 @pytest.mark.asyncio
@@ -803,6 +893,7 @@ class TestUsersHandler:
         ("POST", "/tokens"),
         ("GET", "/tokens/export"),
         ("GET", "/users"),
+        ("POST", "/users"),
         ("GET", "/users/me"),
         ("POST", "/users/me/password"),
         ("PATCH", "/users/{id}"),
@@ -821,7 +912,12 @@ async def test_handler_auth_required(
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "method,url",
-    [("GET", "/users"), ("DELETE", "/users/{id}"), ("PATCH", "/users/{id}")],
+    [
+        ("GET", "/users"),
+        ("POST", "/users"),
+        ("DELETE", "/users/{id}"),
+        ("PATCH", "/users/{id}"),
+    ],
 )
 async def test_handler_admin_required(
     authenticated_user_app_client: AuthAsyncClient, method: str, url: str

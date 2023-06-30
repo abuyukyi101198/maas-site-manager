@@ -15,6 +15,7 @@ from ..db import (
 )
 from ..db.models import (
     User,
+    UserCreate,
     UserUpdate,
 )
 from ..db.queries import InvalidPendingSites
@@ -52,6 +53,8 @@ from ._schema import (
     UsersGetResponse,
     UsersPasswordPostRequest,
     UsersPatchRequest,
+    UsersPostRequest,
+    UsersPostResponse,
 )
 
 site_sort_parameters = SortParamParser(
@@ -215,6 +218,33 @@ async def users_get(
         size=pagination_params.size,
         items=list(results),
     )
+
+
+async def users_post(
+    session: Annotated[AsyncSession, Depends(db_session)],
+    authenticated_admin: Annotated[User, Depends(get_authenticated_admin)],
+    request: UsersPostRequest,
+) -> UsersPostResponse:
+    """
+    Create a user.
+    """
+    if await queries.user_exists(
+        session, email=request.email, username=request.username
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"message": "Email or Username already in use."},
+        )
+    user = await queries.create_user(
+        session,
+        UserCreate(
+            **(
+                request.dict()
+                | {"password": get_password_hash(request.password)}
+            )
+        ),
+    )
+    return UsersPostResponse(**user.dict())
 
 
 async def users_password_post(

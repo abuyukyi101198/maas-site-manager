@@ -84,6 +84,35 @@ class UsersGetResponse(PaginatedResults):
     items: list[User]
 
 
+class UsersPostRequest(BaseModel):
+    """
+    Request to create a User.
+    """
+
+    full_name: str
+    username: str
+    email: str
+    password: str = Field(min_length=8, max_length=100)
+    confirm_password: str = Field(min_length=8, max_length=100)
+    is_admin: bool = False
+
+    @root_validator
+    def passwords_match(cls, values: Any) -> Any:
+        if values.get("password") != values.get("confirm_password"):
+            raise ValueError("Provided passwords do not match.")
+        return values
+
+
+class UsersPostResponse(BaseModel):
+    """Created user."""
+
+    id: int
+    email: str
+    username: str
+    full_name: str
+    is_admin: bool
+
+
 class UsersPasswordPostRequest(BaseModel):
     """User password change schema."""
 
