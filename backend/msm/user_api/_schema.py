@@ -141,3 +141,10 @@ class UsersPatchRequest(BaseModel):
         if values.get("password") != values.get("confirm_password"):
             raise ValueError("Provided passwords do not match.")
         return values
+
+
+class UsersPatchMeRequest(BaseModel):
+    """User Edit Details about themselves."""
+
+    full_name: str | None = None
+    email: str | None = None

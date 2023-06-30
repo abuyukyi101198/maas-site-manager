@@ -798,6 +798,31 @@ class TestUsersHandler:
         assert response.json() == user_details
 
     async def test_users_patch_demote_admin(
+        self, authenticated_admin_app_client: AuthAsyncClient, fixture: Fixture
+    ) -> None:
+        phash2 = "$2b$12$iEPLFcNocyeUDgu2ywDVGeFHyrksI89bzSvdAwvU1N4zYFtofme3S"
+        user_details = {
+            "email": "admin2@example.com",
+            "username": "admin2",
+            "full_name": "Another MAAS Admin",
+            "password": phash2,
+            "is_admin": True,
+        }
+        new_details = {"is_admin": False}
+        await fixture.create(
+            "user",
+            [user_details],
+            commit=True,
+        )
+        response = await authenticated_admin_app_client.patch(
+            "/users/2", json=new_details
+        )
+        user_details |= new_details | {"id": 2}
+        user_details.pop("password")
+        assert response.status_code == 200
+        assert response.json() == user_details
+
+    async def test_users_patch_demote_self_admin(
         self, authenticated_admin_app_client: AuthAsyncClient
     ) -> None:
         response = await authenticated_admin_app_client.patch(
@@ -817,6 +842,15 @@ class TestUsersHandler:
         )
         assert response.status_code == 422
         assert response.json()["detail"]["message"] == "Request body empty."
+
+    async def test_users_patch_nonexistent_user(
+        self, authenticated_admin_app_client: AuthAsyncClient
+    ) -> None:
+        response = await authenticated_admin_app_client.patch(
+            "/users/10", json={"full_name": "ghost_in_the_test"}
+        )
+        assert response.status_code == 422
+        assert response.json()["detail"]["message"] == "User does not exist."
 
     async def test_users_delete(
         self, authenticated_admin_app_client: AuthAsyncClient, fixture: Fixture
@@ -881,6 +915,39 @@ class TestUsersHandler:
             == "Cannot delete the current user."
         )
 
+    async def test_users_patch_me(
+        self, authenticated_user_app_client: AuthAsyncClient
+    ) -> None:
+        old_details = {
+            "id": 1,
+            "email": "admin@example.com",
+            "username": "admin",
+            "full_name": "Admin",
+            "is_admin": False,
+        }
+        new_details = random_sample_dict(
+            {
+                "full_name": "New Admin",
+                "email": "admin3@example.com",
+            },
+        )
+        response = await authenticated_user_app_client.patch(
+            "/users/me", json=new_details
+        )
+
+        assert response.status_code == 200
+        assert response.json() == old_details | new_details
+
+    async def test_users_patch_me_missing_fields(
+        self, authenticated_user_app_client: AuthAsyncClient
+    ) -> None:
+        response = await authenticated_user_app_client.patch(
+            "/users/me", json={}
+        )
+
+        assert response.status_code == 422
+        assert response.json()["detail"]["message"] == "Request body empty."
+
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
@@ -895,6 +962,7 @@ class TestUsersHandler:
         ("GET", "/users"),
         ("POST", "/users"),
         ("GET", "/users/me"),
+        ("PATCH", "/users/me"),
         ("POST", "/users/me/password"),
         ("PATCH", "/users/{id}"),
         ("DELETE", "/users/{id}"),

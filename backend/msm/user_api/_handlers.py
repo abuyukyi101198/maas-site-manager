@@ -52,6 +52,7 @@ from ._schema import (
     TokensPostResponse,
     UsersGetResponse,
     UsersPasswordPostRequest,
+    UsersPatchMeRequest,
     UsersPatchRequest,
     UsersPostRequest,
     UsersPostResponse,
@@ -270,13 +271,13 @@ async def users_password_post(
 
 async def users_patch(
     session: Annotated[AsyncSession, Depends(db_session)],
-    get_authenticated_admin: Annotated[User, Depends(get_authenticated_admin)],
+    authenticated_admin: Annotated[User, Depends(get_authenticated_admin)],
     user_id: int,
     patch_request: UsersPatchRequest,
 ) -> User:
-    """Update the details for a user"""
+    """Admin Update the details for a user"""
 
-    if patch_request.is_admin is False:
+    if user_id == authenticated_admin.id and patch_request.is_admin is False:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"message": "Admin users cannot demote themselves."},
@@ -286,6 +287,12 @@ async def users_patch(
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail={"message": "Request body empty."},
+        )
+
+    if not await queries.user_id_exists(session, user_id):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"message": "User does not exist."},
         )
 
     user = await queries.update_user(
@@ -318,3 +325,22 @@ async def users_me_get(
 ) -> User:
     """Render info about the authenticated user."""
     return authenticated_user
+
+
+async def users_me_patch(
+    session: Annotated[AsyncSession, Depends(db_session)],
+    authenticated_user: Annotated[User, Depends(get_authenticated_user)],
+    patch_request: UsersPatchMeRequest,
+) -> User:
+    """Update the details for a user"""
+
+    if all(v is None for v in patch_request.dict().values()):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"message": "Request body empty."},
+        )
+
+    user = await queries.update_user(
+        session, authenticated_user.id, UserUpdate(**patch_request.dict())
+    )
+    return user

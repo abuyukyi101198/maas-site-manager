@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio.session import AsyncSession
 from msm.db.queries import (
     get_active_tokens,
     user_exists,
+    user_id_exists,
 )
 
 from ..fixtures.db import Fixture
@@ -42,6 +43,26 @@ async def test_get_active_tokens(
         uuid2,
         uuid3,
     ]
+
+
+@pytest.mark.asyncio
+async def test_user_id_exists(session: AsyncSession, fixture: Fixture) -> None:
+    phash1 = "$2b$12$F5sgrhRNtWAOehcoVO.XK.oSvupmcg8.0T2jCHOTg15M8N8LrpRwS"
+    users = await fixture.create(
+        "user",
+        [
+            {
+                "email": "admin@example.com",
+                "username": "admin",
+                "full_name": "Admin",
+                "password": phash1,
+                "is_admin": True,
+            }
+        ],
+        commit=True,
+    )
+    assert await user_id_exists(session, users[0]["id"])
+    assert not await user_id_exists(session, -1)
 
 
 @pytest.mark.asyncio

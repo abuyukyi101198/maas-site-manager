@@ -68,6 +68,13 @@ async def row_count(
     return (await session.execute(stmt)).scalar() or 0
 
 
+async def user_id_exists(session: AsyncSession, user_id: int) -> bool:
+    search = await session.execute(
+        select(User.c.id).select_from(User).filter(User.c.id == user_id)
+    )
+    return search.first() is not None
+
+
 async def user_exists(
     session: AsyncSession, email: str, username: str
 ) -> bool:
