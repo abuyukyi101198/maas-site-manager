@@ -43,7 +43,8 @@ class Site(BaseModel):
     note: str | None
     region: str | None
     street: str | None
-    timezone: TimeZone | None
+    # XXX: mypy can't grok that this is an str/enum with lots of members
+    timezone: TimeZone | None  # type: ignore
     url: str
     connection_status: ConnectionStatus
     stats: SiteData | None
