@@ -14,6 +14,7 @@ import pytest
 from msm import __version__
 from msm.db.models import ConnectionStatus
 from msm.settings import SETTINGS
+from msm.user_api._jwt import get_password_hash
 
 from ..fixtures.app import AuthAsyncClient
 from ..fixtures.db import Fixture
@@ -546,6 +547,122 @@ class TestUsersHandler:
         assert user_list.status_code == 200
         assert user_list.json()["total"] == len(users)
         assert user_list.json()["items"] == users
+
+    @pytest.mark.parametrize(
+        "query_params, expected_result",
+        [
+            (
+                {"sort_by": "username-asc"},
+                ["admin", "alphacen", "hatp13", "proxima", "trappist"],
+            ),
+            (
+                {"sort_by": "username,full_name,email,is_admin"},
+                ["admin", "alphacen", "hatp13", "proxima", "trappist"],
+            ),
+            (
+                {"sort_by": "username-desc"},
+                ["trappist", "proxima", "hatp13", "alphacen", "admin"],
+            ),
+            (
+                {"sort_by": "full_name,email-desc"},
+                ["admin", "hatp13", "proxima", "alphacen", "trappist"],
+            ),
+            (
+                {"sort_by": "is_admin,full_name-desc"},
+                ["alphacen", "proxima", "hatp13", "trappist", "admin"],
+            ),
+            (
+                {"page": 2, "size": 2, "sort_by": "username,email-asc"},
+                ["hatp13", "proxima"],
+            ),
+        ],
+    )
+    async def test_users_get_with_sorting(
+        self,
+        authenticated_admin_app_client: AuthAsyncClient,
+        fixture: Fixture,
+        query_params: str,
+        expected_result: list[str],
+    ) -> None:
+        def extract_users(resp: Response) -> list[str]:
+            return [user["username"] for user in resp.json()["items"]]
+
+        async def create_user(
+            username: str,
+            password: str,
+            email: str,
+            full_name: str,
+            is_admin: bool = False,
+        ) -> None:
+            await fixture.create(
+                "user",
+                {
+                    "email": email,
+                    "username": username,
+                    "full_name": full_name,
+                    "password": get_password_hash(password),
+                    "confirm_password": get_password_hash(password),
+                    "is_admin": is_admin,
+                },
+                commit=True,
+            )
+
+        await create_user(
+            "proxima", "password1", "proxima@example.com", "Proxima Centauri b"
+        )
+        await create_user(
+            "trappist",
+            "password2",
+            "trappist@example.com",
+            "Trappist 1 e",
+            True,
+        )
+        await create_user(
+            "hatp13", "password3", "hatp13@example.com", "HAT-P-13 b"
+        )
+        await create_user(
+            "alphacen", "password4", "alphacen@example.com", "Rigel Kentaurus"
+        )
+
+        response = await authenticated_admin_app_client.get(
+            "/users", params=query_params
+        )
+        assert extract_users(response) == expected_result
+
+    @pytest.mark.parametrize(
+        "sort_by",
+        [
+            "id-asc",
+            "username,username",
+            "doesntexist",
+        ],
+    )
+    async def test_users_get_with_invalid_sorting(
+        self,
+        authenticated_admin_app_client: AuthAsyncClient,
+        fixture: Fixture,
+        sort_by: str,
+    ) -> None:
+        await fixture.create(
+            "user",
+            [
+                {
+                    "email": "proxima@example.com",
+                    "username": "proxima",
+                    "full_name": "Proxima Centauri b",
+                    "password": get_password_hash("password"),
+                    "confirm_password": get_password_hash("password"),
+                    "is_admin": False,
+                }
+            ],
+            commit=True,
+        )
+
+        # not sortable
+        response = await authenticated_admin_app_client.get(
+            "/users", params={"sort_by": sort_by}
+        )
+        assert response.status_code == 400
 
     async def test_users_pagination(
         self, authenticated_admin_app_client: AuthAsyncClient, fixture: Fixture

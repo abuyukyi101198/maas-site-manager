@@ -117,21 +117,34 @@ async def get_user(
 
 async def get_users(
     session: AsyncSession,
+    sort_params: list[SortParam],
     offset: int = 0,
     limit: int | None = None,
+    email: list[str] | None = None,
+    username: list[str] | None = None,
+    full_name: list[str] | None = None,
+    is_admin: list[str] | None = None,
 ) -> tuple[int, list[UserSchema]]:
-    count = await row_count(session, User)
+    filters = filters_from_arguments(
+        User,
+        email=email,
+        username=username,
+        full_name=full_name,
+        is_admin=is_admin,
+    )
+    order_by = order_by_from_arguments(sort_params=sort_params)
+    count = await row_count(session, User, *filters)
     stmt = (
         select(
             User.c.id,
             User.c.email,
             User.c.username,
             User.c.full_name,
-            User.c.password,
             User.c.is_admin,
         )
         .select_from(User)
-        .order_by(User.c.id)
+        .where(*filters)  # type: ignore[arg-type]
+        .order_by(*order_by)
         .offset(offset)
     )
     if limit is not None:

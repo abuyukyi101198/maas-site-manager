@@ -28,12 +28,27 @@ from ...schema import (
     PaginatedResults,
     pagination_params,
     PaginationParams,
+    SortParam,
+    SortParamParser,
+)
+from .._forms import (
+    user_filter_params,
+    UserFilterParams,
 )
 from .._jwt import (
     authenticate_user,
     get_authenticated_admin,
     get_authenticated_user,
     get_password_hash,
+)
+
+user_sort_params = SortParamParser(
+    fields=[
+        "email",
+        "username",
+        "full_name",
+        "is_admin",
+    ]
 )
 
 
@@ -47,10 +62,16 @@ async def get(
     session: Annotated[AsyncSession, Depends(db_session)],
     authenticated_admin: Annotated[User, Depends(get_authenticated_admin)],
     pagination_params: PaginationParams = Depends(pagination_params),
+    filter_params: UserFilterParams = Depends(user_filter_params),
+    sort_params: list[SortParam] = Depends(user_sort_params),
 ) -> UsersGetResponse:
     """Return all users"""
     total, results = await queries.get_users(
-        session, pagination_params.offset, pagination_params.size
+        session,
+        sort_params=sort_params,
+        offset=pagination_params.offset,
+        limit=pagination_params.size,
+        **filter_params._asdict(),
     )
     return UsersGetResponse(
         total=total,
