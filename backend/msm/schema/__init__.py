@@ -7,6 +7,10 @@ from ._pagination import (
     pagination_params,
     PaginationParams,
 )
+from ._search import (
+    search_text_param,
+    SearchTextParam,
+)
 from ._sorting import (
     SortParam,
     SortParamParser,
@@ -19,5 +23,7 @@ __all__ = [
     "pagination_params",
     "SortParam",
     "SortParamParser",
+    "SearchTextParam",
+    "search_text_param",
     "TimeZone",
 ]

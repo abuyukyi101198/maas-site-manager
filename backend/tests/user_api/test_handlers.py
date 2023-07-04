@@ -575,9 +575,22 @@ class TestUsersHandler:
                 {"page": 2, "size": 2, "sort_by": "username,email-asc"},
                 ["hatp13", "proxima"],
             ),
+            (
+                {"search_text": "@example"},
+                ["admin", "hatp13", "alphacen"],
+            ),
+            ({"search_text": "Bob+Smith", "page": 1}, []),
+            (
+                {"search_text": "aur", "sort_by": "username-desc"},
+                ["proxima", "alphacen"],
+            ),
+            (
+                {"sort_by": "full_name-asc", "search_text": " b"},
+                ["hatp13", "proxima"],
+            ),
         ],
     )
-    async def test_users_get_with_sorting(
+    async def test_users_get_with_params(
         self,
         authenticated_admin_app_client: AuthAsyncClient,
         fixture: Fixture,
@@ -608,20 +621,29 @@ class TestUsersHandler:
             )
 
         await create_user(
-            "proxima", "password1", "proxima@example.com", "Proxima Centauri b"
+            "proxima",
+            "password1",
+            "proxima@maas-site-manager.example.com",
+            "Proxima Centauri b",
         )
         await create_user(
             "trappist",
             "password2",
-            "trappist@example.com",
+            "trappist@maas-site-manager.example.com",
             "Trappist 1 e",
             True,
         )
         await create_user(
-            "hatp13", "password3", "hatp13@example.com", "HAT-P-13 b"
+            "hatp13",
+            "password3",
+            "hatp13@example.com",
+            "HAT-P-13 b",
         )
         await create_user(
-            "alphacen", "password4", "alphacen@example.com", "Rigel Kentaurus"
+            "alphacen",
+            "password4",
+            "alphacen@example.com",
+            "Rigel Kentaurus",
         )
 
         response = await authenticated_admin_app_client.get(
@@ -637,7 +659,7 @@ class TestUsersHandler:
             "doesntexist",
         ],
     )
-    async def test_users_get_with_invalid_sorting(
+    async def test_users_get_with_invalid_params(
         self,
         authenticated_admin_app_client: AuthAsyncClient,
         fixture: Fixture,
@@ -647,7 +669,7 @@ class TestUsersHandler:
             "user",
             [
                 {
-                    "email": "proxima@example.com",
+                    "email": "proxima@maas-site-manager.example.com",
                     "username": "proxima",
                     "full_name": "Proxima Centauri b",
                     "password": get_password_hash("password"),

@@ -28,6 +28,8 @@ from ...schema import (
     PaginatedResults,
     pagination_params,
     PaginationParams,
+    search_text_param,
+    SearchTextParam,
     SortParam,
     SortParamParser,
 )
@@ -64,6 +66,7 @@ async def get(
     pagination_params: PaginationParams = Depends(pagination_params),
     filter_params: UserFilterParams = Depends(user_filter_params),
     sort_params: list[SortParam] = Depends(user_sort_params),
+    search_text: SearchTextParam = Depends(search_text_param),
 ) -> UsersGetResponse:
     """Return all users"""
     total, results = await queries.get_users(
@@ -71,6 +74,7 @@ async def get(
         sort_params=sort_params,
         offset=pagination_params.offset,
         limit=pagination_params.size,
+        search_text=search_text.search_text,
         **filter_params._asdict(),
     )
     return UsersGetResponse(

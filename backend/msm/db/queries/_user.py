@@ -1,5 +1,3 @@
-from operator import or_
-
 from sqlalchemy import (
     delete,
     insert,
@@ -7,6 +5,7 @@ from sqlalchemy import (
     update,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql import or_
 
 from .. import models
 from ...schema import SortParam
@@ -70,6 +69,7 @@ async def get_users(
     sort_params: list[SortParam],
     offset: int = 0,
     limit: int | None = None,
+    search_text: list[str] | None = None,
     email: list[str] | None = None,
     username: list[str] | None = None,
     full_name: list[str] | None = None,
@@ -83,6 +83,17 @@ async def get_users(
         is_admin=is_admin,
     )
     order_by = order_by_from_arguments(sort_params=sort_params)
+    if search_text:
+        filters.append(
+            or_(
+                *filters_from_arguments(  # type: ignore[arg-type]
+                    User,
+                    email=search_text,
+                    username=search_text,
+                    full_name=search_text,
+                )
+            )
+        )
     count = await row_count(session, User, *filters)
     stmt = (
         select(
