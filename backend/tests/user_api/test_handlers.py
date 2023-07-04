@@ -919,10 +919,11 @@ class TestUsersHandler:
         }
         new_details = random_sample_dict(
             {
-                "full_name": "New Admin",
-                "email": "admin3@example.com",
-                "password": "New Password",
-                "is_admin": True,
+                "username": "admin3",
+                # "full_name": "New Admin",
+                # "email": "admin3@example.com",
+                # "password": "New Password",
+                # "is_admin": True,
             },
             requires={"password": {"confirm_password": "New Password"}},
         )
@@ -990,6 +991,38 @@ class TestUsersHandler:
         )
         assert response.status_code == 422
         assert response.json()["detail"]["message"] == "User does not exist."
+
+    @pytest.mark.parametrize(
+        "new_details",
+        [{"email": "admin@example.com"}, {"username": "admin"}],
+    )
+    async def test_users_patch_duplicate_user(
+        self,
+        authenticated_admin_app_client: AuthAsyncClient,
+        fixture: Fixture,
+        new_details: dict[str, str],
+    ) -> None:
+        phash2 = "$2b$12$iEPLFcNocyeUDgu2ywDVGeFHyrksI89bzSvdAwvU1N4zYFtofme3S"
+        user_details = {
+            "email": "admin2@example.com",
+            "username": "admin2",
+            "full_name": "Another MAAS Admin",
+            "password": phash2,
+            "is_admin": True,
+        }
+        await fixture.create(
+            "user",
+            [user_details],
+            commit=True,
+        )
+        response = await authenticated_admin_app_client.patch(
+            "/users/2", json=new_details
+        )
+        assert response.status_code == 400
+        assert (
+            response.json()["detail"]["message"]
+            == "Email or Username already in use."
+        )
 
     async def test_users_delete(
         self, authenticated_admin_app_client: AuthAsyncClient, fixture: Fixture
@@ -1066,6 +1099,7 @@ class TestUsersHandler:
         }
         new_details = random_sample_dict(
             {
+                "username": "admin3",
                 "full_name": "New Admin",
                 "email": "admin3@example.com",
             },
@@ -1086,6 +1120,38 @@ class TestUsersHandler:
 
         assert response.status_code == 422
         assert response.json()["detail"]["message"] == "Request body empty."
+
+    @pytest.mark.parametrize(
+        "new_details",
+        [{"email": "admin2@example.com"}, {"username": "admin2"}],
+    )
+    async def test_users_patch_me_duplicate_user(
+        self,
+        authenticated_admin_app_client: AuthAsyncClient,
+        fixture: Fixture,
+        new_details: dict[str, str],
+    ) -> None:
+        phash2 = "$2b$12$iEPLFcNocyeUDgu2ywDVGeFHyrksI89bzSvdAwvU1N4zYFtofme3S"
+        user_details = {
+            "email": "admin2@example.com",
+            "username": "admin2",
+            "full_name": "Another MAAS Admin",
+            "password": phash2,
+            "is_admin": True,
+        }
+        await fixture.create(
+            "user",
+            [user_details],
+            commit=True,
+        )
+        response = await authenticated_admin_app_client.patch(
+            "/users/me", json=new_details
+        )
+        assert response.status_code == 400
+        assert (
+            response.json()["detail"]["message"]
+            == "Email or Username already in use."
+        )
 
 
 @pytest.mark.asyncio

@@ -145,6 +145,7 @@ class UsersPatchRequest(BaseModel):
     """User Edit Details request schema."""
 
     full_name: str | None = None
+    username: str | None = None
     email: str | None = None
     password: str | None = Field(min_length=8, max_length=100)
     confirm_password: str | None = Field(min_length=8, max_length=100)
@@ -183,6 +184,14 @@ async def patch(
             detail={"message": "User does not exist."},
         )
 
+    if await queries.user_exists(
+        session, patch_request.email, patch_request.username
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"message": "Email or Username already in use."},
+        )
+
     user = await queries.update_user(
         session, user_id, UserUpdate(**patch_request.dict())
     )
@@ -218,6 +227,7 @@ async def me_get(
 class UsersPatchMeRequest(BaseModel):
     """User Edit Details about themselves."""
 
+    username: str | None = None
     full_name: str | None = None
     email: str | None = None
 
@@ -233,6 +243,14 @@ async def me_patch(
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail={"message": "Request body empty."},
+        )
+
+    if await queries.user_exists(
+        session, patch_request.email, patch_request.username
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"message": "Email or Username already in use."},
         )
 
     user = await queries.update_user(

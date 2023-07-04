@@ -25,17 +25,18 @@ async def user_id_exists(session: AsyncSession, user_id: int) -> bool:
 
 
 async def user_exists(
-    session: AsyncSession, email: str, username: str
+    session: AsyncSession, email: str | None, username: str | None
 ) -> bool:
+    if not email and not username:
+        return False
+    elif not username:
+        user_filter = User.c.email == email
+    elif not email:
+        user_filter = User.c.username == username
+    else:
+        user_filter = or_(User.c.email == email, User.c.username == username)
     search = await session.execute(
-        select(User.c.id)
-        .select_from(User)
-        .filter(
-            or_(
-                User.c.email == email,
-                User.c.username == username,
-            )
-        )
+        select(User.c.id).select_from(User).filter(user_filter)
     )
     return search.first() is not None
 
