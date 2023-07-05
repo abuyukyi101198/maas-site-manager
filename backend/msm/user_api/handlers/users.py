@@ -185,7 +185,10 @@ async def patch(
         )
 
     if await queries.user_exists(
-        session, patch_request.email, patch_request.username
+        session,
+        email=patch_request.email,
+        username=patch_request.username,
+        exclude_id=user_id,
     ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -246,7 +249,10 @@ async def me_patch(
         )
 
     if await queries.user_exists(
-        session, patch_request.email, patch_request.username
+        session,
+        email=patch_request.email,
+        username=patch_request.username,
+        exclude_id=authenticated_user.id,
     ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

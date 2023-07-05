@@ -5,7 +5,10 @@ from sqlalchemy import (
     update,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql import or_
+from sqlalchemy.sql import (
+    and_,
+    or_,
+)
 
 from .. import models
 from ...schema import SortParam
@@ -25,7 +28,10 @@ async def user_id_exists(session: AsyncSession, user_id: int) -> bool:
 
 
 async def user_exists(
-    session: AsyncSession, email: str | None, username: str | None
+    session: AsyncSession,
+    email: str | None = None,
+    username: str | None = None,
+    exclude_id: int | None = None,
 ) -> bool:
     if not email and not username:
         return False
@@ -35,6 +41,8 @@ async def user_exists(
         user_filter = User.c.username == username
     else:
         user_filter = or_(User.c.email == email, User.c.username == username)
+    if exclude_id is not None:
+        user_filter = and_(user_filter, User.c.id != exclude_id)
     search = await session.execute(
         select(User.c.id).select_from(User).filter(user_filter)
     )
