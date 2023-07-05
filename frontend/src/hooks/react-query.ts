@@ -8,6 +8,7 @@ import type {
   GetTokensQueryParams,
   PostEnrollmentRequestsData,
   PostLoginData,
+  UpdateUserPayload,
 } from "@/api/handlers";
 import {
   deleteTokens,
@@ -17,6 +18,8 @@ import {
   postTokens,
   getSites,
   getTokens,
+  getCurrentUser,
+  updateUser,
 } from "@/api/handlers";
 import type {
   SitesQueryResult,
@@ -25,6 +28,7 @@ import type {
   AccessToken,
   Token,
   Site,
+  CurrentUser,
 } from "@/api/types";
 
 export type UseSitesQueryResult = ReturnType<typeof useSitesQuery>;
@@ -115,3 +119,9 @@ export type ApiError = AxiosError<{
 }>;
 export type LoginError = ApiError;
 export const useLoginMutation = (): UseMutationResult<AccessToken, LoginError, PostLoginData> => useMutation(postLogin);
+
+export const useCurrentUserQuery = () => useQuery<CurrentUser>({ queryKey: ["me"], queryFn: getCurrentUser });
+
+export const useUpdateUserMutation = (
+  options?: Omit<UseMutationOptions<any, unknown, UpdateUserPayload, unknown>, "mutationFn">,
+) => useMutation(updateUser, options);

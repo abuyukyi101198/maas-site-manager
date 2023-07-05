@@ -8,6 +8,8 @@ import {
   postEnrollmentRequests,
   postTokens,
   deleteTokens,
+  getCurrentUser,
+  updateUser,
 } from "./resolvers";
 
 export const worker = setupWorker(
@@ -18,4 +20,6 @@ export const worker = setupWorker(
   postEnrollmentRequests,
   getTokens,
   deleteTokens,
+  getCurrentUser,
+  updateUser,
 );

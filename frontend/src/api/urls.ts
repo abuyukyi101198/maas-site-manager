@@ -6,6 +6,8 @@ const urls = {
   sites: getApiUrl("/sites"),
   tokens: getApiUrl("/tokens"),
   enrollmentRequests: getApiUrl("/requests"),
+  users: getApiUrl("/users"),
+  currentUser: getApiUrl("/users/me"),
 };
 
 export default urls;

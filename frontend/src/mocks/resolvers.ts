@@ -1,9 +1,16 @@
 import { rest } from "msw";
 import type { RestRequest, restContext, ResponseResolver } from "msw";
 
-import { siteFactory, tokenFactory, enrollmentRequestFactory, accessTokenFactory } from "./factories";
+import {
+  siteFactory,
+  tokenFactory,
+  enrollmentRequestFactory,
+  accessTokenFactory,
+  currentUserFactory,
+} from "./factories";
 
 import type { GetSitesQueryParams, PostTokensData, SortDirection, SortKey } from "@/api/handlers";
+import type { CurrentUser } from "@/api/types";
 import urls from "@/api/urls";
 import { isDev } from "@/constants";
 
@@ -130,6 +137,20 @@ export const createMockPostEnrollmentRequestsResolver =
     }
   };
 
+type CurrentUserResponseResolver = ResponseResolver<RestRequest, typeof restContext>;
+export const createMockCurrentUserResolver = (): CurrentUserResponseResolver => async (req, res, ctx) => {
+  const user = currentUserFactory.build({ username: "admin", full_name: "MAAS Admin", email: "admin@example.com" });
+  return res(ctx.status(200), ctx.json(user));
+};
+
+type UpdateUserResponseResolver = ResponseResolver<RestRequest<CurrentUser, { id: string }>, typeof restContext>;
+export const createMockUpdateUserResolver = (): UpdateUserResponseResolver => async (req, res, ctx) => {
+  const { full_name, username, email, is_admin } = req.body;
+  const id = req.params.id;
+  const user = { id: Number(id), full_name, username, email, is_admin };
+  return res(ctx.status(200), ctx.json(user));
+};
+
 export const postLogin = rest.post(urls.login, createMockLoginResolver());
 export const getSites = rest.get(urls.sites, createMockSitesResolver());
 export const postTokens = rest.post(urls.tokens, createMockTokensResolver());
@@ -137,4 +158,14 @@ export const getTokens = rest.get(urls.tokens, createMockGetTokensResolver());
 export const deleteTokens = rest.delete(urls.tokens, createMockDeleteTokensResolver());
 export const getEnrollmentRequests = rest.get(urls.enrollmentRequests, createMockGetEnrollmentRequestsResolver());
 export const postEnrollmentRequests = rest.post(urls.enrollmentRequests, createMockPostEnrollmentRequestsResolver());
-export const allResolvers = [getSites, postTokens, getTokens, getEnrollmentRequests, postEnrollmentRequests];
+export const getCurrentUser = rest.get(urls.currentUser, createMockCurrentUserResolver());
+export const updateUser = rest.patch(`${urls.users}/:id`, createMockUpdateUserResolver());
+export const allResolvers = [
+  getSites,
+  postTokens,
+  getTokens,
+  getEnrollmentRequests,
+  postEnrollmentRequests,
+  getCurrentUser,
+  updateUser,
+];

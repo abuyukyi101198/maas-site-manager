@@ -52,3 +52,11 @@ export type EnrollmentRequest = {
 };
 
 export type EnrollmentRequestsQueryResult = PaginatedQueryResult<EnrollmentRequest>;
+
+export type CurrentUser = {
+  id: number;
+  email: string;
+  full_name?: string;
+  is_admin: boolean;
+  username: string;
+};

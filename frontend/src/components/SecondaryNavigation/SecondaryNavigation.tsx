@@ -131,7 +131,10 @@ const secondaryNavInfo: SecondaryNavInfoType = {
     navItems: [
       {
         label: "",
-        items: [{ path: "/account/password", label: "Password" }],
+        items: [
+          { path: "/account/details", label: "Personal Details" },
+          { path: "/account/password", label: "Password" },
+        ],
       },
     ],
   },

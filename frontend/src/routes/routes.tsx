@@ -6,6 +6,7 @@ import Account from "@/pages/account";
 import Password from "@/pages/account/password";
 import Login from "@/pages/login";
 import Logout from "@/pages/logout";
+import PersonalDetails from "@/pages/personalDetails";
 import Requests from "@/pages/requests";
 import Settings from "@/pages/settings";
 import SitesList from "@/pages/sites";
@@ -67,7 +68,16 @@ export const routes = createRoutesFromElements(
       }
       path="account"
     >
-      <Route element={<RequireLogin />} index loader={() => redirect("/account/password")} />
+      <Route element={<RequireLogin />} index loader={() => redirect("/account/details")} />
+      <Route
+        element={
+          <RequireLogin>
+            <PersonalDetails />
+          </RequireLogin>
+        }
+        path="details"
+      />
+
       <Route
         element={
           <RequireLogin>

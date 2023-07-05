@@ -1,6 +1,23 @@
+import { rest } from "msw";
+import { setupServer } from "msw/node";
+
 import Navigation, { navItemsBottom, navItems, settingsNavItems } from "./Navigation";
 
+import urls from "@/api/urls";
+import { createMockCurrentUserResolver } from "@/mocks/resolvers";
 import { renderWithMemoryRouter, screen, userEvent } from "@/test-utils";
+
+const mockServer = setupServer(rest.get(urls.currentUser, createMockCurrentUserResolver()));
+
+beforeAll(() => {
+  mockServer.listen();
+});
+afterEach(() => {
+  mockServer.resetHandlers();
+});
+afterAll(() => {
+  mockServer.close();
+});
 
 describe("Navigation", () => {
   it("displays navigation", () => {
@@ -106,5 +123,15 @@ describe("Navigation", () => {
     navItemsBottom.map(({ label }) =>
       expect(screen.getByRole("link", { name: new RegExp(label, "i") })).toBeInTheDocument(),
     );
+  });
+
+  it("displays the username of the logged in user", () => {
+    renderWithMemoryRouter(<Navigation isLoggedIn />);
+
+    expect(
+      screen.getByRole("link", {
+        name: /admin/i,
+      }),
+    ).toBeInTheDocument();
   });
 });

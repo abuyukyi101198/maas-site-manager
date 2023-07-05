@@ -116,3 +116,34 @@ export const postEnrollmentRequests = async (data: PostEnrollmentRequestsData) =
     throw error;
   }
 };
+
+export const getCurrentUser = async () => {
+  try {
+    const response = await api.get(urls.currentUser);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export type UserUpdateData = {
+  full_name: string;
+  username: string;
+  email: string;
+  password: string;
+  is_admin: boolean;
+};
+
+export type UpdateUserPayload = {
+  userId: number;
+  userData: Partial<UserUpdateData>;
+};
+
+export const updateUser = async (data: UpdateUserPayload) => {
+  try {
+    const response = await api.patch(`${urls.users}/${data.userId}`, data.userData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
