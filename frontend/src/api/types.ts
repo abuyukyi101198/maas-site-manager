@@ -60,3 +60,12 @@ export type CurrentUser = {
   is_admin: boolean;
   username: string;
 };
+
+export type User = {
+  full_name: string;
+  username: string;
+  email: string;
+  is_admin: boolean;
+};
+
+export type UserQueryResult = PaginatedQueryResult<User>;

@@ -1,9 +1,12 @@
+import type { SortingState } from "@tanstack/react-table";
+
 import {
   customParamSerializer,
   getTimezoneUTCString,
   parseSearchTextToQueryParams,
   getTimeInTimezone,
   formatDistanceToNow,
+  getSortBy,
 } from "./utils";
 
 beforeEach(() => {
@@ -93,5 +96,14 @@ describe("formatDistanceToNow", () => {
       const result = formatDistanceToNow(time);
       expect(result).toBe(expected);
     });
+  });
+});
+
+describe("getSortBy", () => {
+  const sortingState: SortingState = [{ id: "name", desc: false }];
+
+  it("returns a sort key as a string", () => {
+    const sortKey = getSortBy(sortingState);
+    expect(sortKey).toStrictEqual("name-asc");
   });
 });

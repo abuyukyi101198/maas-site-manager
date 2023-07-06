@@ -124,6 +124,10 @@ const secondaryNavInfo: SecondaryNavInfoType = {
           },
         ],
       },
+      {
+        label: "Users",
+        path: "/settings/users",
+      },
     ],
   },
   account: {

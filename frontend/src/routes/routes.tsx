@@ -11,6 +11,7 @@ import Requests from "@/pages/requests";
 import Settings from "@/pages/settings";
 import SitesList from "@/pages/sites";
 import Tokens from "@/pages/tokens/tokens";
+import Users from "@/pages/users";
 import { createRoutesFromElements, Route, redirect } from "@/router";
 
 export const routes = createRoutesFromElements(
@@ -59,6 +60,14 @@ export const routes = createRoutesFromElements(
         }
         path="requests"
       />
+      <Route
+        element={
+          <RequireLogin>
+            <Users />
+          </RequireLogin>
+        }
+        path="users"
+      />
     </Route>
     <Route
       element={
@@ -87,7 +96,6 @@ export const routes = createRoutesFromElements(
         path="password"
       />
     </Route>
-    <Route path="users" />
   </Route>,
 );
 

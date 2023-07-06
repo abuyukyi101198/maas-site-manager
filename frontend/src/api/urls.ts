@@ -5,8 +5,8 @@ const urls = {
   logout: getApiUrl("/logout"),
   sites: getApiUrl("/sites"),
   tokens: getApiUrl("/tokens"),
-  enrollmentRequests: getApiUrl("/requests"),
   users: getApiUrl("/users"),
+  enrollmentRequests: getApiUrl("/requests"),
   currentUser: getApiUrl("/users/me"),
 };
 

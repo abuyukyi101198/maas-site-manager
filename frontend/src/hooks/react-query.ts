@@ -6,6 +6,7 @@ import type {
   GetEnrollmentRequestsQueryParams,
   GetSitesQueryParams,
   GetTokensQueryParams,
+  GetUsersQueryParams,
   PostEnrollmentRequestsData,
   PostLoginData,
   UpdateUserPayload,
@@ -20,6 +21,7 @@ import {
   getTokens,
   getCurrentUser,
   updateUser,
+  getUsers,
 } from "@/api/handlers";
 import type {
   SitesQueryResult,
@@ -29,6 +31,7 @@ import type {
   Token,
   Site,
   CurrentUser,
+  UserQueryResult,
 } from "@/api/types";
 
 export type UseSitesQueryResult = ReturnType<typeof useSitesQuery>;
@@ -57,6 +60,14 @@ export const useSiteQueryData = (id: Site["id"]): Site | null => {
   const site = sites.find((site: any) => site.id === id);
   return site || null;
 };
+
+export type useUsersQueryResult = ReturnType<typeof useUsersQuery>;
+export const useUsersQuery = ({ page, size, sort_by }: GetUsersQueryParams, searchText?: string) =>
+  useQuery<UserQueryResult>({
+    queryKey: ["users", page, size, sort_by, searchText],
+    queryFn: () => getUsers({ page, size, sort_by }, searchText),
+    keepPreviousData: true,
+  });
 
 export type useTokensQueryResult = ReturnType<typeof useTokensQuery>;
 export const useTokensQuery = ({ page, size }: GetTokensQueryParams) =>

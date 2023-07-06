@@ -2,7 +2,7 @@ import api from "./api";
 import type { Token } from "./types";
 import urls from "./urls";
 
-import { customParamSerializer } from "@/utils";
+import { customParamSerializer, customParamWithSearchTextSerializer } from "@/utils";
 
 export type PostLoginData = {
   username: string;
@@ -31,14 +31,17 @@ export type PaginationParams = {
   size: string;
 };
 
-export type SortKey = "name";
 export type SortDirection = "asc" | "desc";
-export type SortBy = `${SortKey}-${SortDirection}` | null;
-export type SortingParams = {
-  sort_by: SortBy;
+
+export type SitesSortKey = "name";
+export type UserSortKey = "username" | "full_name" | "email";
+
+export type SortBy<T extends SitesSortKey | UserSortKey> = `${T}-${SortDirection}` | null;
+export type SortingParams<T extends SitesSortKey | UserSortKey> = {
+  sort_by: SortBy<T>;
 };
 
-export type GetSitesQueryParams = PaginationParams & SortingParams & {};
+export type GetSitesQueryParams = PaginationParams & SortingParams<SitesSortKey> & {};
 export const getSites = async (params: GetSitesQueryParams, queryText?: string) => {
   try {
     const response = await api.get(urls.sites, {
@@ -74,6 +77,19 @@ export type GetTokensQueryParams = PaginationParams & {};
 export const getTokens = async (params: GetTokensQueryParams) => {
   try {
     const response = await api.get(urls.tokens, { params });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export type GetUsersQueryParams = PaginationParams & SortingParams<UserSortKey> & {};
+export const getUsers = async (params: GetUsersQueryParams, searchText?: string) => {
+  try {
+    const response = await api.get(urls.users, {
+      params,
+      paramsSerializer: { serialize: (params) => customParamWithSearchTextSerializer(params, searchText) },
+    });
     return response.data;
   } catch (error) {
     throw error;

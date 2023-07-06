@@ -15,6 +15,10 @@ export const protectedRoutes = {
     path: "/settings/tokens",
     title: "Tokens",
   },
+  users: {
+    path: "/settings/users",
+    title: "Users",
+  },
   account: {
     path: "/account",
     title: "",

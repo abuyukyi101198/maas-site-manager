@@ -7,9 +7,17 @@ import {
   enrollmentRequestFactory,
   accessTokenFactory,
   currentUserFactory,
+  userFactory,
 } from "./factories";
 
-import type { GetSitesQueryParams, PostTokensData, SortDirection, SortKey } from "@/api/handlers";
+import type {
+  GetSitesQueryParams,
+  GetUsersQueryParams,
+  PostTokensData,
+  SortDirection,
+  SitesSortKey,
+  UserSortKey,
+} from "@/api/handlers";
 import type { CurrentUser } from "@/api/types";
 import urls from "@/api/urls";
 import { isDev } from "@/constants";
@@ -17,6 +25,7 @@ import { isDev } from "@/constants";
 export const mockResponseDelay = isDev ? 0 : 0;
 export const sitesList = siteFactory.buildList(155);
 export const tokensList = tokenFactory.buildList(150);
+export const usersList = userFactory.buildList(20);
 export const enrollmentRequestsList = [
   enrollmentRequestFactory.build({ created: undefined }),
   ...enrollmentRequestFactory.buildList(100),
@@ -47,7 +56,7 @@ export const createMockSitesResolver =
     const items = [...sites];
     const sortBy = searchParams.get("sort_by") as GetSitesQueryParams["sort_by"];
     if (sortBy) {
-      const [field, order] = sortBy.split("-") as [SortKey, SortDirection];
+      const [field, order] = sortBy.split("-") as [SitesSortKey, SortDirection];
       items.sort((a, b) => {
         if (order === "asc") {
           return a[field] > b[field] ? 1 : -1;
@@ -109,6 +118,38 @@ export const createMockDeleteTokensResolver = (): DeleteTokensResponseResolver =
   return res(ctx.status(400));
 };
 
+type UsersResponseResolver = ResponseResolver<RestRequest, typeof restContext>;
+export const createMockGetUsersResolver =
+  (users = usersList): UsersResponseResolver =>
+  (req, res, ctx) => {
+    const searchParams = new URLSearchParams(req.url.search);
+    const page = Number(searchParams.get("page"));
+    const size = Number(searchParams.get("size"));
+
+    // sort items
+    const items = [...users];
+    const sortBy = searchParams.get("sort_by") as GetUsersQueryParams["sort_by"];
+    if (sortBy) {
+      const [field, order] = sortBy.split("-") as [UserSortKey, SortDirection];
+      items.sort((a, b) => {
+        if (order === "asc") {
+          return a[field] > b[field] ? 1 : -1;
+        }
+        return a[field] < b[field] ? 1 : -1;
+      });
+    }
+
+    const itemsPage = items.slice((page - 1) * size, page * size);
+
+    const response = {
+      items: itemsPage,
+      page,
+      total: users.length,
+    };
+
+    return res(ctx.json(response));
+  };
+
 export const createMockGetEnrollmentRequestsResolver =
   (enrollmentRequests = enrollmentRequestsList): TokensResponseResolver =>
   (req, res, ctx) => {
@@ -156,6 +197,7 @@ export const getSites = rest.get(urls.sites, createMockSitesResolver());
 export const postTokens = rest.post(urls.tokens, createMockTokensResolver());
 export const getTokens = rest.get(urls.tokens, createMockGetTokensResolver());
 export const deleteTokens = rest.delete(urls.tokens, createMockDeleteTokensResolver());
+export const getUsers = rest.get(urls.users, createMockGetUsersResolver());
 export const getEnrollmentRequests = rest.get(urls.enrollmentRequests, createMockGetEnrollmentRequestsResolver());
 export const postEnrollmentRequests = rest.post(urls.enrollmentRequests, createMockPostEnrollmentRequestsResolver());
 export const getCurrentUser = rest.get(urls.currentUser, createMockCurrentUserResolver());
@@ -168,4 +210,5 @@ export const allResolvers = [
   postEnrollmentRequests,
   getCurrentUser,
   updateUser,
+  getUsers,
 ];

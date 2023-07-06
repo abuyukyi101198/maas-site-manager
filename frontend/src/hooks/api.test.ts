@@ -2,18 +2,20 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { rest } from "msw";
 import { setupServer } from "msw/node";
 
-import { useSitesQuery, useTokensQuery } from "./react-query";
+import { useSitesQuery, useTokensQuery, useUsersQuery } from "./react-query";
 
 import urls from "@/api/urls";
-import { siteFactory, tokenFactory } from "@/mocks/factories";
-import { createMockGetTokensResolver, createMockSitesResolver } from "@/mocks/resolvers";
+import { siteFactory, tokenFactory, userFactory } from "@/mocks/factories";
+import { createMockGetTokensResolver, createMockGetUsersResolver, createMockSitesResolver } from "@/mocks/resolvers";
 import { Providers } from "@/test-utils";
 
 const sitesData = siteFactory.buildList(2);
 const tokensData = tokenFactory.buildList(2);
+const usersData = userFactory.buildList(2);
 const mockServer = setupServer(
   rest.get(urls.sites, createMockSitesResolver(sitesData)),
   rest.get(urls.tokens, createMockGetTokensResolver(tokensData)),
+  rest.get(urls.users, createMockGetUsersResolver(usersData)),
 );
 
 beforeAll(() => {
@@ -40,4 +42,12 @@ it("should return tokens", async () => {
   await waitFor(() => expect(result.current.isFetchedAfterMount).toBe(true));
 
   expect(result.current.data!.items).toEqual(tokensData);
+});
+
+it("should return users", async () => {
+  const { result } = renderHook(() => useUsersQuery({ page: "1", size: "2", sort_by: null }), { wrapper: Providers });
+
+  await waitFor(() => expect(result.current.isFetchedAfterMount).toBe(true));
+
+  expect(result.current.data!.items).toEqual(usersData);
 });

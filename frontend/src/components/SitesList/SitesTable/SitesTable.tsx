@@ -1,9 +1,8 @@
 import type { Dispatch, SetStateAction } from "react";
 import React, { useEffect, useMemo } from "react";
 
-import { Icon } from "@canonical/react-components";
 import { useReactTable, flexRender, getCoreRowModel } from "@tanstack/react-table";
-import type { ColumnDef, Column, Getter, Row, SortingState, Header } from "@tanstack/react-table";
+import type { ColumnDef, Column, Getter, Row, SortingState } from "@tanstack/react-table";
 import classNames from "classnames";
 import pick from "lodash/fp/pick";
 import useLocalStorageState from "use-local-storage-state";
@@ -20,6 +19,7 @@ import SelectAllCheckbox from "@/components/SelectAllCheckbox";
 import TableCaption from "@/components/TableCaption/TableCaption";
 import type { PaginationBarProps } from "@/components/base/PaginationBar/PaginationBar";
 import PaginationBar from "@/components/base/PaginationBar/PaginationBar";
+import SortIndicator from "@/components/base/SortIndicator";
 import TooltipButton from "@/components/base/TooltipButton/TooltipButton";
 import { isDev } from "@/constants";
 import { useRowSelectionContext } from "@/context/RowSelectionContext";
@@ -34,12 +34,6 @@ const createAccessor =
 export type Site = SitesQueryResult["items"][number];
 export type SitesColumnDef = ColumnDef<Site, Partial<Site>>;
 export type SitesColumn = Column<Site, unknown>;
-
-const SortIndicator = ({ header }: { header: Header<Site, Partial<Site>> }) =>
-  ({
-    asc: <Icon aria-label="ascending" name="chevron-up" />,
-    desc: <Icon aria-label="descending" name="chevron-down" />,
-  }[header?.column?.getIsSorted() as string] ?? null);
 
 type SortProps = {
   sorting: SortingState;

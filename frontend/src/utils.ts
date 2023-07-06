@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/browser";
+import type { SortingState } from "@tanstack/react-table";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import { getTimezoneOffset, format, utcToZonedTime } from "date-fns-tz";
 import * as countries from "i18n-iso-countries";
@@ -26,6 +27,15 @@ export const parseSearchTextToQueryParams = (text: string) => {
   return parsedText;
 };
 
+/**
+ * Parses a search string into URL parameters for free text search, e.g:
+ * "Bob Smith" would become "bob+smith"
+ * @param text The text to be parsed
+ */
+export const parseSearchTextToUrlFreeTextSearch = (text: string) => {
+  return text.replaceAll(" ", "+");
+};
+
 export const customParamSerializer = (params: Record<string, string | number | null>, queryText?: string) => {
   return (
     // skip undefined values for specified keys
@@ -33,6 +43,18 @@ export const customParamSerializer = (params: Record<string, string | number | n
       .filter(([_key, value]) => !!value)
       .map(([key, value]) => `${key}=${encodeURIComponent(value!)}`)
       .join("&") + `${queryText ? "&" + queryText : ""}`
+  );
+};
+
+export const customParamWithSearchTextSerializer = (
+  params: Record<string, string | number | null>,
+  searchText?: string,
+) => {
+  return (
+    Object.entries(Object.assign({}, params))
+      .filter(([_key, value]) => !!value)
+      .map(([key, value]) => `${key}=${encodeURIComponent(value!)}`)
+      .join("&") + `${searchText ? "&search_text=" + searchText : ""}`
   );
 };
 
@@ -73,4 +95,12 @@ export const copyToClipboard = (text: string, callback?: (text: string) => void)
     .catch((error) => {
       Sentry.captureException(new Error("copy to clipboard failed", { cause: error }));
     });
+};
+
+export const getSortBy = (sorting: SortingState) => {
+  if (sorting.length !== 1) {
+    return null;
+  }
+  const key = sorting[0].id;
+  return `${key}-${sorting[0].desc ? "desc" : "asc"}`;
 };

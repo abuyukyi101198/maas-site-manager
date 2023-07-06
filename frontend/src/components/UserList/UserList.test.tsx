@@ -1,0 +1,99 @@
+import UserList from "./UserList";
+
+import urls from "@/api/urls";
+import { userFactory } from "@/mocks/factories";
+import { createMockGetUsersResolver } from "@/mocks/resolvers";
+import { createMockGetServer } from "@/mocks/server";
+import { renderWithMemoryRouter, screen, userEvent, waitFor, within } from "@/test-utils";
+
+const userWithoutFullName = userFactory.build({ full_name: "" });
+const users = [...userFactory.buildList(2), userWithoutFullName];
+const mockServer = createMockGetServer(urls.users, createMockGetUsersResolver(users));
+
+describe("UserList", () => {
+  beforeAll(() => {
+    mockServer.listen();
+  });
+
+  afterEach(() => {
+    mockServer.resetHandlers();
+  });
+
+  afterAll(() => {
+    mockServer.close();
+  });
+
+  it("renders a populated user table", async () => {
+    renderWithMemoryRouter(<UserList />);
+
+    expect(screen.getByRole("table", { name: "users" })).toBeInTheDocument();
+
+    await waitFor(() => expect(screen.getAllByRole("rowgroup")).toHaveLength(2));
+    const tableBody = screen.getAllByRole("rowgroup")[1];
+    expect(within(tableBody).getAllByRole("row")).toHaveLength(users.length);
+    within(tableBody)
+      .getAllByRole("row")
+      .forEach((row, i) => {
+        expect(within(row).getAllByRole("cell")[0]).toHaveTextContent(users[i].username); // Username should be displayed by default
+        expect(within(row).getAllByRole("cell")[1]).toHaveTextContent(users[i].email);
+
+        // Check that the user role is being displayed correctly
+        const role = users[i].is_admin ? "Admin" : "User";
+
+        expect(within(row).getAllByRole("cell")[2]).toHaveTextContent(role);
+      });
+  });
+
+  it("can switch between username and full name display", async () => {
+    renderWithMemoryRouter(<UserList />);
+
+    await waitFor(() => expect(screen.getAllByRole("rowgroup")).toHaveLength(2));
+    let tableBody = screen.getAllByRole("rowgroup")[1];
+    expect(within(tableBody).getAllByRole("row")).toHaveLength(users.length);
+    within(tableBody)
+      .getAllByRole("row")
+      .forEach((row, i) => {
+        expect(within(row).getAllByRole("cell")[0]).toHaveTextContent(users[i].username); // Username should be displayed by default
+      });
+
+    await userEvent.click(screen.getByRole("button", { name: "Full name" }));
+
+    tableBody = screen.getAllByRole("rowgroup")[1];
+    expect(within(tableBody).getAllByRole("row")).toHaveLength(users.length);
+    within(tableBody)
+      .getAllByRole("row")
+      .forEach((row, i) => {
+        // If a full name is set, it should be displayed. Otherwise, display a dash
+        expect(within(row).getAllByRole("cell")[0]).toHaveTextContent(users[i].full_name ? users[i].full_name : "—");
+      });
+  });
+
+  it("displays a pagination bar with the table", () => {
+    renderWithMemoryRouter(<UserList />);
+
+    expect(screen.getByText(/Showing 3 out of 3 users/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /next page/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /previous page/i })).toBeInTheDocument();
+  });
+
+  it("displays a sort direction label", async () => {
+    renderWithMemoryRouter(<UserList />);
+
+    const emailDescending = ["columnheader", { name: /Email descending/i }] as const;
+    const emailAscending = ["columnheader", { name: /Email ascending/i }] as const;
+
+    expect(screen.getByRole("columnheader", { name: /Email/i })).toBeInTheDocument();
+    expect(screen.queryByRole(...emailDescending)).not.toBeInTheDocument();
+    expect(screen.queryByRole(...emailAscending)).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("columnheader", { name: /Email/i }));
+
+    expect(screen.getByRole(...emailDescending)).toBeInTheDocument();
+    expect(screen.queryByRole(...emailAscending)).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("columnheader", { name: /Email/i }));
+
+    expect(screen.getByRole(...emailAscending)).toBeInTheDocument();
+    expect(screen.queryByRole(...emailDescending)).not.toBeInTheDocument();
+  });
+});

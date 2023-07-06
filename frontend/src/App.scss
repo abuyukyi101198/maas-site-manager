@@ -37,6 +37,7 @@
 @include vf-p-icon-machines;
 @include vf-p-icon-submit-bug;
 @include vf-p-icon-comments;
+@include vf-p-icon-edit;
 
 // Utilities
 @include vf-u-text-muted;
@@ -70,6 +71,7 @@
 @import "@/components/Placeholder/Placeholder";
 @import "@/components/TokensList/TokensList";
 @import "@/components/TokensList/components/TokensTable/TokensTable";
+@import "@/components/UserList/UserList";
 @import "@/components/base/CopyButton/CopyButton";
 @import "@/components/base/TablePagination/TablePagination";
 @import "@/components/base/PaginationBar/PaginationBar";

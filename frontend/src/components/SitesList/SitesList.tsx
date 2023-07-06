@@ -4,21 +4,13 @@ import type { SortingState } from "@tanstack/react-table";
 
 import SitesTable from "./SitesTable";
 
-import type { SortBy, SortKey } from "@/api/handlers";
+import type { SitesSortKey, SortBy } from "@/api/handlers";
 import { useSitesQuery } from "@/hooks/react-query";
 import useDebounce from "@/hooks/useDebouncedValue";
 import usePagination from "@/hooks/usePagination";
-import { parseSearchTextToQueryParams } from "@/utils";
+import { parseSearchTextToQueryParams, getSortBy } from "@/utils";
 
 const DEFAULT_PAGE_SIZE = 50;
-
-const getSortBy = (sorting: SortingState): SortBy => {
-  if (sorting.length !== 1) {
-    return null;
-  }
-  const key = sorting[0].id as SortKey;
-  return `${key}-${sorting[0].desc ? "desc" : "asc"}`;
-};
 
 const SitesList = () => {
   const [totalDataCount, setTotalDataCount] = useState(0);
@@ -27,7 +19,7 @@ const SitesList = () => {
   const [searchText, setSearchText] = useState("");
   const debounceSearchText = useDebounce(searchText);
   const [sorting, setSorting] = useState<SortingState>([]);
-  const sortBy = getSortBy(sorting);
+  const sortBy = getSortBy(sorting) as SortBy<SitesSortKey>;
 
   const { error, data, isLoading } = useSitesQuery(
     {

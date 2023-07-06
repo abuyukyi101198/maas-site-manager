@@ -1,7 +1,7 @@
 import Chance from "chance";
 import { sub, add } from "date-fns";
 import { Factory } from "fishery";
-import { uniqueNamesGenerator, adjectives, colors, animals } from "unique-names-generator";
+import { uniqueNamesGenerator, adjectives, colors, animals, starWars } from "unique-names-generator";
 
 import type {
   AccessToken,
@@ -11,6 +11,7 @@ import type {
   Site,
   Stats,
   Token,
+  User,
 } from "@/api/types";
 
 export const connections: Stats["connection"][] = ["stable", "lost", "unknown"];
@@ -62,6 +63,26 @@ export const siteFactory = Factory.define<Site>(({ sequence }) => {
   };
 });
 
+export const userFactory = Factory.define<User>(({ sequence }) => {
+  const chance = new Chance(`maas-${sequence}`);
+
+  const full_name = uniqueNamesGenerator({
+    dictionaries: [starWars],
+    length: 1,
+    seed: sequence,
+  });
+  const username = `${full_name.replace(/\s/g, "")}${chance.integer({ min: 1, max: 99 })}`;
+  const email = `${username}@galactic-republic.gov`.toLowerCase();
+  const is_admin = chance.bool();
+
+  return {
+    full_name,
+    username,
+    email,
+    is_admin,
+  };
+});
+
 export const paginatedQueryResultFactory = <T extends unknown>() =>
   Factory.define<PaginatedQueryResult<T>>(() => {
     return { items: [], total: 0, page: 0, size: 0 };
@@ -69,6 +90,7 @@ export const paginatedQueryResultFactory = <T extends unknown>() =>
 
 export const enrollmentRequestQueryResultFactory = paginatedQueryResultFactory<EnrollmentRequest>();
 export const sitesQueryResultFactory = paginatedQueryResultFactory<Site>();
+export const usersQueryResultFactory = paginatedQueryResultFactory<User>();
 
 export const durationFactory = Factory.define<string>(() => "P7DT0H0M0S");
 export const tokenFactory = Factory.define<Token>(({ sequence }) => {

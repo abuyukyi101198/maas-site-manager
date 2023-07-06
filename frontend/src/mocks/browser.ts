@@ -4,6 +4,7 @@ import {
   postLogin,
   getSites,
   getTokens,
+  getUsers,
   getEnrollmentRequests,
   postEnrollmentRequests,
   postTokens,
@@ -15,6 +16,7 @@ import {
 export const worker = setupWorker(
   postLogin,
   getSites,
+  getUsers,
   postTokens,
   getEnrollmentRequests,
   postEnrollmentRequests,
