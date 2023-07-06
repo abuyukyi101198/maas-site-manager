@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from ._tables import METADATA
+from .tables import METADATA
 
 
 class Database:

@@ -14,10 +14,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from msm.db import (
-    Database,
-    METADATA,
-)
+from msm.db import Database
+from msm.db.tables import METADATA
 
 TEST_DB_NAME = "msm"
 

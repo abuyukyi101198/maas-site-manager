@@ -8,10 +8,7 @@ from fastapi import (
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ...db import (
-    db_session,
-    queries,
-)
+from ...db import queries
 from ...db.models import (
     PendingSite,
     Site,
@@ -25,6 +22,7 @@ from ...schema import (
     SortParam,
     SortParamParser,
 )
+from .._dependencies import db_session
 from .._forms import (
     site_filter_parameters,
     SiteFilterParams,

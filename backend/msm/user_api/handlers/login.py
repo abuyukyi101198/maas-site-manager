@@ -9,8 +9,8 @@ from fastapi import (
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ...db import db_session
 from ...settings import SETTINGS
+from .._dependencies import db_session
 from .._jwt import (
     authenticate_user,
     create_access_token,

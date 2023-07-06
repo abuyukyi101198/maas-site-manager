@@ -15,10 +15,7 @@ from pydantic import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ...db import (
-    db_session,
-    queries,
-)
+from ...db import queries
 from ...db.models import (
     User,
     UserCreate,
@@ -33,6 +30,7 @@ from ...schema import (
     SortParam,
     SortParamParser,
 )
+from .._dependencies import db_session
 from .._forms import (
     user_filter_params,
     UserFilterParams,

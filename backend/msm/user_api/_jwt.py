@@ -20,10 +20,10 @@ from jose import (
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..db import db_session
 from ..db.models import UserWithPassword
 from ..db.queries import get_user
 from ..settings import SETTINGS
+from ._dependencies import db_session
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")

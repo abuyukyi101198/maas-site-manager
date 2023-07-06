@@ -12,7 +12,7 @@ from sqlalchemy.sql import (
 
 from .. import models
 from ...schema import SortParam
-from .._tables import User
+from ..tables import User
 from ._count import row_count
 from ._search import (
     filters_from_arguments,

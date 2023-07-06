@@ -16,7 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .. import models
 from ...schema import SortParam
 from ...settings import SETTINGS
-from .._tables import (
+from ..tables import (
     Site,
     SiteData,
 )

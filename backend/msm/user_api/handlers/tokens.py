@@ -9,10 +9,7 @@ from fastapi import Depends
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ...db import (
-    db_session,
-    queries,
-)
+from ...db import queries
 from ...db.models import (
     Token,
     User,
@@ -23,6 +20,7 @@ from ...schema import (
     PaginationParams,
 )
 from .._csv import CSVResponse
+from .._dependencies import db_session
 from .._jwt import get_authenticated_user
 
 

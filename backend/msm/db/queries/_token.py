@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .. import models
-from .._tables import Token
+from ..tables import Token
 from ._count import row_count
 
 
