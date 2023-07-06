@@ -5,12 +5,12 @@ import urls from "./urls";
 import { customParamSerializer, customParamWithSearchTextSerializer } from "@/utils";
 
 export type PostLoginData = {
-  username: string;
+  email: string;
   password: string;
 };
 
 export const postLogin = async (data: PostLoginData) => {
-  if (!data?.username || !data?.password) {
+  if (!data?.email || !data?.password) {
     throw Error("Missing required fields");
   }
   try {

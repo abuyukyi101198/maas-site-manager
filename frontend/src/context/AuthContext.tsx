@@ -11,7 +11,7 @@ type AuthStatus = "initial" | "authenticated" | "unauthorised";
 
 interface AuthContextType {
   status: AuthStatus;
-  login: ({ username, password }: { username: string; password: string }) => void;
+  login: ({ email, password }: { email: string; password: string }) => void;
   logout: (callback: VoidFunction) => void;
   isError: boolean;
   failureReason: LoginError | null;
@@ -107,9 +107,9 @@ export const AuthContextProvider = ({
     );
   }, [apiClient, removePersistedAuthToken]);
 
-  const login = async ({ username, password }: { username: string; password: string }) => {
+  const login = async ({ email, password }: { email: string; password: string }) => {
     try {
-      const response = await mutateAsync({ username, password });
+      const response = await mutateAsync({ email, password });
       dispatch({ type: actionTypes.LOGIN_SUCCESS, payload: response.access_token });
       setPersistedAuthToken(response.access_token);
     } catch (error) {

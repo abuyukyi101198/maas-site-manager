@@ -9,21 +9,21 @@ import { useAuthContext } from "@/context";
 import { useNavigate, useSearchParams } from "@/router";
 
 const initialValues = {
-  username: "",
+  email: "",
   password: "",
 };
 
 type LoginFormValues = typeof initialValues;
 
 const LoginFormSchema = Yup.object().shape({
-  username: Yup.string().required("Please enter a username."),
+  email: Yup.string().required("Please enter an email address."),
   password: Yup.string().required("Please enter a password."),
 });
 
 const LoginForm = () => {
   const id = useId();
   const headingId = `heading-${id}`;
-  const usernameId = `username-${id}`;
+  const emailId = `username-${id}`;
   const passwordId = `password=${id}`;
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -36,10 +36,10 @@ const LoginForm = () => {
   }, [searchParams, navigate]);
 
   const handleSubmit = async (
-    { username, password }: LoginFormValues,
+    { email, password }: LoginFormValues,
     { setSubmitting }: FormikHelpers<LoginFormValues>,
   ) => {
-    await login({ username, password });
+    await login({ email, password });
     setSubmitting(false);
   };
 
@@ -75,14 +75,14 @@ const LoginForm = () => {
               >
                 {({ isSubmitting, errors, touched, isValid, dirty }) => (
                   <Form aria-labelledby={headingId}>
-                    <Label htmlFor={usernameId}>Username</Label>
+                    <Label htmlFor={emailId}>Email</Label>
                     <Field
                       as={Input}
-                      error={touched.username && errors.username}
-                      id={usernameId}
-                      name="username"
+                      error={touched.email && errors.email}
+                      id={emailId}
+                      name="email"
                       required
-                      type="text"
+                      type="email"
                     />
                     <Label htmlFor={passwordId}>Password</Label>
                     <Field

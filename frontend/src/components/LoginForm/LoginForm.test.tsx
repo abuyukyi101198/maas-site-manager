@@ -12,13 +12,13 @@ describe("LoginForm", () => {
   it("displays an error if the username input is left empty", async () => {
     renderWithMemoryRouter(<LoginForm />);
 
-    const usernameInput = screen.getByRole("textbox", { name: "Username" });
+    const emailInput = screen.getByRole("textbox", { name: "Email" });
 
-    await userEvent.type(usernameInput, "test");
-    await userEvent.clear(usernameInput);
+    await userEvent.type(emailInput, "test");
+    await userEvent.clear(emailInput);
     await userEvent.click(screen.getByRole("form"));
 
-    expect(screen.getByText(/Please enter a username/)).toBeInTheDocument();
+    expect(screen.getByText(/Please enter an email address/)).toBeInTheDocument();
   });
 
   it("displays an error if the password input is left empty", async () => {
@@ -36,20 +36,20 @@ describe("LoginForm", () => {
   it("disables the 'Login' button if a username and password are not present", async () => {
     renderWithMemoryRouter(<LoginForm />);
 
-    const usernameInput = screen.getByRole("textbox", { name: "Username" });
+    const emailInput = screen.getByRole("textbox", { name: "Email" });
     const passwordInput = screen.getByLabelText("Password");
     const loginButton = screen.getByRole("button", { name: "Login" });
 
     expect(loginButton).toBeDisabled();
 
-    await userEvent.type(usernameInput, "uname");
+    await userEvent.type(emailInput, "uname@provider.com");
     expect(loginButton).toBeDisabled();
 
-    await userEvent.clear(usernameInput);
+    await userEvent.clear(emailInput);
     await userEvent.type(passwordInput, "pword");
     expect(loginButton).toBeDisabled();
 
-    await userEvent.type(usernameInput, "uname");
+    await userEvent.type(emailInput, "uname@provider.com");
     expect(loginButton).not.toBeDisabled();
   });
 });

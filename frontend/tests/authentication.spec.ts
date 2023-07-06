@@ -3,7 +3,7 @@ import { test, expect, Page } from "@playwright/test";
 import { admin } from "./constants";
 
 export const login = async ({ page }: { page: Page }) => {
-  await page.getByRole("textbox", { name: "Username" }).type(admin.username);
+  await page.getByRole("textbox", { name: "Email" }).type(admin.email);
   await page.getByRole("textbox", { name: "Password" }).type(admin.password);
   await page.getByRole("button", { name: "Login" }).click();
 };
