@@ -13,9 +13,7 @@ from pydantic import (
     Field,
     root_validator,
 )
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from ...db import queries
 from ...db.models import (
     User,
     UserCreate,
@@ -30,7 +28,8 @@ from ...schema import (
     SortParam,
     SortParamParser,
 )
-from .._dependencies import db_session
+from ...service import ServiceCollection
+from .._dependencies import services
 from .._forms import (
     user_filter_params,
     UserFilterParams,
@@ -59,7 +58,7 @@ class UsersGetResponse(PaginatedResults):
 
 
 async def get(
-    session: Annotated[AsyncSession, Depends(db_session)],
+    services: Annotated[ServiceCollection, Depends(services)],
     authenticated_admin: Annotated[User, Depends(get_authenticated_admin)],
     pagination_params: PaginationParams = Depends(pagination_params),
     filter_params: UserFilterParams = Depends(user_filter_params),
@@ -67,8 +66,7 @@ async def get(
     search_text: SearchTextParam = Depends(search_text_param),
 ) -> UsersGetResponse:
     """Return all users"""
-    total, results = await queries.get_users(
-        session,
+    total, results = await services.users.get(
         sort_params=sort_params,
         offset=pagination_params.offset,
         limit=pagination_params.size,
@@ -113,22 +111,21 @@ class UsersPostResponse(BaseModel):
 
 
 async def post(
-    session: Annotated[AsyncSession, Depends(db_session)],
+    services: Annotated[ServiceCollection, Depends(services)],
     authenticated_admin: Annotated[User, Depends(get_authenticated_admin)],
     request: UsersPostRequest,
 ) -> UsersPostResponse:
     """
     Create a user.
     """
-    if await queries.user_exists(
-        session, email=request.email, username=request.username
+    if await services.users.exists(
+        email=request.email, username=request.username
     ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"message": "Email or Username already in use."},
         )
-    user = await queries.create_user(
-        session,
+    user = await services.users.create(
         UserCreate(
             **(
                 request.dict()
@@ -157,7 +154,7 @@ class UsersPatchRequest(BaseModel):
 
 
 async def patch(
-    session: Annotated[AsyncSession, Depends(db_session)],
+    services: Annotated[ServiceCollection, Depends(services)],
     authenticated_admin: Annotated[User, Depends(get_authenticated_admin)],
     user_id: int,
     patch_request: UsersPatchRequest,
@@ -176,14 +173,13 @@ async def patch(
             detail={"message": "Request body empty."},
         )
 
-    if not await queries.user_id_exists(session, user_id):
+    if not await services.users.id_exists(user_id):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail={"message": "User does not exist."},
         )
 
-    if await queries.user_exists(
-        session,
+    if await services.users.exists(
         email=patch_request.email,
         username=patch_request.username,
         exclude_id=user_id,
@@ -193,14 +189,14 @@ async def patch(
             detail={"message": "Email or Username already in use."},
         )
 
-    user = await queries.update_user(
-        session, user_id, UserUpdate(**patch_request.dict())
+    user = await services.users.update(
+        user_id, UserUpdate(**patch_request.dict())
     )
     return user
 
 
 async def delete(
-    session: Annotated[AsyncSession, Depends(db_session)],
+    services: Annotated[ServiceCollection, Depends(services)],
     authenticated_admin: Annotated[User, Depends(get_authenticated_admin)],
     user_id: int,
 ) -> None:
@@ -213,12 +209,12 @@ async def delete(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"message": "Cannot delete the current user."},
         )
-    await queries.delete_user(session, user_id)
+    await services.users.delete(user_id)
     return None
 
 
 async def me_get(
-    session: Annotated[AsyncSession, Depends(db_session)],
+    services: Annotated[ServiceCollection, Depends(services)],
     authenticated_user: Annotated[User, Depends(get_authenticated_user)],
 ) -> User:
     """Render info about the authenticated user."""
@@ -234,7 +230,7 @@ class UsersPatchMeRequest(BaseModel):
 
 
 async def me_patch(
-    session: Annotated[AsyncSession, Depends(db_session)],
+    services: Annotated[ServiceCollection, Depends(services)],
     authenticated_user: Annotated[User, Depends(get_authenticated_user)],
     patch_request: UsersPatchMeRequest,
 ) -> User:
@@ -246,8 +242,7 @@ async def me_patch(
             detail={"message": "Request body empty."},
         )
 
-    if await queries.user_exists(
-        session,
+    if await services.users.exists(
         email=patch_request.email,
         username=patch_request.username,
         exclude_id=authenticated_user.id,
@@ -257,8 +252,8 @@ async def me_patch(
             detail={"message": "Email or Username already in use."},
         )
 
-    user = await queries.update_user(
-        session, authenticated_user.id, UserUpdate(**patch_request.dict())
+    user = await services.users.update(
+        authenticated_user.id, UserUpdate(**patch_request.dict())
     )
     return user
 
@@ -278,16 +273,15 @@ class UsersPasswordPostRequest(BaseModel):
 
 
 async def password_post(
-    session: Annotated[AsyncSession, Depends(db_session)],
+    services: Annotated[ServiceCollection, Depends(services)],
     authenticated_user: Annotated[User, Depends(get_authenticated_user)],
     post_request: UsersPasswordPostRequest,
 ) -> None:
     """Modify the users password."""
     if await authenticate_user(
-        session, authenticated_user.email, post_request.current_password
+        services.users, authenticated_user.email, post_request.current_password
     ):
-        await queries.update_user_password(
-            session,
+        await services.users.update_password(
             authenticated_user.id,
             get_password_hash(post_request.new_password),
         )

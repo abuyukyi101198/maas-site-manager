@@ -6,9 +6,7 @@ from fastapi import (
     status,
 )
 from pydantic import BaseModel
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from ...db import queries
 from ...db.models import (
     PendingSite,
     Site,
@@ -21,7 +19,11 @@ from ...schema import (
     SortParam,
     SortParamParser,
 )
-from .._dependencies import db_session
+from ...service import (
+    InvalidPendingSites,
+    ServiceCollection,
+)
+from .._dependencies import services
 from .._forms import (
     site_filter_parameters,
     SiteFilterParams,
@@ -47,15 +49,14 @@ class SitesGetResponse(PaginatedResults):
 
 
 async def get(
-    session: Annotated[AsyncSession, Depends(db_session)],
+    services: Annotated[ServiceCollection, Depends(services)],
     authenticated_user: Annotated[User, Depends(get_authenticated_user)],
     pagination_params: PaginationParams = Depends(pagination_params),
     filter_params: SiteFilterParams = Depends(site_filter_parameters),
     sort_params: list[SortParam] = Depends(site_sort_parameters),
 ) -> SitesGetResponse:
     """Return accepted sites."""
-    total, results = await queries.get_sites(
-        session,
+    total, results = await services.sites.get(
         sort_params=sort_params,
         offset=pagination_params.offset,
         limit=pagination_params.size,
@@ -74,13 +75,12 @@ class PendingSitesGetResponse(PaginatedResults):
 
 
 async def pending_get(
-    session: Annotated[AsyncSession, Depends(db_session)],
+    services: Annotated[ServiceCollection, Depends(services)],
     authenticated_user: Annotated[User, Depends(get_authenticated_user)],
     pagination_params: PaginationParams = Depends(pagination_params),
 ) -> PendingSitesGetResponse:
     """Return pending sites."""
-    total, results = await queries.get_pending_sites(
-        session,
+    total, results = await services.sites.get_pending(
         offset=pagination_params.offset,
         limit=pagination_params.size,
     )
@@ -100,18 +100,17 @@ class PendingSitesPostRequest(BaseModel):
 
 
 async def pending_post(
-    session: Annotated[AsyncSession, Depends(db_session)],
+    services: Annotated[ServiceCollection, Depends(services)],
     authenticated_user: Annotated[User, Depends(get_authenticated_user)],
     action: PendingSitesPostRequest,
 ) -> None:
     """Accept or reject pending sites."""
     try:
-        await queries.accept_reject_pending_sites(
-            session,
+        await services.sites.accept_reject_pending(
             action.ids,
             action.accept,
         )
-    except queries.InvalidPendingSites as error:
+    except InvalidPendingSites as error:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"message": str(error), "ids": error.ids},

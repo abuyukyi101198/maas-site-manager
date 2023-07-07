@@ -7,10 +7,10 @@ from fastapi import (
     status,
 )
 from pydantic import BaseModel
-from sqlalchemy.ext.asyncio import AsyncSession
 
+from ...service import ServiceCollection
 from ...settings import SETTINGS
-from .._dependencies import db_session
+from .._dependencies import services
 from .._jwt import (
     authenticate_user,
     create_access_token,
@@ -32,11 +32,11 @@ class LoginPostResponse(BaseModel):
 
 
 async def post(
-    session: Annotated[AsyncSession, Depends(db_session)],
+    services: Annotated[ServiceCollection, Depends(services)],
     user_login: LoginPostRequest,
 ) -> LoginPostResponse:
     user = await authenticate_user(
-        session, user_login.email, user_login.password
+        services.users, user_login.email, user_login.password
     )
     if not user:
         raise HTTPException(

@@ -1,36 +1,34 @@
 import pytest
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from msm.db.queries._user import (
-    user_exists,
-    user_id_exists,
-)
+from msm.service._user import UserService
 
-from ...fixtures.db import Fixture
+from ..fixtures.db import Fixture
 
 
 @pytest.mark.asyncio
-async def test_user_id_exists(session: AsyncSession, fixture: Fixture) -> None:
-    phash1 = "$2b$12$F5sgrhRNtWAOehcoVO.XK.oSvupmcg8.0T2jCHOTg15M8N8LrpRwS"
-    users = await fixture.create(
-        "user",
-        [
-            {
-                "email": "admin@example.com",
-                "username": "admin",
-                "full_name": "Admin",
-                "password": phash1,
-                "is_admin": True,
-            }
-        ],
-        commit=True,
-    )
-    assert await user_id_exists(session, users[0]["id"])
-    assert not await user_id_exists(session, -1)
+class TestUserService:
+    async def test_id_exists(
+        self, fixture: Fixture, session: AsyncSession
+    ) -> None:
+        phash1 = "$2b$12$F5sgrhRNtWAOehcoVO.XK.oSvupmcg8.0T2jCHOTg15M8N8LrpRwS"
+        users = await fixture.create(
+            "user",
+            [
+                {
+                    "email": "admin@example.com",
+                    "username": "admin",
+                    "full_name": "Admin",
+                    "password": phash1,
+                    "is_admin": True,
+                }
+            ],
+            commit=True,
+        )
+        service = UserService(session)
+        assert await service.id_exists(users[0]["id"])
+        assert not await service.id_exists(-1)
 
-
-@pytest.mark.asyncio
-class TestUserExists:
     @pytest.mark.parametrize(
         "email,username,exists",
         [
@@ -43,8 +41,8 @@ class TestUserExists:
     )
     async def test_exists(
         self,
-        session: AsyncSession,
         fixture: Fixture,
+        session: AsyncSession,
         email: str,
         username: str,
         exists: bool,
@@ -62,10 +60,8 @@ class TestUserExists:
             [user_details],
             commit=True,
         )
-        assert (
-            await user_exists(session, email=email, username=username)
-            == exists
-        )
+        service = UserService(session)
+        assert await service.exists(email=email, username=username) == exists
 
     @pytest.mark.parametrize(
         "email,username",
@@ -76,10 +72,10 @@ class TestUserExists:
             ("nonexistent_admin@example.com", "nonexistent_admin"),
         ],
     )
-    async def test_skip_user(
+    async def test_exists_exclude_id(
         self,
-        session: AsyncSession,
         fixture: Fixture,
+        session: AsyncSession,
         email: str,
         username: str,
     ) -> None:
@@ -96,6 +92,7 @@ class TestUserExists:
             [user_details],
             commit=True,
         )
-        assert not await user_exists(
-            session, email=email, username=username, exclude_id=user["id"]
+        service = UserService(session)
+        assert not await service.exists(
+            email=email, username=username, exclude_id=user["id"]
         )

@@ -18,22 +18,17 @@ from jose import (
     JWTError,
 )
 from passlib.context import CryptContext
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..db.models import UserWithPassword
-from ..db.queries import get_user
+from ..service import (
+    ServiceCollection,
+    UserService,
+)
 from ..settings import SETTINGS
-from ._dependencies import db_session
+from ._dependencies import services
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-
-def verify_password(plain_password: str, hashed_password: str | None) -> bool:
-    """
-    Verify a plain password against a password hash created by passlib
-    """
-    return bool(pwd_context.verify(plain_password, hashed_password))
 
 
 def get_password_hash(password: str) -> str:
@@ -58,17 +53,19 @@ def create_access_token(
 
 
 async def authenticate_user(
-    session: AsyncSession, email: str, password: str
+    service: UserService,
+    email: str,
+    password: str,
 ) -> UserWithPassword | None:
-    if user := await get_user(session, email):
-        if verify_password(password, user.password.get_secret_value()):
+    if user := await service.get_by_email(email):
+        if _verify_password(password, user.password.get_secret_value()):
             return user
     return None
 
 
 async def get_authenticated_user(
+    services: Annotated[ServiceCollection, Depends(services)],
     token: Annotated[str, Depends(oauth2_scheme)],
-    session: AsyncSession = Depends(db_session),
 ) -> UserWithPassword | None:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -84,17 +81,17 @@ async def get_authenticated_user(
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    user = await get_user(session, email=email)
+    user = await services.users.get_by_email(email)
     if user is None:
         raise credentials_exception
     return user
 
 
 async def get_authenticated_admin(
+    services: Annotated[ServiceCollection, Depends(services)],
     token: Annotated[str, Depends(oauth2_scheme)],
-    session: AsyncSession = Depends(db_session),
 ) -> UserWithPassword | None:
-    if user := await get_authenticated_user(token, session):
+    if user := await get_authenticated_user(services, token):
         if not user.is_admin:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -102,3 +99,8 @@ async def get_authenticated_admin(
                 headers={"WWW-Authenticate": "Bearer"},
             )
     return user
+
+
+def _verify_password(plain_password: str, hashed_password: str | None) -> bool:
+    """Verify a plain password against a password hash created by passlib."""
+    return pwd_context.verify(plain_password, hashed_password)
