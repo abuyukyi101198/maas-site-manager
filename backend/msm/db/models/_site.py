@@ -33,18 +33,18 @@ class Site(BaseModel):
     id: int
     name: str
     name_unique: bool
-    city: str | None
+    city: str | None = None
     country: str | None = Field(min_length=2, max_length=2)
-    latitude: str | None
-    longitude: str | None
-    note: str | None
-    region: str | None
-    street: str | None
+    latitude: str | None = None
+    longitude: str | None = None
+    note: str | None = None
+    region: str | None = None
+    street: str | None = None
     # XXX: mypy can't grok that this is an str/enum with lots of members
-    timezone: TimeZone | None  # type: ignore
+    timezone: TimeZone | None = None  # type: ignore
     url: str
     connection_status: ConnectionStatus
-    stats: SiteData | None
+    stats: SiteData | None = None
 
 
 class PendingSite(BaseModel):
