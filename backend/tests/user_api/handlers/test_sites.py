@@ -10,7 +10,7 @@ import pytest
 from msm.db.models import ConnectionStatus
 from msm.settings import SETTINGS
 
-from ...fixtures.app import AuthAsyncClient
+from ...fixtures.client import Client
 from ...fixtures.db import Fixture
 
 
@@ -28,9 +28,7 @@ def site_details(**extra_details: Any) -> dict[str, Any]:
 
 @pytest.mark.asyncio
 class TestSitesHandler:
-    async def test_get(
-        self, authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
-    ) -> None:
+    async def test_get(self, user_client: Client, fixture: Fixture) -> None:
         sites = await fixture.create(
             "site",
             [
@@ -43,7 +41,7 @@ class TestSitesHandler:
             site["stats"] = None
             del site["created"]
             del site["accepted"]
-        page1 = await authenticated_user_app_client.get("/sites")
+        page1 = await user_client.get("/sites")
         assert page1.status_code == 200
         assert page1.json() == {
             "page": 1,
@@ -51,9 +49,7 @@ class TestSitesHandler:
             "total": 2,
             "items": sites,
         }
-        filtered = await authenticated_user_app_client.get(
-            "/sites?city=onDo"
-        )  # vs London
+        filtered = await user_client.get("/sites?city=onDo")  # vs London
         assert filtered.status_code == 200
         assert filtered.json() == {
             "page": 1,
@@ -61,9 +57,7 @@ class TestSitesHandler:
             "total": 1,
             "items": [sites[0]],
         }
-        paginated = await authenticated_user_app_client.get(
-            "/sites?page=2&size=1"
-        )
+        paginated = await user_client.get("/sites?page=2&size=1")
         assert paginated.status_code == 200
         assert paginated.json() == {
             "page": 2,
@@ -73,7 +67,7 @@ class TestSitesHandler:
         }
 
     async def test_get_only_accepted(
-        self, authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
+        self, user_client: Client, fixture: Fixture
     ) -> None:
         created_site, _ = await fixture.create(
             "site",
@@ -87,7 +81,7 @@ class TestSitesHandler:
         del created_site["created"]
         del created_site["accepted"]
 
-        page1 = await authenticated_user_app_client.get("/sites")
+        page1 = await user_client.get("/sites")
         assert page1.status_code == 200
         assert page1.json() == {
             "page": 1,
@@ -97,7 +91,7 @@ class TestSitesHandler:
         }
 
     async def test_get_filter_timezone(
-        self, authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
+        self, user_client: Client, fixture: Fixture
     ) -> None:
         [created_site, _] = await fixture.create(
             "site",
@@ -110,9 +104,7 @@ class TestSitesHandler:
         created_site["connection_status"] = ConnectionStatus.UNKNOWN
         del created_site["created"]
         del created_site["accepted"]
-        page1 = await authenticated_user_app_client.get(
-            "/sites?timezone=Europe/London"
-        )
+        page1 = await user_client.get("/sites?timezone=Europe/London")
         assert page1.status_code == 200
         assert page1.json() == {
             "page": 1,
@@ -122,7 +114,7 @@ class TestSitesHandler:
         }
 
     async def test_get_with_stats(
-        self, authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
+        self, user_client: Client, fixture: Fixture
     ) -> None:
         [site] = await fixture.create("site", [site_details()])
         [site_data] = await fixture.create(
@@ -148,7 +140,7 @@ class TestSitesHandler:
         del site["created"]
         del site["accepted"]
 
-        page = await authenticated_user_app_client.get("/sites")
+        page = await user_client.get("/sites")
         assert page.status_code == 200
         assert page.json() == {
             "page": 1,
@@ -158,7 +150,7 @@ class TestSitesHandler:
         }
 
     async def test_get_connection_status(
-        self, authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
+        self, user_client: Client, fixture: Fixture
     ) -> None:
         [site] = await fixture.create("site", [site_details()])
         await fixture.create(
@@ -182,7 +174,7 @@ class TestSitesHandler:
             ],
         )
 
-        page = await authenticated_user_app_client.get("/sites")
+        page = await user_client.get("/sites")
         assert page.status_code == 200
         assert (
             page.json()["items"][0]["connection_status"]
@@ -190,7 +182,7 @@ class TestSitesHandler:
         )
 
     async def test_get_by_id(
-        self, authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
+        self, user_client: Client, fixture: Fixture
     ) -> None:
         await fixture.create(
             "site",
@@ -206,12 +198,12 @@ class TestSitesHandler:
         )
 
         site_id = -1
-        response = await authenticated_user_app_client.get(f"/sites/{site_id}")
+        response = await user_client.get(f"/sites/{site_id}")
         assert response.status_code == 404
         assert response.json()["detail"]["message"] == "Site does not exist."
 
         site_id = 2
-        response = await authenticated_user_app_client.get(f"/sites/{site_id}")
+        response = await user_client.get(f"/sites/{site_id}")
         assert response.status_code == 200
         assert response.json()["city"] == "Paris"
         assert response.json()["country"] == "FR"
@@ -237,7 +229,7 @@ class TestSitesHandler:
     )
     async def test_get_with_sorting(
         self,
-        authenticated_user_app_client: AuthAsyncClient,
+        user_client: Client,
         fixture: Fixture,
         query_params: str,
         expected_result: list[str],
@@ -258,9 +250,7 @@ class TestSitesHandler:
             "site", [site_details(city="London", country="GB")]
         )
 
-        response = await authenticated_user_app_client.get(
-            "/sites", params=query_params
-        )
+        response = await user_client.get("/sites", params=query_params)
         assert extract_cities(response) == expected_result
 
     @pytest.mark.parametrize(
@@ -269,7 +259,7 @@ class TestSitesHandler:
     )
     async def test_get_with_invalid_sorting(
         self,
-        authenticated_user_app_client: AuthAsyncClient,
+        user_client: Client,
         fixture: Fixture,
         query_params: str,
     ) -> None:
@@ -278,17 +268,13 @@ class TestSitesHandler:
         )
 
         # not sortable
-        response = await authenticated_user_app_client.get(
-            "/sites", params=query_params
-        )
+        response = await user_client.get("/sites", params=query_params)
         assert response.status_code == 400
 
 
 @pytest.mark.asyncio
 class TestPendingSitesHandler:
-    async def test_get(
-        self, authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
-    ) -> None:
+    async def test_get(self, user_client: Client, fixture: Fixture) -> None:
         _, pending_site = await fixture.create(
             "site",
             [
@@ -297,7 +283,7 @@ class TestPendingSitesHandler:
             ],
         )
 
-        response = await authenticated_user_app_client.get("/requests")
+        response = await user_client.get("/requests")
         assert response.status_code == 200
         assert response.json() == {
             "page": 1,
@@ -314,13 +300,13 @@ class TestPendingSitesHandler:
         }
 
     async def test_post_accept(
-        self, authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
+        self, user_client: Client, fixture: Fixture
     ) -> None:
         [pending_site] = await fixture.create(
             "site", [site_details(accepted=False)]
         )
 
-        response = await authenticated_user_app_client.post(
+        response = await user_client.post(
             "/requests",
             json={"ids": [pending_site["id"]], "accept": True},
         )
@@ -329,13 +315,13 @@ class TestPendingSitesHandler:
         assert created_site["accepted"]
 
     async def test_post_reject(
-        self, authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
+        self, user_client: Client, fixture: Fixture
     ) -> None:
         [pending_site] = await fixture.create(
             "site", [site_details(accepted=False)]
         )
 
-        response = await authenticated_user_app_client.post(
+        response = await user_client.post(
             "/requests",
             json={"ids": [pending_site["id"]], "accept": False},
         )
@@ -343,12 +329,12 @@ class TestPendingSitesHandler:
         assert await fixture.get("site") == []
 
     async def test_post_invalid_ids(
-        self, authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
+        self, user_client: Client, fixture: Fixture
     ) -> None:
         [site] = await fixture.create("site", [site_details()])
         # unknown IDs and IDs for non-pending sites are invalid
         ids = [site["id"], 10000]
-        response = await authenticated_user_app_client.post(
+        response = await user_client.post(
             "/requests",
             json={"ids": ids, "accept": True},
         )

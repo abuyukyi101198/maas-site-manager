@@ -1,7 +1,6 @@
-from httpx import AsyncClient
 import pytest
 
-from ..fixtures.app import AuthAsyncClient
+from ..fixtures.client import Client
 
 
 @pytest.mark.asyncio
@@ -24,9 +23,9 @@ from ..fixtures.app import AuthAsyncClient
     ],
 )
 async def test_handler_auth_required(
-    user_app_client: AsyncClient, method: str, url: str
+    app_client: Client, method: str, url: str
 ) -> None:
-    response = await user_app_client.request(method, url)
+    response = await app_client.request(method, url)
     assert (
         response.status_code == 401
     ), f"Auth should be required for {method} {url}"
@@ -43,9 +42,9 @@ async def test_handler_auth_required(
     ],
 )
 async def test_handler_admin_required(
-    authenticated_user_app_client: AuthAsyncClient, method: str, url: str
+    user_client: Client, method: str, url: str
 ) -> None:
-    response = await authenticated_user_app_client.request(method, url)
+    response = await user_client.request(method, url)
     assert (
         response.status_code == 403
     ), f"Admin should be required for {method} {url}"

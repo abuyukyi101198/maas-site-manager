@@ -1,15 +1,12 @@
 import random
 from typing import Any
 
-from httpx import (
-    AsyncClient,
-    Response,
-)
+from httpx import Response
 import pytest
 
 from msm.user_api._jwt import get_password_hash
 
-from ...fixtures.app import AuthAsyncClient
+from ...fixtures.client import Client
 from ...fixtures.db import Fixture
 
 
@@ -38,9 +35,7 @@ def random_sample_dict(
 
 @pytest.mark.asyncio
 class TestUsersGetHandler:
-    async def test_get(
-        self, user_app_client: AsyncClient, fixture: Fixture
-    ) -> None:
+    async def test_get(self, app_client: Client, fixture: Fixture) -> None:
         phash1 = "$2b$12$F5sgrhRNtWAOehcoVO.XK.oSvupmcg8.0T2jCHOTg15M8N8LrpRwS"
         phash2 = "$2b$12$iEPLFcNocyeUDgu2ywDVGeFHyrksI89bzSvdAwvU1N4zYFtofme3S"
         users = await fixture.create(
@@ -66,13 +61,13 @@ class TestUsersGetHandler:
         for user in users:
             user.pop("password")
 
-        response = await user_app_client.post(
+        response = await app_client.post(
             "/login",
             json={"email": "admin@example.com", "password": "admin"},
         )
         assert response.status_code == 200
 
-        user_list = await user_app_client.get(
+        user_list = await app_client.get(
             "/users",
             headers={
                 "Authorization": " ".join(
@@ -131,7 +126,7 @@ class TestUsersGetHandler:
     )
     async def test_with_params(
         self,
-        authenticated_admin_app_client: AuthAsyncClient,
+        admin_client: Client,
         fixture: Fixture,
         query_params: str,
         expected_result: list[str],
@@ -184,9 +179,7 @@ class TestUsersGetHandler:
             "Rigel Kentaurus",
         )
 
-        response = await authenticated_admin_app_client.get(
-            "/users", params=query_params
-        )
+        response = await admin_client.get("/users", params=query_params)
         assert extract_users(response) == expected_result
 
     @pytest.mark.parametrize(
@@ -199,7 +192,7 @@ class TestUsersGetHandler:
     )
     async def test_with_invalid_params(
         self,
-        authenticated_admin_app_client: AuthAsyncClient,
+        admin_client: Client,
         fixture: Fixture,
         sort_by: str,
     ) -> None:
@@ -218,13 +211,13 @@ class TestUsersGetHandler:
         )
 
         # not sortable
-        response = await authenticated_admin_app_client.get(
+        response = await admin_client.get(
             "/users", params={"sort_by": sort_by}
         )
         assert response.status_code == 400
 
     async def test_pagination(
-        self, authenticated_admin_app_client: AuthAsyncClient, fixture: Fixture
+        self, admin_client: Client, fixture: Fixture
     ) -> None:
         phash2 = "$2b$12$iEPLFcNocyeUDgu2ywDVGeFHyrksI89bzSvdAwvU1N4zYFtofme3S"
         users = await fixture.create(
@@ -241,9 +234,7 @@ class TestUsersGetHandler:
         for user in users:
             user.pop("password")
 
-        paginated = await authenticated_admin_app_client.get(
-            "/users?page=2&size=1"
-        )
+        paginated = await admin_client.get("/users?page=2&size=1")
         assert paginated.status_code == 200
         assert paginated.json() == {
             "page": 2,
@@ -253,7 +244,7 @@ class TestUsersGetHandler:
         }
 
     async def test_get_by_id(
-        self, authenticated_admin_app_client: AuthAsyncClient, fixture: Fixture
+        self, admin_client: Client, fixture: Fixture
     ) -> None:
         async def create_user(
             username: str,
@@ -301,16 +292,12 @@ class TestUsersGetHandler:
         )
 
         user_id = -1
-        response = await authenticated_admin_app_client.get(
-            f"/users/{user_id}"
-        )
+        response = await admin_client.get(f"/users/{user_id}")
         assert response.status_code == 404
         assert response.json()["detail"]["message"] == "User does not exist."
 
         user_id = 2
-        response = await authenticated_admin_app_client.get(
-            f"/users/{user_id}"
-        )
+        response = await admin_client.get(f"/users/{user_id}")
         assert response.status_code == 200
         assert response.json() == {
             "id": 2,
@@ -323,16 +310,14 @@ class TestUsersGetHandler:
 
 @pytest.mark.asyncio
 class TestUsersPostHandler:
-    async def test_post(
-        self, authenticated_admin_app_client: AuthAsyncClient
-    ) -> None:
+    async def test_post(self, admin_client: Client) -> None:
         user_details = {
             "full_name": "A MAAS User",
             "username": "newuser",
             "email": "newuser@example.com",
             "is_admin": False,
         }
-        response = await authenticated_admin_app_client.post(
+        response = await admin_client.post(
             "/users",
             json=user_details
             | {"password": "password", "confirm_password": "password"},
@@ -340,10 +325,8 @@ class TestUsersPostHandler:
         assert response.status_code == 200
         assert response.json() == user_details | {"id": 2}
 
-    async def test_missing_fields(
-        self, authenticated_admin_app_client: AuthAsyncClient
-    ) -> None:
-        response = await authenticated_admin_app_client.post(
+    async def test_missing_fields(self, admin_client: Client) -> None:
+        response = await admin_client.post(
             "/users",
             json={},
         )
@@ -363,9 +346,7 @@ class TestUsersPostHandler:
             ]
         ]
 
-    async def test_password_unconfirmed(
-        self, authenticated_admin_app_client: AuthAsyncClient
-    ) -> None:
+    async def test_password_unconfirmed(self, admin_client: Client) -> None:
         user_details = {
             "full_name": "A MAAS User",
             "username": "newuser",
@@ -373,16 +354,14 @@ class TestUsersPostHandler:
             "password": "password",
             "confirm_password": "",
         }
-        response = await authenticated_admin_app_client.post(
+        response = await admin_client.post(
             "/users",
             json=user_details,
         )
         assert response.status_code == 422
         assert response.json()
 
-    async def test_email_taken(
-        self, authenticated_admin_app_client: AuthAsyncClient
-    ) -> None:
+    async def test_email_taken(self, admin_client: Client) -> None:
         user_details = {
             "full_name": "A New Admin",
             "username": "newAdmin",
@@ -390,7 +369,7 @@ class TestUsersPostHandler:
             "password": "password",
             "confirm_password": "password",
         }
-        response = await authenticated_admin_app_client.post(
+        response = await admin_client.post(
             "/users",
             json=user_details,
         )
@@ -400,9 +379,7 @@ class TestUsersPostHandler:
             == "Email or Username already in use."
         )
 
-    async def test_username_taken(
-        self, authenticated_admin_app_client: AuthAsyncClient
-    ) -> None:
+    async def test_username_taken(self, admin_client: Client) -> None:
         user_details = {
             "full_name": "A New Admin",
             "username": "admin",
@@ -410,7 +387,7 @@ class TestUsersPostHandler:
             "password": "password",
             "confirm_password": "password",
         }
-        response = await authenticated_admin_app_client.post(
+        response = await admin_client.post(
             "/users",
             json=user_details,
         )
@@ -423,11 +400,9 @@ class TestUsersPostHandler:
 
 @pytest.mark.asyncio
 class TestUsersMePasswordPostHandler:
-    async def test_password_change(
-        self, authenticated_user_app_client: AuthAsyncClient
-    ) -> None:
+    async def test_password_change(self, user_client: Client) -> None:
         new_password = "new_admin_password"
-        response = await authenticated_user_app_client.post(
+        response = await user_client.post(
             "/users/me/password",
             json={
                 "current_password": "admin",
@@ -437,11 +412,9 @@ class TestUsersMePasswordPostHandler:
         )
         assert response.status_code == 200
 
-    async def test_password_too_short(
-        self, authenticated_user_app_client: AuthAsyncClient
-    ) -> None:
+    async def test_password_too_short(self, user_client: Client) -> None:
         short_pass = "new"
-        response = await authenticated_user_app_client.post(
+        response = await user_client.post(
             "/users/me/password",
             json={
                 "current_password": "admin",
@@ -455,12 +428,10 @@ class TestUsersMePasswordPostHandler:
             == "ensure this value has at least 8 characters"
         )
 
-    async def test_password_too_long(
-        self, authenticated_user_app_client: AuthAsyncClient
-    ) -> None:
+    async def test_password_too_long(self, user_client: Client) -> None:
         long_pass = "new" * 40
 
-        response = await authenticated_user_app_client.post(
+        response = await user_client.post(
             "/users/me/password",
             json={
                 "current_password": "admin",
@@ -476,10 +447,10 @@ class TestUsersMePasswordPostHandler:
 
     async def test_password_change_incorrect_pass(
         self,
-        authenticated_user_app_client: AuthAsyncClient,
+        user_client: Client,
     ) -> None:
         new_password = "new_admin_password"
-        response = await authenticated_user_app_client.post(
+        response = await user_client.post(
             "/users/me/password",
             json={
                 "current_password": "wrong_password",
@@ -495,9 +466,9 @@ class TestUsersMePasswordPostHandler:
 
     async def test_password_change_missing_parameters(
         self,
-        authenticated_user_app_client: AuthAsyncClient,
+        user_client: Client,
     ) -> None:
-        response = await authenticated_user_app_client.post(
+        response = await user_client.post(
             "/users/me/password",
             json={},
         )
@@ -518,9 +489,7 @@ class TestUsersMePasswordPostHandler:
 
 @pytest.mark.asyncio
 class TestUsersPatchHandler:
-    async def test_patch(
-        self, authenticated_admin_app_client: AuthAsyncClient
-    ) -> None:
+    async def test_patch(self, admin_client: Client) -> None:
         old_details = {
             "id": 1,
             "email": "admin@example.com",
@@ -536,9 +505,7 @@ class TestUsersPatchHandler:
             },
             requires={"password": {"confirm_password": "New Password"}},
         )
-        response = await authenticated_admin_app_client.patch(
-            "/users/1", json=new_details
-        )
+        response = await admin_client.patch("/users/1", json=new_details)
 
         user_details = old_details | new_details
         user_details.pop("password")
@@ -547,7 +514,7 @@ class TestUsersPatchHandler:
         assert response.json() == user_details
 
     async def test_demote_admin(
-        self, authenticated_admin_app_client: AuthAsyncClient, fixture: Fixture
+        self, admin_client: Client, fixture: Fixture
     ) -> None:
         phash2 = "$2b$12$iEPLFcNocyeUDgu2ywDVGeFHyrksI89bzSvdAwvU1N4zYFtofme3S"
         user_details = {
@@ -559,18 +526,14 @@ class TestUsersPatchHandler:
         }
         new_details = {"is_admin": False}
         await fixture.create("user", [user_details])
-        response = await authenticated_admin_app_client.patch(
-            "/users/2", json=new_details
-        )
+        response = await admin_client.patch("/users/2", json=new_details)
         user_details |= new_details | {"id": 2}
         user_details.pop("password")
         assert response.status_code == 200
         assert response.json() == user_details
 
-    async def test_demote_self_admin(
-        self, authenticated_admin_app_client: AuthAsyncClient
-    ) -> None:
-        response = await authenticated_admin_app_client.patch(
+    async def test_demote_self_admin(self, admin_client: Client) -> None:
+        response = await admin_client.patch(
             "/users/1", json={"is_admin": False}
         )
         assert response.status_code == 403
@@ -579,19 +542,13 @@ class TestUsersPatchHandler:
             == "Admin users cannot demote themselves."
         )
 
-    async def test_missing_fields(
-        self, authenticated_admin_app_client: AuthAsyncClient
-    ) -> None:
-        response = await authenticated_admin_app_client.patch(
-            "/users/1", json={}
-        )
+    async def test_missing_fields(self, admin_client: Client) -> None:
+        response = await admin_client.patch("/users/1", json={})
         assert response.status_code == 422
         assert response.json()["detail"]["message"] == "Request body empty."
 
-    async def test_nonexistent_user(
-        self, authenticated_admin_app_client: AuthAsyncClient
-    ) -> None:
-        response = await authenticated_admin_app_client.patch(
+    async def test_nonexistent_user(self, admin_client: Client) -> None:
+        response = await admin_client.patch(
             "/users/10", json={"full_name": "ghost_in_the_test"}
         )
         assert response.status_code == 404
@@ -603,7 +560,7 @@ class TestUsersPatchHandler:
     )
     async def test_duplicate_user(
         self,
-        authenticated_admin_app_client: AuthAsyncClient,
+        admin_client: Client,
         fixture: Fixture,
         new_details: dict[str, str],
     ) -> None:
@@ -617,9 +574,7 @@ class TestUsersPatchHandler:
         }
         await fixture.create("user", [user_details])
 
-        response = await authenticated_admin_app_client.patch(
-            "/users/2", json=new_details
-        )
+        response = await admin_client.patch("/users/2", json=new_details)
         assert response.status_code == 400
         assert (
             response.json()["detail"]["message"]
@@ -630,7 +585,7 @@ class TestUsersPatchHandler:
 @pytest.mark.asyncio
 class TestUsersDeleteHandler:
     async def test_delete(
-        self, authenticated_admin_app_client: AuthAsyncClient, fixture: Fixture
+        self, admin_client: Client, fixture: Fixture
     ) -> None:
         phash2 = "$2b$12$iEPLFcNocyeUDgu2ywDVGeFHyrksI89bzSvdAwvU1N4zYFtofme3S"
         await fixture.create(
@@ -646,10 +601,10 @@ class TestUsersDeleteHandler:
             ],
         )
 
-        response = await authenticated_admin_app_client.delete("/users/2")
+        response = await admin_client.delete("/users/2")
         assert response.status_code == 204
 
-        users_response = await authenticated_admin_app_client.get("/users")
+        users_response = await admin_client.get("/users")
         assert users_response.status_code == 200
         assert users_response.json() == {
             "items": [
@@ -667,7 +622,7 @@ class TestUsersDeleteHandler:
         }
 
     async def test_delete_self_fails(
-        self, authenticated_admin_app_client: AuthAsyncClient, fixture: Fixture
+        self, admin_client: Client, fixture: Fixture
     ) -> None:
         phash2 = "$2b$12$iEPLFcNocyeUDgu2ywDVGeFHyrksI89bzSvdAwvU1N4zYFtofme3S"
         await fixture.create(
@@ -683,7 +638,7 @@ class TestUsersDeleteHandler:
             ],
         )
 
-        response = await authenticated_admin_app_client.delete("/users/1")
+        response = await admin_client.delete("/users/1")
         assert response.status_code == 400
         assert (
             response.json()["detail"]["message"]
@@ -693,9 +648,7 @@ class TestUsersDeleteHandler:
 
 @pytest.mark.asyncio
 class TestUsersMePatchHandler:
-    async def test_patch(
-        self, authenticated_user_app_client: AuthAsyncClient
-    ) -> None:
+    async def test_patch(self, user_client: Client) -> None:
         old_details = {
             "id": 1,
             "email": "admin@example.com",
@@ -710,19 +663,13 @@ class TestUsersMePatchHandler:
                 "email": "admin3@example.com",
             },
         )
-        response = await authenticated_user_app_client.patch(
-            "/users/me", json=new_details
-        )
+        response = await user_client.patch("/users/me", json=new_details)
 
         assert response.status_code == 200
         assert response.json() == old_details | new_details
 
-    async def test_missing_fields(
-        self, authenticated_user_app_client: AuthAsyncClient
-    ) -> None:
-        response = await authenticated_user_app_client.patch(
-            "/users/me", json={}
-        )
+    async def test_missing_fields(self, user_client: Client) -> None:
+        response = await user_client.patch("/users/me", json={})
 
         assert response.status_code == 422
         assert response.json()["detail"]["message"] == "Request body empty."
@@ -733,7 +680,7 @@ class TestUsersMePatchHandler:
     )
     async def test_duplicate_user(
         self,
-        authenticated_admin_app_client: AuthAsyncClient,
+        admin_client: Client,
         fixture: Fixture,
         new_details: dict[str, str],
     ) -> None:
@@ -746,9 +693,7 @@ class TestUsersMePatchHandler:
             "is_admin": True,
         }
         await fixture.create("user", [user_details])
-        response = await authenticated_admin_app_client.patch(
-            "/users/me", json=new_details
-        )
+        response = await admin_client.patch("/users/me", json=new_details)
         assert response.status_code == 400
         assert (
             response.json()["detail"]["message"]

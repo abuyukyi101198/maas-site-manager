@@ -1,5 +1,7 @@
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
+import random
+import string
 from typing import (
     Any,
     Iterator,
@@ -80,6 +82,12 @@ class Fixture:
 
     def __init__(self, conn: AsyncConnection):
         self.conn = conn
+
+    def random_string(self, length: int = 10) -> str:
+        """Return a random string of specified length."""
+        return "".join(
+            random.sample(string.ascii_letters + string.digits, length)
+        )
 
     async def create(
         self,

@@ -1,22 +1,21 @@
-from httpx import AsyncClient
 import pytest
 
 from msm import __version__
 
-from ...fixtures.app import AuthAsyncClient
+from ...fixtures.client import Client
 
 
 @pytest.mark.asyncio
-async def test_get(user_app_client: AsyncClient) -> None:
-    response = await user_app_client.get("/")
+async def test_get(app_client: Client) -> None:
+    response = await app_client.get("/")
     assert response.status_code == 200
     assert response.json() == {"version": __version__}
 
 
 @pytest.mark.asyncio
 async def test_get_authenticated(
-    authenticated_user_app_client: AuthAsyncClient,
+    user_client: Client,
 ) -> None:
-    response = await authenticated_user_app_client.get("/")
+    response = await user_client.get("/")
     assert response.status_code == 200
     assert response.json() == {"version": __version__}

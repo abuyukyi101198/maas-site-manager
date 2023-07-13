@@ -5,7 +5,7 @@ from datetime import (
 
 import pytest
 
-from ...fixtures.app import AuthAsyncClient
+from ...fixtures.client import Client
 from ...fixtures.db import Fixture
 
 
@@ -23,13 +23,13 @@ def duration_format(delta: timedelta, time_format: str) -> str:
 @pytest.mark.asyncio
 @pytest.mark.parametrize("time_format", ["iso8601", "float"])
 async def test_token_time_format(
-    time_format: str, authenticated_user_app_client: AuthAsyncClient
+    time_format: str, user_client: Client
 ) -> None:
     seconds = 100
     expiry = timedelta(seconds=seconds)
     formatted_expiry = duration_format(expiry, time_format)
 
-    response = await authenticated_user_app_client.post(
+    response = await user_client.post(
         "/tokens", json={"duration": formatted_expiry}
     )
     assert response.status_code == 200
@@ -40,9 +40,7 @@ async def test_token_time_format(
 
 
 @pytest.mark.asyncio
-async def test_tokens_get(
-    authenticated_user_app_client: AuthAsyncClient, fixture: Fixture
-) -> None:
+async def test_tokens_get(user_client: Client, fixture: Fixture) -> None:
     tokens = await fixture.create(
         "token",
         [
@@ -72,7 +70,7 @@ async def test_tokens_get(
         token["expired"] = token["expired"].isoformat()
         token["created"] = token["created"].isoformat()
         token["value"] = str(token["value"])
-    response = await authenticated_user_app_client.get("/tokens")
+    response = await user_client.get("/tokens")
     assert response.status_code == 200
     assert response.json()["total"] == 2
     assert response.json()["items"] == tokens
