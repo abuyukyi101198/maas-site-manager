@@ -5,7 +5,7 @@ import UserListTable from "./UserListTable/UserListTable";
 
 import type { SortBy, UserSortKey } from "@/api/handlers";
 import PaginationBar from "@/components/base/PaginationBar/PaginationBar";
-import { useAppContext } from "@/context";
+import { useAppLayoutContext } from "@/context";
 import { useUsersQuery } from "@/hooks/react-query";
 import useDebounce from "@/hooks/useDebouncedValue";
 import usePagination from "@/hooks/usePagination";
@@ -19,7 +19,7 @@ const UserList = () => {
     usePagination(DEFAULT_PAGE_SIZE, totalDataCount);
   const [searchText, setSearchText] = useState("");
   const debounceSearchText = useDebounce(searchText);
-  const { setSidebar } = useAppContext();
+  const { setSidebar } = useAppLayoutContext();
   const [sorting, setSorting] = useState<SortingState>([]);
   const sortBy = getSortBy(sorting) as SortBy<UserSortKey>;
 

@@ -1,3 +1,3 @@
 export { AuthContext, AuthContextProvider, useAuthContext } from "./AuthContext";
-export { AppContext, AppContextProvider, useAppContext } from "./AppContext";
+export { AppLayoutContext, AppLayoutContextProvider, useAppLayoutContext } from "./AppLayoutContext";
 export { RowSelectionContextProviders, useRowSelectionContext } from "./RowSelectionContext";

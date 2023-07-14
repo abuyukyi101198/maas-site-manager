@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from "react";
 
-export const AppContext = createContext<{
+export const AppLayoutContext = createContext<{
   sidebar: "removeRegions" | "createToken" | null;
   setSidebar: (sidebar: "removeRegions" | "createToken" | null) => void;
 }>({
@@ -8,10 +8,10 @@ export const AppContext = createContext<{
   setSidebar: () => null,
 });
 
-export const AppContextProvider = ({ children }: { children: React.ReactNode }) => {
+export const AppLayoutContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [sidebar, setSidebar] = useState<"removeRegions" | "createToken" | null>(null);
 
-  return <AppContext.Provider value={{ sidebar, setSidebar }}>{children}</AppContext.Provider>;
+  return <AppLayoutContext.Provider value={{ sidebar, setSidebar }}>{children}</AppLayoutContext.Provider>;
 };
 
-export const useAppContext = () => useContext(AppContext);
+export const useAppLayoutContext = () => useContext(AppLayoutContext);

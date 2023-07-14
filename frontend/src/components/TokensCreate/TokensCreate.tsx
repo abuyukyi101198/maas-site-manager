@@ -7,7 +7,7 @@ import * as Yup from "yup";
 
 import { humanIntervalToISODuration } from "./utils";
 
-import { useAppContext } from "@/context";
+import { useAppLayoutContext } from "@/context";
 import { useTokensCreateMutation } from "@/hooks/react-query";
 
 const initialValues = {
@@ -42,7 +42,7 @@ const TokensCreate = () => {
   const expiresId = useId();
   const amountId = useId();
   const tokensCreateMutation = useTokensCreateMutation();
-  const { setSidebar } = useAppContext();
+  const { setSidebar } = useAppLayoutContext();
   const handleSubmit = async (
     { amount, expires }: TokensCreateFormValues,
     { setSubmitting }: FormikHelpers<TokensCreateFormValues>,

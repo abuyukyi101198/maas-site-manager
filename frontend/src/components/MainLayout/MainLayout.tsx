@@ -9,7 +9,7 @@ import DocumentTitle from "@/components/DocumentTitle/DocumentTitle";
 import Navigation from "@/components/Navigation";
 import RemoveRegions from "@/components/RemoveRegions";
 import SecondaryNavigation from "@/components/SecondaryNavigation";
-import { useAppContext, useAuthContext } from "@/context";
+import { useAppLayoutContext, useAuthContext } from "@/context";
 import TokensCreate from "@/pages/tokens/create";
 import { matchPath, Outlet, useLocation } from "@/router";
 
@@ -21,7 +21,7 @@ export const sidebarLabels: Record<"removeRegions" | "createToken", string> = {
 const Aside = () => {
   const { pathname } = useLocation();
   const previousPathname = usePrevious(pathname);
-  const { sidebar, setSidebar } = useAppContext();
+  const { sidebar, setSidebar } = useAppLayoutContext();
 
   // close any open panels on route change
   useEffect(() => {

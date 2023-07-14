@@ -8,7 +8,7 @@ import TokensTable from "./components/TokensTable/TokensTable";
 import docsUrls from "@/base/docsUrls";
 import ExternalLink from "@/components/ExternalLink";
 import PaginationBar from "@/components/base/PaginationBar";
-import { useAppContext } from "@/context";
+import { useAppLayoutContext } from "@/context";
 import { useRowSelectionContext } from "@/context/RowSelectionContext";
 import { useDeleteTokensMutation, useTokensQuery } from "@/hooks/react-query";
 import usePagination from "@/hooks/usePagination";
@@ -16,7 +16,7 @@ import usePagination from "@/hooks/usePagination";
 const DEFAULT_PAGE_SIZE = 50;
 
 const TokensList = () => {
-  const { setSidebar } = useAppContext();
+  const { setSidebar } = useAppLayoutContext();
   const { rowSelection, setRowSelection } = useRowSelectionContext("tokens");
   const [totalDataCount, setTotalDataCount] = useState(0);
   const { page, debouncedPage, size, handleNextClick, handlePreviousClick, handlePageSizeChange, setPage } =
