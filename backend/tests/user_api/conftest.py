@@ -1,6 +1,6 @@
 from typing import (
-    AsyncIterable,
-    Iterable,
+    AsyncIterator,
+    Iterator,
 )
 
 from fastapi import FastAPI
@@ -17,7 +17,7 @@ from ..fixtures.db import Fixture
 
 
 @pytest.fixture
-def api_app(db: Database, db_connection: AsyncConnection) -> Iterable[FastAPI]:
+def api_app(db: Database, db_connection: AsyncConnection) -> Iterator[FastAPI]:
     """The API for users."""
 
     from msm.user_api._dependencies import db_connection as orig_db_connection
@@ -30,7 +30,7 @@ def api_app(db: Database, db_connection: AsyncConnection) -> Iterable[FastAPI]:
 
 
 @pytest.fixture
-async def app_client(api_app: FastAPI) -> AsyncIterable[Client]:
+async def app_client(api_app: FastAPI) -> AsyncIterator[Client]:
     """Client for the user API."""
     async with Client(app=api_app, base_url="http://test") as client:
         yield client
@@ -39,7 +39,7 @@ async def app_client(api_app: FastAPI) -> AsyncIterable[Client]:
 @pytest.fixture
 async def user_client(
     api_app: FastAPI, fixture: Fixture
-) -> AsyncIterable[Client]:
+) -> AsyncIterator[Client]:
     """Authenticated Client for the user API."""
     email = "admin@example.com"
     password = "admin"
@@ -61,7 +61,7 @@ async def user_client(
 @pytest.fixture
 async def admin_client(
     api_app: FastAPI, fixture: Fixture
-) -> AsyncIterable[Client]:
+) -> AsyncIterator[Client]:
     """Authenticated Client for the user API."""
     email = "admin@example.com"
     password = "admin"

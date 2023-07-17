@@ -1,6 +1,6 @@
-from collections.abc import AsyncIterator
 from typing import (
     Annotated,
+    AsyncIterator,
     Iterator,
 )
 

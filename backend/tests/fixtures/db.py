@@ -1,9 +1,9 @@
-from collections.abc import AsyncIterator
 from dataclasses import dataclass
 import random
 import string
 from typing import (
     Any,
+    AsyncIterator,
     Iterator,
 )
 

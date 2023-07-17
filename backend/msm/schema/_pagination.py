@@ -1,5 +1,7 @@
-from collections.abc import Sequence
-from typing import NamedTuple
+from typing import (
+    NamedTuple,
+    Sequence,
+)
 
 from fastapi import Query
 from pydantic import (
