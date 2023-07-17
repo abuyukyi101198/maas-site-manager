@@ -15,6 +15,8 @@ libnspr4 \
 libgbm1
 endef
 
+FE_TEST_TIMEOUT = 15000
+
 
 # Dependencies
 
@@ -86,7 +88,7 @@ ci-frontend-lint:
 .PHONY: ci-frontend-lint
 
 ci-frontend-test:
-	env -C frontend VITEST_JUNIT_SUITE_NAME='maas-site-manager frontend tests' yarnpkg run coverage --silent --reporter=junit --reporter=default --outputFile.junit=../junit-frontend.xml
+	env -C frontend VITEST_JUNIT_SUITE_NAME='maas-site-manager frontend tests' yarnpkg run coverage --test-timeout=$(FE_TEST_TIMEOUT) --silent --reporter=junit --reporter=default --outputFile.junit=../junit-frontend.xml
 .PHONY: ci-frontend-test
 
 ci-e2e-test:
