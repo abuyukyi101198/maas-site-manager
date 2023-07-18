@@ -1,6 +1,18 @@
+import { setupServer } from "msw/node";
+
 import MainLayout from "./MainLayout";
 
+import { allResolvers } from "@/mocks/resolvers";
 import { renderWithMemoryRouter, screen, waitFor } from "@/test-utils";
+
+const mockServer = setupServer(...allResolvers);
+
+beforeAll(() => {
+  mockServer.listen();
+});
+afterAll(() => {
+  mockServer.close();
+});
 
 describe("MainLayout", () => {
   it("renders header", async () => {

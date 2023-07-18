@@ -1,153 +1,164 @@
+import { rest } from "msw";
+import { setupServer } from "msw/node";
+
 import UserListTable from "./UserListTable";
 
+import urls from "@/api/urls";
 import { userFactory, usersQueryResultFactory } from "@/mocks/factories";
+import { createMockCurrentUserResolver } from "@/mocks/resolvers";
 import { renderWithMemoryRouter, screen, within } from "@/test-utils";
 
-describe("UserListTable", () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
+const mockServer = setupServer(rest.get(urls.currentUser, createMockCurrentUserResolver()));
 
-  afterEach(() => {
-    vi.useRealTimers();
-  });
+beforeAll(() => {
+  mockServer.listen();
+});
+beforeEach(() => {
+  vi.useFakeTimers();
+});
+afterEach(() => {
+  vi.useRealTimers();
+  mockServer.resetHandlers();
+});
+afterAll(() => {
+  mockServer.close();
+});
 
-  it("renders an empty users table", () => {
-    renderWithMemoryRouter(
-      <UserListTable
-        data={usersQueryResultFactory.build()}
-        error={undefined}
-        isLoading={false}
-        setSorting={vi.fn()}
-        sorting={[]}
-      />,
-    );
+it("renders an empty users table", () => {
+  renderWithMemoryRouter(
+    <UserListTable
+      data={usersQueryResultFactory.build()}
+      error={undefined}
+      isLoading={false}
+      setSorting={vi.fn()}
+      sorting={[]}
+    />,
+  );
 
-    expect(screen.getByRole("table", { name: "users" })).toBeInTheDocument();
-    expect(screen.getAllByRole("row")).toHaveLength(1); // Only header row should be there
-  });
+  expect(screen.getByRole("table", { name: "users" })).toBeInTheDocument();
+  expect(screen.getAllByRole("row")).toHaveLength(1); // Only header row should be there
+});
 
-  it("renders a spinner while loading", () => {
-    renderWithMemoryRouter(
-      <UserListTable
-        data={usersQueryResultFactory.build()}
-        error={undefined}
-        isLoading={true}
-        setSorting={vi.fn()}
-        sorting={[]}
-      />,
-    );
+it("renders a spinner while loading", () => {
+  renderWithMemoryRouter(
+    <UserListTable
+      data={usersQueryResultFactory.build()}
+      error={undefined}
+      isLoading={true}
+      setSorting={vi.fn()}
+      sorting={[]}
+    />,
+  );
 
-    expect(screen.getByText(/Loading/i)).toBeInTheDocument();
-  });
+  expect(screen.getByText(/Loading/i)).toBeInTheDocument();
+});
 
-  it("shows errors if present", () => {
-    const errorMessage = "There has been an error!";
-    renderWithMemoryRouter(
-      <UserListTable
-        data={usersQueryResultFactory.build()}
-        error={errorMessage}
-        isLoading={false}
-        setSorting={vi.fn()}
-        sorting={[]}
-      />,
-    );
+it("shows errors if present", () => {
+  const errorMessage = "There has been an error!";
+  renderWithMemoryRouter(
+    <UserListTable
+      data={usersQueryResultFactory.build()}
+      error={errorMessage}
+      isLoading={false}
+      setSorting={vi.fn()}
+      sorting={[]}
+    />,
+  );
 
-    expect(screen.getByText(errorMessage)).toBeInTheDocument();
-  });
+  expect(screen.getByText(errorMessage)).toBeInTheDocument();
+});
 
-  it("renders rows with details for each user", () => {
-    const items = userFactory.buildList(5);
-    renderWithMemoryRouter(
-      <UserListTable
-        data={usersQueryResultFactory.build({ items, total: 1, page: 1, size: 1 })}
-        error={undefined}
-        isLoading={false}
-        setSorting={vi.fn()}
-        sorting={[]}
-      />,
-    );
+it("renders rows with details for each user", () => {
+  const items = userFactory.buildList(5);
+  renderWithMemoryRouter(
+    <UserListTable
+      data={usersQueryResultFactory.build({ items, total: 1, page: 1, size: 1 })}
+      error={undefined}
+      isLoading={false}
+      setSorting={vi.fn()}
+      sorting={[]}
+    />,
+  );
 
-    expect(screen.getByRole("table", { name: "users" })).toBeInTheDocument();
+  expect(screen.getByRole("table", { name: "users" })).toBeInTheDocument();
 
-    const tableBody = screen.getAllByRole("rowgroup")[1];
-    expect(within(tableBody).getAllByRole("row")).toHaveLength(items.length);
-    within(tableBody)
-      .getAllByRole("row")
-      .forEach((row, i) => {
-        expect(within(row).getAllByRole("cell")[0]).toHaveTextContent(items[i].username); // Username should be displayed by default
-        expect(within(row).getAllByRole("cell")[1]).toHaveTextContent(items[i].email);
+  const tableBody = screen.getAllByRole("rowgroup")[1];
+  expect(within(tableBody).getAllByRole("row")).toHaveLength(items.length);
+  within(tableBody)
+    .getAllByRole("row")
+    .forEach((row, i) => {
+      expect(within(row).getAllByRole("cell")[0]).toHaveTextContent(items[i].username); // Username should be displayed by default
+      expect(within(row).getAllByRole("cell")[1]).toHaveTextContent(items[i].email);
 
-        // Check that the user role is being displayed correctly
-        const role = items[i].is_admin ? "Admin" : "User";
+      // Check that the user role is being displayed correctly
+      const role = items[i].is_admin ? "Admin" : "User";
 
-        expect(within(row).getAllByRole("cell")[2]).toHaveTextContent(role);
-      });
-  });
+      expect(within(row).getAllByRole("cell")[2]).toHaveTextContent(role);
+    });
+});
 
-  it("renders correctly paginated results", () => {
-    const pageLength = 50;
-    const items = userFactory.buildList(pageLength);
+it("renders correctly paginated results", () => {
+  const pageLength = 50;
+  const items = userFactory.buildList(pageLength);
 
-    renderWithMemoryRouter(
-      <UserListTable
-        data={usersQueryResultFactory.build({ items, total: 100, page: 1, size: pageLength })}
-        error={undefined}
-        isLoading={false}
-        setSorting={vi.fn()}
-        sorting={[]}
-      />,
-    );
+  renderWithMemoryRouter(
+    <UserListTable
+      data={usersQueryResultFactory.build({ items, total: 100, page: 1, size: pageLength })}
+      error={undefined}
+      isLoading={false}
+      setSorting={vi.fn()}
+      sorting={[]}
+    />,
+  );
 
-    const tableBody = screen.getAllByRole("rowgroup")[1];
-    expect(within(tableBody).getAllByRole("row")).toHaveLength(pageLength);
-  });
+  const tableBody = screen.getAllByRole("rowgroup")[1];
+  expect(within(tableBody).getAllByRole("row")).toHaveLength(pageLength);
+});
 
-  it("displays the correct sort direction label", () => {
-    const items = userFactory.buildList(2);
-    const { rerender } = renderWithMemoryRouter(
-      <UserListTable
-        data={usersQueryResultFactory.build({ items, total: 2, page: 1, size: 10 })}
-        error={undefined}
-        isLoading={false}
-        setSorting={vi.fn()}
-        sorting={[]}
-      />,
-    );
+it("displays the correct sort direction label", () => {
+  const items = userFactory.buildList(2);
+  const { rerender } = renderWithMemoryRouter(
+    <UserListTable
+      data={usersQueryResultFactory.build({ items, total: 2, page: 1, size: 10 })}
+      error={undefined}
+      isLoading={false}
+      setSorting={vi.fn()}
+      sorting={[]}
+    />,
+  );
 
-    const emailDescending = ["columnheader", { name: /Email descending/i }] as const;
-    const emailAscending = ["columnheader", { name: /Email ascending/i }] as const;
+  const emailDescending = ["columnheader", { name: /Email descending/i }] as const;
+  const emailAscending = ["columnheader", { name: /Email ascending/i }] as const;
 
-    expect(screen.getByRole("columnheader", { name: /Email/i })).toBeInTheDocument();
-    expect(screen.queryByRole(...emailAscending)).not.toBeInTheDocument();
-    expect(screen.queryByRole(...emailDescending)).not.toBeInTheDocument();
+  expect(screen.getByRole("columnheader", { name: /Email/i })).toBeInTheDocument();
+  expect(screen.queryByRole(...emailAscending)).not.toBeInTheDocument();
+  expect(screen.queryByRole(...emailDescending)).not.toBeInTheDocument();
 
-    // Sort by email descending
-    rerender(
-      <UserListTable
-        data={usersQueryResultFactory.build({ items, total: 2, page: 1, size: 10 })}
-        error={undefined}
-        isLoading={false}
-        setSorting={vi.fn()}
-        sorting={[{ id: "email", desc: true }]}
-      />,
-    );
+  // Sort by email descending
+  rerender(
+    <UserListTable
+      data={usersQueryResultFactory.build({ items, total: 2, page: 1, size: 10 })}
+      error={undefined}
+      isLoading={false}
+      setSorting={vi.fn()}
+      sorting={[{ id: "email", desc: true }]}
+    />,
+  );
 
-    expect(screen.getByRole(...emailDescending)).toBeInTheDocument();
-    expect(screen.queryByRole(...emailAscending)).not.toBeInTheDocument();
+  expect(screen.getByRole(...emailDescending)).toBeInTheDocument();
+  expect(screen.queryByRole(...emailAscending)).not.toBeInTheDocument();
 
-    // Sort by email ascending
-    rerender(
-      <UserListTable
-        data={usersQueryResultFactory.build({ items, total: 2, page: 1, size: 10 })}
-        error={undefined}
-        isLoading={false}
-        setSorting={vi.fn()}
-        sorting={[{ id: "email", desc: false }]}
-      />,
-    );
+  // Sort by email ascending
+  rerender(
+    <UserListTable
+      data={usersQueryResultFactory.build({ items, total: 2, page: 1, size: 10 })}
+      error={undefined}
+      isLoading={false}
+      setSorting={vi.fn()}
+      sorting={[{ id: "email", desc: false }]}
+    />,
+  );
 
-    expect(screen.getByRole(...emailAscending)).toBeInTheDocument();
-    expect(screen.queryByRole(...emailDescending)).not.toBeInTheDocument();
-  });
+  expect(screen.getByRole(...emailAscending)).toBeInTheDocument();
+  expect(screen.queryByRole(...emailDescending)).not.toBeInTheDocument();
 });

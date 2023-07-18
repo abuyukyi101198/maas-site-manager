@@ -44,6 +44,13 @@ if (!globalThis.TextEncoder || !globalThis.TextDecoder) {
   globalThis.TextDecoder = NodeTextDecoder;
 }
 
+beforeAll(() => {
+  // fail a test whenver console.error is called
+  vi.spyOn(console, "error").mockImplementation((...args: unknown[]) => {
+    throw new Error(args.join(" "));
+  });
+});
+
 // runs a cleanup after each test case (e.g. clearing jsdom)
 afterEach(() => {
   cleanup();

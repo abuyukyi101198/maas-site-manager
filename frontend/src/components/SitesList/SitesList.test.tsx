@@ -4,7 +4,7 @@ import urls from "@/api/urls";
 import { siteFactory } from "@/mocks/factories";
 import { createMockSitesResolver } from "@/mocks/resolvers";
 import { createMockGetServer } from "@/mocks/server";
-import { renderWithMemoryRouter, screen, userEvent, waitFor, within } from "@/test-utils";
+import { act, renderWithMemoryRouter, screen, userEvent, waitFor, within } from "@/test-utils";
 
 const sites = siteFactory.buildList(2);
 const mockServer = createMockGetServer(urls.sites, createMockSitesResolver(sites));
@@ -95,4 +95,11 @@ it("can hide and unhide all columns", async () => {
   expect(screen.getByRole("columnheader", { name: /Country/i })).toBeInTheDocument();
   expect(screen.getByRole("columnheader", { name: /Local time/i })).toBeInTheDocument();
   expect(screen.getByRole("columnheader", { name: /Machines/i })).toBeInTheDocument();
+});
+
+it("toggles select all checkbox on click", async () => {
+  renderWithMemoryRouter(<SitesList />);
+  await expect(screen.getByRole("checkbox", { name: /select all/i })).not.toBeChecked();
+  await act(async () => await screen.getByRole("checkbox", { name: /select all/i }).click());
+  await expect(screen.getByRole("checkbox", { name: /select all/i })).toBeChecked();
 });

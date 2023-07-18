@@ -1,8 +1,9 @@
-import { render, fireEvent, waitFor } from "@testing-library/react";
+/* eslint-disable testing-library/no-unnecessary-act */
 
 import DynamicTable from "./DynamicTable";
 
 import BREAKPOINTS from "@/base/breakpoints";
+import { render, fireEvent, waitFor, act } from "@/test-utils";
 
 const offset = 100;
 
@@ -21,17 +22,36 @@ beforeAll(() => {
 
 it("sets a fixed table body height based on top offset on large screens", async () => {
   vi.spyOn(window, "innerWidth", "get").mockReturnValue(BREAKPOINTS.xSmall);
-  await fireEvent(window, new Event("resize"));
 
-  const { container } = render(<DynamicTable.Body className="test-class">Test content</DynamicTable.Body>);
+  await act(async () => {
+    fireEvent(window, new Event("resize"));
+  });
+
+  const { container } = render(
+    <DynamicTable>
+      <DynamicTable.Body className="test-class">
+        <tr>
+          <td>Test content</td>
+        </tr>
+      </DynamicTable.Body>
+    </DynamicTable>,
+  );
+
   // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
   const tbody = container.querySelector("tbody");
-  fireEvent(window, new Event("resize"));
+
+  await act(async () => {
+    fireEvent(window, new Event("resize"));
+  });
 
   // does not alter the height on small screens
   expect(tbody).toHaveStyle("height: undefined");
 
   vi.spyOn(window, "innerWidth", "get").mockReturnValue(BREAKPOINTS.large);
-  await fireEvent(window, new Event("resize"));
+
+  await act(async () => {
+    fireEvent(window, new Event("resize"));
+  });
+
   await waitFor(() => expect(tbody).toHaveStyle(`height: calc(100vh - ${offset + 1}px)`));
 });

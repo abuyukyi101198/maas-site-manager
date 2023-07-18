@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import * as timezoneMock from "timezone-mock";
 
 import DateTime from "./DateTime";
@@ -20,6 +21,12 @@ it("renders time in a correct format", () => {
 });
 
 it("renders invalid time fallback value correctly", () => {
+  // Suppress console errors for this test
+  const originalConsoleError = console.error;
+  console.error = vi.fn();
+
   render(<DateTime value="" />);
   expect(screen.getByText("Invalid time value")).toBeInTheDocument();
+
+  console.error = originalConsoleError;
 });
