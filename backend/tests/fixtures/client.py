@@ -3,42 +3,30 @@ from httpx import (
     Response,
 )
 
+from msm.jwt import create_token
+
 
 class Client(AsyncClient):
     """Equivalent to AsyncClient, but has the ability to send
     requests from an authorized login"""
 
-    def __init__(self, **kwargs) -> None:  # type: ignore
-        super().__init__(**kwargs)
-        self._token = ""
-        self._token_type = ""
+    _auth_token = ""
 
-    async def login(self, email: str, password: str) -> None:
-        """login this client with the email and password"""
-        response = await self.post(
-            "/login", json={"email": email, "password": password}
-        )
-        assert (
-            response.status_code == 200
-        ), f"Could not login user: {response.text}"
-        self._token = response.json()["access_token"]
-        self._token_type = response.json()["token_type"].capitalize()
-
-    @property
-    def authenticated(self) -> bool:
-        """Are we logged in?"""
-        return bool(self._token)
+    def authenticate(self, user_id: int | None) -> None:
+        """Set or unset authentication token for a user ID."""
+        if user_id is None:
+            self._auth_token = ""
+        else:
+            self._auth_token = create_token(str(user_id))
 
     async def request(self, *args, **kwargs) -> Response:  # type: ignore
-        """Generate a request with the authorized payload attached if the user
-        has been logged in. All methods (get, post, push, ...) use this in
-        the backend to construct their requests"""
-        if self.authenticated:
-            kwargs.update(
-                {
-                    "headers": {
-                        "Authorization": f"{self._token_type} {self._token}"
-                    },
-                }
-            )
+        """Generate a request, setting the auth token if set.
+
+        All other request methods use this in the backend to construct their
+        requests.
+        """
+        if self._auth_token:
+            headers = kwargs.get("headers") or {}  # might be set to None
+            headers["Authorization"] = f"Bearer {self._auth_token}"
+            kwargs["headers"] = headers
         return await super().request(*args, **kwargs)
