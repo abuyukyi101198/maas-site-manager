@@ -1,5 +1,9 @@
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
+from typing import (
+    Any,
+    AsyncGenerator,
+    Callable,
+)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -34,51 +38,32 @@ def create_app(database: Database | None = None) -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    app.router.add_api_route("/", handlers.root.get, methods=["GET"])
 
-    app.router.add_api_route("/login", handlers.login.post, methods=["POST"])
+    def route(
+        path: str,
+        methods: list[str],
+        handler: Callable[..., Any],
+        **kwargs: Any,
+    ) -> None:
+        app.router.add_api_route(path, handler, methods=methods, **kwargs)
 
-    app.router.add_api_route(
-        "/requests", handlers.sites.pending_get, methods=["GET"]
-    )
-    app.router.add_api_route(
-        "/requests",
-        handlers.sites.pending_post,
-        methods=["POST"],
-        status_code=204,
-    )
-    app.router.add_api_route("/sites", handlers.sites.get, methods=["GET"])
-    app.router.add_api_route(
-        "/sites/{site_id}", handlers.sites.get_id, methods=["GET"]
-    )
-
-    app.router.add_api_route("/tokens", handlers.tokens.get, methods=["GET"])
-    app.router.add_api_route("/tokens", handlers.tokens.post, methods=["POST"])
-    app.router.add_api_route(
-        "/tokens/export", handlers.tokens.export_get, methods=["GET"]
-    )
-
-    app.router.add_api_route(
-        "/users/me", handlers.users.me_get, methods=["GET"]
-    )
-    app.router.add_api_route(
-        "/users/me", handlers.users.me_patch, methods=["PATCH"]
-    )
-    app.router.add_api_route(
-        "/users/me/password", handlers.users.password_patch, methods=["PATCH"]
-    )
-    app.router.add_api_route("/users", handlers.users.get, methods=["GET"])
-    app.router.add_api_route("/users", handlers.users.post, methods=["POST"])
-    app.router.add_api_route(
-        "/users/{user_id}", handlers.users.get_id, methods=["GET"]
-    )
-    app.router.add_api_route(
-        "/users/{user_id}", handlers.users.patch, methods=["PATCH"]
-    )
-    app.router.add_api_route(
-        "/users/{user_id}",
-        handlers.users.delete,
-        methods=["DELETE"],
-        status_code=204,
+    route("/", ["GET"], handlers.root.get)
+    route("/login", ["POST"], handlers.login.post)
+    route("/requests", ["GET"], handlers.sites.pending_get)
+    route("/requests", ["POST"], handlers.sites.pending_post, status_code=204)
+    route("/sites", ["GET"], handlers.sites.get)
+    route("/sites/{site_id}", ["GET"], handlers.sites.get_id)
+    route("/tokens", ["GET"], handlers.tokens.get)
+    route("/tokens", ["POST"], handlers.tokens.post)
+    route("/tokens/export", ["GET"], handlers.tokens.export_get)
+    route("/users/me", ["GET"], handlers.users.me_get)
+    route("/users/me", ["PATCH"], handlers.users.me_patch)
+    route("/users/me/password", ["PATCH"], handlers.users.password_patch)
+    route("/users", ["GET"], handlers.users.get)
+    route("/users", ["POST"], handlers.users.post)
+    route("/users/{user_id}", ["GET"], handlers.users.get_id)
+    route("/users/{user_id}", ["PATCH"], handlers.users.patch)
+    route(
+        "/users/{user_id}", ["DELETE"], handlers.users.delete, status_code=204
     )
     return app
