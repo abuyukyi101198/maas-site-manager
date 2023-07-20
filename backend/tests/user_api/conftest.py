@@ -1,32 +1,55 @@
 from typing import (
     AsyncIterator,
+    Awaitable,
+    Callable,
     Iterator,
 )
 
-from fastapi import FastAPI
+from fastapi import (
+    FastAPI,
+    Request,
+    Response,
+)
 import pytest
 from sqlalchemy.ext.asyncio import AsyncConnection
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.types import ASGIApp
 
 from msm.db import Database
 from msm.db.models import User
 from msm.user_api import create_app
 
-from ..fixtures.app import override_dependencies
 from ..fixtures.client import Client
 from ..fixtures.factory import Factory
 
 
 @pytest.fixture
-def api_app(db: Database, db_connection: AsyncConnection) -> Iterator[FastAPI]:
+def transaction_middleware_class(
+    db_connection: AsyncConnection,
+) -> Iterator[type]:
+    class ConnectionReusingTransactionMiddleware(BaseHTTPMiddleware):
+        def __init__(self, app: ASGIApp, db: Database):
+            super().__init__(app)
+
+        async def dispatch(
+            self,
+            request: Request,
+            call_next: Callable[[Request], Awaitable[Response]],
+        ) -> Response:
+            request.app.state.conn = db_connection
+            return await call_next(request)
+
+    yield ConnectionReusingTransactionMiddleware
+
+
+@pytest.fixture
+def api_app(
+    db: Database, transaction_middleware_class: type
+) -> Iterator[FastAPI]:
     """The API for users."""
-
-    from msm.user_api._dependencies import db_connection as orig_db_connection
-
-    deps_map = {orig_db_connection: lambda: db_connection}
-
-    app = create_app(database=db)
-    with override_dependencies(app, deps_map):
-        yield app
+    yield create_app(
+        database=db, transaction_middleware_class=transaction_middleware_class
+    )
 
 
 @pytest.fixture

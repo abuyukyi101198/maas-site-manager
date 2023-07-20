@@ -7,10 +7,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from .. import PACKAGE
 from ..db import Database
 from ..settings import SETTINGS
+from ._middleware import TransactionMiddleware
 from .handlers import API_ROUTERS
 
 
-def create_app(database: Database | None = None) -> FastAPI:
+def create_app(
+    database: Database | None = None,
+    transaction_middleware_class: type = TransactionMiddleware,
+) -> FastAPI:
     """Create the FastAPI WSGI application."""
     db = database or Database(str(SETTINGS.db_dsn))
 
@@ -26,7 +30,6 @@ def create_app(database: Database | None = None) -> FastAPI:
         version=PACKAGE.version,
         lifespan=lifespan,
     )
-    app.state.db = db
     app.add_middleware(
         CORSMiddleware,
         allow_origins=SETTINGS.allowed_origins,
@@ -34,6 +37,7 @@ def create_app(database: Database | None = None) -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    app.add_middleware(transaction_middleware_class, db=db)
 
     for router in API_ROUTERS:
         app.include_router(router)

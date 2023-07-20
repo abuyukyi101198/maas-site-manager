@@ -14,10 +14,11 @@ from ..service import ServiceCollection
 
 
 async def db_connection(request: Request) -> AsyncIterator[AsyncConnection]:
-    """Provide a DB connection to execute queries, within a transaction."""
-    async with request.app.state.db.engine.connect() as conn:
-        async with conn.begin():
-            yield conn
+    """Provide a DB connection to execute queries, within a transaction.
+
+    Requires the TransactionMiddleware to be used.
+    """
+    yield request.app.state.conn
 
 
 def services(
