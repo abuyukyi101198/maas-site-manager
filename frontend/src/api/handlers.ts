@@ -175,3 +175,11 @@ export const addUser = async (data: Omit<User, "id">) => {
     throw error;
   }
 };
+
+export const deleteUser = async (userId: number) => {
+  try {
+    await api.delete(`${urls.users}/${userId}`);
+  } catch (error) {
+    throw error;
+  }
+};

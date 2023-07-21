@@ -24,6 +24,7 @@ import {
   getUsers,
   addUser,
   getUser,
+  deleteUser,
 } from "@/api/handlers";
 import type {
   SitesQueryResult,
@@ -147,3 +148,7 @@ export const useUpdateUserMutation = (
 export const useAddUserMutation = (
   options?: Omit<UseMutationOptions<any, unknown, Omit<User, "id">, unknown>, "mutationFn">,
 ) => useMutation(addUser, options);
+
+export const useDeleteUserMutation = (
+  options?: Omit<UseMutationOptions<void, unknown, number, unknown>, "mutationFn">,
+) => useMutation(deleteUser, options);

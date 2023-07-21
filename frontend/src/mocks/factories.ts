@@ -66,13 +66,14 @@ export const userFactory = Factory.define<User>(({ sequence }) => {
   const username = `${full_name.replace(/\s/g, "").replace("é", "e")}${chance.integer({ min: 1, max: 99 })}`;
   const email = `${username}@galactic-republic.gov`.toLowerCase().replace("é", "e");
   const is_admin = chance.bool();
+  const id = sequence;
 
   return {
-    id: sequence,
     full_name,
     username,
     email,
     is_admin,
+    id,
   };
 });
 

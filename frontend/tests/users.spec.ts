@@ -29,9 +29,7 @@ test("can open and close the 'Edit user' form", async ({ page }) => {
   await expect(page.getByRole("form", { name: `Edit ${formTitle}` })).toBeHidden();
 });
 
-// TODO: Enable this test https://warthogs.atlassian.net/browse/MAASENG-1875
-// eslint-disable-next-line playwright/no-skipped-test
-test.skip("can open and close the 'Delete user' form", async ({ page }) => {
+test("can open and close the 'Delete user' form", async ({ page }) => {
   const rows = page.getByRole("rowgroup");
   const rowToDelete = rows.nth(1).getByRole("row").nth(0);
   const formTitle = await rowToDelete.getByRole("cell").nth(0).textContent();
@@ -86,4 +84,20 @@ test("closes the form when navigating away", async ({ page }) => {
 
   await page.goBack();
   await expect(page.getByRole("form", { name: /Add user/i })).toBeHidden();
+});
+
+test("can delete a user", async ({ page }) => {
+  const testUsername = "Watto89";
+  const dialog = page.getByRole("dialog", {
+    name: /delete user/i,
+  });
+  await expect(dialog).toBeHidden();
+  await page.getByRole("button", { name: new RegExp(`Delete ${testUsername}`, "i") }).click();
+  await expect(dialog).toBeVisible();
+  const deleteBtn = page.getByRole("button", { name: /^delete$/i });
+  await expect(deleteBtn).toBeDisabled();
+  await page.getByPlaceholder(testUsername).type(testUsername);
+  await expect(deleteBtn).toBeEnabled();
+  await deleteBtn.click();
+  await expect(dialog).toBeHidden();
 });

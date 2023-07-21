@@ -206,6 +206,15 @@ export const createMockAddUserResolver = (): AddUserResponseResolver => async (r
   return res(ctx.status(201), ctx.json(newUser));
 };
 
+type DeleteUserResponseResolver = ResponseResolver<RestRequest<{ id: string }>, typeof restContext>;
+export const createMockDeleteUserResolver = (): DeleteUserResponseResolver => async (req, res, ctx) => {
+  const id = req.params.id;
+  if (Number(id) === 1) {
+    return res(ctx.status(400));
+  }
+  return res(ctx.status(200));
+};
+
 export const postLogin = rest.post(urls.login, createMockLoginResolver());
 export const getSites = rest.get(urls.sites, createMockSitesResolver());
 export const postTokens = rest.post(urls.tokens, createMockTokensResolver());
@@ -218,6 +227,7 @@ export const postEnrollmentRequests = rest.post(urls.enrollmentRequests, createM
 export const getCurrentUser = rest.get(urls.currentUser, createMockCurrentUserResolver());
 export const updateUser = rest.patch(`${urls.users}/:id`, createMockUpdateUserResolver());
 export const addUser = rest.post(urls.users, createMockAddUserResolver());
+export const deleteUser = rest.delete(`${urls.users}/:id`, createMockDeleteUserResolver());
 export const allResolvers = [
   getSites,
   postTokens,
@@ -229,4 +239,5 @@ export const allResolvers = [
   getUsers,
   addUser,
   getUser,
+  deleteUser,
 ];

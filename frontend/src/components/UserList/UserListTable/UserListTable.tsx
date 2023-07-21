@@ -155,6 +155,10 @@ const UserListTable = ({
                   aria-label={deleteLabel}
                   className="is-dense u-table-cell-padding-overlap"
                   disabled={currentUsername === username}
+                  onClick={() => {
+                    setSelectedUserId(id);
+                    setSidebar("deleteUser");
+                  }}
                 >
                   <Icon name="delete" />
                 </Button>

@@ -1,15 +1,16 @@
 import { createContext, useContext, useState } from "react";
 
+export type Sidebar = "removeRegions" | "createToken" | "addUser" | "editUser" | "deleteUser" | null;
 export const AppLayoutContext = createContext<{
-  sidebar: "removeRegions" | "createToken" | "addUser" | "editUser" | null;
-  setSidebar: (sidebar: "removeRegions" | "createToken" | "addUser" | "editUser" | null) => void;
+  sidebar: Sidebar;
+  setSidebar: (sidebar: Sidebar) => void;
 }>({
   sidebar: null,
   setSidebar: () => null,
 });
 
 export const AppLayoutContextProvider = ({ children }: { children: React.ReactNode }) => {
-  const [sidebar, setSidebar] = useState<"removeRegions" | "createToken" | "addUser" | "editUser" | null>(null);
+  const [sidebar, setSidebar] = useState<Sidebar>(null);
 
   return <AppLayoutContext.Provider value={{ sidebar, setSidebar }}>{children}</AppLayoutContext.Provider>;
 };

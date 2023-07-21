@@ -13,6 +13,7 @@ import {
   updateUser,
   addUser,
   getUser,
+  deleteUser,
 } from "./resolvers";
 
 export const worker = setupWorker(
@@ -28,4 +29,5 @@ export const worker = setupWorker(
   updateUser,
   addUser,
   getUser,
+  deleteUser,
 );
