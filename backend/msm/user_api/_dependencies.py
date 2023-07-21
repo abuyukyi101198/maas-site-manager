@@ -18,7 +18,7 @@ async def db_connection(request: Request) -> AsyncIterator[AsyncConnection]:
 
     Requires the TransactionMiddleware to be used.
     """
-    yield request.app.state.conn
+    yield request.state.conn
 
 
 def services(

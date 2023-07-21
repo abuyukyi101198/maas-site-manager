@@ -36,7 +36,7 @@ def transaction_middleware_class(
             request: Request,
             call_next: Callable[[Request], Awaitable[Response]],
         ) -> Response:
-            request.app.state.conn = db_connection
+            request.state.conn = db_connection
             return await call_next(request)
 
     yield ConnectionReusingTransactionMiddleware

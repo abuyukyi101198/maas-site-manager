@@ -16,7 +16,7 @@ from ..db import Database
 class TransactionMiddleware(BaseHTTPMiddleware):
     """Run a request in a transaction, handling commit/rollback.
 
-    This makes the database connection available as `app.state.conn`.
+    This makes the database connection available as `request.state.conn`.
     """
 
     def __init__(self, app: ASGIApp, db: Database):
@@ -30,6 +30,6 @@ class TransactionMiddleware(BaseHTTPMiddleware):
     ) -> Response:
         async with self.db.engine.connect() as conn:
             async with conn.begin():
-                request.app.state.conn = conn
+                request.state.conn = conn
                 response = await call_next(request)
         return response
