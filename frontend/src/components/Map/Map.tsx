@@ -13,7 +13,11 @@ const Map = ({ id = "map-container" }: MapContainerProps) => {
       id={id}
       zoom={3}
     >
-      <TileLayer data-testid="tile-layer" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      <TileLayer
+        attribution='<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
+        data-testid="tile-layer"
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
     </MapContainer>
   );
 };

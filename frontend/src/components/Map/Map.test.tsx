@@ -12,3 +12,18 @@ it("renders the map with controls", async () => {
   expect(screen.getByRole("button", { name: /Zoom in/ })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: /Zoom out/ })).toBeInTheDocument();
 });
+
+it("displays open street map attribution", () => {
+  render(<Map id="map-container" />);
+
+  expect(
+    screen.getByRole("link", {
+      name: /openstreetmap/i,
+    }),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("link", {
+      name: /openstreetmap/i,
+    }),
+  ).toHaveAttribute("href", "https://www.openstreetmap.org/copyright");
+});
