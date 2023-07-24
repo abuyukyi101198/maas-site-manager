@@ -30,6 +30,12 @@
   }
 }
 
+.u-flex--row-small {
+  @media (min-width: $breakpoint-small) {
+    flex-direction: row !important;
+  }
+}
+
 .u-flex--grow {
   flex-grow: 1 !important;
 }
@@ -75,4 +81,3 @@
   clip: rect(1px, 1px, 1px, 1px) !important;
   white-space: nowrap !important;
 }
-

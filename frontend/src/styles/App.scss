@@ -24,6 +24,7 @@
 @include vf-p-card;
 @include vf-p-accordion;
 @include vf-p-table-sortable;
+@include vf-p-segmented-control;
 
 // icons
 @include vf-p-icons;
@@ -38,6 +39,8 @@
 @include vf-p-icon-submit-bug;
 @include vf-p-icon-comments;
 @include vf-p-icon-edit;
+@include vf-p-icon-switcher-environments;
+@include vf-p-icon-exposed;
 
 // Utilities
 @include vf-u-text-muted;
