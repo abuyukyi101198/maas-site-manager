@@ -61,3 +61,19 @@ test("can close remove regions panel using Escape key", async ({ page }) => {
   await dialog.press("Escape");
   await expect(dialog).toBeHidden();
 });
+
+test("hides columns dropdown in the map view", async ({ page }) => {
+  const searchAndFilter = page.getByRole("searchbox", { name: /Search and filter/i });
+  const columnsDropdown = page.getByRole("button", { name: /Columns/i });
+  const controlsHeading = page.getByRole("heading", { level: 2, name: /MAAS regions/i });
+
+  await expect(searchAndFilter).toBeVisible();
+  await expect(columnsDropdown).toBeVisible();
+  await expect(controlsHeading).toBeVisible();
+
+  await page.goto(routesConfig.sitesMap.path);
+
+  await expect(searchAndFilter).toBeVisible();
+  await expect(controlsHeading).toBeVisible();
+  await expect(columnsDropdown).toBeHidden();
+});

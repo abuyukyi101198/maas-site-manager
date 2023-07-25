@@ -1,0 +1,15 @@
+.regions-map {
+    position: relative;
+}
+
+.regions-map__controls-wrapper {
+    position: absolute;
+
+    /* matches the padding of the main container */
+    top: $map-top-offset;
+    left: 0;
+    right: 0;
+
+    /* places controls above the map */
+    z-index: #{$map-base-z-index + 1};
+}

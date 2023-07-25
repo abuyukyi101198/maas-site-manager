@@ -1,5 +1,5 @@
-import MapComponent from "@/components/Map";
+import RegionsMap from "@/components/RegionsMap";
 
-const Map: React.FC = () => <MapComponent />;
+const Map: React.FC = () => <RegionsMap />;
 
 export default Map;

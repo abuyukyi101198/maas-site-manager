@@ -3,6 +3,7 @@ import { useMemo } from "react";
 
 import { Select } from "@canonical/react-components";
 
+import ControlsBar from "@/components/base/ControlsBar";
 import type { AppPaginationProps } from "@/components/base/TablePagination/TablePagination";
 import TablePagination from "@/components/base/TablePagination/TablePagination";
 
@@ -48,33 +49,30 @@ const PaginationBar = ({
   };
 
   return (
-    <section className="pagination-bar u-flex u-flex--justify-between u-flex--wrap">
-      <div className="p-form p-form--inline">
-        <strong className="pagination-bar__description">
-          Showing {getDisplayedDataCount()} out of {totalItems} {dataContext}
-        </strong>
-
-        <div className="u-flex u-flex--wrap u-flex--column-x-small pagination-bar__right">
-          <TablePagination
-            currentPage={currentPage}
-            isLoading={isLoading}
-            itemsPerPage={itemsPerPage}
-            onNextClick={onNextClick}
-            onPreviousClick={onPreviousClick}
-            setCurrentPage={setCurrentPage}
-            totalItems={totalItems}
-          />
-
-          <Select
-            aria-label="Items per page"
-            name="Items per page"
-            onChange={handleSizeChange}
-            options={pageOptions}
-            value={itemsPerPage}
-          />
-        </div>
-      </div>
-    </section>
+    <ControlsBar>
+      <ControlsBar.Left>
+        Showing {getDisplayedDataCount()} out of {totalItems} {dataContext}
+      </ControlsBar.Left>
+      <ControlsBar.Right>
+        <TablePagination
+          currentPage={currentPage}
+          isLoading={isLoading}
+          itemsPerPage={itemsPerPage}
+          onNextClick={onNextClick}
+          onPreviousClick={onPreviousClick}
+          setCurrentPage={setCurrentPage}
+          totalItems={totalItems}
+        />
+        <Select
+          aria-label="Items per page"
+          className="u-no-margin--bottom"
+          name="Items per page"
+          onChange={handleSizeChange}
+          options={pageOptions}
+          value={itemsPerPage}
+        />
+      </ControlsBar.Right>
+    </ControlsBar>
   );
 };
 

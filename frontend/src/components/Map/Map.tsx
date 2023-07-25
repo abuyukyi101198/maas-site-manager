@@ -1,5 +1,5 @@
 import type { MapContainerProps } from "react-leaflet";
-import { MapContainer, TileLayer } from "react-leaflet";
+import { MapContainer, TileLayer, ZoomControl } from "react-leaflet";
 
 const Map = ({ id = "map-container" }: MapContainerProps) => {
   return (
@@ -12,7 +12,9 @@ const Map = ({ id = "map-container" }: MapContainerProps) => {
       className="map"
       id={id}
       zoom={3}
+      zoomControl={false}
     >
+      <ZoomControl position="bottomright" />
       <TileLayer
         attribution='<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
         data-testid="tile-layer"

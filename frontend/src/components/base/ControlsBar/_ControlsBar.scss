@@ -1,4 +1,4 @@
-.pagination-bar {
+.controls-bar {
   border-top: 1px solid $color-mid-light;
   border-bottom: 1px solid $color-mid-light;
   align-items: center;
@@ -8,17 +8,13 @@
   .p-form--inline {
       width: 100%;
   }
-  
-  label {
-    margin-bottom: 0;
-  }
 
-  .pagination-bar__description {
+  .controls-bar__left {
     margin: 0;
     padding: 0;
   }
 
-  .pagination-bar__right {
+  .controls-bar__right {
     width: 100%;
     margin-left: auto;
     margin-right: 0;
@@ -26,9 +22,5 @@
     @media screen and (min-width: $breakpoint-small) {
       width: auto;
     }
-  }
-
-  select {
-    margin-bottom: 0;
   }
 }

@@ -2,7 +2,7 @@ import { SearchBox, Button, Icon } from "@canonical/react-components";
 
 import ColumnsVisibilityControl from "./ColumnsVisibilityControl";
 import SitesCount from "./SitesCount";
-import SitesViewControl from "./SitesViewControl/SitesViewControl";
+import SitesViewControl from "./SitesViewControl";
 
 import type { SitesColumn } from "@/components/SitesList/SitesTable/SitesTable";
 import { useAppLayoutContext } from "@/context/AppLayoutContext";
@@ -14,7 +14,7 @@ const SitesTableControls = ({
   isLoading,
   allColumns,
   setSearchText,
-}: { allColumns: SitesColumn[]; setSearchText: (text: string) => void } & Pick<
+}: { allColumns?: SitesColumn[]; setSearchText: (text: string) => void } & Pick<
   UseSitesQueryResult,
   "data" | "isLoading"
 >) => {
@@ -29,7 +29,7 @@ const SitesTableControls = ({
     <div className="u-fixed-width sites-table-controls">
       <div className="u-flex--large">
         <div>
-          <h2 className="p-heading--4">
+          <h2 className="p-heading--4 u-no-padding--top">
             <SitesCount data={data} isLoading={isLoading} />
           </h2>
         </div>
@@ -41,21 +41,17 @@ const SitesTableControls = ({
             placeholder="Search and filter"
           />
         </div>
-        <div className="u-flex u-flex--column u-flex--row-small">
-          <div className="u-flex">
-            <Button
-              appearance="negative"
-              disabled={isRemoveDisabled}
-              onClick={() => setSidebar("removeRegions")}
-              type="button"
-            >
-              <Icon light name="delete" /> Remove
-            </Button>
-            <ColumnsVisibilityControl columns={allColumns} />
-          </div>
-          <div className="u-flex">
-            <SitesViewControl />
-          </div>
+        <div className="u-flex u-flex--column u-flex--row-small u-flex u-flex--justify-end">
+          <Button
+            appearance="negative"
+            disabled={isRemoveDisabled}
+            onClick={() => setSidebar("removeRegions")}
+            type="button"
+          >
+            <Icon light name="delete" /> Remove
+          </Button>
+          {allColumns && <ColumnsVisibilityControl columns={allColumns} />}
+          <SitesViewControl />
         </div>
       </div>
     </div>
