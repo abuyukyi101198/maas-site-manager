@@ -11,6 +11,9 @@ from jose import (
 
 from .settings import SETTINGS
 
+TOKEN_ALGORITHM = "HS256"
+TOKEN_DURATION_MINUTES = 30
+
 
 class InvalidToken(Exception):
     """Token is invalid"""
@@ -19,14 +22,14 @@ class InvalidToken(Exception):
 def create_token(subject: str, duration: timedelta | None = None) -> str:
     """Create a JWT token and return it's encoded form as string."""
     if duration is None:
-        duration = timedelta(minutes=SETTINGS.access_token_expire_minutes)
+        duration = timedelta(minutes=TOKEN_DURATION_MINUTES)
     data = {
         "sub": subject,
         "iss": "MAAS site manager",
         "exp": datetime.utcnow() + duration,
     }
     encoded = jwt.encode(
-        data, SETTINGS.secret_key, algorithm=SETTINGS.algorithm
+        data, SETTINGS.token_secret_key, algorithm=TOKEN_ALGORITHM
     )
     return str(encoded)
 
@@ -35,7 +38,7 @@ def validate_token(token: str) -> str:
     """Validate a JWT token and return its subject."""
     try:
         payload = jwt.decode(
-            token, SETTINGS.secret_key, algorithms=[SETTINGS.algorithm]
+            token, SETTINGS.token_secret_key, algorithms=[TOKEN_ALGORITHM]
         )
     except JWTError:
         raise InvalidToken()

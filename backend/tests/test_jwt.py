@@ -10,6 +10,7 @@ import pytest
 from msm.jwt import (
     create_token,
     InvalidToken,
+    TOKEN_DURATION_MINUTES,
     validate_token,
 )
 from msm.settings import SETTINGS
@@ -20,21 +21,19 @@ class TestCreateToken:
         subject = "subject"
         token = create_token(subject)
         payload = jwt.decode(
-            token, SETTINGS.secret_key, algorithms=[SETTINGS.algorithm]
+            token, SETTINGS.token_secret_key, algorithms=["HS256"]
         )
         assert payload["sub"] == subject
         assert payload["iss"] == "MAAS site manager"
         assert datetime.fromtimestamp(
             payload["exp"]
-        ) < datetime.utcnow() + timedelta(
-            minutes=SETTINGS.access_token_expire_minutes
-        )
+        ) < datetime.utcnow() + timedelta(minutes=TOKEN_DURATION_MINUTES)
 
     def test_create_with_duration(self) -> None:
         duration = timedelta(minutes=1)
         token = create_token("user@example.com", duration=duration)
         payload = jwt.decode(
-            token, SETTINGS.secret_key, algorithms=[SETTINGS.algorithm]
+            token, SETTINGS.token_secret_key, algorithms=["HS256"]
         )
         assert (
             datetime.fromtimestamp(payload["exp"])
@@ -61,7 +60,7 @@ class TestValidateToken:
     )
     def test_invalid_missing_fields(self, data: dict[str, Any]) -> None:
         encoded = jwt.encode(
-            data, SETTINGS.secret_key, algorithm=SETTINGS.algorithm
+            data, SETTINGS.token_secret_key, algorithm="HS256"
         )
         with pytest.raises(InvalidToken):
             validate_token(str(encoded))

@@ -34,7 +34,7 @@ class Site(BaseModel):
     name: str
     name_unique: bool
     city: str | None = None
-    country: str | None = Field(min_length=2, max_length=2)
+    country: str | None = Field(default=None, min_length=2, max_length=2)
     latitude: str | None = None
     longitude: str | None = None
     note: str | None = None

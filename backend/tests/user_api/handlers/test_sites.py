@@ -12,7 +12,7 @@ from msm.db.models import (
     Site,
     SiteData,
 )
-from msm.settings import SETTINGS
+from msm.service._site import LOST_CONNECTION_THRESHOLD_SECONDS
 
 from ...fixtures.client import Client
 from ...fixtures.factory import Factory
@@ -139,9 +139,7 @@ class TestSitesHandler:
             site.id,
             last_seen=(
                 datetime.utcnow()
-                - timedelta(
-                    seconds=SETTINGS.lost_connection_threshold_seconds + 1
-                )
+                - timedelta(seconds=LOST_CONNECTION_THRESHOLD_SECONDS + 1)
             ),
         )
 

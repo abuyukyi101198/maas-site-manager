@@ -25,8 +25,9 @@ from ..db.tables import (
     SiteData,
 )
 from ..schema import SortParam
-from ..settings import SETTINGS
 from ._base import Service
+
+LOST_CONNECTION_THRESHOLD_SECONDS = 60
 
 
 class InvalidPendingSites(Exception):
@@ -147,7 +148,7 @@ class SiteService(Service):
 
     def _select_statement(self) -> Select[Any]:
         connection_lost_timedelta = datetime.utcnow() - timedelta(
-            seconds=SETTINGS.lost_connection_threshold_seconds
+            seconds=LOST_CONNECTION_THRESHOLD_SECONDS
         )
         return select(
             Site.c.id,

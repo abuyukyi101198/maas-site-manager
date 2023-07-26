@@ -1,31 +1,17 @@
-from logging import getLogger
-from os import (
-    environ,
-    getenv,
-)
-
 from pydantic import (
     BaseSettings,
     Field,
     PostgresDsn,
 )
 
-logger = getLogger("site-manager.settings")
-
 
 class Settings(BaseSettings):
-    """API settings."""
+    """Application settings."""
 
     db_dsn: PostgresDsn = Field(
         default="postgresql+asyncpg://postgres:msm@localhost/msm",
         env="MSM_DB_DSN",
     )  # type: ignore
-
-    default_page_size: int = Field(
-        default=20, gte=1, env="MSM_DEFAULT_PAGE_SIZE"
-    )
-
-    max_page_size: int = Field(default=100, gte=1, env="MSM_MAX_PAGE_SIZE")
 
     allowed_origins: list[str] = Field(
         default=[
@@ -36,17 +22,7 @@ class Settings(BaseSettings):
         env="MSM_ALLOWED_ORIGINS",
     )
 
-    secret_key: str = getenv("SECRET_KEY", "")
-    if "SECRET_KEY" not in environ:
-        logger.critical("Secret key not defined in environment!")
-
-    algorithm = "HS256"
-
-    access_token_expire_minutes = int(getenv("MSM_TOKEN_EXPIRATION_TIME", 30))
-
-    lost_connection_threshold_seconds = int(
-        getenv("MSM_LOST_CONNECTION_THRESHOLD", 60)
-    )
+    token_secret_key: str = Field(default="", env="MSM_TOKEN_SECRET_KEY")
 
 
 SETTINGS = Settings()
