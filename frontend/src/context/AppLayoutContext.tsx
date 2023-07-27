@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from "react";
 
-export type Sidebar = "removeRegions" | "createToken" | "addUser" | "editUser" | "deleteUser" | null;
+export type Sidebar = "removeRegions" | "createToken" | "addUser" | "editUser" | "deleteUser" | "regionDetails" | null;
 export const AppLayoutContext = createContext<{
   sidebar: Sidebar;
   setSidebar: (sidebar: Sidebar) => void;

@@ -1,9 +1,10 @@
-import { Button, Icon, Input, Notification, Spinner } from "@canonical/react-components";
+import { Button, Input, Notification, Spinner } from "@canonical/react-components";
 import { useQueryClient } from "@tanstack/react-query";
 import { Field, Form, Formik } from "formik";
 import * as Yup from "yup";
 
 import ErrorMessage from "@/components/ErrorMessage";
+import RemoveButton from "@/components/base/RemoveButton";
 import { useAppLayoutContext, useUserSelectionContext } from "@/context";
 import { useDeleteUserMutation, useUserQuery } from "@/hooks/react-query";
 
@@ -100,9 +101,12 @@ const DeleteUser = () => {
                   <Button appearance="base" onClick={() => setSidebar(null)} type="button">
                     Cancel
                   </Button>
-                  <Button appearance="negative" disabled={!dirty || isSubmitting || !isValid} type="submit">
-                    <Icon light name="delete" /> Delete
-                  </Button>
+                  <RemoveButton
+                    disabled={!dirty || isSubmitting || !isValid}
+                    label="Delete"
+                    showDeleteIcon
+                    type="submit"
+                  />
                 </div>
               </div>
             </Form>

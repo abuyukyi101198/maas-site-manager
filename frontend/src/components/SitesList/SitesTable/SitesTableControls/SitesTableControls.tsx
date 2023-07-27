@@ -1,10 +1,11 @@
-import { SearchBox, Button, Icon } from "@canonical/react-components";
+import { SearchBox } from "@canonical/react-components";
 
 import ColumnsVisibilityControl from "./ColumnsVisibilityControl";
 import SitesCount from "./SitesCount";
 import SitesViewControl from "./SitesViewControl";
 
 import type { SitesColumn } from "@/components/SitesList/SitesTable/SitesTable";
+import RemoveButton from "@/components/base/RemoveButton";
 import { useAppLayoutContext } from "@/context/AppLayoutContext";
 import { useRowSelectionContext } from "@/context/RowSelectionContext";
 import type { UseSitesQueryResult } from "@/hooks/react-query";
@@ -42,14 +43,12 @@ const SitesTableControls = ({
           />
         </div>
         <div className="u-flex u-flex--column u-flex--row-small u-flex u-flex--justify-end">
-          <Button
-            appearance="negative"
+          <RemoveButton
             disabled={isRemoveDisabled}
             onClick={() => setSidebar("removeRegions")}
+            showDeleteIcon
             type="button"
-          >
-            <Icon light name="delete" /> Remove
-          </Button>
+          />
           {allColumns && <ColumnsVisibilityControl columns={allColumns} />}
           <SitesViewControl />
         </div>

@@ -6,6 +6,7 @@ import classNames from "classnames";
 import DeleteUser from "@/components/DeleteUser";
 import DocumentTitle from "@/components/DocumentTitle/DocumentTitle";
 import Navigation from "@/components/Navigation";
+import RegionDetails from "@/components/RegionDetails/RegionDetails";
 import RemoveRegions from "@/components/RemoveRegions";
 import SecondaryNavigation from "@/components/SecondaryNavigation";
 import UserForm from "@/components/UserForm";
@@ -22,6 +23,7 @@ export const sidebarLabels: Record<NonNullable<Sidebar>, string> = {
   removeRegions: "Remove regions",
   createToken: "Generate tokens",
   deleteUser: "Delete user",
+  regionDetails: "Region details",
 };
 
 const UserAddForm = () => <UserForm type="add" />;
@@ -33,6 +35,8 @@ const sidebarComponent = {
   createToken: TokensCreate,
   deleteUser: DeleteUser,
   removeRegions: RemoveRegions,
+  // TODO: remove fixed id value once related task is complete: https://warthogs.atlassian.net/browse/MAASENG-1978
+  regionDetails: () => RegionDetails({ id: "7" }),
 } as const;
 
 const SidebarComponents = ({ sidebar }: { sidebar: NonNullable<Sidebar> }) => {

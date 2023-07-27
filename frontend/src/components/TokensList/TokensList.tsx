@@ -7,6 +7,7 @@ import TokensTable from "./components/TokensTable/TokensTable";
 
 import ExternalLink from "@/components/ExternalLink";
 import PaginationBar from "@/components/base/PaginationBar";
+import RemoveButton from "@/components/base/RemoveButton";
 import docsUrls from "@/config/docsUrls";
 import { useAppLayoutContext } from "@/context";
 import { useRowSelectionContext } from "@/context/RowSelectionContext";
@@ -96,9 +97,7 @@ const TokensList = () => {
           <Col size={12}>
             <div className="u-flex u-flex--justify-end">
               <Button disabled={!Object.keys(rowSelection).length}>Export</Button>
-              <Button appearance="negative" disabled={!Object.keys(rowSelection).length} onClick={handleTokenDelete}>
-                Delete
-              </Button>
+              <RemoveButton disabled={!Object.keys(rowSelection).length} label="Delete" onClick={handleTokenDelete} />
               <Button className="p-button--positive" onClick={() => setSidebar("createToken")} type="button">
                 Generate tokens
               </Button>

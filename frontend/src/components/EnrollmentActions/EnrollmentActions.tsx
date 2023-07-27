@@ -2,6 +2,7 @@ import { Button, Notification } from "@canonical/react-components";
 
 import EnrollmentNotification from "./EnrollmentNotification";
 
+import RemoveButton from "@/components/base/RemoveButton";
 import { useRowSelectionContext } from "@/context/RowSelectionContext";
 import { useEnrollmentRequestsMutation } from "@/hooks/react-query";
 
@@ -33,9 +34,7 @@ const EnrollmentActions: React.FC = () => {
           </Notification>
         ) : null}
         <div className="u-flex u-flex--justify-end">
-          <Button appearance="negative" disabled={isActionDisabled} onClick={handleDeny} type="button">
-            Deny
-          </Button>
+          <RemoveButton disabled={isActionDisabled} label="Deny" onClick={handleDeny} type="button" />
           <Button appearance="positive" disabled={isActionDisabled} onClick={handleAccept} type="button">
             Accept
           </Button>

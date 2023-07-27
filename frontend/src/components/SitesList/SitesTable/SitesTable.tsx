@@ -17,6 +17,7 @@ import ExternalLink from "@/components/ExternalLink";
 import NoRegions from "@/components/NoRegions";
 import SelectAllCheckbox from "@/components/SelectAllCheckbox";
 import TableCaption from "@/components/TableCaption/TableCaption";
+import LocalTime from "@/components/base/LocalTime/LocalTime";
 import type { PaginationBarProps } from "@/components/base/PaginationBar/PaginationBar";
 import PaginationBar from "@/components/base/PaginationBar/PaginationBar";
 import SortIndicator from "@/components/base/SortIndicator";
@@ -24,7 +25,7 @@ import TooltipButton from "@/components/base/TooltipButton/TooltipButton";
 import { isDev } from "@/constants";
 import { useRowSelectionContext } from "@/context/RowSelectionContext";
 import type { UseSitesQueryResult } from "@/hooks/react-query";
-import { getCountryName, getTimezoneUTCString, getTimeInTimezone } from "@/utils";
+import { getCountryName } from "@/utils";
 
 const createAccessor =
   <T, K extends keyof T>(keys: K[] | K) =>
@@ -182,7 +183,7 @@ const SitesTable = ({
           const { timezone } = getValue();
           return timezone ? (
             <div>
-              {getTimeInTimezone(new Date(), timezone)} UTC{getTimezoneUTCString(timezone)}
+              <LocalTime timezone={timezone} />
             </div>
           ) : null;
         },
