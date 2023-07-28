@@ -29,3 +29,22 @@ $grid-margin-default: map_get($grid-margin-widths, default);
         z-index: $map-base-z-index;
     }
 }
+
+/* Leaflet zoom styling */
+.leaflet-control-zoom.leaflet-bar.leaflet-control {
+    border: 1px solid $colors--light-theme--border-high-contrast;
+    border-radius: 0;
+
+    .leaflet-control-zoom-in, .leaflet-control-zoom-out {
+        width: 2.25rem;
+        height: 2.25rem;
+
+        &.leaflet-disabled {
+            background: $color-light;
+        }
+    }
+
+    .leaflet-control-zoom-in {
+        border-bottom: 2px solid $color-mid-x-light;
+    }
+}
