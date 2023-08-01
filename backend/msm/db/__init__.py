@@ -24,5 +24,4 @@ class Database:
     ) -> None:
         async with self.engine.connect() as conn:
             async with conn.begin():
-                # ensure schema is created
                 await conn.run_sync(func)
