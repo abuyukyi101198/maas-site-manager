@@ -5,13 +5,20 @@ import * as ReactDOM from "react-dom/client";
 
 import packageInfo from "../package.json";
 
-import App from "./App";
-import { useMockData } from "./constants";
+import App from "@/App";
+import { baseURL } from "@/api";
+import { useMockData } from "@/constants";
 
 /* c8 ignore next 4 */
 if (useMockData) {
   const { worker } = await import("./mocks/browser");
-  await worker.start();
+  await worker.start({
+    onUnhandledRequest(req) {
+      if (req.url.href.includes(baseURL)) {
+        console.warn("Found an unhandled %s request to %s", req.method, req.url.href);
+      }
+    },
+  });
 }
 
 const environment = process.env.NODE_ENV;

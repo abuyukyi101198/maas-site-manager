@@ -1,3 +1,5 @@
+import { baseURL } from "./config";
+
 export const getApiUrl = (path: string) => {
-  return new URL(path, import.meta.env.VITE_API_URL).toString();
+  return new URL(path, baseURL).toString();
 };
