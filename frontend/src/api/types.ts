@@ -37,7 +37,6 @@ export type SitesQueryResult = PaginatedQueryResult<Site>;
 
 export type Token = {
   id: number;
-  site_id: Site["id"] | null;
   value: string;
   expired: string; //<ISO 8601 date string>,
   created: string; //<ISO 8601 date string>

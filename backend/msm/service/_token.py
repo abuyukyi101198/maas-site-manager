@@ -43,7 +43,6 @@ class TokenService(Service):
         stmt = (
             select(
                 Token.c.id,
-                Token.c.site_id,
                 Token.c.value,
                 Token.c.expired,
                 Token.c.created,
@@ -61,7 +60,6 @@ class TokenService(Service):
         result = await self.conn.execute(
             select(
                 Token.c.id,
-                Token.c.site_id,
                 Token.c.value,
                 Token.c.expired,
                 Token.c.created,

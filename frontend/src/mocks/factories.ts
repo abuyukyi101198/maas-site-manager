@@ -92,7 +92,6 @@ export const tokenFactory = Factory.define<Token>(({ sequence }) => {
   const chance = new Chance(`maas-${sequence}`);
   return {
     id: sequence,
-    site_id: `${chance.integer({ min: 0, max: 100 })}`,
     value: chance.hash({ length: 64 }),
     expired: new Date(chance.date({ min: add(now, { seconds: 1 }), max: add(now, { days: 1 }) })).toISOString(), //<ISO 8601 date string>,
     created: new Date(chance.date({ min: sub(now, { minutes: 15 }), max: now })).toISOString(), //<ISO 8601 date string>

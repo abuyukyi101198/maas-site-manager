@@ -51,7 +51,6 @@ Token = Table(
     "token",
     METADATA,
     Column("id", Integer, primary_key=True),
-    Column("site_id", Integer, ForeignKey("site.id"), index=True),
     Column(
         "value", UUID(as_uuid=True), nullable=False, index=True, default=uuid4
     ),

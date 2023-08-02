@@ -9,6 +9,5 @@ class Token(BaseModel):
 
     id: int
     value: UUID
-    site_id: int | None = None
     expired: datetime
     created: datetime

@@ -36,7 +36,7 @@ fi
 
 (
     copy_cmd sites.csv 'site(id, city, country, latitude, longitude, name, name_unique, note, region, street, timezone, url, accepted, created)'
-    copy_cmd tokens.csv 'token(site_id, value, expired, created)'
+    copy_cmd tokens.csv 'token(value, expired, created)'
     copy_cmd users.csv '"user"(email, username, full_name, password, is_admin)'
     copy_cmd site_data.csv 'site_data(site_id, allocated_machines, deployed_machines, ready_machines, error_machines, other_machines, last_seen)'
 ) | psql --single-transaction "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
