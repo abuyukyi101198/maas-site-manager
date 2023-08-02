@@ -53,7 +53,7 @@ tox -- <extra args>...
 
 ## Running the app in development
 
-In development, the application can be run using the `uvicorn` ASGI server.
+The application is run using the `uvicorn` ASGI server.
 
 It requires a PostgreSQL database set up to connect to.  One (more persistent)
 option is to set up the required user and database in the system-wide
@@ -84,7 +84,7 @@ Database schema setup will happen automatically at application startup.
 The application can be run via
 
 ```
-tox -e run run
+tox run -e run
 ```
 
 ## Delete and recreate the database

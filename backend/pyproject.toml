@@ -33,6 +33,8 @@ dependencies = [
   "SQLAlchemy[postgresql_asyncpg]",
   "StrEnum", # emulate enum.StrEnum, which is available in Python3.11
   "ujson", # faster JSON encoding/decoding (for fastapi)
+  "uvicorn[standard]",
+  "uvloop",
 ]
 [project.optional-dependencies]
 testing = [
@@ -43,11 +45,8 @@ testing = [
   "pytest-postgresql",
   "pytest-xdist",
 ]
-uvicorn = [
-  "uvicorn",
-  "uvloop",
-  "watchfiles",
-]
+[project.scripts]
+msm-user-api = "msm.user_api:run"
 
 [tool.setuptools.packages.find]
 include = ["msm*"]

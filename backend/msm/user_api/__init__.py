@@ -1,4 +1,6 @@
+import argparse
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import AsyncGenerator
 
 from fastapi import FastAPI
@@ -7,6 +9,9 @@ from prometheus_client import (
     CollectorRegistry,
     REGISTRY,
 )
+import uvicorn
+
+import msm
 
 from .. import PACKAGE
 from ..db import Database
@@ -17,6 +22,26 @@ from ..middleware import (
 from ..settings import SETTINGS
 from ._prometheus import instrument_prometheus
 from .handlers import API_ROUTERS
+
+
+def run() -> None:
+    """Run the API application."""
+    args = _get_args()
+    if args.devmode:
+        reload_dirs = [str(Path(msm.__file__).parent)]
+        host = "0.0.0.0"
+    else:
+        reload_dirs = None
+        host = "127.0.0.1"
+    uvicorn.run(
+        "msm.user_api:create_app",
+        factory=True,
+        host=host,
+        port=args.port,
+        loop="uvloop",
+        reload=args.devmode,
+        reload_dirs=reload_dirs,
+    )
 
 
 def create_app(
@@ -55,3 +80,24 @@ def create_app(
     instrument_prometheus(app, prometheus_registry)
 
     return app
+
+
+def _get_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="MAAS site manager user API.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument(
+        "--devmode",
+        help="run server in deveopment mode",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "--port",
+        "-P",
+        help="server port",
+        type=int,
+        default=8000,
+    )
+    return parser.parse_args()
