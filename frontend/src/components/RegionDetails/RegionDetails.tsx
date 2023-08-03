@@ -12,13 +12,13 @@ import {
 import LocalTime from "@/components/base/LocalTime/LocalTime";
 import RemoveButton from "@/components/base/RemoveButton";
 import { useAppLayoutContext, useRowSelectionContext } from "@/context";
+import type { RegionDetailsContextValue } from "@/context/RegionDetailsContext";
 import { useRegionDetailsContext } from "@/context/RegionDetailsContext";
 import { useSiteQuery } from "@/hooks/react-query";
 import { getCountryName } from "@/utils";
 
-const RegionDetails = () => {
-  const { regionId } = useRegionDetailsContext();
-  const { data: site, error, isLoading } = useSiteQuery(regionId);
+const RegionDetailsContent = ({ id }: { id: NonNullable<RegionDetailsContextValue["selected"]> }) => {
+  const { data: site, error, isLoading } = useSiteQuery(id);
   const { setSidebar } = useAppLayoutContext();
   const { setRowSelection } = useRowSelectionContext("sites");
   const stats = site?.stats;
@@ -138,6 +138,12 @@ const RegionDetails = () => {
       )}
     </div>
   );
+};
+
+const RegionDetails = () => {
+  const { selected: regionId } = useRegionDetailsContext();
+
+  return regionId ? <RegionDetailsContent id={regionId} /> : null;
 };
 
 export default RegionDetails;

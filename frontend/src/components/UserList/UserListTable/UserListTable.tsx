@@ -20,7 +20,7 @@ const createAccessor =
   (row: T) =>
     pick(keys, row);
 
-export type UserColumnDef = ColumnDef<User, Partial<User>>;
+export type UserColumnDef = ColumnDef<User, User>;
 export type UserColumn = Column<User, unknown>;
 
 type SortProps = {
@@ -36,7 +36,7 @@ const UserListTable = ({
   sorting,
 }: Pick<useUsersQueryResult, "data" | "error" | "isLoading"> & SortProps) => {
   const [isShowingFullName, setIsShowingFullName] = useState(false);
-  const { setSelectedUserId } = useUserSelectionContext();
+  const { setSelected: setSelectedUserId } = useUserSelectionContext();
   const { setSidebar } = useAppLayoutContext();
   const { data: currentUser } = useCurrentUserQuery();
   const currentUsername = currentUser?.username;

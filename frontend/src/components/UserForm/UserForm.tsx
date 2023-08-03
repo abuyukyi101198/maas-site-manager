@@ -52,7 +52,6 @@ const AddUserSchema = Yup.object().shape({
 });
 
 const UserForm = ({ type }: { type: "add" | "edit" }) => {
-  // Field label IDs
   const headingId = useId();
   const usernameId = useId();
   const fullNameId = useId();
@@ -62,10 +61,10 @@ const UserForm = ({ type }: { type: "add" | "edit" }) => {
 
   const [initialValues, setInitialValues] = useState<UserFormValues>(baseInitialValues);
 
+  const { selected: selectedUserId, setSelected: setSelectedUserId } = useUserSelectionContext();
   const { setSidebar } = useAppLayoutContext();
   const queryClient = useQueryClient();
-  const { selectedUserId, setSelectedUserId } = useUserSelectionContext();
-  const { data: user, error, isLoading } = useUserQuery({ id: selectedUserId, enabled: type === "edit" });
+  const { data: user, error, isLoading } = useUserQuery({ id: selectedUserId!, enabled: type === "edit" });
 
   const resetForm = () => {
     setSidebar(null);

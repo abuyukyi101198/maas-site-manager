@@ -1,21 +1,8 @@
-import { createContext } from "react";
+import { getSelectedEntityContext, getSelectedEntityContextProvider, useSelectedEntityContext } from "./utils";
 
 import type { Site } from "@/api/types";
 
-export type RegionDetailsId = Site["id"] | null;
-
-export const RegionDetailsContext = createContext<{
-  regionId: RegionDetailsId;
-  setRegionId: (regionId: RegionDetailsId) => void;
-}>({
-  regionId: null,
-  setRegionId: () => null,
-});
-
-export const RegionDetailsContextProvider = ({ children }: { children: React.ReactNode }) => {
-  const [regionId, setRegionId] = useState<RegionDetailsId>(null);
-
-  return <RegionDetailsContext.Provider value={{ regionId, setRegionId }}>{children}</RegionDetailsContext.Provider>;
-};
-
-export const useRegionDetailsContext = () => useContext(RegionDetailsContext);
+export const RegionDetailsContextProvider = getSelectedEntityContextProvider<Site["id"]>("regionDetails");
+export const RegionDetailsContext = getSelectedEntityContext<Site["id"]>("regionDetails");
+export const useRegionDetailsContext = () => useSelectedEntityContext<Site["id"]>("regionDetails");
+export type RegionDetailsContextValue = ReturnType<typeof useRegionDetailsContext>;

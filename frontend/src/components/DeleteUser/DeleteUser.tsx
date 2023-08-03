@@ -6,6 +6,7 @@ import * as Yup from "yup";
 import ErrorMessage from "@/components/ErrorMessage";
 import RemoveButton from "@/components/base/RemoveButton";
 import { useAppLayoutContext, useUserSelectionContext } from "@/context";
+import type { UserSelectionContextValue } from "@/context/UserSelectionContext";
 import { useDeleteUserMutation, useUserQuery } from "@/hooks/react-query";
 
 const initialValues = {
@@ -21,17 +22,16 @@ const createValidationSchema = (username: string) => {
   });
 };
 
-const DeleteUser = () => {
+const DeleteUserContent = ({
+  selectedUserId,
+  setSelectedUserId,
+}: {
+  selectedUserId: NonNullable<UserSelectionContextValue["selected"]>;
+  setSelectedUserId: NonNullable<UserSelectionContextValue["setSelected"]>;
+}) => {
   const id = useId();
   const { setSidebar } = useAppLayoutContext();
-  const { selectedUserId, setSelectedUserId } = useUserSelectionContext();
-  const {
-    data: user,
-    error,
-    isError,
-    isLoading,
-    isSuccess: getUserSuccess,
-  } = useUserQuery({ id: selectedUserId, enabled: true });
+  const { data: user, error, isError, isLoading, isSuccess: getUserSuccess } = useUserQuery({ id: selectedUserId });
 
   const deleteUserMutation = useDeleteUserMutation();
   const headingId = `heading-${id}`;
@@ -115,6 +115,14 @@ const DeleteUser = () => {
       )}
     </>
   );
+};
+
+const DeleteUser = () => {
+  const { selected: selectedUserId, setSelected: setSelectedUserId } = useUserSelectionContext();
+
+  return selectedUserId ? (
+    <DeleteUserContent selectedUserId={selectedUserId} setSelectedUserId={setSelectedUserId} />
+  ) : null;
 };
 
 export default DeleteUser;

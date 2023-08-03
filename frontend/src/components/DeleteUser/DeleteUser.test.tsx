@@ -28,9 +28,9 @@ afterAll(() => {
 
 describe("DeleteUser", () => {
   const renderDeleteForm = () => {
-    const setSelectedUserId = vi.fn();
+    const setSelected = vi.fn();
     return render(
-      <UserSelectionContext.Provider value={{ selectedUserId: mockUser.id, setSelectedUserId }}>
+      <UserSelectionContext.Provider value={{ selected: mockUser.id, setSelected }}>
         <DeleteUser />
       </UserSelectionContext.Provider>,
     );

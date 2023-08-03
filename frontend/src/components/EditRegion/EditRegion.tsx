@@ -4,6 +4,7 @@ import * as Yup from "yup";
 
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import { useAppLayoutContext } from "@/context";
+import type { RegionDetailsContextValue } from "@/context/RegionDetailsContext";
 import { useRegionDetailsContext } from "@/context/RegionDetailsContext";
 import { useSiteQuery } from "@/hooks/react-query";
 
@@ -31,7 +32,13 @@ const EditRegionSchema = Yup.object().shape({
 
 type RegionFormValues = typeof baseInitialValues;
 
-const EditRegion = () => {
+const EditRegionContent = ({
+  regionId,
+  setRegionId,
+}: {
+  regionId: NonNullable<RegionDetailsContextValue["selected"]>;
+  setRegionId: NonNullable<RegionDetailsContextValue["setSelected"]>;
+}) => {
   const headingId = useId();
   const streetId = useId();
   const cityId = useId();
@@ -39,7 +46,6 @@ const EditRegion = () => {
   const coordinatesId = useId();
 
   const [initialValues, setInitialValues] = useState<RegionFormValues>(baseInitialValues);
-  const { regionId, setRegionId } = useRegionDetailsContext();
   const { setSidebar } = useAppLayoutContext();
   const { data: region, error, isLoading } = useSiteQuery(regionId);
 
@@ -131,6 +137,12 @@ const EditRegion = () => {
       )}
     </div>
   );
+};
+
+const EditRegion = () => {
+  const { selected: regionId, setSelected: setRegionId } = useRegionDetailsContext();
+
+  return regionId ? <EditRegionContent regionId={regionId} setRegionId={setRegionId} /> : null;
 };
 
 export default EditRegion;

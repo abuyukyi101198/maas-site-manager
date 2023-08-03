@@ -60,7 +60,7 @@ const SitesTable = ({
     defaultValue: {},
   });
   const { rowSelection, setRowSelection } = useRowSelectionContext("sites");
-  const { setRegionId } = useRegionDetailsContext();
+  const { setSelected: setRegionId } = useRegionDetailsContext();
   const { setSidebar } = useAppLayoutContext();
 
   // clear selection on unmount

@@ -15,6 +15,7 @@ if (useMockData) {
   await worker.start({
     onUnhandledRequest(req) {
       if (req.url.href.includes(baseURL)) {
+        // eslint-disable-next-line no-console
         console.warn("Found an unhandled %s request to %s", req.method, req.url.href);
       }
     },

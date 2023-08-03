@@ -16,7 +16,7 @@ const mockServer = setupServer(rest.get(`${urls.sites}/:id`, createMockSiteResol
 
 const renderForm = (): RenderResult => {
   return renderWithMemoryRouter(
-    <RegionDetailsContext.Provider value={{ regionId: site.id, setRegionId: vi.fn() }}>
+    <RegionDetailsContext.Provider value={{ selected: site.id, setSelected: vi.fn() }}>
       <RegionDetails />
     </RegionDetailsContext.Provider>,
   );

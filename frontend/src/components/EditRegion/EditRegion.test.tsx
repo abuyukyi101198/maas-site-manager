@@ -14,7 +14,7 @@ const mockServer = setupServer(rest.get(`${urls.sites}/:id`, createMockSiteResol
 
 const renderForm = async (): Promise<RenderResult> => {
   const { ...rendered } = render(
-    <RegionDetailsContext.Provider value={{ regionId: region.id, setRegionId: vi.fn() }}>
+    <RegionDetailsContext.Provider value={{ selected: region.id, setSelected: vi.fn() }}>
       <EditRegion />
     </RegionDetailsContext.Provider>,
   );

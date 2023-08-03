@@ -13,9 +13,9 @@ const user = userFactory.build({ is_admin: true });
 const mockServer = setupServer(rest.get(`${urls.users}/:id`, createMockGetUserResolver([user])));
 
 const renderEditForm = (): RenderResult => {
-  const setSelectedUserId = vi.fn();
+  const setSelected = vi.fn();
   return render(
-    <UserSelectionContext.Provider value={{ selectedUserId: user.id, setSelectedUserId }}>
+    <UserSelectionContext.Provider value={{ selected: user.id, setSelected }}>
       <UserForm type="edit" />
     </UserSelectionContext.Provider>,
   );

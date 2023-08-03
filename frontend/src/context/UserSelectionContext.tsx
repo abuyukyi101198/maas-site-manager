@@ -1,25 +1,8 @@
-import { createContext, useContext, useState } from "react";
+import { getSelectedEntityContext, getSelectedEntityContextProvider, useSelectedEntityContext } from "./utils";
 
 import type { User } from "@/api/types";
 
-export type SelectedUserId = User["id"] | null | undefined;
-
-export const UserSelectionContext = createContext<{
-  selectedUserId: SelectedUserId;
-  setSelectedUserId: (selectedUserId: SelectedUserId) => void;
-}>({
-  selectedUserId: null,
-  setSelectedUserId: () => null,
-});
-
-export const UserSelectionContextProvider = ({ children }: { children: React.ReactNode }) => {
-  const [selectedUserId, setSelectedUserId] = useState<SelectedUserId>(null);
-
-  return (
-    <UserSelectionContext.Provider value={{ selectedUserId, setSelectedUserId }}>
-      {children}
-    </UserSelectionContext.Provider>
-  );
-};
-
-export const useUserSelectionContext = () => useContext(UserSelectionContext);
+export const UserSelectionContextProvider = getSelectedEntityContextProvider<User["id"]>("userSelection");
+export const UserSelectionContext = getSelectedEntityContext<User["id"]>("userSelection");
+export const useUserSelectionContext = () => useSelectedEntityContext<User["id"]>("userSelection");
+export type UserSelectionContextValue = ReturnType<typeof useUserSelectionContext>;

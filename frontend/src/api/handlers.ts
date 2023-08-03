@@ -1,8 +1,7 @@
 import api from "./api";
-import type { Token, User } from "./types";
+import type { Site, Token, User } from "./types";
 import urls from "./urls";
 
-import type { RegionDetailsId } from "@/context/RegionDetailsContext";
 import { customParamSerializer, customParamWithSearchTextSerializer } from "@/utils";
 
 export type PostLoginData = {
@@ -57,7 +56,7 @@ export const getSites = async (params: GetSitesQueryParams, queryText?: string) 
   }
 };
 
-export const getSite = async (id: RegionDetailsId) => {
+export const getSite = async (id: Site["id"]) => {
   try {
     const response = await api.get(`${urls.sites}/${id}`);
     return response.data;
@@ -106,7 +105,7 @@ export const getUsers = async (params: GetUsersQueryParams, searchText?: string)
   }
 };
 
-export const getUser = async (id: User["id"]) => {
+export const getUser = async (id?: User["id"]) => {
   try {
     const response = await api.get(`${urls.users}/${id}`);
     return response.data;
