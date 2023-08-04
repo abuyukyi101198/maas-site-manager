@@ -1,6 +1,7 @@
 import pytest
 
-from msm.db.models import User
+from msm.db import models
+from msm.user_api.handlers.users import User
 
 from ...fixtures.client import Client
 from ...fixtures.factory import Factory
@@ -10,16 +11,16 @@ from ...fixtures.factory import Factory
 class TestUsersGetHandler:
     async def test_get(
         self,
-        api_admin: User,
-        api_user: User,
+        api_admin: models.User,
+        api_user: models.User,
         admin_client: Client,
         factory: Factory,
     ) -> None:
         user_list = await admin_client.get("/users")
         assert user_list.status_code == 200
         users = [
-            api_admin.model_dump(),
-            api_user.model_dump(),
+            User.from_model(api_admin).model_dump(),
+            User.from_model(api_user).model_dump(),
         ]
         user_details = user_list.json()
         assert user_details["total"] == len(users)
@@ -131,7 +132,7 @@ class TestUsersGetHandler:
             "size": 1,
             "total": 2,
             "items": [
-                user.model_dump(),
+                User.from_model(user).model_dump(),
             ],
         }
 
@@ -146,7 +147,7 @@ class TestUsersGetHandler:
 
         response = await admin_client.get(f"/users/{user.id}")
         assert response.status_code == 200
-        assert response.json() == user.model_dump()
+        assert response.json() == User.from_model(user).model_dump()
 
 
 @pytest.mark.asyncio
@@ -295,8 +296,10 @@ class TestUsersMePasswordPostHandler:
 
 @pytest.mark.asyncio
 class TestUsersPatchHandler:
-    async def test_patch(self, api_user: User, admin_client: Client) -> None:
-        old_details = api_user.model_dump()
+    async def test_patch(
+        self, api_user: models.User, admin_client: Client
+    ) -> None:
+        old_details = User.from_model(api_user).model_dump()
         new_details = {"email": "newemail@example.com"}
         response = await admin_client.patch(
             f"/users/{api_user.id}", json=new_details
@@ -315,10 +318,12 @@ class TestUsersPatchHandler:
             f"/users/{user.id}", json=new_details
         )
         assert response.status_code == 200
-        assert response.json() == user.model_dump() | new_details
+        assert (
+            response.json() == User.from_model(user).model_dump() | new_details
+        )
 
     async def test_demote_self_admin(
-        self, api_admin: User, admin_client: Client
+        self, api_admin: models.User, admin_client: Client
     ) -> None:
         response = await admin_client.patch(
             f"/users/{api_admin.id}", json={"is_admin": False}
@@ -330,7 +335,7 @@ class TestUsersPatchHandler:
         )
 
     async def test_missing_fields(
-        self, api_admin: User, admin_client: Client
+        self, api_admin: models.User, admin_client: Client
     ) -> None:
         response = await admin_client.patch(f"/users/{api_admin.id}", json={})
         assert response.status_code == 422
@@ -368,7 +373,7 @@ class TestUsersPatchHandler:
 @pytest.mark.asyncio
 class TestUsersDeleteHandler:
     async def test_delete(
-        self, api_admin: User, admin_client: Client, factory: Factory
+        self, api_admin: models.User, admin_client: Client, factory: Factory
     ) -> None:
         user = await factory.make_User()
         response = await admin_client.delete(f"/users/{user.id}")
@@ -377,7 +382,7 @@ class TestUsersDeleteHandler:
         assert response.status_code == 404
 
     async def test_delete_self_fails(
-        self, api_admin: User, admin_client: Client, factory: Factory
+        self, api_admin: models.User, admin_client: Client, factory: Factory
     ) -> None:
         response = await admin_client.delete(f"/users/{api_admin.id}")
         assert response.status_code == 400
@@ -389,8 +394,10 @@ class TestUsersDeleteHandler:
 
 @pytest.mark.asyncio
 class TestUsersMePatchHandler:
-    async def test_patch(self, api_user: User, user_client: Client) -> None:
-        old_details = api_user.model_dump()
+    async def test_patch(
+        self, api_user: models.User, user_client: Client
+    ) -> None:
+        old_details = User.from_model(api_user).model_dump()
         new_details = {"email": "new-email@example.com"}
         response = await user_client.patch("/users/me", json=new_details)
 

@@ -56,7 +56,7 @@ async def user_client(
 ) -> AsyncIterator[Client]:
     """Authenticated client for the API user."""
     async with Client(app=api_app, base_url="http://test") as client:
-        client.authenticate(api_user.id)
+        client.authenticate(api_user.auth_id)
         yield client
 
 
@@ -66,5 +66,5 @@ async def admin_client(
 ) -> AsyncIterator[Client]:
     """Authenticated client for the API admin."""
     async with Client(app=api_app, base_url="http://test") as client:
-        client.authenticate(api_admin.id)
+        client.authenticate(api_admin.auth_id)
         yield client

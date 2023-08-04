@@ -54,6 +54,14 @@ User = Table(
     Column("full_name", Text),
     Column("password", Text),  # this is the hashed password
     Column("is_admin", Boolean),
+    Column(
+        "auth_id",
+        UUID(as_uuid=True),
+        nullable=False,
+        unique=True,
+        index=True,
+        default=uuid4,
+    ),
 )
 
 

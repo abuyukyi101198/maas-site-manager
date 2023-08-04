@@ -87,6 +87,14 @@ class UserService(Service):
                 return models.User(**user._asdict())
         return None
 
+    async def get_by_auth_id(self, auth_id: str) -> models.User | None:
+        """Gets a user by authentication ID."""
+        stmt = self._select_statement().where(User.c.auth_id == auth_id)
+        if result := await self.conn.execute(stmt):
+            if user := result.one_or_none():
+                return models.User(**user._asdict())
+        return None
+
     async def create(self, details: models.UserCreate) -> models.User:
         data = details.model_dump()
         if password := data.get("password"):
@@ -98,6 +106,7 @@ class UserService(Service):
                 User.c.username,
                 User.c.full_name,
                 User.c.is_admin,
+                User.c.auth_id,
             ),
             [data],
         )
@@ -162,6 +171,7 @@ class UserService(Service):
                 User.c.username,
                 User.c.full_name,
                 User.c.is_admin,
+                User.c.auth_id,
             )
         )
         result = await self.conn.execute(stmt)
@@ -190,6 +200,7 @@ class UserService(Service):
             User.c.username,
             User.c.full_name,
             User.c.is_admin,
+            User.c.auth_id,
         ]
         if include_password:
             fields.append(User.c.password)

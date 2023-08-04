@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from httpx import (
     AsyncClient,
     Response,
@@ -12,12 +14,12 @@ class Client(AsyncClient):
 
     _auth_token = ""
 
-    def authenticate(self, user_id: int | None) -> None:
+    def authenticate(self, auth_id: UUID | None) -> None:
         """Set or unset authentication token for a user ID."""
-        if user_id is None:
+        if auth_id is None:
             self._auth_token = ""
         else:
-            self._auth_token = create_token(str(user_id))
+            self._auth_token = create_token(str(auth_id))
 
     async def request(self, *args, **kwargs) -> Response:  # type: ignore
         """Generate a request, setting the auth token if set.

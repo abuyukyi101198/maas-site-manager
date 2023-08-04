@@ -11,15 +11,12 @@ from fastapi import (
 )
 from pydantic import (
     BaseModel,
+    EmailStr,
     Field,
     model_validator,
 )
 
-from ...db.models import (
-    User,
-    UserCreate,
-    UserUpdate,
-)
+from ...db import models
 from ...schema import (
     PaginatedResults,
     pagination_params,
@@ -53,6 +50,21 @@ user_sort_params = SortParamParser(
 )
 
 
+class User(BaseModel):
+    """A user."""
+
+    id: int
+    email: EmailStr
+    username: str
+    full_name: str
+    is_admin: bool
+
+    @classmethod
+    def from_model(cls, user: models.User) -> "User":
+        """Return an instance from a User model."""
+        return cls(**user.model_dump())
+
+
 class UsersGetResponse(PaginatedResults):
     """List of existing users."""
 
@@ -62,7 +74,7 @@ class UsersGetResponse(PaginatedResults):
 @router.get("/users")
 async def get(
     services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_admin: Annotated[User, Depends(authenticated_admin)],
+    authenticated_admin: Annotated[models.User, Depends(authenticated_admin)],
     pagination_params: PaginationParams = Depends(pagination_params),
     filter_params: UserFilterParams = Depends(user_filter_params),
     sort_params: list[SortParam] = Depends(user_sort_params),
@@ -80,17 +92,17 @@ async def get(
         total=total,
         page=pagination_params.page,
         size=pagination_params.size,
-        items=results,
+        items=[User.from_model(user) for user in results],
     )
 
 
 @router.get("/users/me")
 async def get_me(
     services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[User, Depends(authenticated_user)],
+    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
 ) -> User:
     """Render info about the authenticated user."""
-    return authenticated_user
+    return User.from_model(authenticated_user)
 
 
 class UsersPatchMeRequest(BaseModel):
@@ -104,7 +116,7 @@ class UsersPatchMeRequest(BaseModel):
 @router.patch("/users/me")
 async def patch_me(
     services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[User, Depends(authenticated_user)],
+    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
     patch_request: UsersPatchMeRequest,
 ) -> User:
     """Update the details for a user"""
@@ -126,9 +138,9 @@ async def patch_me(
         )
 
     user = await services.users.update(
-        authenticated_user.id, UserUpdate(**patch_request.model_dump())
+        authenticated_user.id, models.UserUpdate(**patch_request.model_dump())
     )
-    return user
+    return User.from_model(user)
 
 
 class UsersPasswordPatchRequest(BaseModel):
@@ -148,7 +160,7 @@ class UsersPasswordPatchRequest(BaseModel):
 @router.patch("/users/me/password")
 async def patch_me_password(
     services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[User, Depends(authenticated_user)],
+    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
     post_request: UsersPasswordPatchRequest,
 ) -> None:
     """Modify the users password."""
@@ -169,7 +181,7 @@ async def patch_me_password(
 @router.get("/users/{user_id}")
 async def get_id(
     services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_admin: Annotated[User, Depends(authenticated_admin)],
+    authenticated_admin: Annotated[models.User, Depends(authenticated_admin)],
     user_id: int,
 ) -> User:
     """
@@ -177,7 +189,7 @@ async def get_id(
     """
 
     if user := await services.users.get_by_id(user_id):
-        return user
+        return User.from_model(user)
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
         detail={"message": "User does not exist."},
@@ -206,7 +218,7 @@ class UsersPostRequest(BaseModel):
 @router.post("/users")
 async def post(
     services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_admin: Annotated[User, Depends(authenticated_admin)],
+    authenticated_admin: Annotated[models.User, Depends(authenticated_admin)],
     request: UsersPostRequest,
 ) -> User:
     """
@@ -219,7 +231,10 @@ async def post(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"message": "Email or Username already in use."},
         )
-    return await services.users.create(UserCreate(**request.model_dump()))
+    user = await services.users.create(
+        models.UserCreate(**request.model_dump())
+    )
+    return User.from_model(user)
 
 
 class UsersPatchRequest(BaseModel):
@@ -244,7 +259,7 @@ class UsersPatchRequest(BaseModel):
 @router.patch("/users/{user_id}")
 async def patch(
     services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_admin: Annotated[User, Depends(authenticated_admin)],
+    authenticated_admin: Annotated[models.User, Depends(authenticated_admin)],
     user_id: int,
     patch_request: UsersPatchRequest,
 ) -> User:
@@ -278,15 +293,16 @@ async def patch(
             detail={"message": "Email or Username already in use."},
         )
 
-    return await services.users.update(
-        user_id, UserUpdate(**patch_request.model_dump())
+    user = await services.users.update(
+        user_id, models.UserUpdate(**patch_request.model_dump())
     )
+    return User.from_model(user)
 
 
 @router.delete("/users/{user_id}", status_code=204)
 async def delete(
     services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_admin: Annotated[User, Depends(authenticated_admin)],
+    authenticated_admin: Annotated[models.User, Depends(authenticated_admin)],
     user_id: int,
 ) -> None:
     """

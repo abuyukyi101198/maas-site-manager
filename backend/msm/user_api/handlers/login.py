@@ -49,5 +49,5 @@ async def post(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token = create_token(str(user.id), key=config.token_secret_key)
+    access_token = create_token(str(user.auth_id), key=config.token_secret_key)
     return LoginPostResponse(access_token=access_token, token_type="bearer")
