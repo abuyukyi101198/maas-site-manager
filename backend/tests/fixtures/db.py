@@ -8,6 +8,7 @@ from typing import (
 import pytest
 from pytest_postgresql.executor import PostgreSQLExecutor
 from pytest_postgresql.janitor import DatabaseJanitor
+from sqlalchemy import URL
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from msm.db import Database
@@ -26,17 +27,13 @@ class TestDSN:
     port: int
 
     @property
-    def sync_dsn(self) -> str:
-        return f"postgresql+psycopg://{self._base_dsn()}"
-
-    @property
-    def async_dsn(self) -> str:
-        return f"postgresql+asyncpg://{self._base_dsn()}"
-
-    def _base_dsn(self) -> str:
-        return (
-            f"/{self.db}?"
-            f"user={self.user}&host={self.socketdir}&port={self.port}"
+    def dsn(self) -> URL:
+        return URL.create(
+            "postgresql+asyncpg",
+            host=self.socketdir,
+            port=self.port,
+            database=self.db,
+            username=self.user,
         )
 
 
@@ -60,7 +57,7 @@ async def db(
 ) -> AsyncIterator[Database]:
     """Set up the database schema."""
     echo = request.config.getoption("sqlalchemy_debug")
-    db = Database(db_setup.async_dsn, echo=echo)
+    db = Database(db_setup.dsn, echo=echo)
     await db.ensure_schema()
     yield db
     await db.drop_schema()

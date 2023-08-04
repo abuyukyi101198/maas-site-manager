@@ -10,6 +10,7 @@ from prometheus_client import (
     REGISTRY,
 )
 import uvicorn
+from uvicorn.server import logger
 
 import msm
 
@@ -51,7 +52,8 @@ def create_app(
 ) -> FastAPI:
     """Create the FastAPI WSGI application."""
     settings = Settings()
-    db = database or Database(str(settings.db_dsn))
+    db = database or Database(settings.db_dsn)
+    logger.info(f"Database connection URL is {settings.db_dsn}")
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:

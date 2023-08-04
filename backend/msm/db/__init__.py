@@ -3,13 +3,14 @@ from typing import (
     Callable,
 )
 
+from sqlalchemy import URL
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from .tables import METADATA
 
 
 class Database:
-    def __init__(self, dsn: str, echo: bool = False):
+    def __init__(self, dsn: URL, echo: bool = False):
         self.dsn = dsn
         self.engine = create_async_engine(dsn, echo=echo)
 
