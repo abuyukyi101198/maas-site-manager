@@ -66,7 +66,7 @@ export const getSiteMarker = (appearance: keyof typeof markerIcon) => {
   return markerIcon[appearance];
 };
 
-const SiteMarker = ({ name, id, position }: SiteMarkerType) => {
+const SiteMarker = ({ id, position }: SiteMarkerType) => {
   const eventHandlers = useMemo(
     () => ({
       mouseover() {},
@@ -78,7 +78,7 @@ const SiteMarker = ({ name, id, position }: SiteMarkerType) => {
   );
 
   return (
-    <Marker alt={name} eventHandlers={eventHandlers} icon={getSiteMarker("base")} keyboard position={position}>
+    <Marker eventHandlers={eventHandlers} icon={getSiteMarker("base")} keyboard position={position}>
       <Popup minWidth={300}>
         <RegionSummary id={id} />
       </Popup>

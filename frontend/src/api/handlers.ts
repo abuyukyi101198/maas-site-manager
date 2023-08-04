@@ -56,6 +56,19 @@ export const getSites = async (params: GetSitesQueryParams, queryText?: string) 
   }
 };
 
+export const getSitesCoordinates = async (queryText?: string) => {
+  try {
+    const response = await api.get(urls.sitesCoordinates, {
+      paramsSerializer: {
+        serialize: (params) => customParamSerializer(params, queryText),
+      },
+    });
+    return { items: response.data };
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const getSite = async (id: Site["id"]) => {
   try {
     const response = await api.get(`${urls.sites}/${id}`);

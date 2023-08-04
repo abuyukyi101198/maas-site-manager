@@ -1,12 +1,12 @@
 import urls from "@/api/urls";
 import RegionsMap from "@/components/RegionsMap";
 import { siteFactory } from "@/mocks/factories";
-import { createMockSitesResolver } from "@/mocks/resolvers";
+import { createMockSitesCoordinatesResolver } from "@/mocks/resolvers";
 import { createMockGetServer } from "@/mocks/server";
 import { renderWithMemoryRouter, screen } from "@/utils/test-utils";
 
 const sites = siteFactory.buildList(2);
-const mockServer = createMockGetServer(urls.sites, createMockSitesResolver(sites));
+const mockServer = createMockGetServer(urls.sitesCoordinates, createMockSitesCoordinatesResolver(sites));
 
 beforeAll(() => {
   mockServer.listen();

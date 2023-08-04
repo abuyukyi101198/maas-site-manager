@@ -26,6 +26,7 @@ import {
   getUser,
   deleteUser,
   getSite,
+  getSitesCoordinates,
 } from "@/api/handlers";
 import type {
   SitesQueryResult,
@@ -36,6 +37,7 @@ import type {
   Site,
   UsersQueryResult,
   User,
+  SitesCoordinatesQueryResult,
 } from "@/api/types";
 
 export type UseSitesQueryResult = ReturnType<typeof useSitesQuery>;
@@ -49,6 +51,13 @@ export const useSitesQuery = ({ page, size, sort_by }: GetSitesQueryParams, quer
     refetchInterval,
   });
 
+export const useSitesCoordinatesQuery = (queryText?: string) =>
+  useQuery<SitesCoordinatesQueryResult>({
+    queryKey: ["sitesCoordinates", queryText],
+    queryFn: () => getSitesCoordinates(queryText),
+    keepPreviousData: true,
+    refetchInterval,
+  });
 export const useSiteQuery = (id: Site["id"]) =>
   useQuery<Site>({ queryKey: ["sites", id], queryFn: () => getSite(id), keepPreviousData: true });
 

@@ -36,6 +36,7 @@ export type PaginatedQueryResult<D extends unknown> = {
 };
 
 export type SitesQueryResult = PaginatedQueryResult<Site>;
+export type SitesCoordinatesQueryResult = { items: Pick<Site, "id" | "latitude" | "longitude">[] };
 
 export type Token = {
   id: number;

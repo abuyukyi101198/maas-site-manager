@@ -68,6 +68,14 @@ export const createMockSitesResolver =
     return res(ctx.json(response));
   };
 
+export const createMockSitesCoordinatesResolver =
+  (sites = sitesList): SitesResponseResolver =>
+  (req, res, ctx) => {
+    const response = sites.map(({ id, latitude, longitude }) => ({ id, latitude, longitude }));
+
+    return res(ctx.json(response));
+  };
+
 type SiteResponseResolver = ResponseResolver<RestRequest, typeof restContext>;
 export const createMockSiteResolver =
   (sites = sitesList): SiteResponseResolver =>
@@ -227,6 +235,7 @@ export const createMockDeleteUserResolver = (): DeleteUserResponseResolver => as
 
 export const postLogin = rest.post(urls.login, createMockLoginResolver());
 export const getSites = rest.get(urls.sites, createMockSitesResolver());
+export const getSitesCoordinates = rest.get(urls.sitesCoordinates, createMockSitesCoordinatesResolver());
 export const getSite = rest.get(`${urls.sites}/:id`, createMockSiteResolver());
 export const postTokens = rest.post(urls.tokens, createMockTokensResolver());
 export const getTokens = rest.get(urls.tokens, createMockGetTokensResolver());
@@ -240,9 +249,12 @@ export const updateUser = rest.patch(`${urls.users}/:id`, createMockUpdateUserRe
 export const addUser = rest.post(urls.users, createMockAddUserResolver());
 export const deleteUser = rest.delete(`${urls.users}/:id`, createMockDeleteUserResolver());
 export const allResolvers = [
+  postLogin,
   getSites,
+  getSitesCoordinates,
   getSite,
   postTokens,
+  deleteTokens,
   getTokens,
   getEnrollmentRequests,
   postEnrollmentRequests,

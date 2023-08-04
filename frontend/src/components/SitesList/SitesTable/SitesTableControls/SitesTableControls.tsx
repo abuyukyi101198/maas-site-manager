@@ -11,13 +11,13 @@ import { useRowSelectionContext } from "@/context/RowSelectionContext";
 import type { UseSitesQueryResult } from "@/hooks/react-query";
 
 const SitesTableControls = ({
-  data,
+  totalSites,
   isLoading,
   allColumns,
   setSearchText,
-}: { allColumns?: SitesColumn[]; setSearchText: (text: string) => void } & Pick<
+}: { allColumns?: SitesColumn[]; setSearchText: (text: string) => void; totalSites: number | null } & Pick<
   UseSitesQueryResult,
-  "data" | "isLoading"
+  "isLoading"
 >) => {
   const handleSearchInput = (inputValue: string) => {
     setSearchText(inputValue);
@@ -31,7 +31,7 @@ const SitesTableControls = ({
       <div className="u-flex--large">
         <div>
           <h2 className="p-heading--4 u-no-padding--top">
-            <SitesCount data={data} isLoading={isLoading} />
+            <SitesCount isLoading={isLoading} totalSites={totalSites} />
           </h2>
         </div>
         <div className="u-flex--grow">

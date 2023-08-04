@@ -79,8 +79,7 @@ export const getTimezoneUTCString = (timezone: string, date?: Date | number) => 
   }
 };
 
-export const formatSiteMarker = (site: Site): SiteMarkerType => ({
-  name: site.name,
+export const formatSiteMarker = (site: Pick<Site, "id" | "latitude" | "longitude">): SiteMarkerType => ({
   id: site.id,
   position: [Number(site.latitude), Number(site.longitude)],
 });

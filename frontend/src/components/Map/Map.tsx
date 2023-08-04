@@ -1,10 +1,26 @@
+import type { LeafletEventHandlerFn } from "leaflet";
 import type { MapContainerProps } from "react-leaflet";
-import { MapContainer, TileLayer, ZoomControl } from "react-leaflet";
+import { MapContainer, TileLayer, ZoomControl, useMapEvents } from "react-leaflet";
 
 import SiteMarker from "./SiteMarker";
 import { type SiteMarkerType } from "./types";
 
-const Map = ({ id = "map-container", markers }: MapContainerProps & { markers: SiteMarkerType[] | null }) => {
+const MapEvents = ({ onEvent }: { onEvent: LeafletEventHandlerFn }) => {
+  useMapEvents({
+    zoomend: onEvent,
+    moveend: onEvent,
+  });
+  return null;
+};
+
+const Map = ({
+  id = "map-container",
+  markers,
+  onBoundsChange,
+}: MapContainerProps & {
+  markers: SiteMarkerType[] | null;
+  onBoundsChange?: (bounds: string) => void;
+}) => {
   return (
     <MapContainer
       boundsOptions={{
@@ -17,13 +33,18 @@ const Map = ({ id = "map-container", markers }: MapContainerProps & { markers: S
       zoom={3}
       zoomControl={false}
     >
+      <MapEvents
+        onEvent={(e) => {
+          onBoundsChange?.(e.target.getBounds().toBBoxString());
+        }}
+      />
       <ZoomControl position="bottomright" />
       <TileLayer
         attribution='<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
         data-testid="tile-layer"
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      {markers?.map(({ position, id, name }) => <SiteMarker id={id} key={id} name={name} position={position} />)}
+      {markers?.map(({ position, id }) => <SiteMarker id={id} key={id} position={position} />)}
     </MapContainer>
   );
 };

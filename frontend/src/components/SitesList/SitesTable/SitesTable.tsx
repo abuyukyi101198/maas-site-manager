@@ -299,9 +299,9 @@ const SitesTable = ({
     <>
       <SitesTableControls
         allColumns={table.getAllLeafColumns()}
-        data={data}
         isLoading={isLoading}
         setSearchText={setSearchText}
+        totalSites={data?.total ?? null}
       />
       <PaginationBar {...paginationProps} />
       <DynamicTable aria-label="sites" className="sites-table">
