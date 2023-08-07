@@ -1,11 +1,3 @@
-from importlib.metadata import distribution
+"""MAAS Site Manager."""
 
-__all__ = [
-    "PACKAGE",
-    "__version__",
-]
-
-
-PACKAGE = distribution("msm")
-
-__version__ = PACKAGE.version
+__version__ = "0.0.1"

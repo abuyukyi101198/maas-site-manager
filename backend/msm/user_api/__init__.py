@@ -18,7 +18,7 @@ from uvicorn.server import logger
 
 import msm
 
-from .. import PACKAGE
+from .. import __version__
 from ..db import Database
 from ..middleware import (
     DatabaseMetricsMiddleware,
@@ -76,8 +76,8 @@ def create_app(
 
     app = FastAPI(
         title="MAAS Site Manager",
-        name=PACKAGE.name,
-        version=PACKAGE.version,
+        name="msm",
+        version=__version__,
         lifespan=lifespan,
     )
     if settings.dev_mode:

@@ -6,7 +6,6 @@ requires = [
 
 [project]
 name = "msm"
-version = "0.0.1"
 description = "MAAS Site Manager"
 readme = "README.rst"
 maintainers = [
@@ -20,6 +19,9 @@ classifiers = [
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+]
+dynamic = [
+  "version",
 ]
 dependencies = [
   "fastapi",
@@ -47,6 +49,9 @@ testing = [
 ]
 [project.scripts]
 msm-user-api = "msm.user_api:run"
+
+[tool.setuptools.dynamic]
+version = {attr = "msm.__version__"}
 
 [tool.setuptools.packages.find]
 include = ["msm*"]
