@@ -52,6 +52,8 @@ site_sort_parameters = SortParamParser(
 
 
 class SitesGetResponse(PaginatedResults):
+    """Response with paginated accepted sites."""
+
     items: list[Site]
 
 
@@ -83,19 +85,18 @@ async def get_coordinates(
     services: Annotated[ServiceCollection, Depends(services)],
     authenticated_user: Annotated[User, Depends(authenticated_user)],
 ) -> Iterable[SiteCoordinates]:
+    """Return coordinates for all accepted sites."""
     return await services.sites.get_coordinates()
 
 
-@v1_router.get("/sites/{site_id}")
+@v1_router.get("/sites/{id}")
 async def get_id(
     services: Annotated[ServiceCollection, Depends(services)],
     authenticated_user: Annotated[User, Depends(authenticated_user)],
-    site_id: int,
+    id: int,
 ) -> Site:
-    """
-    Select a specific site by id
-    """
-    if site := await services.sites.get_by_id(site_id):
+    """Return a specific site."""
+    if site := await services.sites.get_by_id(id):
         return site
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,

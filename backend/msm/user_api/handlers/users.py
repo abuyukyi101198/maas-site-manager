@@ -178,17 +178,15 @@ async def patch_me_password(
     )
 
 
-@v1_router.get("/users/{user_id}")
+@v1_router.get("/users/{id}")
 async def get_id(
     services: Annotated[ServiceCollection, Depends(services)],
     authenticated_admin: Annotated[models.User, Depends(authenticated_admin)],
-    user_id: int,
+    id: int,
 ) -> User:
-    """
-    Select a specific user by id
-    """
+    """Select a specific user"""
 
-    if user := await services.users.get_by_id(user_id):
+    if user := await services.users.get_by_id(id):
         return User.from_model(user)
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
@@ -197,9 +195,7 @@ async def get_id(
 
 
 class UsersPostRequest(BaseModel):
-    """
-    Request to create a User.
-    """
+    """Request to create a User."""
 
     full_name: str
     username: str
@@ -221,9 +217,7 @@ async def post(
     authenticated_admin: Annotated[models.User, Depends(authenticated_admin)],
     request: UsersPostRequest,
 ) -> User:
-    """
-    Create a user.
-    """
+    """Create a user."""
     if await services.users.exists(
         email=request.email, username=request.username
     ):
@@ -238,7 +232,7 @@ async def post(
 
 
 class UsersPatchRequest(BaseModel):
-    """User Edit Details request schema."""
+    """Request to edit details for a User."""
 
     full_name: str | None = None
     username: str | None = None
@@ -256,16 +250,16 @@ class UsersPatchRequest(BaseModel):
         return values
 
 
-@v1_router.patch("/users/{user_id}")
+@v1_router.patch("/users/{id}")
 async def patch(
     services: Annotated[ServiceCollection, Depends(services)],
     authenticated_admin: Annotated[models.User, Depends(authenticated_admin)],
-    user_id: int,
+    id: int,
     patch_request: UsersPatchRequest,
 ) -> User:
-    """Admin Update the details for a user"""
+    """Admin action to update the details for a user."""
 
-    if user_id == authenticated_admin.id and patch_request.is_admin is False:
+    if id == authenticated_admin.id and patch_request.is_admin is False:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"message": "Admin users cannot demote themselves."},
@@ -277,7 +271,7 @@ async def patch(
             detail={"message": "Request body empty."},
         )
 
-    if not await services.users.id_exists(user_id):
+    if not await services.users.id_exists(id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"message": "User does not exist."},
@@ -286,7 +280,7 @@ async def patch(
     if await services.users.exists(
         email=patch_request.email,
         username=patch_request.username,
-        exclude_id=user_id,
+        exclude_id=id,
     ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -294,25 +288,22 @@ async def patch(
         )
 
     user = await services.users.update(
-        user_id, models.UserUpdate(**patch_request.model_dump())
+        id, models.UserUpdate(**patch_request.model_dump())
     )
     return User.from_model(user)
 
 
-@v1_router.delete("/users/{user_id}", status_code=204)
+@v1_router.delete("/users/{id}", status_code=204)
 async def delete(
     services: Annotated[ServiceCollection, Depends(services)],
     authenticated_admin: Annotated[models.User, Depends(authenticated_admin)],
-    user_id: int,
+    id: int,
 ) -> None:
-    """
-    Delete a user from the database.
-    Don't allow a user to delete themselves.
-    """
-    if authenticated_admin.id == user_id:
+    """Delete a user from the database."""
+    if authenticated_admin.id == id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"message": "Cannot delete the current user."},
         )
-    await services.users.delete(user_id)
+    await services.users.delete(id)
     return None

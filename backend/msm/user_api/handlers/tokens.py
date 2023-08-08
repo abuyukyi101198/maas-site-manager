@@ -40,7 +40,7 @@ async def get(
     authenticated_user: Annotated[User, Depends(authenticated_user)],
     pagination_params: PaginationParams = Depends(pagination_params),
 ) -> TokensGetResponse:
-    """Return all tokens"""
+    """Return all tokens."""
     total, results = await services.tokens.get(
         pagination_params.offset, pagination_params.size
     )
@@ -53,10 +53,7 @@ async def get(
 
 
 class TokensPostRequest(BaseModel):
-    """
-    Request to create one or more tokens, with a certain validity,
-    expressed in seconds.
-    """
+    """Request to create one or more tokens, with a certain validity."""
 
     count: int = 1
     duration: timedelta
@@ -75,8 +72,8 @@ async def post(
     authenticated_user: Annotated[User, Depends(authenticated_user)],
     create_request: TokensPostRequest,
 ) -> TokensPostResponse:
-    """
-    Create one or more tokens.
+    """Create one or more tokens.
+
     Token duration (TTL) is expressed as an ISO-8601 duration string.
     """
     expired, tokens = await services.tokens.create(
@@ -91,5 +88,6 @@ async def get_export(
     services: Annotated[ServiceCollection, Depends(services)],
     authenticated_user: Annotated[User, Depends(authenticated_user)],
 ) -> CSVResponse:
+    """Return the list of active tokens in CSV format."""
     tokens = await services.tokens.get_active()
     return CSVResponse(content=tokens)

@@ -13,7 +13,7 @@ AUTHENTICATED_ROUTES = [
     ("POST", "/api/v1/requests"),
     ("GET", "/api/v1/sites"),
     ("GET", "/api/v1/sites/coordinates"),
-    ("GET", "/api/v1/sites/{site_id}"),
+    ("GET", "/api/v1/sites/{id}"),
     ("GET", "/api/v1/tokens"),
     ("POST", "/api/v1/tokens"),
     ("GET", "/api/v1/tokens/export"),
@@ -22,9 +22,9 @@ AUTHENTICATED_ROUTES = [
     ("GET", "/api/v1/users/me"),
     ("PATCH", "/api/v1/users/me"),
     ("PATCH", "/api/v1/users/me/password"),
-    ("GET", "/api/v1/users/{user_id}"),
-    ("PATCH", "/api/v1/users/{user_id}"),
-    ("DELETE", "/api/v1/users/{user_id}"),
+    ("GET", "/api/v1/users/{id}"),
+    ("PATCH", "/api/v1/users/{id}"),
+    ("DELETE", "/api/v1/users/{id}"),
 ]
 
 UNAUTHENTICATED_ROUTES = [
