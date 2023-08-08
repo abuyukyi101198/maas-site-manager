@@ -18,17 +18,27 @@ endef
 FE_TEST_TIMEOUT = 15000
 FE_TEST_RETRY = 3
 
+# Macros
+
+define apt_install
+sudo -E DEBIAN_FRONTEND=noninteractive apt -y install
+endef
+
+define run_tox_env
+env -C backend tox run -e
+endef
+
 # Dependencies
 
 install-dependencies: install-backend-dependencies install-frontend-dependencies
 .PHONY: install-dependencies
 
 install-backend-dependencies:
-	sudo -E DEBIAN_FRONTEND=noninteractive apt -y install $(BACKEND_PACKAGES)
+	$(apt_install) $(BACKEND_PACKAGES)
 .PHONY: install-backend-dependencies
 
 install-frontend-dependencies:
-	sudo -E DEBIAN_FRONTEND=noninteractive apt -y install $(FRONTEND_PACKAGES)
+	$(apt_install) $(FRONTEND_PACKAGES)
 .PHONY: install-frontend-dependencies
 
 
@@ -60,15 +70,15 @@ ci-backend-build:  # nothing to do since everything is run in tox envs
 .PHONY: ci-backend-build
 
 ci-backend-lint:
-	env -C backend tox -e lint,check
+	$(run_tox_env) lint,check
 .PHONY: ci-backend-lint
 
 ci-backend-test:
-	env -C backend tox -e test -- --junit-xml=../junit-backend.xml
+	$(run_tox_env) test -- --junit-xml=../junit-backend.xml
 .PHONY: ci-backend-test
 
 ci-backend-format:
-	env -C backend tox -e format
+	$(run_tox_env) format
 .PHONY: ci-backend-format
 
 
