@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from logging import Logger
+import os
 from pathlib import Path
 from typing import (
     Any,
@@ -26,12 +27,17 @@ from ..middleware import (
 )
 from ..service import ConfigService
 from ..settings import Settings
+from ..snap import environ_from_snap
 from ._prometheus import instrument_prometheus
 from .handlers import api_router
 
 
 def run() -> None:
     """Run the API application."""
+
+    # no-op if not running in a snap
+    os.environ.update(environ_from_snap())
+
     settings = Settings()
     config: dict[str, Any]
     if settings.dev_mode:

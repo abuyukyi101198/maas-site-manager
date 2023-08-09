@@ -1,0 +1,71 @@
+name: maas-site-manager
+summary: MAAS site manager
+description: |
+  MAAS site manager
+grade: stable
+confinement: strict
+base: core22
+adopt-info: snap-metadata
+
+environment:
+  LD_PRELOAD: $SNAP/usr/lib/snap-preload.so
+  MSM_USER_API_SOCKET: $SNAP_DATA/user-api.sock
+
+apps:
+  user-api:
+    daemon: simple
+    command: bin/msm-user-api
+    install-mode: disable
+    plugs:
+      - network
+      - network-bind
+
+  nginx:
+    daemon: simple
+    command: usr/sbin/nginx -c $SNAP/etc/nginx/msm.conf
+    install-mode: disable
+    plugs:
+      - network
+      - network-bind
+
+parts:
+  backend:
+    plugin: python
+    source: backend
+    python-packages:
+      - .
+    prime:
+      - -bin/activate*
+      - -bin/Activate*
+      - -include
+    override-build: |
+      craftctl default
+      snap-helpers write-hooks
+
+  nginx:
+    plugin: nil
+    stage-packages:
+      - nginx-core
+    prime:
+      - etc/nginx
+      - -etc/nginx/modules-*
+      - -etc/nginx/nginx.conf
+      - -etc/nginx/sites-*
+      - usr/sbin/nginx
+
+  snap-preload:
+    plugin: make
+    source: https://github.com/maas/snap-preload
+    source-type: git
+
+  local:
+    plugin: dump
+    source: snap/local/tree
+
+  snap-metadata:
+    plugin: nil
+    source: .
+    after:
+      - backend
+    override-build: |
+      craftctl set version="$(snap/local/package-version)"
