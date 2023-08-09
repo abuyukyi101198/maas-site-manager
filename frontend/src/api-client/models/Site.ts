@@ -1,0 +1,29 @@
+/* generated using openapi-typescript-codegen -- do no edit */
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { ConnectionStatus } from './ConnectionStatus';
+import type { SiteData } from './SiteData';
+import type { TimeZone } from './TimeZone';
+
+/**
+ * A MAAS installation.
+ */
+export type Site = {
+    id: number;
+    name: string;
+    name_unique: boolean;
+    city: (string | null);
+    country: (string | null);
+    latitude: (string | null);
+    longitude: (string | null);
+    note: (string | null);
+    region: (string | null);
+    street: (string | null);
+    timezone: (TimeZone | null);
+    url: string;
+    connection_status: ConnectionStatus;
+    stats: (SiteData | null);
+};
+
