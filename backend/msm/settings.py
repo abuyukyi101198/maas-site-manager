@@ -24,13 +24,16 @@ class Settings(BaseSettings):
     )
     dev_mode: bool = Field(default=False, validation_alias="MSM_DEV_MODE")
     db_host: str = Field(default="localhost", validation_alias="MSM_DB_HOST")
-    db_port: int | None = Field(default=5432, validation_alias="MSM_DB_PORT")
+    db_port: int = Field(default=5432, validation_alias="MSM_DB_PORT")
     db_name: str = Field(default="msm", validation_alias="MSM_DB_NAME")
     db_user: str | None = Field(default=None, validation_alias="MSM_DB_USER")
     db_password: SecretStr | None = Field(
         default=None, validation_alias="MSM_DB_PASSWORD"
     )
-    user_api_socket: str | None = Field(
+    user_api_port: int = Field(
+        default=8000, validation_alias="MSM_USER_API_PORT"
+    )
+    user_api_socket: str = Field(
         default="user_api.socket", validation_alias="MSM_USER_API_SOCKET"
     )
 

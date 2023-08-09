@@ -22,7 +22,7 @@ apps:
 
   nginx:
     daemon: simple
-    command: usr/sbin/nginx -c $SNAP/etc/nginx/msm.conf
+    command: usr/sbin/nginx -c $SNAP_DATA/nginx.conf
     install-mode: disable
     plugs:
       - network
@@ -57,10 +57,6 @@ parts:
     plugin: make
     source: https://github.com/maas/snap-preload
     source-type: git
-
-  local:
-    plugin: dump
-    source: snap/local/tree
 
   snap-metadata:
     plugin: nil

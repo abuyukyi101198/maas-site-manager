@@ -43,7 +43,7 @@ def run() -> None:
     if settings.dev_mode:
         config = {
             "host": "0.0.0.0",
-            "port": 8000,
+            "port": settings.user_api_port,
             "reload": True,
             "reload_dirs": [str(Path(msm.__file__).parent)],
         }

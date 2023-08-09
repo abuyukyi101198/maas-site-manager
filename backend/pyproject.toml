@@ -25,6 +25,7 @@ dynamic = [
 ]
 dependencies = [
   "fastapi",
+  "Jinja2",
   "passlib[bcrypt]",
   "prometheus-fastapi-instrumentator",
   "pydantic[email]",
@@ -52,6 +53,9 @@ testing = [
 msm-user-api = "msm.user_api:run"
 [project.entry-points."snaphelpers.hooks"]
 configure = "msm.snap:configure_hook"
+
+[tool.setuptools.package-data]
+msm = ["snap/templates/*"]
 
 [tool.setuptools.dynamic]
 version = {attr = "msm.__version__"}
