@@ -154,7 +154,7 @@ const SitesTable = ({
       {
         id: "address",
         enableSorting: false,
-        accessorFn: createAccessor(["country", "city", "zip", "street"]),
+        accessorFn: createAccessor(["country", "city", "street"]),
         header: ({ header }) => (
           <>
             <div>
@@ -164,12 +164,12 @@ const SitesTable = ({
           </>
         ),
         cell: ({ getValue }) => {
-          const { country, city, zip, street } = getValue();
+          const { country, city, street } = getValue();
           return (
             <>
               <div>{country ? getCountryName(country) : ""}</div>
               <div className="u-text--muted">
-                {street}, {city}, {zip}
+                {street}, {city}
               </div>
             </>
           );
@@ -275,7 +275,7 @@ const SitesTable = ({
       sorting,
     },
     onSortingChange: setSorting,
-    getRowId: (row) => row.id,
+    getRowId: (row) => `${row.id}`,
     manualPagination: true,
     pageCount,
     onColumnVisibilityChange: setColumnVisibility,

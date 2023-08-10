@@ -16,7 +16,7 @@ import { useRegionDetailsContext } from "@/context/RegionDetailsContext";
 import { useSiteQuery } from "@/hooks/react-query";
 
 const RegionSummary = ({ id }: { id: Site["id"] }) => {
-  const { data: site, error, isLoading } = useSiteQuery(id);
+  const { data: site, error, isLoading } = useSiteQuery({ id });
   const { setSidebar } = useAppLayoutContext();
   const { setSelected: setRegionId } = useRegionDetailsContext();
   const stats = site?.stats;

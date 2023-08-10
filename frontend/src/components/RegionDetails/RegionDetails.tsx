@@ -18,7 +18,7 @@ import { useSiteQuery } from "@/hooks/react-query";
 import { getCountryName } from "@/utils";
 
 const RegionDetailsContent = ({ id }: { id: NonNullable<RegionDetailsContextValue["selected"]> }) => {
-  const { data: site, error, isLoading } = useSiteQuery(id);
+  const { data: site, error, isLoading } = useSiteQuery({ id });
   const { setSidebar } = useAppLayoutContext();
   const { setRowSelection } = useRowSelectionContext("sites");
   const stats = site?.stats;
@@ -63,7 +63,7 @@ const RegionDetailsContent = ({ id }: { id: NonNullable<RegionDetailsContextValu
               </tr>
               <tr>
                 <td className="u-text--muted region-details__table-row-label">Country</td>
-                <td className="region-details__table-item">{getCountryName(site.country)}</td>
+                <td className="region-details__table-item">{site.country ? getCountryName(site.country) : null}</td>
               </tr>
               <tr>
                 <td className="u-text--muted region-details__table-row-label">Street</td>
@@ -74,13 +74,9 @@ const RegionDetailsContent = ({ id }: { id: NonNullable<RegionDetailsContextValu
                 <td className="region-details__table-item">{site.city}</td>
               </tr>
               <tr>
-                <td className="u-text--muted region-details__table-row-label">Zip</td>
-                <td className="region-details__table-item">{site.zip}</td>
-              </tr>
-              <tr>
                 <td className="u-text--muted region-details__table-row-label">Local time</td>
                 <td className="region-details__table-item">
-                  <LocalTime timezone={site.timezone} />
+                  {site.timezone ? <LocalTime timezone={site.timezone} /> : null}
                 </td>
               </tr>
               <tr>

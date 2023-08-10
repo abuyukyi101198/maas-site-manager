@@ -1,10 +1,10 @@
 import { Notification } from "@canonical/react-components";
 import pluralize from "pluralize";
 
-import type { PostEnrollmentRequestsData } from "@/api/handlers";
+import type { PendingSitesPostRequest } from "@/api-client/models/PendingSitesPostRequest";
 import { useNavigate } from "@/utils/router";
 
-const EnrollmentNotification = ({ accept, ids }: Partial<PostEnrollmentRequestsData>) => {
+const EnrollmentNotification = ({ accept, ids }: Partial<PendingSitesPostRequest>) => {
   const navigate = useNavigate();
   return (
     <Notification

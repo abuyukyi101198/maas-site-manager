@@ -16,14 +16,10 @@ const RegionsMap = () => {
   return (
     <div className="regions-map">
       <div className="regions-map__controls-wrapper">
-        <SitesTableControls
-          isLoading={isLoading}
-          setSearchText={setSearchText}
-          totalSites={data?.items?.length ?? null}
-        />
+        <SitesTableControls isLoading={isLoading} setSearchText={setSearchText} totalSites={data?.length ?? null} />
       </div>
       <section aria-label="regions map">
-        <Map markers={data?.items?.map?.(formatSiteMarker) ?? null} />
+        <Map markers={data?.map?.(formatSiteMarker) ?? null} />
       </section>
       <SitesHiddenButton />
     </div>

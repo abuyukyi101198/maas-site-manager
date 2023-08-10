@@ -3,11 +3,21 @@ import { sub, add } from "date-fns";
 import { Factory } from "fishery";
 import { uniqueNamesGenerator, adjectives, colors, animals, starWars } from "unique-names-generator";
 
-import type { AccessToken, EnrollmentRequest, PaginatedQueryResult, Site, Stats, Token, User } from "@/api/types";
+import type { AccessToken, PaginatedQueryResult, Token } from "@/api/types";
+import type { PendingSite } from "@/api-client";
+import { ConnectionStatus } from "@/api-client/models/ConnectionStatus";
+import type { Site } from "@/api-client/models/Site";
+import type { SiteData } from "@/api-client/models/SiteData";
+import { TimeZone } from "@/api-client/models/TimeZone";
+import type { User } from "@/api-client/models/User";
 
-export const connections: Site["connection_status"][] = ["stable", "lost", "unknown"];
+export const connections: ConnectionStatus[] = [
+  ConnectionStatus.STABLE,
+  ConnectionStatus.LOST,
+  ConnectionStatus.UNKNOWN,
+];
 
-export const statsFactory = Factory.define<Stats>(({ sequence }) => {
+export const statsFactory = Factory.define<SiteData>(({ sequence }) => {
   const chance = new Chance(`maas-${sequence}`);
   const now = new Date();
   const machines = {
@@ -15,6 +25,7 @@ export const statsFactory = Factory.define<Stats>(({ sequence }) => {
     allocated_machines: chance.integer({ min: 0, max: 500 }),
     ready_machines: chance.integer({ min: 0, max: 500 }),
     error_machines: chance.integer({ min: 0, max: 500 }),
+    other_machines: chance.integer({ min: 0, max: 500 }),
   };
   return {
     ...machines,
@@ -40,17 +51,19 @@ export const siteFactory = Factory.define<Site>(({ sequence }) => {
   });
 
   return {
-    id: `${sequence}`,
+    id: sequence,
     name,
     name_unique: chance.bool(),
     url: `http://${name}.${chance.tld()}`,
     country: chance.country(), // <alpha2 country code>,
     city: chance.city(),
+    note: null,
+    region: null,
     latitude: `${chance.latitude()}`,
     longitude: `${chance.longitude()}`,
     zip: chance.zip(),
     street: chance.address(),
-    timezone: chance.timezone().utc[0],
+    timezone: chance.pickone(Object.values(TimeZone)),
     connection_status: connectionFactory.build(),
     stats: statsFactory.build(),
   };
@@ -84,7 +97,7 @@ export const paginatedQueryResultFactory = <T extends unknown>() =>
     return { items: [], total: 0, page: 0, size: 0 };
   });
 
-export const enrollmentRequestQueryResultFactory = paginatedQueryResultFactory<EnrollmentRequest>();
+export const enrollmentRequestQueryResultFactory = paginatedQueryResultFactory<PendingSite>();
 export const sitesQueryResultFactory = paginatedQueryResultFactory<Site>();
 export const usersQueryResultFactory = paginatedQueryResultFactory<User>();
 
@@ -108,7 +121,7 @@ export const accessTokenFactory = Factory.define<AccessToken>(({ sequence }) => 
   };
 });
 
-export const enrollmentRequestFactory = Factory.define<EnrollmentRequest>(({ sequence }) => {
+export const enrollmentRequestFactory = Factory.define<PendingSite>(({ sequence }) => {
   const chance = new Chance(`maas-${sequence}`);
   const name = uniqueNamesGenerator({
     dictionaries: [adjectives, colors, animals],
@@ -117,7 +130,7 @@ export const enrollmentRequestFactory = Factory.define<EnrollmentRequest>(({ seq
     seed: sequence,
   });
   return {
-    id: `request-${sequence}`,
+    id: sequence,
     name,
     url: `http://${name}.${chance.tld()}`,
     created: new Date(chance.date({ year: 2023 })).toISOString(), //<ISO 8601 date string>

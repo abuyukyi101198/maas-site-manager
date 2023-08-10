@@ -11,14 +11,12 @@ import { useSiteQuery } from "@/hooks/react-query";
 const baseInitialValues = {
   street: "",
   city: "",
-  zip: "",
   coordinates: "",
 };
 
 const EditRegionSchema = Yup.object().shape({
   street: Yup.string(),
   city: Yup.string(),
-  zip: Yup.string(),
   coordinates: Yup.string()
     .matches(
       /^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$/,
@@ -42,19 +40,17 @@ const EditRegionContent = ({
   const headingId = useId();
   const streetId = useId();
   const cityId = useId();
-  const zipId = useId();
   const coordinatesId = useId();
 
   const [initialValues, setInitialValues] = useState<RegionFormValues>(baseInitialValues);
   const { setSidebar } = useAppLayoutContext();
-  const { data: region, error, isLoading } = useSiteQuery(regionId);
+  const { data: region, error, isLoading } = useSiteQuery({ id: regionId });
 
   useEffect(() => {
     if (region) {
       setInitialValues({
-        street: region.street,
-        city: region.city,
-        zip: region.zip,
+        street: region.street ?? "",
+        city: region.city ?? "",
         coordinates: `${region.latitude}, ${region.longitude}`,
       });
     }
@@ -65,7 +61,6 @@ const EditRegionContent = ({
     const regionData = {
       street: values.street,
       city: values.city,
-      zip: values.zip,
       latitude,
       longitude,
     };
@@ -97,8 +92,6 @@ const EditRegionContent = ({
                 <Field as={Input} error={touched.street && errors.street} id={streetId} name="street" type="text" />
                 <Label htmlFor={cityId}>City</Label>
                 <Field as={Input} error={touched.city && errors.city} id={cityId} name="city" type="text" />
-                <Label htmlFor={zipId}>Zip</Label>
-                <Field as={Input} error={touched.zip && errors.zip} id={zipId} name="zip" type="text" />
                 <Label htmlFor={coordinatesId}>Latitude and Longitude</Label>
                 <Field
                   as={Input}

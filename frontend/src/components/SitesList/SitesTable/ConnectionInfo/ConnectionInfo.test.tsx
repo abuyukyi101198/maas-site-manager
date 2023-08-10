@@ -2,6 +2,7 @@ import * as timezoneMock from "timezone-mock";
 
 import ConnectionInfo, { connectionIcons, connectionLabels } from "./ConnectionInfo";
 
+import { ConnectionStatus } from "@/api-client/models/ConnectionStatus";
 import { connections } from "@/mocks/factories";
 import { render, screen } from "@/utils/test-utils";
 
@@ -32,6 +33,6 @@ it("displays last seen text relative to local time correctly", () => {
 });
 
 it("displays 'waiting for first' text for the unknown status", () => {
-  render(<ConnectionInfo connection="unknown" />);
+  render(<ConnectionInfo connection={ConnectionStatus.UNKNOWN} />);
   expect(screen.getByText(/waiting for first/i)).toBeInTheDocument();
 });

@@ -1,6 +1,10 @@
-import { getApiUrl } from "./utils";
+import { baseURL } from "@/api/config";
 
-const urls = {
+export const getApiUrl = (path: string): string => {
+  return `${baseURL}/api/v1${path}`;
+};
+
+export const apiUrls = {
   login: getApiUrl("/login"),
   logout: getApiUrl("/logout"),
   sites: getApiUrl("/sites"),
@@ -10,5 +14,3 @@ const urls = {
   enrollmentRequests: getApiUrl("/requests"),
   currentUser: getApiUrl("/users/me"),
 };
-
-export default urls;

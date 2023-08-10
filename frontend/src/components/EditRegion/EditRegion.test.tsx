@@ -3,14 +3,14 @@ import { rest } from "msw";
 
 import EditRegion from "./EditRegion";
 
-import urls from "@/api/urls";
 import { RegionDetailsContext } from "@/context/RegionDetailsContext";
 import { siteFactory } from "@/mocks/factories";
 import { createMockSiteResolver } from "@/mocks/resolvers";
+import { apiUrls } from "@/utils/test-urls";
 import { render, waitFor, screen, userEvent, setupServer } from "@/utils/test-utils";
 
 const region = siteFactory.build();
-const mockServer = setupServer(rest.get(`${urls.sites}/:id`, createMockSiteResolver([region])));
+const mockServer = setupServer(rest.get(`${apiUrls.sites}/:id`, createMockSiteResolver([region])));
 
 const renderForm = async (): Promise<RenderResult> => {
   const { ...rendered } = render(
@@ -45,7 +45,6 @@ it("prefills form data", async () => {
 
   expect(screen.getByRole("textbox", { name: "Street" })).toHaveValue(region.street);
   expect(screen.getByRole("textbox", { name: "City" })).toHaveValue(region.city);
-  expect(screen.getByRole("textbox", { name: "Zip" })).toHaveValue(region.zip);
   expect(screen.getByRole("textbox", { name: "Latitude and Longitude" })).toHaveValue(
     `${region.latitude}, ${region.longitude}`,
   );

@@ -4,18 +4,18 @@ import { setupServer } from "msw/node";
 
 import { useSitesQuery, useTokensQuery, useUsersQuery } from "./react-query";
 
-import urls from "@/api/urls";
 import { siteFactory, tokenFactory, userFactory } from "@/mocks/factories";
 import { createMockGetTokensResolver, createMockGetUsersResolver, createMockSitesResolver } from "@/mocks/resolvers";
+import { apiUrls } from "@/utils/test-urls";
 import { Providers } from "@/utils/test-utils";
 
 const sitesData = siteFactory.buildList(2);
 const tokensData = tokenFactory.buildList(2);
 const usersData = userFactory.buildList(2);
 const mockServer = setupServer(
-  rest.get(urls.sites, createMockSitesResolver(sitesData)),
-  rest.get(urls.tokens, createMockGetTokensResolver(tokensData)),
-  rest.get(urls.users, createMockGetUsersResolver(usersData)),
+  rest.get(apiUrls.sites, createMockSitesResolver(sitesData)),
+  rest.get(apiUrls.tokens, createMockGetTokensResolver(tokensData)),
+  rest.get(apiUrls.users, createMockGetUsersResolver(usersData)),
 );
 
 beforeAll(() => {
@@ -29,7 +29,9 @@ afterAll(() => {
 });
 
 it("should return sites", async () => {
-  const { result } = renderHook(() => useSitesQuery({ page: "1", size: "2", sort_by: null }), { wrapper: Providers });
+  const { result } = renderHook(() => useSitesQuery({ page: 1, size: 2, sortBy: null }), {
+    wrapper: Providers,
+  });
 
   await waitFor(() => expect(result.current.isFetchedAfterMount).toBe(true));
 
@@ -37,7 +39,7 @@ it("should return sites", async () => {
 });
 
 it("should return tokens", async () => {
-  const { result } = renderHook(() => useTokensQuery({ page: "1", size: "2" }), { wrapper: Providers });
+  const { result } = renderHook(() => useTokensQuery({ page: 1, size: 2 }), { wrapper: Providers });
 
   await waitFor(() => expect(result.current.isFetchedAfterMount).toBe(true));
 
@@ -45,7 +47,7 @@ it("should return tokens", async () => {
 });
 
 it("should return users", async () => {
-  const { result } = renderHook(() => useUsersQuery({ page: "1", size: "2", sort_by: null }), { wrapper: Providers });
+  const { result } = renderHook(() => useUsersQuery({ page: 1, size: 2, sortBy: null }), { wrapper: Providers });
 
   await waitFor(() => expect(result.current.isFetchedAfterMount).toBe(true));
 

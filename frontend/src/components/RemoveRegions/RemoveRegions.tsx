@@ -7,7 +7,7 @@ import pluralize from "pluralize";
 import * as Yup from "yup";
 
 import { useAppLayoutContext, useRowSelectionContext } from "@/context";
-import { useSiteQueryData } from "@/hooks/react-query";
+import { useSiteQuery } from "@/hooks/react-query";
 
 const initialValues = {
   confirmText: "",
@@ -40,8 +40,8 @@ const RemoveRegions = () => {
   const id = useId();
   const confirmTextId = `confirm-text-${id}`;
   const headingId = `heading-${id}`;
-  const site = useSiteQueryData(Object.keys(rowSelection)?.[0]);
-  const regionName = site?.name;
+  const { data } = useSiteQuery({ id: Number(Object.keys(rowSelection)?.[0]) });
+  const regionName = data?.name;
   const regionsCountText = regionsCount === 1 ? regionName : pluralize("regions", regionsCount || 0, !!regionsCount);
   const expectedConfirmTextValue = `remove ${regionsCountText}`;
   const handleSubmit = (

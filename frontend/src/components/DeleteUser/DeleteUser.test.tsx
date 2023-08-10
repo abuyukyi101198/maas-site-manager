@@ -3,17 +3,17 @@ import { setupServer } from "msw/node";
 
 import DeleteUser from "./DeleteUser";
 
-import urls from "@/api/urls";
 import { UserSelectionContext } from "@/context";
 import { userFactory } from "@/mocks/factories";
 import { createMockDeleteUserResolver, createMockGetUserResolver } from "@/mocks/resolvers";
+import { apiUrls } from "@/utils/test-urls";
 import { render, screen, userEvent, waitFor } from "@/utils/test-utils";
 
 const mockUser = userFactory.build({ username: "abc123", id: 2 });
 
 const mockServer = setupServer(
-  rest.delete(`${urls.users}/:id`, createMockDeleteUserResolver()),
-  rest.get(`${urls.users}/:id`, createMockGetUserResolver([mockUser])),
+  rest.delete(`${apiUrls.users}/:id`, createMockDeleteUserResolver()),
+  rest.get(`${apiUrls.users}/:id`, createMockGetUserResolver([mockUser])),
 );
 
 beforeAll(() => {

@@ -3,13 +3,13 @@ import { setupServer } from "msw/node";
 
 import PersonalDetailsUpdate from "./PersonalDetailsUpdate";
 
-import urls from "@/api/urls";
 import { createMockCurrentUserResolver, createMockUpdateUserResolver } from "@/mocks/resolvers";
+import { apiUrls } from "@/utils/test-urls";
 import { render, screen, userEvent, waitFor } from "@/utils/test-utils";
 
 const mockServer = setupServer(
-  rest.get(urls.currentUser, createMockCurrentUserResolver()),
-  rest.patch(`${urls.users}/:id`, createMockUpdateUserResolver()),
+  rest.get(apiUrls.currentUser, createMockCurrentUserResolver()),
+  rest.patch(`${apiUrls.users}/:id`, createMockUpdateUserResolver()),
 );
 
 beforeAll(() => {

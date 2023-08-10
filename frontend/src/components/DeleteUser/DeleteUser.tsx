@@ -1,5 +1,4 @@
 import { Button, Input, Notification, Spinner } from "@canonical/react-components";
-import { useQueryClient } from "@tanstack/react-query";
 import { Field, Form, Formik } from "formik";
 import * as Yup from "yup";
 
@@ -36,20 +35,21 @@ const DeleteUserContent = ({
   const deleteUserMutation = useDeleteUserMutation();
   const headingId = `heading-${id}`;
   const confirmInputId = `confirm-${id}`;
-  const queryClient = useQueryClient();
   const initialValues = {
     confirmUsername: "",
   };
 
   const handleSubmit = () => {
     if (getUserSuccess) {
-      deleteUserMutation.mutate(user.id, {
-        onSuccess() {
-          queryClient.invalidateQueries(["users"]);
-          setSidebar(null);
-          setSelectedUserId(null);
+      deleteUserMutation.mutate(
+        { id: user.id },
+        {
+          onSuccess() {
+            setSidebar(null);
+            setSelectedUserId(null);
+          },
         },
-      });
+      );
     }
   };
 

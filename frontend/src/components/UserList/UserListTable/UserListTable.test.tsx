@@ -3,12 +3,12 @@ import { setupServer } from "msw/node";
 
 import UserListTable from "./UserListTable";
 
-import urls from "@/api/urls";
 import { userFactory, usersQueryResultFactory } from "@/mocks/factories";
 import { createMockCurrentUserResolver } from "@/mocks/resolvers";
+import { apiUrls } from "@/utils/test-urls";
 import { renderWithMemoryRouter, screen, within } from "@/utils/test-utils";
 
-const mockServer = setupServer(rest.get(urls.currentUser, createMockCurrentUserResolver()));
+const mockServer = setupServer(rest.get(apiUrls.currentUser, createMockCurrentUserResolver()));
 
 beforeAll(() => {
   mockServer.listen();

@@ -7,6 +7,7 @@ import { getName } from "i18n-iso-countries";
 import en from "i18n-iso-countries/langs/en.json";
 
 import type { Site } from "@/api/types";
+import type { TimeZone } from "@/api-client";
 import type { SiteMarkerType } from "@/components/Map/types";
 
 if (typeof window !== "undefined") {
@@ -39,34 +40,12 @@ export const parseSearchTextToUrlFreeTextSearch = (text: string) => {
   return text.replaceAll(" ", "+");
 };
 
-export const customParamSerializer = (params: Record<string, string | number | null>, queryText?: string) => {
-  return (
-    // skip undefined values for specified keys
-    Object.entries(Object.assign({}, params))
-      .filter(([_key, value]) => !!value)
-      .map(([key, value]) => `${key}=${encodeURIComponent(value!)}`)
-      .join("&") + `${queryText ? "&" + queryText : ""}`
-  );
-};
-
-export const customParamWithSearchTextSerializer = (
-  params: Record<string, string | number | null>,
-  searchText?: string,
-) => {
-  return (
-    Object.entries(Object.assign({}, params))
-      .filter(([_key, value]) => !!value)
-      .map(([key, value]) => `${key}=${encodeURIComponent(value!)}`)
-      .join("&") + `${searchText ? "&search_text=" + searchText : ""}`
-  );
-};
-
 export const formatDistanceToNow = (dateString: string) =>
   formatDistanceToNowStrict(parseISO(dateString), {
     addSuffix: true,
   });
 
-export const getTimezoneUTCString = (timezone: string, date?: Date | number) => {
+export const getTimezoneUTCString = (timezone: TimeZone, date?: Date | number) => {
   const offset = getTimezoneOffset(timezone, date);
   const sign = offset < 0 ? "-" : "+";
   const absOffset = Math.abs(offset);
@@ -84,7 +63,7 @@ export const formatSiteMarker = (site: Pick<Site, "id" | "latitude" | "longitude
   position: [Number(site.latitude), Number(site.longitude)],
 });
 
-export const getTimeInTimezone = (date: Date, timezone: string) => {
+export const getTimeInTimezone = (date: Date, timezone: TimeZone) => {
   const time = date.getTime() + getTimezoneOffset(timezone);
   const hours = `${new Date(time).getUTCHours()}`.padStart(2, "0");
   const minutes = `${new Date(time).getUTCMinutes()}`.padStart(2, "0");

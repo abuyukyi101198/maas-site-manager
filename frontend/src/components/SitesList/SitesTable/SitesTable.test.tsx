@@ -1,14 +1,15 @@
 import SitesTable from "./SitesTable";
 
-import urls from "@/api/urls";
+import { TimeZone } from "@/api-client/models/TimeZone";
 import { enrollmentRequestFactory, siteFactory, sitesQueryResultFactory, statsFactory } from "@/mocks/factories";
 import { createMockGetEnrollmentRequestsResolver } from "@/mocks/resolvers";
 import { createMockGetServer } from "@/mocks/server";
+import { apiUrls } from "@/utils/test-urls";
 import { renderWithMemoryRouter, screen, within } from "@/utils/test-utils";
 
 const enrollmentRequests = enrollmentRequestFactory.buildList(2);
 const mockServer = createMockGetServer(
-  urls.enrollmentRequests,
+  apiUrls.enrollmentRequests,
   createMockGetEnrollmentRequestsResolver(enrollmentRequests),
 );
 const paginationProps = {
@@ -109,7 +110,7 @@ it("displays correct local time", () => {
   const date = new Date("Fri Apr 21 2023 12:00:00 GMT+0000 (GMT)");
   vi.setSystemTime(date);
 
-  const item = siteFactory.build({ timezone: "Europe/London" });
+  const item = siteFactory.build({ timezone: TimeZone.EUROPE_LONDON });
   renderWithMemoryRouter(
     <SitesTable
       {...commonProps}

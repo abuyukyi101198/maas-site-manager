@@ -1,6 +1,24 @@
 import RemoveRegions from "./index";
 
+import { siteFactory } from "@/mocks/factories";
+import { createMockSiteResolver } from "@/mocks/resolvers";
+import { createMockGetServer } from "@/mocks/server";
+import { apiUrls } from "@/utils/test-urls";
 import { render, screen, userEvent } from "@/utils/test-utils";
+
+const sites = siteFactory.build();
+const mockServer = createMockGetServer(`${apiUrls.sites}/:id`, createMockSiteResolver([sites]));
+
+beforeAll(() => {
+  mockServer.listen();
+});
+afterEach(() => {
+  mockServer.resetHandlers();
+  localStorage.clear();
+});
+afterAll(() => {
+  mockServer.close();
+});
 
 vi.mock("@/context", async () => {
   const actual = await vi.importActual("@/context");

@@ -80,8 +80,7 @@ const UserForm = ({ type }: { type: "add" | "edit" }) => {
   });
 
   const addUser = useAddUserMutation({
-    onSuccess(data) {
-      queryClient.setQueryData(["user"], () => data);
+    onSuccess() {
       resetForm();
     },
   });
@@ -111,16 +110,16 @@ const UserForm = ({ type }: { type: "add" | "edit" }) => {
     if (type === "edit") {
       if (!values.password) {
         await NoPasswordUserSchema.validate(values);
-        updateUser.mutate({ userId: user!.id, userData });
+        updateUser.mutate({ id: user!.id, requestBody: { ...userData } });
       } else {
         await AddUserSchema.validate(values);
         updateUser.mutate({
-          userId: user!.id,
-          userData: { ...userData, password: values.password, confirm_password: values.confirm_password },
+          id: user!.id,
+          requestBody: { ...userData, password: values.password, confirm_password: values.confirm_password },
         });
       }
     } else {
-      addUser.mutate(values);
+      addUser.mutate({ requestBody: { ...values } });
     }
   };
 

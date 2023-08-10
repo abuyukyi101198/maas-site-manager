@@ -1,9 +1,9 @@
 import { useEffect, useMemo } from "react";
 
-import { useReactTable, flexRender, getCoreRowModel, createColumnHelper } from "@tanstack/react-table";
+import { useReactTable, flexRender, getCoreRowModel } from "@tanstack/react-table";
 import type { Column, ColumnDef } from "@tanstack/react-table";
 
-import type { EnrollmentRequest } from "@/api/types";
+import type { PendingSite } from "@/api-client/models/PendingSite";
 import DateTime from "@/components/DateTime";
 import DynamicTable from "@/components/DynamicTable/DynamicTable";
 import ExternalLink from "@/components/ExternalLink";
@@ -14,10 +14,8 @@ import { isDev } from "@/constants";
 import { useRowSelectionContext } from "@/context/RowSelectionContext";
 import type { UseEnrollmentRequestsQueryResult } from "@/hooks/react-query";
 
-export type EnrollmentRequestsColumnDef = ColumnDef<EnrollmentRequest, EnrollmentRequest[keyof EnrollmentRequest]>;
-export type EnrollmentRequestsColumn = Column<EnrollmentRequest, unknown>;
-
-const columnHelper = createColumnHelper<EnrollmentRequest>();
+export type EnrollmentRequestsColumnDef = ColumnDef<PendingSite, PendingSite[keyof PendingSite]>;
+export type EnrollmentRequestsColumn = Column<PendingSite, unknown>;
 
 const RequestsTable = ({
   data,
@@ -33,8 +31,9 @@ const RequestsTable = ({
 
   const columns = useMemo<EnrollmentRequestsColumnDef[]>(
     () => [
-      columnHelper.accessor("name", {
+      {
         id: "select",
+        accessorKey: "name",
         header: ({ table }) => <SelectAllCheckbox table={table} tableId="requests" />,
         cell: ({ row, getValue }) => {
           return (
@@ -53,34 +52,37 @@ const RequestsTable = ({
             </label>
           );
         },
-      }),
-      columnHelper.accessor("name", {
+      },
+      {
         id: "name",
+        accessorKey: "name",
         header: () => <div>Name</div>,
-      }),
-      columnHelper.accessor("url", {
+      },
+      {
         id: "url",
+        accessorKey: "url",
         header: () => <div>URL</div>,
-        cell: ({ getValue }) => <ExternalLink to={getValue()}>{getValue()}</ExternalLink>,
-      }),
-      columnHelper.accessor("created", {
+        cell: ({ getValue }) => <ExternalLink to={String(getValue())}>{getValue()}</ExternalLink>,
+      },
+      {
         id: "created",
+        accessorKey: "created",
         header: () => <div>Time of request (UTC)</div>,
-        cell: ({ getValue }) => <DateTime value={getValue()} />,
-      }),
+        cell: ({ getValue }) => <DateTime value={String(getValue())} />,
+      },
     ],
     [],
   );
 
   // wrap the empty array in useMemo to avoid re-rendering the empty table on every render
-  const noItems = useMemo<EnrollmentRequest[]>(() => [], []);
-  const table = useReactTable<EnrollmentRequest>({
+  const noItems = useMemo<PendingSite[]>(() => [], []);
+  const table = useReactTable<PendingSite>({
     data: data?.items || noItems,
     columns,
     state: {
       rowSelection,
     },
-    getRowId: (row) => row.id,
+    getRowId: (row) => `${row.id}`,
     manualPagination: true,
     enableRowSelection: true,
     enableMultiRowSelection: true,

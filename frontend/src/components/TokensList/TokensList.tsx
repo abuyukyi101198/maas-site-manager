@@ -24,8 +24,8 @@ const TokensList = () => {
     usePagination(DEFAULT_PAGE_SIZE, totalDataCount);
 
   const { error, data, isLoading } = useTokensQuery({
-    page: `${debouncedPage}`,
-    size: `${size}`,
+    page: debouncedPage,
+    size,
   });
 
   const tokensDeleteMutation = useDeleteTokensMutation({

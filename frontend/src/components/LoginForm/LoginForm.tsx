@@ -28,6 +28,8 @@ const LoginForm = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { login, isError, failureReason, status } = useAuthContext();
+  // TODO: update error response types  https://warthogs.atlassian.net/browse/MAASENG-2082
+  /* @ts-ignore-next-line */
   const failureDetails = failureReason?.response?.data?.detail;
   const handleRedirect = useCallback(() => {
     // send user back to the page they tried to visit

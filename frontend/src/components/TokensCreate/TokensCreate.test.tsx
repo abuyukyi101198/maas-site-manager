@@ -3,12 +3,12 @@ import { setupServer } from "msw/node";
 
 import TokensCreate from "./TokensCreate";
 
-import urls from "@/api/urls";
 import type * as apiHooks from "@/hooks/react-query";
 import { createMockTokensResolver } from "@/mocks/resolvers";
+import { apiUrls } from "@/utils/test-urls";
 import { renderWithMemoryRouter, screen, userEvent } from "@/utils/test-utils";
 
-const mockServer = setupServer(rest.post(urls.tokens, createMockTokensResolver()));
+const mockServer = setupServer(rest.post(apiUrls.tokens, createMockTokensResolver()));
 
 const tokensMutationMock = vi.fn();
 
@@ -66,7 +66,7 @@ it("can generate enrolment tokens", async () => {
   await userEvent.click(screen.getByRole("button", { name: /Generate tokens/i }));
   expect(tokensMutationMock).toHaveBeenCalledTimes(1);
   expect(tokensMutationMock).toHaveBeenCalledWith({
-    amount: 1,
+    count: 1,
     duration: "P7DT0H0M0S",
   });
 });

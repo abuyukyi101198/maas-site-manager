@@ -24,9 +24,10 @@ afterAll(() => {
 it("requires name, amount and expiration time", async () => {
   // @ts-expect-error
   expect(postTokens({})).rejects.toThrowError();
-  expect(postTokens({ amount: 1, duration: durationFactory.build() })).resolves.toEqual(
+  expect(postTokens({ count: 1, duration: durationFactory.build() })).resolves.toEqual(
     expect.objectContaining({
-      items: expect.any(Array),
+      expired: expect.any(String),
+      tokens: expect.any(Array),
     }),
   );
 });
@@ -34,8 +35,8 @@ it("requires name, amount and expiration time", async () => {
 it("requires ids and accept values", async () => {
   // @ts-expect-error
   expect(postEnrollmentRequests({})).rejects.toThrowError();
-  expect(postEnrollmentRequests({ ids: [], accept: false })).resolves.toEqual("");
-  expect(postEnrollmentRequests({ ids: [], accept: true })).resolves.toEqual("");
+  expect(postEnrollmentRequests({ ids: [], accept: false })).resolves.toEqual(undefined);
+  expect(postEnrollmentRequests({ ids: [], accept: true })).resolves.toEqual(undefined);
 });
 
 it("returns the user object", async () => {

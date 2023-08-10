@@ -1,13 +1,14 @@
 import type { SortingState } from "@tanstack/react-table";
 
 import {
-  customParamSerializer,
   getTimezoneUTCString,
   parseSearchTextToQueryParams,
   getTimeInTimezone,
   formatDistanceToNow,
   getSortBy,
 } from "./utils";
+
+import { TimeZone } from "@/api-client";
 
 beforeEach(() => {
   vi.useFakeTimers();
@@ -32,47 +33,25 @@ it("should modify multiple search params", () => {
   expect(queryParams).toBe(expectedResponse);
 });
 
-it("should serialize params normally if just params are provided", () => {
-  const params = { page: "1", size: "20", sort_by: "name-asc" };
-  const serialized = customParamSerializer(params);
-  const expectedResult = "page=1&size=20&sort_by=name-asc";
-  expect(serialized).toBe(expectedResult);
-});
-
-it("should be compatible with already serialized queryText", () => {
-  const params = { page: "1", size: "20" };
-  const serializedQueryText = "country=cuba";
-  const serialized = customParamSerializer(params, serializedQueryText);
-  const expectedResult = `page=1&size=20&${serializedQueryText}`;
-  expect(serialized).toBe(expectedResult);
-});
-
-it("should skip parameters with null values", () => {
-  const params = { page: "1", size: "20", sort_by: null };
-  const serialized = customParamSerializer(params);
-  const expectedResult = `page=1&size=20`;
-  expect(serialized).toBe(expectedResult);
-});
-
 [
-  ["Canada/Newfoundland", "-2:30"],
-  ["UTC", ""],
-  ["Europe/London", "+1"],
+  [TimeZone.CANADA_NEWFOUNDLAND, "-2:30"],
+  [TimeZone.UTC, ""],
+  [TimeZone.EUROPE_LONDON, "+1"],
 ].forEach(([timezone, expected]) => {
   it(`returns ${expected} for ${timezone}`, () => {
-    const result = getTimezoneUTCString(timezone);
+    const result = getTimezoneUTCString(timezone as TimeZone);
     expect(result).toBe(expected);
   });
 });
 
 [
-  ["Canada/Newfoundland", "09:30"],
-  ["UTC", "12:00"],
-  ["Europe/Warsaw", "14:00"],
-  ["Europe/London", "13:00"],
+  [TimeZone.CANADA_NEWFOUNDLAND, "09:30"],
+  [TimeZone.UTC, "12:00"],
+  [TimeZone.EUROPE_WARSAW, "14:00"],
+  [TimeZone.EUROPE_LONDON, "13:00"],
 ].forEach(([timezone, expected]) => {
   it(`returns ${expected} for ${timezone}`, () => {
-    const result = getTimeInTimezone(new Date("2000-01-01T12:00:00Z"), timezone);
+    const result = getTimeInTimezone(new Date("2000-01-01T12:00:00Z"), timezone as TimeZone);
     expect(result).toBe(expected);
   });
 });

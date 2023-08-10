@@ -1,7 +1,8 @@
 import classNames from "classnames";
 import get from "lodash/get";
 
-import type { Site, Stats } from "@/api/types";
+import type { Site } from "@/api-client/models/Site";
+import type { SiteData } from "@/api-client/models/SiteData";
 import ExternalLink from "@/components/ExternalLink";
 import TooltipButton from "@/components/base/TooltipButton";
 import docsUrls from "@/config/docsUrls";
@@ -18,7 +19,7 @@ export const connectionLabels: Record<Site["connection_status"], string> = {
   unknown: "Waiting for first",
 } as const;
 
-type ConnectionInfoProps = { connection: Site["connection_status"]; lastSeen?: Stats["last_seen"] };
+type ConnectionInfoProps = { connection: Site["connection_status"]; lastSeen?: SiteData["last_seen"] };
 
 export const getLastSeenText = ({ connection, lastSeen }: ConnectionInfoProps) => {
   if (!lastSeen) {

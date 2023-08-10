@@ -48,7 +48,7 @@ const TokensCreate = () => {
     { setSubmitting }: FormikHelpers<TokensCreateFormValues>,
   ) => {
     await tokensCreateMutation.mutateAsync({
-      amount: Number(amount),
+      count: Number(amount),
       duration: humanIntervalToISODuration(expires) as string,
     });
     setSubmitting(false);

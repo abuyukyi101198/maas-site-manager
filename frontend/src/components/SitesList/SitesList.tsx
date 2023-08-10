@@ -6,9 +6,8 @@ import SitesTable from "./SitesTable";
 
 import type { SitesSortKey, SortBy } from "@/api/handlers";
 import { useSitesQuery } from "@/hooks/react-query";
-import useDebounce from "@/hooks/useDebouncedValue";
 import usePagination from "@/hooks/usePagination";
-import { parseSearchTextToQueryParams, getSortBy } from "@/utils";
+import { getSortBy } from "@/utils";
 
 const DEFAULT_PAGE_SIZE = 50;
 
@@ -17,18 +16,14 @@ const SitesList = () => {
   const { page, debouncedPage, size, handleNextClick, handlePreviousClick, handlePageSizeChange, setPage } =
     usePagination(DEFAULT_PAGE_SIZE, totalDataCount);
   const [searchText, setSearchText] = useState("");
-  const debounceSearchText = useDebounce(searchText);
   const [sorting, setSorting] = useState<SortingState>([]);
   const sortBy = getSortBy(sorting) as SortBy<SitesSortKey>;
 
-  const { error, data, isLoading } = useSitesQuery(
-    {
-      page: `${debouncedPage}`,
-      size: `${size}`,
-      sort_by: sortBy,
-    },
-    parseSearchTextToQueryParams(debounceSearchText),
-  );
+  const { error, data, isLoading } = useSitesQuery({
+    page: debouncedPage,
+    size,
+    sortBy,
+  });
 
   useEffect(() => {
     setPage(1);

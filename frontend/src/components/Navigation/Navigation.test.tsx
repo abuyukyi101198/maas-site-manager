@@ -7,13 +7,15 @@ import { setupServer } from "msw/node";
 
 import Navigation, { navItemsBottom, navItems, settingsNavItems } from "./Navigation";
 
-import urls from "@/api/urls";
 import { createMockCurrentUserResolver } from "@/mocks/resolvers";
+import { getApiUrl } from "@/utils/test-urls";
 import { renderWithMemoryRouter, screen, userEvent, waitFor } from "@/utils/test-utils";
 
-const mockServer = setupServer(rest.get(urls.currentUser, createMockCurrentUserResolver()));
+const mockServer = setupServer(rest.get(getApiUrl("/users/me"), createMockCurrentUserResolver()));
 
 beforeAll(() => {
+  vi.stubGlobal("location", { origin: "http://localhost:8000" });
+  vi.stubGlobal("navigation", vi.fn());
   mockServer.listen();
 });
 afterEach(() => {
@@ -21,6 +23,7 @@ afterEach(() => {
 });
 afterAll(() => {
   mockServer.close();
+  vi.unstubAllGlobals();
 });
 
 it("displays navigation", () => {

@@ -2,10 +2,10 @@ import { rest } from "msw";
 
 import NoRegions from "./NoRegions";
 
-import urls from "@/api/urls";
 import { enrollmentRequestFactory } from "@/mocks/factories";
 import { createMockGetEnrollmentRequestsResolver } from "@/mocks/resolvers";
 import { createMockGetServer } from "@/mocks/server";
+import { apiUrls } from "@/utils/test-urls";
 import { getByTextContent, renderWithMemoryRouter, screen, waitFor } from "@/utils/test-utils";
 
 const renderComponent = () =>
@@ -18,7 +18,7 @@ const renderComponent = () =>
 
 const enrollmentRequests = enrollmentRequestFactory.buildList(2);
 const mockServer = createMockGetServer(
-  urls.enrollmentRequests,
+  apiUrls.enrollmentRequests,
   createMockGetEnrollmentRequestsResolver(enrollmentRequests),
 );
 beforeAll(() => {
@@ -64,7 +64,7 @@ it("should display the amount of open enrollment requests", async () => {
 });
 
 it("should display a link to the tokens page if no enrollment requests are open", async () => {
-  mockServer.resetHandlers(rest.get(urls.enrollmentRequests, createMockGetEnrollmentRequestsResolver([])));
+  mockServer.resetHandlers(rest.get(apiUrls.enrollmentRequests, createMockGetEnrollmentRequestsResolver([])));
   renderComponent();
   await waitFor(() =>
     expect(

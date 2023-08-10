@@ -14,8 +14,8 @@ const Requests: React.FC = () => {
   const { page, debouncedPage, size, handleNextClick, handlePreviousClick, handlePageSizeChange, setPage } =
     usePagination(DEFAULT_PAGE_SIZE, totalDataCount);
   const { error, data, isLoading } = useRequestsQuery({
-    page: `${debouncedPage}`,
-    size: `${size}`,
+    page: debouncedPage,
+    size,
   });
 
   useEffect(() => {

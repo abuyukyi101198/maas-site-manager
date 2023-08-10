@@ -1,12 +1,12 @@
 import type { Reducer } from "react";
 import React, { createContext, useContext, useReducer } from "react";
 
-import type { AxiosInstance } from "axios";
 import useLocalStorageState from "use-local-storage-state";
 
+import type { FetchHttpRequestWithInterceptors } from "@/api/FetchHttpRequestWithInterceptors";
+import type { ApiClient } from "@/api-client";
+import { OpenAPI } from "@/api-client";
 import { useLoginMutation } from "@/hooks/react-query";
-import type { LoginError } from "@/hooks/react-query";
-
 type AuthStatus = "initial" | "authenticated" | "unauthorised";
 
 interface AuthContextType {
@@ -14,7 +14,7 @@ interface AuthContextType {
   login: ({ email, password }: { email: string; password: string }) => void;
   logout: () => Promise<void>;
   isError: boolean;
-  failureReason: LoginError | null;
+  failureReason: unknown | null;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -65,13 +65,7 @@ const authReducer: Reducer<AuthState, AuthAction> = (state, action) => {
   }
 };
 
-export const AuthContextProvider = ({
-  apiClient,
-  children,
-}: {
-  apiClient: AxiosInstance;
-  children: React.ReactNode;
-}) => {
+export const AuthContextProvider = ({ apiClient, children }: { apiClient: ApiClient; children: React.ReactNode }) => {
   const [persistedAuthToken, setPersistedAuthToken] = useLocalStorageState<string>("jwtToken");
   const removePersistedAuthToken = useCallback(() => {
     localStorage.removeItem("jwtToken");
@@ -85,35 +79,30 @@ export const AuthContextProvider = ({
   };
 
   const clearAuthToken = useCallback(() => {
-    apiClient.interceptors.request.clear();
+    OpenAPI.TOKEN = undefined;
     removePersistedAuthToken();
-  }, [apiClient.interceptors.request, removePersistedAuthToken]);
+  }, [removePersistedAuthToken]);
 
   const updateAuthToken = useCallback(
     (authToken: AuthToken) => {
       if (authToken) {
         setPersistedAuthToken(authToken);
-        apiClient.interceptors.request.use(function (config) {
-          config.headers.Authorization = `Bearer ${authToken}`;
-          return config;
-        });
+        OpenAPI.TOKEN = authToken;
       }
     },
-    [apiClient, setPersistedAuthToken],
+    [setPersistedAuthToken],
   );
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   useEffect(() => {
-    apiClient.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        if (error?.response?.status === 401 || error?.status === 401) {
-          dispatch({ type: actionTypes.LOGOUT });
-        }
-        return Promise.reject(error);
-      },
-    );
-  }, [apiClient]);
+    // Add a response interceptor to handle logout on 401 status
+    (apiClient.request as FetchHttpRequestWithInterceptors).addResponseInterceptor((_response, error) => {
+      if (error?.status === 401) {
+        dispatch({ type: actionTypes.LOGOUT });
+        clearAuthToken();
+      }
+    });
+  }, [apiClient, clearAuthToken]);
 
   const login = async ({ email, password }: { email: string; password: string }) => {
     try {

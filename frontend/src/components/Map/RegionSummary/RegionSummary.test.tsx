@@ -2,14 +2,14 @@ import { rest } from "msw";
 
 import RegionSummary from "./RegionSummary";
 
-import urls from "@/api/urls";
 import { siteFactory, statsFactory } from "@/mocks/factories";
 import { createMockSiteResolver } from "@/mocks/resolvers";
+import { apiUrls } from "@/utils/test-urls";
 import { renderWithMemoryRouter, waitFor, screen, setupServer, userEvent } from "@/utils/test-utils";
 
 const stats = statsFactory.build();
 const site = siteFactory.build({ url: "https://example.com", stats });
-const mockServer = setupServer(rest.get(`${urls.sites}/:id`, createMockSiteResolver([site])));
+const mockServer = setupServer(rest.get(`${apiUrls.sites}/:id`, createMockSiteResolver([site])));
 
 beforeAll(() => {
   mockServer.listen();

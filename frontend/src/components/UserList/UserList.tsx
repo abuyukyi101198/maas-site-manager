@@ -23,14 +23,12 @@ const UserList = () => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const sortBy = getSortBy(sorting) as SortBy<UserSortKey>;
 
-  const { data, error, isLoading } = useUsersQuery(
-    {
-      page: `${debouncedPage}`,
-      size: `${size}`,
-      sort_by: sortBy,
-    },
-    parseSearchTextToUrlFreeTextSearch(debounceSearchText),
-  );
+  const { data, error, isLoading } = useUsersQuery({
+    page: debouncedPage,
+    size,
+    sortBy,
+    searchText: parseSearchTextToUrlFreeTextSearch(debounceSearchText),
+  });
 
   useEffect(() => {
     setPage(1);

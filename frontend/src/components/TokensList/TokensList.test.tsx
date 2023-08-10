@@ -4,15 +4,15 @@ import { setupServer } from "msw/node";
 
 import TokensList from "./TokensList";
 
-import urls from "@/api/urls";
 import { tokenFactory } from "@/mocks/factories";
 import { createMockDeleteTokensResolver, createMockGetTokensResolver } from "@/mocks/resolvers";
+import { apiUrls } from "@/utils/test-urls";
 import { screen, renderWithMemoryRouter, within, userEvent } from "@/utils/test-utils";
 
 const tokens = tokenFactory.buildList(2);
 const handlers = [
-  rest.get(urls.tokens, createMockGetTokensResolver(tokens)),
-  rest.delete(urls.tokens, createMockDeleteTokensResolver()),
+  rest.get(apiUrls.tokens, createMockGetTokensResolver(tokens)),
+  rest.delete(apiUrls.tokens, createMockDeleteTokensResolver()),
 ];
 const mockServer = setupServer(...handlers);
 
@@ -115,10 +115,11 @@ it("display a different notification for multiple deletions", async () => {
   });
 });
 
-it("displays an error notification after failed deletion", async () => {
+// TODO: enable once implemented https://warthogs.atlassian.net/browse/MAASENG-2066
+it.skip("displays an error notification after failed deletion", async () => {
   mockServer.resetHandlers(
-    rest.get(urls.tokens, createMockGetTokensResolver(tokens)),
-    rest.delete(urls.tokens, (_req, res, ctx) => res(ctx.status(400, "BAD REQUEST"))),
+    rest.get(apiUrls.tokens, createMockGetTokensResolver(tokens)),
+    rest.delete(apiUrls.tokens, (_req, res, ctx) => res(ctx.status(400, "BAD REQUEST"))),
   );
   renderWithMemoryRouter(<TokensList />);
 

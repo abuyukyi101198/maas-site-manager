@@ -46,7 +46,7 @@ const PersonalDetailsUpdate = () => {
     userData: PersonalDetailsUpdateFormValues,
     { setSubmitting: _ }: FormikHelpers<PersonalDetailsUpdateFormValues>,
   ) => {
-    updateUser.mutate({ userId: data!.id, userData });
+    updateUser.mutate({ id: data!.id, requestBody: { ...userData } });
   };
 
   return (

@@ -3,17 +3,13 @@ import type { RestRequest, restContext, ResponseResolver } from "msw";
 
 import { siteFactory, tokenFactory, enrollmentRequestFactory, accessTokenFactory, userFactory } from "./factories";
 
-import type {
-  GetSitesQueryParams,
-  GetUsersQueryParams,
-  PostTokensData,
-  SortDirection,
-  SitesSortKey,
-  UserSortKey,
-} from "@/api/handlers";
-import type { Site, User } from "@/api/types";
-import urls from "@/api/urls";
+import type { GetSitesQueryParams, SortDirection, SitesSortKey, UserSortKey } from "@/api/handlers";
+import type { User } from "@/api/types";
+import type { TokensPostResponse } from "@/api-client";
+import type { Site } from "@/api-client/models/Site";
+import type { SitesGetResponse } from "@/api-client/models/SitesGetResponse";
 import { isDev } from "@/constants";
+import { apiUrls } from "@/utils/test-urls";
 
 export const mockResponseDelay = isDev ? 0 : 0;
 export const sitesList = siteFactory.buildList(155);
@@ -47,7 +43,7 @@ export const createMockSitesResolver =
     const size = Number(searchParams.get("size"));
     // sort items
     const items = [...sites];
-    const sortBy = searchParams.get("sort_by") as GetSitesQueryParams["sort_by"];
+    const sortBy = searchParams.get("sortBy") as GetSitesQueryParams["sortBy"];
     if (sortBy) {
       const [field, order] = sortBy.split("-") as [SitesSortKey, SortDirection];
       items.sort((a, b) => {
@@ -59,10 +55,11 @@ export const createMockSitesResolver =
     }
     const itemsPage = items.slice((page - 1) * size, page * size);
 
-    const response = {
+    const response: SitesGetResponse = {
       items: itemsPage,
       page,
       total: sites.length,
+      size,
     };
 
     return res(ctx.json(response));
@@ -76,27 +73,27 @@ export const createMockSitesCoordinatesResolver =
     return res(ctx.json(response));
   };
 
-type SiteResponseResolver = ResponseResolver<RestRequest, typeof restContext>;
 export const createMockSiteResolver =
-  (sites = sitesList): SiteResponseResolver =>
+  (sites = sitesList): ResponseResolver<RestRequest, typeof restContext> =>
   (req, res, ctx) => {
-    const id = req.params.id as string;
+    const id = Number(req.params.id);
 
-    const site = sites.find((site: Site) => site.id === id);
-    return res(ctx.json(site));
+    const site = sites.find((site) => site.id === id) as Site;
+    return res(ctx.json({ ...site }));
   };
 
 type TokensResponseResolver = ResponseResolver<RestRequest, typeof restContext>;
 export const createMockTokensResolver = (): TokensResponseResolver => async (req, res, ctx) => {
-  let items;
-  const { amount, duration } = await req.json();
-  if (amount && duration) {
-    items = Array(amount).fill(tokenFactory.build());
+  let tokens;
+  const { count, duration } = await req.json();
+  if (count && duration) {
+    tokens = Array(count).fill(tokenFactory.build());
   } else {
     return res(ctx.status(400));
   }
-  const response = {
-    items,
+  const response: TokensPostResponse = {
+    expired: "",
+    tokens,
   };
 
   return res(ctx.json(response));
@@ -139,7 +136,7 @@ export const createMockGetUsersResolver =
 
     // sort items
     const items = [...users];
-    const sortBy = searchParams.get("sort_by") as GetUsersQueryParams["sort_by"];
+    const sortBy = searchParams.get("sortBy");
     if (sortBy) {
       const [field, order] = sortBy.split("-") as [UserSortKey, SortDirection];
       items.sort((a, b) => {
@@ -188,7 +185,7 @@ export const createMockGetEnrollmentRequestsResolver =
     return res(ctx.json(response));
   };
 
-type PostEnrollmentRequestsResponseResolver = ResponseResolver<RestRequest<PostTokensData>, typeof restContext>;
+type PostEnrollmentRequestsResponseResolver = ResponseResolver<RestRequest, typeof restContext>;
 export const createMockPostEnrollmentRequestsResolver =
   (): PostEnrollmentRequestsResponseResolver => async (req, res, ctx) => {
     const { ids, accept } = await req.json();
@@ -233,21 +230,21 @@ export const createMockDeleteUserResolver = (): DeleteUserResponseResolver => as
   return res(ctx.status(200));
 };
 
-export const postLogin = rest.post(urls.login, createMockLoginResolver());
-export const getSites = rest.get(urls.sites, createMockSitesResolver());
-export const getSitesCoordinates = rest.get(urls.sitesCoordinates, createMockSitesCoordinatesResolver());
-export const getSite = rest.get(`${urls.sites}/:id`, createMockSiteResolver());
-export const postTokens = rest.post(urls.tokens, createMockTokensResolver());
-export const getTokens = rest.get(urls.tokens, createMockGetTokensResolver());
-export const deleteTokens = rest.delete(urls.tokens, createMockDeleteTokensResolver());
-export const getUsers = rest.get(urls.users, createMockGetUsersResolver());
-export const getUser = rest.get(`${urls.users}/:id`, createMockGetUserResolver());
-export const getEnrollmentRequests = rest.get(urls.enrollmentRequests, createMockGetEnrollmentRequestsResolver());
-export const postEnrollmentRequests = rest.post(urls.enrollmentRequests, createMockPostEnrollmentRequestsResolver());
-export const getCurrentUser = rest.get(urls.currentUser, createMockCurrentUserResolver());
-export const updateUser = rest.patch(`${urls.users}/:id`, createMockUpdateUserResolver());
-export const addUser = rest.post(urls.users, createMockAddUserResolver());
-export const deleteUser = rest.delete(`${urls.users}/:id`, createMockDeleteUserResolver());
+export const postLogin = rest.post(apiUrls.login, createMockLoginResolver());
+export const getSites = rest.get(apiUrls.sites, createMockSitesResolver());
+export const getSitesCoordinates = rest.get(apiUrls.sitesCoordinates, createMockSitesCoordinatesResolver());
+export const getSite = rest.get(`${apiUrls.sites}/:id`, createMockSiteResolver());
+export const postTokens = rest.post(apiUrls.tokens, createMockTokensResolver());
+export const getTokens = rest.get(apiUrls.tokens, createMockGetTokensResolver());
+export const deleteTokens = rest.delete(apiUrls.tokens, createMockDeleteTokensResolver());
+export const getUsers = rest.get(apiUrls.users, createMockGetUsersResolver());
+export const getUser = rest.get(`${apiUrls.users}/:id`, createMockGetUserResolver());
+export const getEnrollmentRequests = rest.get(apiUrls.enrollmentRequests, createMockGetEnrollmentRequestsResolver());
+export const postEnrollmentRequests = rest.post(apiUrls.enrollmentRequests, createMockPostEnrollmentRequestsResolver());
+export const getCurrentUser = rest.get(apiUrls.currentUser, createMockCurrentUserResolver());
+export const updateUser = rest.patch(`${apiUrls.users}/:id`, createMockUpdateUserResolver());
+export const addUser = rest.post(apiUrls.users, createMockAddUserResolver());
+export const deleteUser = rest.delete(`${apiUrls.users}/:id`, createMockDeleteUserResolver());
 export const allResolvers = [
   postLogin,
   getSites,

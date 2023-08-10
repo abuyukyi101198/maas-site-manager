@@ -1,11 +1,10 @@
-import axios from "axios";
-
-import urls from "@/api/urls";
+import { apiClient } from "@/api";
 import { durationFactory } from "@/mocks/factories";
 import { createMockTokensResolver } from "@/mocks/resolvers";
 import { createMockPostServer } from "@/mocks/server";
+import { apiUrls } from "@/utils/test-urls";
 
-const mockServer = createMockPostServer(urls.tokens, createMockTokensResolver());
+const mockServer = createMockPostServer(apiUrls.tokens, createMockTokensResolver());
 
 beforeAll(() => {
   mockServer.listen();
@@ -18,7 +17,9 @@ afterAll(() => {
 });
 
 it("returns list of tokens", async () => {
-  const amount = 1;
-  const result = await axios.post(urls.tokens, { duration: durationFactory.build(), amount });
-  expect(result.data.items).toHaveLength(amount);
+  const count = 1;
+  const result = await apiClient.default.postApiV1TokensPost({
+    requestBody: { duration: durationFactory.build(), count },
+  });
+  expect(result.tokens).toHaveLength(count);
 });

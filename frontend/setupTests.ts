@@ -49,6 +49,11 @@ beforeAll(() => {
   vi.spyOn(console, "error").mockImplementation((...args: unknown[]) => {
     throw new Error(args.join(" "));
   });
+  vi.stubGlobal("AbortController", NodeAbortController);
+});
+
+afterAll(() => {
+  vi.unstubAllGlobals();
 });
 
 // runs a cleanup after each test case (e.g. clearing jsdom)

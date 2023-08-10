@@ -1,16 +1,7 @@
-import type { UseMutationOptions, UseMutationResult } from "@tanstack/react-query";
+import type { MutateOptions, UseMutationOptions } from "@tanstack/react-query";
 import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
-import type { AxiosError } from "axios";
 
-import type {
-  GetEnrollmentRequestsQueryParams,
-  GetSitesQueryParams,
-  GetTokensQueryParams,
-  GetUsersQueryParams,
-  PostEnrollmentRequestsData,
-  PostLoginData,
-  UpdateUserPayload,
-} from "@/api/handlers";
+import type apiClient from "@/api";
 import {
   deleteTokens,
   postLogin,
@@ -24,42 +15,35 @@ import {
   getUsers,
   addUser,
   getUser,
-  deleteUser,
   getSite,
   getSitesCoordinates,
+  deleteUser,
 } from "@/api/handlers";
-import type {
-  SitesQueryResult,
-  PostTokensResult,
-  EnrollmentRequestsQueryResult,
-  AccessToken,
-  Token,
-  Site,
-  UsersQueryResult,
-  User,
-  SitesCoordinatesQueryResult,
-} from "@/api/types";
+import type { SitesQueryResult, PostTokensResult, Token, Site, UsersQueryResult, User } from "@/api/types";
+import type { PendingSitesPostRequest } from "@/api-client";
 
 export type UseSitesQueryResult = ReturnType<typeof useSitesQuery>;
 
 const refetchInterval = Number(import.meta.env.VITE_POLLING_INTERVAL_MS);
-export const useSitesQuery = ({ page, size, sort_by }: GetSitesQueryParams, queryText?: string) =>
+
+// TODO: integrate supported API params https://warthogs.atlassian.net/browse/MAASENG-2081
+export const useSitesQuery = ({ page, size, sortBy }: Parameters<typeof apiClient.default.getApiV1SitesGet>[0]) =>
   useQuery<SitesQueryResult>({
-    queryKey: ["sites", page, size, sort_by, queryText],
-    queryFn: () => getSites({ page, size, sort_by }, queryText),
+    queryKey: ["sites", page, size, sortBy],
+    queryFn: () => getSites({ page, size, sortBy }),
     keepPreviousData: true,
     refetchInterval,
   });
 
 export const useSitesCoordinatesQuery = (queryText?: string) =>
-  useQuery<SitesCoordinatesQueryResult>({
+  useQuery({
     queryKey: ["sitesCoordinates", queryText],
     queryFn: () => getSitesCoordinates(queryText),
     keepPreviousData: true,
     refetchInterval,
   });
-export const useSiteQuery = (id: Site["id"]) =>
-  useQuery<Site>({ queryKey: ["sites", id], queryFn: () => getSite(id), keepPreviousData: true });
+export const useSiteQuery = ({ id }: Parameters<typeof apiClient.default.getIdApiV1SitesIdGet>[0]) =>
+  useQuery<Site>({ queryKey: ["sites", id], queryFn: () => getSite({ id }), keepPreviousData: true });
 
 // return single site data from query cache
 export const useSiteQueryData = (id: Site["id"]): Site | null => {
@@ -78,10 +62,15 @@ export const useSiteQueryData = (id: Site["id"]): Site | null => {
 };
 
 export type useUsersQueryResult = ReturnType<typeof useUsersQuery>;
-export const useUsersQuery = ({ page, size, sort_by }: GetUsersQueryParams, searchText?: string) =>
+export const useUsersQuery = ({
+  page,
+  size,
+  sortBy,
+  searchText,
+}: Parameters<typeof apiClient.default.getApiV1UsersGet>[0]) =>
   useQuery<UsersQueryResult>({
-    queryKey: ["users", page, size, sort_by, searchText],
-    queryFn: () => getUsers({ page, size, sort_by }, searchText),
+    queryKey: ["users", page, size, sortBy, searchText],
+    queryFn: () => getUsers({ page, size, sortBy, searchText }),
     keepPreviousData: true,
   });
 
@@ -89,13 +78,13 @@ export type useUserQueryResult = ReturnType<typeof useUserQuery>;
 export const useUserQuery = ({ id, enabled = true }: { id: User["id"]; enabled?: boolean }) =>
   useQuery<User>({
     queryKey: ["users", id],
-    queryFn: () => getUser(id),
+    queryFn: () => getUser({ id }),
     keepPreviousData: true,
     enabled,
   });
 
 export type useTokensQueryResult = ReturnType<typeof useTokensQuery>;
-export const useTokensQuery = ({ page, size }: GetTokensQueryParams) =>
+export const useTokensQuery = ({ page, size }: Parameters<typeof getTokens>[0]) =>
   useQuery<PostTokensResult>({
     queryKey: ["tokens", page, size],
     queryFn: () => getTokens({ page, size }),
@@ -123,8 +112,8 @@ export const useDeleteTokensMutation = (options: UseMutationOptions<unknown, unk
 };
 
 export type UseEnrollmentRequestsQueryResult = ReturnType<typeof useRequestsQuery>;
-export const useRequestsQuery = ({ page, size }: GetEnrollmentRequestsQueryParams) =>
-  useQuery<EnrollmentRequestsQueryResult>({
+export const useRequestsQuery = ({ page, size }: Parameters<typeof apiClient.default.getRequestsApiV1RequestsGet>[0]) =>
+  useQuery({
     queryKey: ["requests", page, size],
     queryFn: () => getEnrollmentRequests({ page, size }),
     keepPreviousData: true,
@@ -132,16 +121,14 @@ export const useRequestsQuery = ({ page, size }: GetEnrollmentRequestsQueryParam
   });
 
 export const useRequestsCountQuery = () =>
-  useQuery<EnrollmentRequestsQueryResult>({
-    queryKey: ["requests", "1", "1"],
-    queryFn: () => getEnrollmentRequests({ page: "1", size: "1" }),
+  useQuery({
+    queryKey: ["requests", 1, 1],
+    queryFn: () => getEnrollmentRequests({ page: 1, size: 1 }),
     keepPreviousData: true,
     refetchInterval,
   });
 
-export const useEnrollmentRequestsMutation = (
-  options: UseMutationOptions<unknown, unknown, PostEnrollmentRequestsData, unknown>,
-) => {
+export const useEnrollmentRequestsMutation = (options: MutateOptions<unknown, unknown, PendingSitesPostRequest>) => {
   const queryClient = useQueryClient();
   return useMutation(postEnrollmentRequests, {
     onSuccess: (...args) => {
@@ -150,22 +137,40 @@ export const useEnrollmentRequestsMutation = (
     },
   });
 };
-export type ApiError = AxiosError<{
-  detail?: string | Array<{ loc: string[]; msg: string; type: string }>;
-}>;
-export type LoginError = ApiError;
-export const useLoginMutation = (): UseMutationResult<AccessToken, LoginError, PostLoginData> => useMutation(postLogin);
+
+export const useLoginMutation = () => useMutation(postLogin);
 
 export const useCurrentUserQuery = () => useQuery<User>({ queryKey: ["me"], queryFn: getCurrentUser });
 
 export const useUpdateUserMutation = (
-  options?: Omit<UseMutationOptions<any, unknown, UpdateUserPayload, unknown>, "mutationFn">,
+  options?: Omit<UseMutationOptions<any, unknown, Parameters<typeof updateUser>[0], unknown>, "mutationFn">,
 ) => useMutation(updateUser, options);
 
 export const useAddUserMutation = (
-  options?: Omit<UseMutationOptions<any, unknown, Omit<User, "id">, unknown>, "mutationFn">,
-) => useMutation(addUser, options);
+  options?: Omit<
+    UseMutationOptions<any, unknown, Parameters<typeof addUser>[0], Parameters<typeof addUser>[0]>,
+    "mutationFn"
+  >,
+) => {
+  const queryClient = useQueryClient();
+  return useMutation(addUser, {
+    ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries(["users"]);
+      options?.onSuccess?.(...args);
+    },
+  });
+};
 
 export const useDeleteUserMutation = (
-  options?: Omit<UseMutationOptions<void, unknown, number, unknown>, "mutationFn">,
-) => useMutation(deleteUser, options);
+  options?: Omit<UseMutationOptions<any, unknown, Parameters<typeof deleteUser>[0], unknown>, "mutationFn">,
+) => {
+  const queryClient = useQueryClient();
+  return useMutation(deleteUser, {
+    ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries(["users"]);
+      options?.onSuccess?.(...args);
+    },
+  });
+};

@@ -1,3 +1,6 @@
+import type { Site as SiteModel } from "@/api-client/models/Site";
+
+export type Site = SiteModel;
 export type AccessToken = {
   access_token: string;
   token_type: "bearer";
@@ -10,22 +13,6 @@ export type Stats = {
   error_machines: number;
   total_machines: number;
   last_seen: string; // <ISO 8601 date string>
-};
-
-export type Site = {
-  id: string;
-  name: string;
-  name_unique: boolean;
-  url: string; // <full URL including protocol>,
-  country: string; // <alpha2 country code>,
-  city: string;
-  zip: string;
-  street: string;
-  timezone: string; // IANA time zone name,
-  latitude: string;
-  longitude: string;
-  connection_status: "stable" | "lost" | "unknown";
-  stats: Stats | null;
 };
 
 export type PaginatedQueryResult<D extends unknown> = {
