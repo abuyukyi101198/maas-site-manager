@@ -43,6 +43,7 @@ it("prefills form data", async () => {
 
   expect(screen.getByRole("heading", { name: `Edit ${region.name}` })).toBeInTheDocument();
 
+  expect(screen.getByRole("combobox", { name: "Country" })).toHaveValue(region.country);
   expect(screen.getByRole("textbox", { name: "Street" })).toHaveValue(region.street);
   expect(screen.getByRole("textbox", { name: "City" })).toHaveValue(region.city);
   expect(screen.getByRole("textbox", { name: "Latitude and Longitude" })).toHaveValue(

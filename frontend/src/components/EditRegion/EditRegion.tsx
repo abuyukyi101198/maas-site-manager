@@ -1,5 +1,6 @@
-import { ActionButton, Button, Input, Label, Notification, Spinner } from "@canonical/react-components";
+import { ActionButton, Button, Input, Label, Notification, Spinner, Select } from "@canonical/react-components";
 import { Field, Form, Formik } from "formik";
+import en from "i18n-iso-countries/langs/en.json";
 import * as Yup from "yup";
 
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
@@ -7,8 +8,18 @@ import { useAppLayoutContext } from "@/context";
 import type { RegionDetailsContextValue } from "@/context/RegionDetailsContext";
 import { useRegionDetailsContext } from "@/context/RegionDetailsContext";
 import { useSiteQuery } from "@/hooks/react-query";
+import { getCountryName } from "@/utils";
+
+const countryOptions = [
+  { value: "", label: "Select country...", disabled: true },
+  ...Object.keys(en.countries).map((countryCode) => ({
+    value: countryCode,
+    label: getCountryName(countryCode),
+  })),
+] as const;
 
 const baseInitialValues = {
+  country: "",
   street: "",
   city: "",
   coordinates: "",
@@ -38,6 +49,7 @@ const EditRegionContent = ({
   setRegionId: NonNullable<RegionDetailsContextValue["setSelected"]>;
 }) => {
   const headingId = useId();
+  const countryId = useId();
   const streetId = useId();
   const cityId = useId();
   const coordinatesId = useId();
@@ -51,6 +63,7 @@ const EditRegionContent = ({
       setInitialValues({
         street: region.street ?? "",
         city: region.city ?? "",
+        country: region.country ?? "",
         coordinates: `${region.latitude}, ${region.longitude}`,
       });
     }
@@ -61,6 +74,7 @@ const EditRegionContent = ({
     const regionData = {
       street: values.street,
       city: values.city,
+      country: values.country,
       latitude,
       longitude,
     };
@@ -87,7 +101,14 @@ const EditRegionContent = ({
             {({ isSubmitting, errors, touched, isValid, dirty }) => (
               <Form aria-labelledby={headingId}>
                 <h4 className="p-heading--5">Geolocation data</h4>
-                {/* TODO: Add country input field https://warthogs.atlassian.net/browse/MAASENG-2055 */}
+                <Label htmlFor={countryId}>Country</Label>
+                <Field
+                  as={Select}
+                  error={touched.country && errors.country}
+                  id={countryId}
+                  name="country"
+                  options={countryOptions}
+                />
                 <Label htmlFor={streetId}>Street</Label>
                 <Field as={Input} error={touched.street && errors.street} id={streetId} name="street" type="text" />
                 <Label htmlFor={cityId}>City</Label>
