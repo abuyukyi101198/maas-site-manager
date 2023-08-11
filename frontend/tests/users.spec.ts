@@ -88,7 +88,7 @@ test("closes the form when navigating away", async ({ page }) => {
 
 test("can delete a user", async ({ page }) => {
   const testUsername = "Watto89";
-  const dialog = page.getByRole("dialog", {
+  const dialog = page.getByRole("complementary", {
     name: /delete user/i,
   });
   await expect(dialog).toBeHidden();

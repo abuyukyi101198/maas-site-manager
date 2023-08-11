@@ -1,16 +1,19 @@
 import classNames from "classnames";
+import type { LeafletEventHandlerFnMap } from "leaflet";
 import L from "leaflet";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
-import { Marker, Popup } from "react-leaflet";
+import { Marker, Popup, useMap } from "react-leaflet";
 
 import RegionSummary from "@/components/Map/RegionSummary/RegionSummary";
 import type { SiteMarkerType } from "@/components/Map/types";
 
 type MarkerApprearance = "base" | "selected";
+
 const SiteMarkerSvg = ({ appearance = "base" }: { appearance?: MarkerApprearance }) => {
   return (
     <svg
+      aria-label="region location marker"
       className={classNames("site-marker", { "is-selected": appearance === "selected" })}
       fill="none"
       height="47"
@@ -66,21 +69,62 @@ export const getSiteMarker = (appearance: keyof typeof markerIcon) => {
   return markerIcon[appearance];
 };
 
-const SiteMarker = ({ id, position }: SiteMarkerType) => {
+const HOVER_DELAY = 750;
+
+const SiteMarker = ({
+  id,
+  position,
+  handleMarkerClick,
+}: SiteMarkerType & { handleMarkerClick: (id: SiteMarkerType["id"]) => void }) => {
+  const popupContentRef = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const resetTimeout = () => timeoutRef.current && clearTimeout(timeoutRef.current);
+  const map = useMap();
+
+  const handleClick = useCallback(() => {
+    map.closePopup();
+    handleMarkerClick(id);
+  }, [map, handleMarkerClick, id]);
+
   const eventHandlers = useMemo(
-    () => ({
-      mouseover() {},
-      mouseout() {},
-      dragend() {},
-      click() {},
-    }),
-    [],
+    () =>
+      ({
+        mouseover(event) {
+          timeoutRef.current = setTimeout(() => {
+            event.target.openPopup();
+          }, HOVER_DELAY);
+        },
+        mouseout(event) {
+          resetTimeout();
+          // ignore mouseout events within the popup content
+          if (event.originalEvent.relatedTarget === popupContentRef.current?.firstElementChild) {
+            return;
+          } else {
+            map.closePopup();
+          }
+        },
+        dragend() {},
+        click() {
+          handleClick();
+        },
+        keypress() {
+          handleClick();
+        },
+      }) as LeafletEventHandlerFnMap,
+    [map, handleClick],
   );
 
   return (
     <Marker eventHandlers={eventHandlers} icon={getSiteMarker("base")} keyboard position={position}>
-      <Popup minWidth={300}>
-        <RegionSummary id={id} />
+      <Popup minWidth={385}>
+        <div
+          onMouseLeave={() => {
+            map.closePopup();
+          }}
+          ref={popupContentRef}
+        >
+          <RegionSummary id={id} />
+        </div>
       </Popup>
     </Marker>
   );

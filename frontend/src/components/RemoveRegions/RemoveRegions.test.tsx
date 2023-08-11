@@ -1,13 +1,28 @@
-import RemoveRegions from "./index";
+import { rest } from "msw";
 
-import { siteFactory } from "@/mocks/factories";
+import RemoveRegions from "./RemoveRegions";
+
+import { siteFactory, statsFactory } from "@/mocks/factories";
 import { createMockSiteResolver } from "@/mocks/resolvers";
-import { createMockGetServer } from "@/mocks/server";
 import { apiUrls } from "@/utils/test-urls";
-import { render, screen, userEvent } from "@/utils/test-utils";
+import { screen, setupServer, render, userEvent } from "@/utils/test-utils";
 
-const sites = siteFactory.build();
-const mockServer = createMockGetServer(`${apiUrls.sites}/:id`, createMockSiteResolver([sites]));
+const stats = statsFactory.build();
+const site = siteFactory.build({ stats });
+
+const mockServer = setupServer(rest.get(`${apiUrls.sites}/:id`, createMockSiteResolver([site])));
+
+beforeAll(() => {
+  mockServer.listen();
+});
+
+afterEach(() => {
+  mockServer.resetHandlers();
+});
+
+afterAll(() => {
+  mockServer.close();
+});
 
 beforeAll(() => {
   mockServer.listen();

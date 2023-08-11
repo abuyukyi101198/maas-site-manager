@@ -57,7 +57,7 @@ const RegionDetailsContent = ({ id }: { id: NonNullable<RegionDetailsContextValu
                 >
                   {get(connectionLabels, site.connection_status)}
                   <span className="u-text--muted region-details__last-seen">
-                    {getLastSeenText({ connection: site.connection_status, lastSeen: stats.last_seen })}
+                    {getLastSeenText({ connection: site.connection_status, lastSeen: stats.last_seen, format: "long" })}
                   </span>
                 </td>
               </tr>

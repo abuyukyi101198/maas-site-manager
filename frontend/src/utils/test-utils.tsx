@@ -6,6 +6,7 @@ import type { RenderOptions, RenderResult } from "@testing-library/react";
 import { screen, render } from "@testing-library/react";
 
 import apiClient from "@/api";
+import MainLayout from "@/components/MainLayout";
 import { AppLayoutContextProvider, AuthContextProvider, RowSelectionContextProviders } from "@/context";
 import type { MemoryRouterProps } from "@/utils/router";
 import { MemoryRouter } from "@/utils/router";
@@ -24,14 +25,17 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
 };
 
 const makeProvidersWithMemoryRouter =
-  (memoryRouterProps: MemoryRouterProps) =>
+  ({ withMainLayout, ...memoryRouterProps }: MemoryRenderOptions) =>
   ({ children }: { children: React.ReactNode }) => {
     return (
       <Providers>
         <MemoryRouter {...memoryRouterProps}>
           <AppLayoutContextProvider>
             <AuthContextProvider apiClient={apiClient}>
-              <RowSelectionContextProviders>{children}</RowSelectionContextProviders>
+              <RowSelectionContextProviders>
+                {withMainLayout ? <MainLayout /> : null}
+                {children}
+              </RowSelectionContextProviders>
             </AuthContextProvider>
           </AppLayoutContextProvider>
         </MemoryRouter>
@@ -44,10 +48,12 @@ const customRender: (ui: ReactElement, options?: Omit<RenderOptions, "wrapper">)
   options?: Omit<RenderOptions, "wrapper">,
 ) => render(ui, { wrapper: Providers, ...options });
 
-interface MemoryRenderOptions extends MemoryRouterProps, Omit<RenderOptions, "wrapper"> {}
+interface MemoryRenderOptions extends MemoryRouterProps, Omit<RenderOptions, "wrapper"> {
+  withMainLayout?: boolean;
+}
 const renderWithMemoryRouter = (ui: ReactElement, options?: MemoryRenderOptions) => {
-  const { basename, initialEntries, initialIndex } = options || {};
-  const Providers = makeProvidersWithMemoryRouter({ basename, initialEntries, initialIndex });
+  const { basename, initialEntries, initialIndex, withMainLayout } = options || {};
+  const Providers = makeProvidersWithMemoryRouter({ basename, initialEntries, initialIndex, withMainLayout });
   return render(ui, { wrapper: Providers, ...options });
 };
 

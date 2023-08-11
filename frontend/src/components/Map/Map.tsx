@@ -5,6 +5,9 @@ import { MapContainer, TileLayer, ZoomControl, useMapEvents } from "react-leafle
 import SiteMarker from "./SiteMarker";
 import { type SiteMarkerType } from "./types";
 
+import { useAppLayoutContext } from "@/context";
+import { useRegionDetailsContext } from "@/context/RegionDetailsContext";
+
 const MapEvents = ({ onEvent }: { onEvent: LeafletEventHandlerFn }) => {
   useMapEvents({
     zoomend: onEvent,
@@ -21,6 +24,13 @@ const Map = ({
   markers: SiteMarkerType[] | null;
   onBoundsChange?: (bounds: string) => void;
 }) => {
+  const { setSidebar } = useAppLayoutContext();
+  const { setSelected: setRegionId } = useRegionDetailsContext();
+  const handleMarkerClick = (id: SiteMarkerType["id"]) => {
+    setRegionId(id);
+    setSidebar("regionDetails");
+  };
+
   return (
     <MapContainer
       boundsOptions={{
@@ -44,7 +54,9 @@ const Map = ({
         data-testid="tile-layer"
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      {markers?.map(({ position, id }) => <SiteMarker id={id} key={id} position={position} />)}
+      {markers?.map(({ position, id }) => (
+        <SiteMarker handleMarkerClick={handleMarkerClick} id={id} key={id} position={position} />
+      ))}
     </MapContainer>
   );
 };

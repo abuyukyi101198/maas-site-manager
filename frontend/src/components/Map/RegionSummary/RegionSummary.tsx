@@ -60,7 +60,7 @@ const RegionSummary = ({ id }: { id: Site["id"] }) => {
                 >
                   {get(connectionLabels, site.connection_status)}
                   <span className="u-text--muted region-summary__last-seen">
-                    last seen {getLastSeenText({ connection: site.connection_status, lastSeen: stats.last_seen })}
+                    {getLastSeenText({ lastSeen: stats.last_seen, connection: site.connection_status, format: "long" })}
                   </span>
                 </td>
               </tr>

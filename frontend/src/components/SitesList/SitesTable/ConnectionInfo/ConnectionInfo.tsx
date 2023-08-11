@@ -21,11 +21,16 @@ export const connectionLabels: Record<Site["connection_status"], string> = {
 
 type ConnectionInfoProps = { connection: Site["connection_status"]; lastSeen?: SiteData["last_seen"] };
 
-export const getLastSeenText = ({ connection, lastSeen }: ConnectionInfoProps) => {
+export const getLastSeenText = ({
+  connection,
+  lastSeen,
+  format = "long",
+}: ConnectionInfoProps & { format: "long" | "short" }) => {
   if (!lastSeen) {
     return null;
   }
-  return connection === "unknown" ? `heartbeat since ${formatDistanceToNow(lastSeen)}` : formatDistanceToNow(lastSeen);
+  const description = connection === "unknown" ? "heartbeat since" : "last seen";
+  return `${format === "long" ? description : ""} ${formatDistanceToNow(lastSeen)}`;
 };
 
 const ConnectionInfo = ({ connection, lastSeen }: ConnectionInfoProps) => {
@@ -54,7 +59,9 @@ const ConnectionInfo = ({ connection, lastSeen }: ConnectionInfoProps) => {
         </div>
       </TooltipButton>
       <div className="connection__text u-text--muted">
-        <time dateTime={lastSeen}>{getLastSeenText({ connection, lastSeen })}</time>
+        <time dateTime={lastSeen}>
+          {getLastSeenText({ connection, lastSeen, format: connection === "unknown" ? "long" : "short" })}
+        </time>
       </div>
     </>
   );

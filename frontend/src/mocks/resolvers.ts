@@ -9,6 +9,7 @@ import type { TokensPostResponse } from "@/api-client";
 import type { Site } from "@/api-client/models/Site";
 import type { SitesGetResponse } from "@/api-client/models/SitesGetResponse";
 import { isDev } from "@/constants";
+import staticTileImage from "@/mocks/assets/static-tile.png";
 import { apiUrls } from "@/utils/test-urls";
 
 export const mockResponseDelay = isDev ? 0 : 0;
@@ -245,6 +246,13 @@ export const getCurrentUser = rest.get(apiUrls.currentUser, createMockCurrentUse
 export const updateUser = rest.patch(`${apiUrls.users}/:id`, createMockUpdateUserResolver());
 export const addUser = rest.post(apiUrls.users, createMockAddUserResolver());
 export const deleteUser = rest.delete(`${apiUrls.users}/:id`, createMockDeleteUserResolver());
+export const tileHandler = rest.get(/.*\.(?:png|jpg|jpeg|bmp)$/, async (req, res, ctx) => {
+  if (req.url.host.includes("tile.openstreetmap.org")) {
+    const image = await fetch(staticTileImage).then((res) => res.arrayBuffer());
+    return res(ctx.status(200), ctx.set("Content-Type", "image/png"), ctx.body(image));
+  }
+});
+
 export const allResolvers = [
   postLogin,
   getSites,
@@ -261,4 +269,5 @@ export const allResolvers = [
   addUser,
   getUser,
   deleteUser,
+  ...(import.meta.env.VITE_USE_MOCK_TILES === "true" ? [tileHandler] : []),
 ];

@@ -1,9 +1,26 @@
-/* eslint-disable testing-library/no-container */
+import { rest } from "msw";
+
 import Map from "./Map";
 
-import { siteFactory } from "@/mocks/factories";
+import { markerFactory, siteFactory, statsFactory } from "@/mocks/factories";
+import { createMockSiteResolver } from "@/mocks/resolvers";
 import { formatSiteMarker } from "@/utils";
-import { render, screen, within } from "@/utils/test-utils";
+import { apiUrls } from "@/utils/test-urls";
+import { render, renderWithMemoryRouter, screen, setupServer, userEvent } from "@/utils/test-utils";
+
+const stats = statsFactory.build();
+const site = siteFactory.build({ name: "region-name", url: "https://example.com", stats });
+const mockServer = setupServer(rest.get(`${apiUrls.sites}/:id`, createMockSiteResolver([site])));
+
+beforeAll(() => {
+  mockServer.listen();
+});
+afterEach(() => {
+  mockServer.resetHandlers();
+});
+afterAll(() => {
+  mockServer.close();
+});
 
 it("renders the map with controls", async () => {
   render(<Map id="map-container" markers={null} />);
@@ -34,12 +51,24 @@ it("displays open street map attribution", () => {
 it("displays map markers", () => {
   const sites = siteFactory.buildList(2);
   const markers = sites.map(formatSiteMarker);
-  const { container } = render(<Map id="map-container" markers={markers} />);
+  render(<Map id="map-container" markers={markers} />);
 
-  expect(container.querySelectorAll(".leaflet-marker-icon")).toHaveLength(sites.length);
-  expect(within(container.querySelector(".leaflet-marker-pane")!).getAllByRole("button")).toHaveLength(sites.length);
-  // TODO: ensure that each marker has an accessible label
-  // markers.forEach(({ name }) => {
-  //   expect(screen.getByRole("button", { name })).toBeInTheDocument();
-  // });
+  const markerButtons = screen.getAllByRole("button", {
+    name: /region location marker/,
+  });
+  expect(markerButtons).toHaveLength(sites.length);
+  markerButtons.forEach((marker) => {
+    expect(marker).toBeVisible();
+  });
+});
+
+it("displays region details after clicking a marker", async () => {
+  const markers = [{ ...markerFactory.build({ id: site.id, position: [0, 0] }) }];
+  renderWithMemoryRouter(<Map id="map-container" markers={markers} />, { withMainLayout: true });
+  expect(screen.getByLabelText(/region location marker/)).toBeInTheDocument();
+  const marker = screen.getByRole("button", { name: /region location marker/ });
+  const regionDetails = /Region details/i;
+  expect(screen.queryByLabelText(regionDetails)).not.toBeInTheDocument();
+  await userEvent.click(marker);
+  expect(screen.getByLabelText(regionDetails)).toBeInTheDocument();
 });

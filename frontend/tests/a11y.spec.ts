@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright"; // 1
-import { protectedPages, publicPages } from "@/config/routes";
+import { protectedPages, publicPages, routesConfig } from "@/config/routes";
 import { adminAuthFile } from "./constants";
 
 type ColorScheme = Pick<NonNullable<Parameters<Page["emulateMedia"]>[0]>, "colorScheme">["colorScheme"];
@@ -13,7 +13,10 @@ const a11yTest =
     }) => {
       await page.emulateMedia({ colorScheme });
       // eslint-disable-next-line playwright/no-networkidle
-      await page.goto(path, { waitUntil: "networkidle" });
+      await page.goto(path, {
+        // leaflet map tends to trigger continuous network requests disallowing the use of networkidle
+        waitUntil: path.includes(routesConfig.sitesMap.path) ? "domcontentloaded" : "networkidle",
+      });
       // verify the correct page has been displayed
       await expect(page).toHaveTitle(new RegExp(title));
 

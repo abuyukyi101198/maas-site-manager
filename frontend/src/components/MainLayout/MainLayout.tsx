@@ -3,8 +3,6 @@ import { useEffect } from "react";
 import { Col, Row, useOnEscapePressed, usePrevious } from "@canonical/react-components";
 import classNames from "classnames";
 
-import SiteSelection from "../SiteSelection/SiteSelection";
-
 import DeleteUser from "@/components/DeleteUser";
 import DocumentTitle from "@/components/DocumentTitle/DocumentTitle";
 import EditRegion from "@/components/EditRegion/EditRegion";
@@ -12,6 +10,7 @@ import Navigation from "@/components/Navigation";
 import RegionDetails from "@/components/RegionDetails/RegionDetails";
 import RemoveRegions from "@/components/RemoveRegions";
 import SecondaryNavigation from "@/components/SecondaryNavigation";
+import SiteSelection from "@/components/SiteSelection/SiteSelection";
 import UserForm from "@/components/UserForm";
 import type { RoutePath } from "@/config/routes";
 import { routesConfig } from "@/config/routes";
@@ -77,7 +76,6 @@ const Aside = () => {
       aria-label={sidebar ? sidebarLabels[sidebar] : undefined}
       className={classNames("l-aside is-maas-site-manager u-padding-top--medium", { "is-collapsed": !sidebar })}
       id="aside-panel"
-      role="dialog"
     >
       <Row>
         <Col size={12}>{sidebar && <SidebarComponents sidebar={sidebar} />}</Col>

@@ -5,6 +5,7 @@ $grid-margin-small: map_get($grid-margin-widths, small);
 $grid-margin-default: map_get($grid-margin-widths, default);
 
 .map {
+    font-family: inherit;
     height: 100vh;
     position: relative;
     background: #fff;
@@ -27,6 +28,24 @@ $grid-margin-default: map_get($grid-margin-widths, default);
 
     .leaflet-pane {
         z-index: $map-base-z-index;
+    }
+
+    .leaflet-popup-content-wrapper,
+    .leaflet-popup-content {
+        margin: 0;
+        padding: 0;
+    }
+
+    .leaflet-popup-tip-container {
+        display: none;
+    }
+
+    a.leaflet-popup-close-button {
+        display: none;
+    }
+
+    .leaflet-popup {
+        margin-bottom: 47px;
     }
 }
 
@@ -54,3 +73,4 @@ $grid-margin-default: map_get($grid-margin-widths, default);
     background: none;
     border: none;
 }
+

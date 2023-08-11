@@ -56,14 +56,14 @@ test("can hide table columns", async ({ page }) => {
 });
 
 test("opens remove regions panel if remove button is pressed", async ({ page }) => {
-  await expect(page.getByRole("dialog", { name: /Remove regions/i })).toBeHidden();
+  await expect(page.getByRole("complementary", { name: /Remove regions/i })).toBeHidden();
   await page.getByRole("checkbox", { name: /select all/i }).click({ force: true });
   await page.getByRole("button", { name: /Remove/i }).click();
-  await expect(page.getByRole("dialog", { name: /Remove regions/i })).toBeVisible();
+  await expect(page.getByRole("complementary", { name: /Remove regions/i })).toBeVisible();
 });
 
 test("can close remove regions panel using Escape key", async ({ page }) => {
-  const dialog = page.getByRole("dialog", { name: /Remove regions/i });
+  const dialog = page.getByRole("complementary", { name: /Remove regions/i });
   await expect(dialog).toBeHidden();
   await page.getByRole("checkbox", { name: /select all/i }).click({ force: true });
   await page.getByRole("button", { name: /Remove/i }).click();

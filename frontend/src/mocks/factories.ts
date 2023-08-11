@@ -10,6 +10,7 @@ import type { Site } from "@/api-client/models/Site";
 import type { SiteData } from "@/api-client/models/SiteData";
 import { TimeZone } from "@/api-client/models/TimeZone";
 import type { User } from "@/api-client/models/User";
+import type { SiteMarkerType } from "@/components/Map/types";
 
 export const connections: ConnectionStatus[] = [
   ConnectionStatus.STABLE,
@@ -39,6 +40,14 @@ export const connectionFactory = Factory.define<Site["connection_status"]>(({ se
     dictionaries: [connections],
     seed: sequence,
   }) as Site["connection_status"];
+});
+
+export const markerFactory = Factory.define<SiteMarkerType>(({ sequence }) => {
+  const chance = new Chance(`maas-${sequence}`);
+  return {
+    id: sequence,
+    position: [chance.latitude(), chance.longitude()],
+  };
 });
 
 export const siteFactory = Factory.define<Site>(({ sequence }) => {

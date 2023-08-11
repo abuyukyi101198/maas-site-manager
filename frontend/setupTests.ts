@@ -44,6 +44,8 @@ if (!globalThis.TextEncoder || !globalThis.TextDecoder) {
   globalThis.TextDecoder = NodeTextDecoder;
 }
 
+Object.defineProperty(window, "scrollTo", { value: vi.fn(), writable: true });
+
 beforeAll(() => {
   // fail a test whenver console.error is called
   vi.spyOn(console, "error").mockImplementation((...args: unknown[]) => {

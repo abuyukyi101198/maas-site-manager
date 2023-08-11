@@ -61,7 +61,7 @@ export default defineConfig({
   ],
   // run the dev server before starting tests
   webServer: {
-    command: "yarnpkg run dev",
+    command: "VITE_USE_MOCK_TILES=true yarnpkg run dev",
     url: `http://localhost:${process.env.VITE_UI_PORT}`,
     reuseExistingServer: !process.env.CI,
   },
