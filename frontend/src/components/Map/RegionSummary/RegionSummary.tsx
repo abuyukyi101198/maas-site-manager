@@ -23,13 +23,11 @@ const RegionSummary = ({ id }: { id: Site["id"] }) => {
 
   return (
     <Card className="region-summary" title="Region details">
-      {!stats || !site || isLoading ? (
-        <Spinner />
-      ) : error ? (
+      {error ? (
         <Notification severity="negative" title="Error while fetching site">
           <ErrorMessage error={error} />
         </Notification>
-      ) : (
+      ) : site ? (
         <>
           <div>
             <span className="region-summary__header">
@@ -60,24 +58,30 @@ const RegionSummary = ({ id }: { id: Site["id"] }) => {
                 >
                   {get(connectionLabels, site.connection_status)}
                   <span className="u-text--muted region-summary__last-seen">
-                    {getLastSeenText({ lastSeen: stats.last_seen, connection: site.connection_status, format: "long" })}
+                    {stats
+                      ? getLastSeenText({
+                          lastSeen: stats.last_seen,
+                          connection: site.connection_status,
+                          format: "long",
+                        })
+                      : null}
                   </span>
                 </td>
               </tr>
               <tr>
                 <td className="u-text--muted region-summary__table-item">Machines</td>
-                <td>{stats.total_machines}</td>
+                <td>{stats?.total_machines}</td>
               </tr>
               <tr>
                 <td className="u-text--muted region-summary__table-item">Machine status</td>
-                <td>
-                  <AggregatedStatus hideLabel stats={stats} />
-                </td>
+                <td>{stats ? <AggregatedStatus hideLabel stats={stats} /> : null}</td>
               </tr>
             </tbody>
           </table>
         </>
-      )}
+      ) : isLoading ? (
+        <Spinner />
+      ) : null}
     </Card>
   );
 };
