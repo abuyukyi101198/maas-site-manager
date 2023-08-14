@@ -74,3 +74,8 @@ $grid-margin-default: map_get($grid-margin-widths, default);
     border: none;
 }
 
+/* Ensure controls and attribution are underneath side panel */
+.leaflet-bottom.leaflet-right {
+    z-index: 100;
+}
+
