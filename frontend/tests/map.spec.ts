@@ -23,3 +23,22 @@ test("displays site markers", async ({ page }) => {
     .press("Enter");
   await expect(editRegion).toBeVisible();
 });
+
+test("returns to previous side panel if it exists", async ({ page }) => {
+  const map = page.getByRole("region", { name: "regions map" });
+  await expect(map).toBeVisible({ timeout: 5000 });
+  await page
+    .getByRole("button", { name: /region location marker/i })
+    .first()
+    .press("Enter");
+  await page
+    .getByRole("complementary", { name: /Region details/i })
+    .getByRole("button", { name: "Edit" })
+    .click();
+
+  await expect(page.getByRole("complementary", { name: /Edit region/i })).toBeVisible();
+
+  await page.getByRole("button", { name: /Cancel/i }).click();
+
+  await expect(page.getByRole("complementary", { name: /Region details/i })).toBeVisible();
+});

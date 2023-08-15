@@ -35,7 +35,7 @@ const createHandleValidate =
 
 const RemoveRegions = () => {
   const { rowSelection } = useRowSelectionContext("sites");
-  const { setSidebar } = useAppLayoutContext();
+  const { previousSidebar, setSidebar } = useAppLayoutContext();
   const regionsCount = rowSelection && Object.keys(rowSelection).length;
   const id = useId();
   const confirmTextId = `confirm-text-${id}`;
@@ -87,7 +87,17 @@ const RemoveRegions = () => {
               placeholder={`remove ${regionsCountText}`}
               type="text"
             />
-            <Button appearance="base" onClick={() => setSidebar(null)} type="button">
+            <Button
+              appearance="base"
+              onClick={() => {
+                if (previousSidebar) {
+                  setSidebar(previousSidebar);
+                } else {
+                  setSidebar(null);
+                }
+              }}
+              type="button"
+            >
               Cancel
             </Button>
             <Button appearance="negative" disabled={!dirty || isSubmitting} type="submit">

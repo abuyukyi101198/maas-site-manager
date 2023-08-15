@@ -55,7 +55,7 @@ const EditRegionContent = ({
   const coordinatesId = useId();
 
   const [initialValues, setInitialValues] = useState<RegionFormValues>(baseInitialValues);
-  const { setSidebar } = useAppLayoutContext();
+  const { previousSidebar, setSidebar } = useAppLayoutContext();
   const { data: region, error, isLoading } = useSiteQuery({ id: regionId });
 
   useEffect(() => {
@@ -81,12 +81,17 @@ const EditRegionContent = ({
     // eslint-disable-next-line no-console
     console.table(regionData);
     // TODO: Enable mutation here once implemented in backend https://warthogs.atlassian.net/browse/MAASENG-2059
+    resetForm();
   };
 
   const resetForm = () => {
     setInitialValues(baseInitialValues);
-    setRegionId(null);
-    setSidebar(null);
+    if (previousSidebar) {
+      setSidebar(previousSidebar);
+    } else {
+      setRegionId(null);
+      setSidebar(null);
+    }
   };
 
   return (
