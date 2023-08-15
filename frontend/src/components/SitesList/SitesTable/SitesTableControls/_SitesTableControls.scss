@@ -17,12 +17,7 @@ $box-shadow:
 
   &.is-map-view {
     .site-control-heading {
-      -webkit-text-stroke-width: 0.5px;
-      -webkit-text-stroke-color: $color-x-dark;
-
-      &.site-control-heading__loading {
-        -webkit-text-stroke-width: 0;
-      }
+      font-weight: $font-weight-regular-text;
     }
 
     .p-search-box__input,
