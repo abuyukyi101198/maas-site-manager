@@ -38,13 +38,24 @@ parts:
     source: backend
     python-packages:
       - .
+    override-build: |
+      craftctl default
+      snap-helpers write-hooks
     prime:
       - -bin/activate*
       - -bin/Activate*
       - -include
+
+  frontend:
+    plugin: nil
+    source: .
+    build-snaps:
+      - node/18/stable
     override-build: |
-      craftctl default
-      snap-helpers write-hooks
+      cd frontend
+      npm install -g yarn
+      yarn run build
+      cp -a dist $SNAPCRAFT_PART_INSTALL/static
 
   nginx:
     plugin: nil
