@@ -10,8 +10,6 @@ import { DefaultService } from './services/DefaultService';
 
 type HttpRequestConstructor = new (config: OpenAPIConfig) => BaseHttpRequest;
 
-export type ResponseInterceptor = (response: any, error: any) => any;
-
 export class ApiClient {
 
     public readonly default: DefaultService;
