@@ -38,8 +38,9 @@ class Site(BaseModel):
     latitude: str | None = None
     longitude: str | None = None
     note: str | None = None
-    region: str | None = None
-    street: str | None = None
+    state: str | None = None
+    address: str | None = None
+    postal_code: str | None = None
     # XXX: mypy can't grok that this is an str/enum with lots of members
     timezone: TimeZone | None = None  # type: ignore
     url: str

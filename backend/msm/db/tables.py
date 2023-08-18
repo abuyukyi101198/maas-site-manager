@@ -29,6 +29,7 @@ Site = Table(
     "site",
     METADATA,
     Column("id", Integer, primary_key=True),
+    Column("address", Text),
     Column("city", Text),
     Column("country", Text),  # ISO 3166 Alpha2
     Column("latitude", Text),
@@ -36,8 +37,8 @@ Site = Table(
     Column("name", Text),
     Column("name_unique", Boolean),
     Column("note", Text),
-    Column("region", Text),
-    Column("street", Text),
+    Column("postal_code", Text),
+    Column("state", Text),
     Column("timezone", Text),
     Column("url", Text, nullable=False),
     Column("accepted", Boolean, nullable=False, index=True, default=False),

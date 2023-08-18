@@ -6,12 +6,13 @@ from fastapi import Query
 class SiteFilterParams(NamedTuple):
     """Site filtering parameters."""
 
+    address: list[str] | None
     city: list[str] | None
     country: list[str] | None
     name: list[str] | None
     note: list[str] | None
-    region: list[str] | None
-    street: list[str] | None
+    postal_code: list[str] | None
+    state: list[str] | None
     timezone: list[str] | None
     url: list[str] | None
 
@@ -31,20 +32,25 @@ async def site_filter_parameters(
     | None = Query(default=None, title="Filter for country"),
     name: list[str] | None = Query(default=None, title="Filter for names"),
     note: list[str] | None = Query(default=None, title="Filter for notes"),
-    region: list[str] | None = Query(default=None, title="Filter for regions"),
-    street: list[str] | None = Query(default=None, title="Filter for streets"),
+    state: list[str]
+    | None = Query(default=None, title="Filter for administrative regions"),
+    address: list[str]
+    | None = Query(default=None, title="Filter for streets"),
+    postal_code: list[str]
+    | None = Query(default=None, title="Filter for postal code"),
     timezone: list[str]
     | None = Query(default=None, title="Filter for timezones"),
     url: list[str] | None = Query(default=None, title="Filter for urls"),
 ) -> SiteFilterParams:
     """Return parameters for site filtering."""
     return SiteFilterParams(
+        address=address,
         city=city,
         country=country,
         name=name,
         note=note,
-        region=region,
-        street=street,
+        postal_code=postal_code,
+        state=state,
         timezone=timezone,
         url=url,
     )

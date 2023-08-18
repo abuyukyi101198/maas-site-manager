@@ -171,8 +171,8 @@ class TestSitesHandler:
         [
             ("sort_by=city-asc", ["London", "Milan", "Paris", "Rome"]),
             (
-                "sort_by=city,name,name_unique,country,region,street,"
-                "timezone,connection_status",
+                "sort_by=city,postal_code,name,name_unique,country,state,"
+                "address,timezone,connection_status",
                 ["London", "Milan", "Paris", "Rome"],
             ),
             ("sort_by=city-asc", ["London", "Milan", "Paris", "Rome"]),

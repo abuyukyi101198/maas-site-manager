@@ -43,8 +43,9 @@ site_sort_parameters = SortParamParser(
         "name_unique",
         "country",
         "city",
-        "region",
-        "street",
+        "state",
+        "address",
+        "postal_code",
         "timezone",
         "connection_status",
     ]

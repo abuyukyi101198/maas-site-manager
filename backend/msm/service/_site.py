@@ -48,20 +48,22 @@ class SiteService(Service):
         country: list[str] | None = None,
         name: list[str] | None = None,
         note: list[str] | None = None,
-        region: list[str] | None = None,
-        street: list[str] | None = None,
+        state: list[str] | None = None,
+        postal_code: list[str] | None = None,
+        address: list[str] | None = None,
         timezone: list[str] | None = None,
         url: list[str] | None = None,
     ) -> tuple[int, Iterable[models.Site]]:
         """Return accepted sites, with optional filtering."""
         filters = queries.filters_from_arguments(
             Site,
+            address=address,
             city=city,
             country=country,
             name=name,
             note=note,
-            region=region,
-            street=street,
+            postal_code=postal_code,
+            state=state,
             timezone=timezone,
             url=url,
         )
@@ -169,15 +171,16 @@ class SiteService(Service):
         )
         return select(
             Site.c.id,
-            Site.c.name,
-            Site.c.name_unique,
+            Site.c.address,
             Site.c.city,
             Site.c.country,
             Site.c.latitude,
             Site.c.longitude,
+            Site.c.name,
+            Site.c.name_unique,
             Site.c.note,
-            Site.c.region,
-            Site.c.street,
+            Site.c.postal_code,
+            Site.c.state,
             Site.c.timezone,
             Site.c.url,
             case(
