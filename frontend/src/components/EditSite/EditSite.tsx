@@ -106,7 +106,7 @@ const EditSiteContent = ({
             {({ isSubmitting, errors, touched, isValid, dirty }) => (
               <Form aria-labelledby={headingId}>
                 <h4 className="p-heading--5">Geolocation data</h4>
-                <Label htmlFor={countryId}>Country</Label>
+                <Label htmlFor={countryId}>Country/Region</Label>
                 <Field
                   as={Select}
                   error={touched.country && errors.country}
@@ -114,7 +114,7 @@ const EditSiteContent = ({
                   name="country"
                   options={countryOptions}
                 />
-                <Label htmlFor={streetId}>Street</Label>
+                <Label htmlFor={streetId}>Address</Label>
                 <Field as={Input} error={touched.street && errors.street} id={streetId} name="street" type="text" />
                 <Label htmlFor={cityId}>City</Label>
                 <Field as={Input} error={touched.city && errors.city} id={cityId} name="city" type="text" />

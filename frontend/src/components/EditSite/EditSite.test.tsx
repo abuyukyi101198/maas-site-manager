@@ -43,8 +43,8 @@ it("prefills form data", async () => {
 
   expect(screen.getByRole("heading", { name: `Edit ${site.name}` })).toBeInTheDocument();
 
-  expect(screen.getByRole("combobox", { name: "Country" })).toHaveValue(site.country);
-  expect(screen.getByRole("textbox", { name: "Street" })).toHaveValue(site.street);
+  expect(screen.getByRole("combobox", { name: "Country/Region" })).toHaveValue(site.country);
+  expect(screen.getByRole("textbox", { name: "Address" })).toHaveValue(site.street);
   expect(screen.getByRole("textbox", { name: "City" })).toHaveValue(site.city);
   expect(screen.getByRole("textbox", { name: "Latitude and Longitude" })).toHaveValue(
     `${site.latitude}, ${site.longitude}`,
