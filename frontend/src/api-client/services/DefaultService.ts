@@ -151,6 +151,29 @@ export class DefaultService {
     }
 
     /**
+     * Delete
+     * Delete a site from the database.
+     * @returns void
+     * @throws ApiError
+     */
+    public deleteApiV1SitesIdDelete({
+        id,
+    }: {
+        id: number,
+    }): CancelablePromise<void> {
+        return this.httpRequest.request({
+            method: 'DELETE',
+            url: '/api/v1/sites/{id}',
+            path: {
+                'id': id,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Get Requests
      * Return pending sites.
      * @returns PendingSitesGetResponse Successful Response
@@ -258,6 +281,29 @@ export class DefaultService {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/v1/tokens/export',
+        });
+    }
+
+    /**
+     * Delete
+     * Delete a token from the database.
+     * @returns void
+     * @throws ApiError
+     */
+    public deleteApiV1TokensIdDelete({
+        id,
+    }: {
+        id: number,
+    }): CancelablePromise<void> {
+        return this.httpRequest.request({
+            method: 'DELETE',
+            url: '/api/v1/tokens/{id}',
+            path: {
+                'id': id,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
         });
     }
 
