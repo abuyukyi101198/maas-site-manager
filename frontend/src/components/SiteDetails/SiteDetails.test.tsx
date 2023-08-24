@@ -44,7 +44,10 @@ it("renders the correct details for a site", async () => {
 
   expect(screen.getByText(new RegExp(site.connection_status, "i"))).toBeInTheDocument();
   expect(screen.getByText(getCountryName(site.country!))).toBeInTheDocument();
-  expect(screen.getByText(site.street!)).toBeInTheDocument();
+  expect(screen.getByText(site.state!)).toBeInTheDocument();
+  expect(screen.getByText(site.address!)).toBeInTheDocument();
+  expect(screen.getByText(site.city!)).toBeInTheDocument();
+  expect(screen.getByText(site.postal_code!)).toBeInTheDocument();
   expect(
     screen.getByText(`${getTimeInTimezone(new Date(), site.timezone!)} UTC${getTimezoneUTCString(site.timezone!)}`),
   ).toBeInTheDocument();

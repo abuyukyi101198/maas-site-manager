@@ -64,7 +64,7 @@ export const $Site = {
             }],
             isRequired: true,
         },
-        region: {
+        state: {
             type: 'any-of',
             contains: [{
                 type: 'string',
@@ -73,7 +73,16 @@ export const $Site = {
             }],
             isRequired: true,
         },
-        street: {
+        address: {
+            type: 'any-of',
+            contains: [{
+                type: 'string',
+            }, {
+                type: 'null',
+            }],
+            isRequired: true,
+        },
+        postal_code: {
             type: 'any-of',
             contains: [{
                 type: 'string',

@@ -156,22 +156,22 @@ const SitesTable = ({
       {
         id: "address",
         enableSorting: false,
-        accessorFn: createAccessor(["country", "city", "street"]),
+        accessorFn: createAccessor(["country", "city", "address", "postal_code"]),
         header: ({ header }) => (
           <>
             <div>
               country <SortIndicator header={header} />
             </div>
-            <div className="u-text--muted">street, city, ZIP</div>
+            <div className="u-text--muted">address, city, postal code</div>
           </>
         ),
         cell: ({ getValue }) => {
-          const { country, city, street } = getValue();
+          const { country, city, address, postal_code } = getValue();
           return (
             <>
               <div>{country ? getCountryName(country) : ""}</div>
               <div className="u-text--muted">
-                {street}, {city}
+                {address}, {city} {postal_code}
               </div>
             </>
           );

@@ -19,8 +19,9 @@ export type Site = {
     latitude: (string | null);
     longitude: (string | null);
     note: (string | null);
-    region: (string | null);
-    street: (string | null);
+    state: (string | null);
+    address: (string | null);
+    postal_code: (string | null);
     timezone: (TimeZone | null);
     url: string;
     connection_status: ConnectionStatus;

@@ -3,6 +3,7 @@ import { Field, Form, Formik } from "formik";
 import en from "i18n-iso-countries/langs/en.json";
 import * as Yup from "yup";
 
+import type { Site } from "@/api/types";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import { useAppLayoutContext } from "@/context";
 import type { SiteDetailsContextValue } from "@/context/SiteDetailsContext";
@@ -18,16 +19,23 @@ const countryOptions = [
   })),
 ] as const;
 
-const baseInitialValues = {
+type Coordinates = `${NonNullable<Site["latitude"]>},${NonNullable<Site["longitude"]>}` | "";
+
+const baseInitialValues: Record<keyof Pick<Site, "country" | "state" | "address" | "city" | "postal_code">, string> &
+  Record<"coordinates", Coordinates> = {
   country: "",
-  street: "",
+  state: "",
+  address: "",
   city: "",
+  postal_code: "",
   coordinates: "",
 };
 
 const EditSiteSchema = Yup.object().shape({
-  street: Yup.string(),
+  state: Yup.string(),
+  address: Yup.string(),
   city: Yup.string(),
+  postal_code: Yup.string(),
   coordinates: Yup.string()
     .matches(
       /^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$/,
@@ -50,7 +58,9 @@ const EditSiteContent = ({
 }) => {
   const headingId = useId();
   const countryId = useId();
-  const streetId = useId();
+  const stateId = useId();
+  const addressId = useId();
+  const postalCodeId = useId();
   const cityId = useId();
   const coordinatesId = useId();
 
@@ -61,9 +71,11 @@ const EditSiteContent = ({
   useEffect(() => {
     if (site) {
       setInitialValues({
-        street: site.street ?? "",
+        address: site.address ?? "",
         city: site.city ?? "",
+        state: site.state ?? "",
         country: site.country ?? "",
+        postal_code: site.postal_code ?? "",
         coordinates: `${site.latitude}, ${site.longitude}`,
       });
     }
@@ -71,10 +83,13 @@ const EditSiteContent = ({
 
   const handleSubmit = async (values: SiteFormValues) => {
     const [latitude, longitude] = values.coordinates.replace(/\s+/g, "").split(",");
-    const siteData = {
-      street: values.street,
-      city: values.city,
-      country: values.country,
+    const { address, city, postal_code, state, country } = values;
+    const siteData: Pick<Site, "address" | "city" | "postal_code" | "state" | "country" | "latitude" | "longitude"> = {
+      address,
+      city,
+      postal_code,
+      state,
+      country,
       latitude,
       longitude,
     };
@@ -114,10 +129,28 @@ const EditSiteContent = ({
                   name="country"
                   options={countryOptions}
                 />
-                <Label htmlFor={streetId}>Address</Label>
-                <Field as={Input} error={touched.street && errors.street} id={streetId} name="street" type="text" />
+                <Label htmlFor={stateId}>Administrative region</Label>
+                <Field
+                  as={Input}
+                  className="u-no-margin"
+                  error={touched.state && errors.state}
+                  help={<small className="u-text--muted">e.g. state, province etc.</small>}
+                  id={stateId}
+                  name="state"
+                  type="text"
+                />
                 <Label htmlFor={cityId}>City</Label>
                 <Field as={Input} error={touched.city && errors.city} id={cityId} name="city" type="text" />
+                <Label htmlFor={addressId}>Address</Label>
+                <Field as={Input} error={touched.address && errors.address} id={addressId} name="address" type="text" />
+                <Label htmlFor={postalCodeId}>Postal code</Label>
+                <Field
+                  as={Input}
+                  error={touched.postal_code && errors.postal_code}
+                  id={postalCodeId}
+                  name="postal_code"
+                  type="text"
+                />
                 <Label htmlFor={coordinatesId}>Latitude and Longitude</Label>
                 <Field
                   as={Input}

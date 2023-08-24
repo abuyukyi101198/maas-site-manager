@@ -72,12 +72,20 @@ const SiteDetailsContent = ({ id }: { id: NonNullable<SiteDetailsContextValue["s
                 <td className="site-details__table-item">{site.country ? getCountryName(site.country) : null}</td>
               </tr>
               <tr>
-                <td className="u-text--muted site-details__table-row-label">Street</td>
-                <td className="site-details__table-item">{site.street}</td>
+                <td className="u-text--muted site-details__table-row-label">Administrative region</td>
+                <td className="site-details__table-item">{site.state}</td>
+              </tr>
+              <tr>
+                <td className="u-text--muted site-details__table-row-label">Address</td>
+                <td className="site-details__table-item">{site.address}</td>
               </tr>
               <tr>
                 <td className="u-text--muted site-details__table-row-label">City</td>
                 <td className="site-details__table-item">{site.city}</td>
+              </tr>
+              <tr>
+                <td className="u-text--muted site-details__table-row-label">Postal code</td>
+                <td className="site-details__table-item">{site.postal_code}</td>
               </tr>
               <tr>
                 <td className="u-text--muted site-details__table-row-label">Local time</td>
