@@ -8,3 +8,16 @@ install-dependencies ci-dep ci-build ci-lint ci-test:
 ci-dep-docker-prepare: ci-dep # run by the build-env-prepare job
 	chmod -R a+w /var/cache/playwright-browsers /var/cache/yarn || true
 .PHONY: ci-dep-docker-prepare
+
+
+SNAPCRAFT := SNAPCRAFT_BUILD_INFO=1 snapcraft -v
+SNAP_FILE := maas-site-manager.snap
+
+snap:
+	$(SNAPCRAFT) -o $(SNAP_FILE)
+.PHONY: snap
+
+snap-clean:
+	$(SNAPCRAFT) clean
+	rm -f $(SNAP_FILE)
+.PHONY: snap-clean
