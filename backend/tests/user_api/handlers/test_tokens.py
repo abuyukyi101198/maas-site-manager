@@ -7,10 +7,6 @@ import pytest
 
 from ...fixtures.client import Client
 from ...fixtures.factory import Factory
-from .isoformat_fix import (
-    fromisoformat,
-    isoformat,
-)
 
 
 def iso8601_duration(duration: timedelta) -> str:
@@ -26,7 +22,9 @@ async def test_token_time_format(user_client: Client) -> None:
     )
     assert response.status_code == 200
     result = response.json()
-    assert fromisoformat(result["expired"]) < (datetime.utcnow() + expiry)
+    assert datetime.fromisoformat(result["expired"]) < (
+        datetime.utcnow() + expiry
+    )
 
 
 @pytest.mark.asyncio
@@ -39,8 +37,8 @@ async def test_tokens_get(user_client: Client, factory: Factory) -> None:
     expected = []
     for token in tokens:
         entry = token.model_dump()
-        entry["expired"] = isoformat(token.expired)
-        entry["created"] = isoformat(token.created)
+        entry["expired"] = token.expired.isoformat()
+        entry["created"] = token.created.isoformat()
         entry["value"] = str(token.value)
         expected.append(entry)
 

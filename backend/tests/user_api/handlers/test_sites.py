@@ -16,7 +16,6 @@ from msm.service._site import LOST_CONNECTION_THRESHOLD_SECONDS
 
 from ...fixtures.client import Client
 from ...fixtures.factory import Factory
-from .isoformat_fix import isoformat
 
 
 def site_details(site: Site, stats: SiteData | None = None) -> dict[str, Any]:
@@ -26,13 +25,13 @@ def site_details(site: Site, stats: SiteData | None = None) -> dict[str, Any]:
         data["stats"] = None
     else:
         data["stats"] = stats.model_dump()
-        data["stats"]["last_seen"] = isoformat(data["stats"]["last_seen"])
+        data["stats"]["last_seen"] = data["stats"]["last_seen"].isoformat()
     return data
 
 
 def pending_site_details(site: PendingSite) -> dict[str, Any]:
     data = site.model_dump()
-    data["created"] = isoformat(data["created"])
+    data["created"] = data["created"].isoformat()
     return data
 
 
