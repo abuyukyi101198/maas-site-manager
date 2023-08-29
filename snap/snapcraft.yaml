@@ -21,6 +21,11 @@ hooks:
       - network
 
 apps:
+  maas-site-manager:
+    command: bin/msm-admin
+    plugs:
+      - network
+
   user-api:
     daemon: simple
     command: bin/msm-user-api
