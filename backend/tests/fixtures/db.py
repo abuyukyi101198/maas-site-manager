@@ -18,8 +18,8 @@ TEST_DB_NAME = "msm"
 
 
 @dataclass
-class TestDSN:
-    """Database DSN."""
+class DBConfig:
+    """Database configuration."""
 
     db: str
     user: str
@@ -28,6 +28,7 @@ class TestDSN:
 
     @property
     def dsn(self) -> URL:
+        """DSN URL for the test database."""
         return URL.create(
             "postgresql+asyncpg",
             host=self.socketdir,
@@ -36,9 +37,19 @@ class TestDSN:
             username=self.user,
         )
 
+    @property
+    def settings_environ(self) -> dict[str, str]:
+        """Return environment settings for the test database."""
+        return {
+            "MSM_DB_HOST": self.socketdir,
+            "MSM_DB_NAME": self.db,
+            "MSM_DB_USER": self.user,
+            "MSM_DB_PORT": str(self.port),
+        }
+
 
 @pytest.fixture(scope="session")
-def db_setup(postgresql_proc: PostgreSQLExecutor) -> Iterator[TestDSN]:
+def db_setup(postgresql_proc: PostgreSQLExecutor) -> Iterator[DBConfig]:
     """Setup and teardown the database. Return the URL."""
     port = postgresql_proc.port
     user = postgresql_proc.user
@@ -47,13 +58,13 @@ def db_setup(postgresql_proc: PostgreSQLExecutor) -> Iterator[TestDSN]:
         user, socketdir, port, TEST_DB_NAME, postgresql_proc.version
     )
     with janitor:
-        yield TestDSN(TEST_DB_NAME, user, socketdir, port)
+        yield DBConfig(TEST_DB_NAME, user, socketdir, port)
 
 
 @pytest.fixture
 async def db(
     request: pytest.FixtureRequest,
-    db_setup: TestDSN,
+    db_setup: DBConfig,
 ) -> AsyncIterator[Database]:
     """Set up the database schema."""
     echo = request.config.getoption("sqlalchemy_debug")

@@ -46,6 +46,7 @@ class Settings(BaseSettings):
         return URL.create(
             "postgresql+asyncpg",
             host=self.db_host,
+            port=self.db_port,
             database=self.db_name,
             username=self.db_user,
             password=password,
