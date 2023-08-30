@@ -1,5 +1,4 @@
 import asyncio
-import os
 from pathlib import Path
 
 from snaphelpers import Snap
@@ -11,17 +10,14 @@ from msm.db import (
 from msm.settings import Settings
 
 from ._config import NginxConfig
-from ._env import environ_from_snap
 
 
 def configure_hook(snap: Snap) -> None:
     """The `configure` hook called by the snap."""
-    env = environ_from_snap()
-    if not env:
-        # no config option has been set
-        return
-    os.environ.update(env)
     settings = Settings()
+    if not settings.db_name:
+        # service is not configured
+        return
 
     _validate_settings(settings)
     _generate_config(settings, snap)

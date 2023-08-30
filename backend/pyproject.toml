@@ -46,6 +46,7 @@ testing = [
   "psycopg",
   "pytest",
   "pytest-asyncio",
+  "pytest-mock",
   "pytest-postgresql",
   "pytest-xdist",
 ]
