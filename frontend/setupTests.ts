@@ -6,7 +6,7 @@ import { fetch, Request, Response } from "@remix-run/web-fetch";
 import { TextEncoder as NodeTextEncoder, TextDecoder as NodeTextDecoder } from "util";
 import { AbortSignal as NodeAbortSignal, AbortController as NodeAbortController } from "abort-controller";
 
-config({ path: "../.env" });
+config();
 
 // extends Vitest's expect method with methods from react-testing-library
 expect.extend(matchers);
