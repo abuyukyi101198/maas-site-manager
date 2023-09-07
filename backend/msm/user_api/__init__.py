@@ -62,7 +62,7 @@ def create_app(
     transaction_middleware_class: type = TransactionMiddleware,
     prometheus_registry: CollectorRegistry = REGISTRY,
 ) -> FastAPI:
-    """Create the FastAPI WSGI application."""
+    """Create the User API (FastAPI) ASGI application."""
     settings = Settings()
     if not db:
         db = Database(settings.db_dsn)
