@@ -309,6 +309,9 @@ class TestUsersPatchHandler:
         # assert response.status_code == 200
         assert response.json() == user_details
 
+        response = await admin_client.patch("/users/42", json=new_details)
+        assert response.status_code == 404
+
     async def test_demote_admin(
         self, admin_client: Client, factory: Factory
     ) -> None:

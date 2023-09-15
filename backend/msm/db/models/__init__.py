@@ -5,6 +5,7 @@ from ._site import (
     Site,
     SiteCoordinates,
     SiteData,
+    SiteUpdate,
 )
 from ._token import Token
 from ._user import (
@@ -18,6 +19,7 @@ __all__ = [
     "ConnectionStatus",
     "PendingSite",
     "Site",
+    "SiteUpdate",
     "SiteCoordinates",
     "SiteData",
     "Token",

@@ -27,12 +27,10 @@ class SiteData(BaseModel):
     last_seen: datetime
 
 
-class Site(BaseModel):
-    """A MAAS installation."""
+class SiteUpdate(BaseModel):
+    """The allowed updates to a Site from a user."""
 
-    id: int
     name: str
-    name_unique: bool
     city: str | None = None
     country: str | None = Field(default=None, min_length=2, max_length=2)
     latitude: str | None = None
@@ -42,8 +40,28 @@ class Site(BaseModel):
     address: str | None = None
     postal_code: str | None = None
     # XXX: mypy can't grok that this is an str/enum with lots of members
-    timezone: TimeZone | None = None  # type: ignore
+    timezone: TimeZone | None = None  # type: ignore[valid-type]
     url: str
+    name_unique: bool
+
+
+class Site(BaseModel):
+    """A MAAS installation."""
+
+    id: int
+    name: str
+    city: str | None = None
+    country: str | None = Field(default=None, min_length=2, max_length=2)
+    latitude: str | None = None
+    longitude: str | None = None
+    note: str | None = None
+    state: str | None = None
+    address: str | None = None
+    postal_code: str | None = None
+    # XXX: mypy can't grok that this is an str/enum with lots of members
+    timezone: TimeZone | None = None  # type: ignore[valid-type]
+    url: str
+    name_unique: bool
     connection_status: ConnectionStatus
     stats: SiteData | None = None
 

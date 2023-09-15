@@ -37,6 +37,7 @@ from .._forms import (
     user_filter_params,
     UserFilterParams,
 )
+from .._utils import raise_on_empty_request
 
 v1_router = APIRouter(prefix="/v1")
 
@@ -121,11 +122,7 @@ async def patch_me(
 ) -> User:
     """Update the details for a user"""
 
-    if all(v is None for v in patch_request.model_dump().values()):
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail={"message": "Request body empty."},
-        )
+    raise_on_empty_request(patch_request)
 
     if await services.users.exists(
         email=patch_request.email,

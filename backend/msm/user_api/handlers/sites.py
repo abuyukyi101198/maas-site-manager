@@ -1,5 +1,6 @@
 from typing import (
     Annotated,
+    cast,
     Iterable,
 )
 
@@ -9,20 +10,19 @@ from fastapi import (
     HTTPException,
     status,
 )
-from pydantic import BaseModel
-
-from ...db.models import (
-    PendingSite,
-    Site,
-    SiteCoordinates,
-    User,
+from pydantic import (
+    BaseModel,
+    Field,
 )
+
+from ...db import models
 from ...schema import (
     PaginatedResults,
     pagination_params,
     PaginationParams,
     SortParam,
     SortParamParser,
+    TimeZone,
 )
 from ...service import (
     InvalidPendingSites,
@@ -33,6 +33,10 @@ from .._dependencies import services
 from .._forms import (
     site_filter_parameters,
     SiteFilterParams,
+)
+from .._utils import (
+    not_found,
+    raise_on_empty_request,
 )
 
 v1_router = APIRouter(prefix="/v1")
@@ -55,13 +59,30 @@ site_sort_parameters = SortParamParser(
 class SitesGetResponse(PaginatedResults):
     """Response with paginated accepted sites."""
 
-    items: list[Site]
+    items: list[models.Site]
+
+
+class SiteUpdateRequest(BaseModel):
+    """Update a site without setting it's name_unique."""
+
+    name: str
+    city: str | None = None
+    country: str | None = Field(default=None, min_length=2, max_length=2)
+    latitude: str | None = None
+    longitude: str | None = None
+    note: str | None = None
+    state: str | None = None
+    address: str | None = None
+    postal_code: str | None = None
+    # XXX: mypy can't grok that this is an str/enum with lots of members
+    timezone: TimeZone | None = None  # type: ignore[valid-type]
+    url: str
 
 
 @v1_router.get("/sites")
 async def get(
     services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[User, Depends(authenticated_user)],
+    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
     pagination_params: PaginationParams = Depends(pagination_params),
     filter_params: SiteFilterParams = Depends(site_filter_parameters),
     sort_params: list[SortParam] = Depends(site_sort_parameters),
@@ -77,15 +98,41 @@ async def get(
         total=total,
         page=pagination_params.page,
         size=pagination_params.size,
-        items=results,
+        items=list(results),
     )
+
+
+@v1_router.patch("/sites/{id}")
+async def patch(
+    services: Annotated[ServiceCollection, Depends(services)],
+    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
+    patch_request: SiteUpdateRequest,
+    id: int,
+) -> models.Site:
+    """Modify a site and make sure that the `name_unique`
+    flag is updated accordingly.
+    """
+    if not await services.sites.id_exists(id):
+        raise not_found("Site")
+
+    raise_on_empty_request(patch_request)
+
+    # if the name exists name_unique should be false
+    site_updated = patch_request.model_dump()
+    site_updated["name_unique"] = await services.sites.is_name_unique(
+        id, site_updated["name"]
+    )
+
+    await services.sites.update(id, models.SiteUpdate(**site_updated))
+
+    return cast(models.Site, await services.sites.get_by_id(id))
 
 
 @v1_router.get("/sites/coordinates")
 async def get_coordinates(
     services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[User, Depends(authenticated_user)],
-) -> Iterable[SiteCoordinates]:
+    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
+) -> Iterable[models.SiteCoordinates]:
     """Return coordinates for all accepted sites."""
     return await services.sites.get_coordinates()
 
@@ -93,26 +140,23 @@ async def get_coordinates(
 @v1_router.get("/sites/{id}")
 async def get_id(
     services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[User, Depends(authenticated_user)],
+    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
     id: int,
-) -> Site:
+) -> models.Site:
     """Return a specific site."""
     if site := await services.sites.get_by_id(id):
         return site
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail={"message": "Site does not exist."},
-    )
+    raise not_found("Site")
 
 
 class PendingSitesGetResponse(PaginatedResults):
-    items: list[PendingSite]
+    items: list[models.PendingSite]
 
 
 @v1_router.get("/requests")
 async def get_requests(
     services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[User, Depends(authenticated_user)],
+    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
     pagination_params: PaginationParams = Depends(pagination_params),
 ) -> PendingSitesGetResponse:
     """Return pending sites."""
@@ -124,7 +168,7 @@ async def get_requests(
         total=total,
         page=pagination_params.page,
         size=pagination_params.size,
-        items=results,
+        items=list(results),
     )
 
 
@@ -138,7 +182,7 @@ class PendingSitesPostRequest(BaseModel):
 @v1_router.post("/requests", status_code=204)
 async def post_requests(
     services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[User, Depends(authenticated_user)],
+    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
     action: PendingSitesPostRequest,
 ) -> None:
     """Accept or reject pending sites."""
@@ -159,7 +203,7 @@ async def post_requests(
 @v1_router.delete("/sites/{id}", status_code=204)
 async def delete(
     services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[Site, Depends(authenticated_user)],
+    authenticated_user: Annotated[models.Site, Depends(authenticated_user)],
     id: int,
 ) -> None:
     """Delete a site from the database."""

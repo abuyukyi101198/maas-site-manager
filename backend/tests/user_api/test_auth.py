@@ -14,6 +14,7 @@ AUTHENTICATED_ROUTES = [
     ("GET", "/api/v1/sites"),
     ("GET", "/api/v1/sites/coordinates"),
     ("GET", "/api/v1/sites/{id}"),
+    ("PATCH", "/api/v1/sites/{id}"),
     ("DELETE", "/api/v1/sites/{id}"),
     ("GET", "/api/v1/tokens"),
     ("POST", "/api/v1/tokens"),

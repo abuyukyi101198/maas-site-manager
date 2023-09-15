@@ -126,6 +126,35 @@ class TestSitesHandler:
             "items": [site_details(site, stats=site_data)],
         }
 
+    async def test_patch(self, user_client: Client, factory: Factory) -> None:
+        site = await factory.make_Site()
+        site_duplicate = await factory.make_Site()
+        update: dict[str, str | bool] = {
+            "name": "shiny new name",
+            "url": "https://shiny.example.com",
+        }
+
+        # update a site
+        response = await user_client.patch(f"/sites/{site.id}", json=update)
+        assert response.status_code == 200
+        updated = Site(**site.model_dump()).model_dump() | update
+        assert response.json() == updated
+
+        # update a site to a non unique name
+        response_duplicate = await user_client.patch(
+            f"/sites/{site_duplicate.id}", json=update
+        )
+        assert response_duplicate.status_code == 200
+        update["name_unique"] = False
+        updated_duplicate = (
+            Site(**site_duplicate.model_dump()).model_dump() | update
+        )
+        assert response_duplicate.json() == updated_duplicate
+
+        # try to update a non existent site
+        response = await user_client.patch("/sites/42", json=update)
+        assert response.status_code == 404
+
     async def test_get_connection_status(
         self, user_client: Client, factory: Factory
     ) -> None:
