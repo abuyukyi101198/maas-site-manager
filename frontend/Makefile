@@ -5,7 +5,18 @@ libasound2 \
 libdbus-glib-1-2 \
 libnss3 \
 libnspr4 \
-libgbm1
+libgbm1 \
+libatk1.0-0 \
+libatk-bridge2.0-0 \
+libcups2 \
+libxkbcommon0 \
+libatspi2.0-0 \
+libxdamage1 \
+libpango-1.0-0 \
+libcairo2 \
+libgtk-3-0 \
+libpangocairo-1.0-0\
+libcairo-gobject2
 endef
 
 FE_TEST_TIMEOUT = 15000
