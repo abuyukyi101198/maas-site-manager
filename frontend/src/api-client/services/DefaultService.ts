@@ -10,6 +10,7 @@ import type { RootGetResponse } from '../models/RootGetResponse';
 import type { Site } from '../models/Site';
 import type { SiteCoordinates } from '../models/SiteCoordinates';
 import type { SitesGetResponse } from '../models/SitesGetResponse';
+import type { SiteUpdateRequest } from '../models/SiteUpdateRequest';
 import type { TokensGetResponse } from '../models/TokensGetResponse';
 import type { TokensPostRequest } from '../models/TokensPostRequest';
 import type { TokensPostResponse } from '../models/TokensPostResponse';
@@ -118,15 +119,30 @@ export class DefaultService {
     }
 
     /**
-     * Get Coordinates
-     * Return coordinates for all accepted sites.
-     * @returns SiteCoordinates Successful Response
+     * Patch
+     * Modify a site and make sure that the `name_unique`
+     * flag is updated accordingly.
+     * @returns Site Successful Response
      * @throws ApiError
      */
-    public getCoordinatesApiV1SitesCoordinatesGet(): CancelablePromise<Array<SiteCoordinates>> {
+    public patchApiV1SitesIdPatch({
+        id,
+        requestBody,
+    }: {
+        id: number,
+        requestBody: SiteUpdateRequest,
+    }): CancelablePromise<Site> {
         return this.httpRequest.request({
-            method: 'GET',
-            url: '/api/v1/sites/coordinates',
+            method: 'PATCH',
+            url: '/api/v1/sites/{id}',
+            path: {
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
         });
     }
 
@@ -173,6 +189,19 @@ export class DefaultService {
             errors: {
                 422: `Validation Error`,
             },
+        });
+    }
+
+    /**
+     * Get Coordinates
+     * Return coordinates for all accepted sites.
+     * @returns SiteCoordinates Successful Response
+     * @throws ApiError
+     */
+    public getCoordinatesApiV1SitesCoordinatesGet(): CancelablePromise<Array<SiteCoordinates>> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/v1/sites/coordinates',
         });
     }
 

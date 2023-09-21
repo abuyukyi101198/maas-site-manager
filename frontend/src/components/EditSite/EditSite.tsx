@@ -8,7 +8,7 @@ import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import { useAppLayoutContext } from "@/context";
 import type { SiteDetailsContextValue } from "@/context/SiteDetailsContext";
 import { useSiteDetailsContext } from "@/context/SiteDetailsContext";
-import { useSiteQuery } from "@/hooks/react-query";
+import { useSiteQuery, useUpdateSiteMutation } from "@/hooks/react-query";
 import { getCountryName } from "@/utils";
 
 const countryOptions = [
@@ -68,6 +68,12 @@ const EditSiteContent = ({
   const { previousSidebar, setSidebar } = useAppLayoutContext();
   const { data: site, error, isLoading } = useSiteQuery({ id: siteId });
 
+  const updateSite = useUpdateSiteMutation({
+    onSuccess() {
+      resetForm();
+    },
+  });
+
   useEffect(() => {
     if (site) {
       setInitialValues({
@@ -84,7 +90,9 @@ const EditSiteContent = ({
   const handleSubmit = async (values: SiteFormValues) => {
     const [latitude, longitude] = values.coordinates.replace(/\s+/g, "").split(",");
     const { address, city, postal_code, state, country } = values;
-    const siteData: Pick<Site, "address" | "city" | "postal_code" | "state" | "country" | "latitude" | "longitude"> = {
+    const requestBody = {
+      name: site!.name,
+      url: site!.url,
       address,
       city,
       postal_code,
@@ -93,10 +101,7 @@ const EditSiteContent = ({
       latitude,
       longitude,
     };
-    // eslint-disable-next-line no-console
-    console.table(siteData);
-    // TODO: Enable mutation here once implemented in backend https://warthogs.atlassian.net/browse/MAASENG-2059
-    resetForm();
+    updateSite.mutate({ id: site!.id, requestBody });
   };
 
   const resetForm = () => {

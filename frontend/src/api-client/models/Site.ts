@@ -13,7 +13,6 @@ import type { TimeZone } from './TimeZone';
 export type Site = {
     id: number;
     name: string;
-    name_unique: boolean;
     city: (string | null);
     country: (string | null);
     latitude: (string | null);
@@ -24,6 +23,7 @@ export type Site = {
     postal_code: (string | null);
     timezone: (TimeZone | null);
     url: string;
+    name_unique: boolean;
     connection_status: ConnectionStatus;
     stats: (SiteData | null);
 };

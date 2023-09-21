@@ -99,6 +99,12 @@ export const createMockDeleteSiteResolver = (): DeleteSiteResponseResolver => as
   return res(ctx.status(204));
 };
 
+type UpdateSiteResponseResolver = ResponseResolver<RestRequest<Site, { id: string }>, typeof restContext>;
+export const createMockUpdateSiteResolver = (): UpdateSiteResponseResolver => async (req, res, ctx) => {
+  const site = { ...req.body };
+  return res(ctx.status(200), ctx.json(site));
+};
+
 type TokensResponseResolver = ResponseResolver<RestRequest, typeof restContext>;
 export const createMockTokensResolver = (): TokensResponseResolver => async (req, res, ctx) => {
   let tokens;
@@ -258,6 +264,7 @@ export const getSitesCoordinates = rest.get(apiUrls.sitesCoordinates, createMock
 export const getSite = rest.get(`${apiUrls.sites}/:id`, createMockSiteResolver());
 export const deleteSites = rest.delete(apiUrls.sites, createMockDeleteSitesResolver());
 export const deleteSite = rest.delete(`${apiUrls.sites}/:id`, createMockDeleteSiteResolver());
+export const updateSite = rest.patch(`${apiUrls.sites}/:id`, createMockUpdateSiteResolver());
 export const postTokens = rest.post(apiUrls.tokens, createMockTokensResolver());
 export const getTokens = rest.get(apiUrls.tokens, createMockGetTokensResolver());
 export const deleteTokens = rest.delete(apiUrls.tokens, createMockDeleteTokensResolver());
@@ -293,6 +300,7 @@ export const allResolvers = [
   getSite,
   deleteSites,
   deleteSite,
+  updateSite,
   postTokens,
   deleteTokens,
   deleteToken,

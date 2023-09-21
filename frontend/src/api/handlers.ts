@@ -59,6 +59,9 @@ export const getSite = async ({ id }: Parameters<typeof apiClient.default.getIdA
   return response;
 };
 
+export const updateSite = ({ id, requestBody }: Parameters<typeof apiClient.default.patchApiV1SitesIdPatch>[0]) =>
+  apiClient.default.patchApiV1SitesIdPatch({ id, requestBody });
+
 export const deleteSites = async (data: Site["id"][]) => {
   if (data.length === 0) {
     throw Error("No sites selected");

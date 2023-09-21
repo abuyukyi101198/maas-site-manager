@@ -20,6 +20,7 @@ import {
   deleteUser,
   getTokensExport,
   deleteSites,
+  updateSite,
 } from "@/api/handlers";
 import type { SitesQueryResult, PostTokensResult, Site, UsersQueryResult, User } from "@/api/types";
 import type { PendingSitesPostRequest } from "@/api-client";
@@ -73,6 +74,19 @@ export const useDeleteSitesMutation = (options?: UseMutationOptions<unknown, unk
       queryClient.invalidateQueries({ queryKey: ["sites"] });
     },
     onError: () => {
+      queryClient.invalidateQueries({ queryKey: ["sites"] });
+    },
+  });
+};
+
+export const useUpdateSiteMutation = (
+  options?: Omit<UseMutationOptions<any, unknown, Parameters<typeof updateSite>[0], unknown>, "mutationFn">,
+) => {
+  const queryClient = useQueryClient();
+  return useMutation(updateSite, {
+    ...options,
+    onSuccess: (...args) => {
+      options?.onSuccess?.(...args);
       queryClient.invalidateQueries({ queryKey: ["sites"] });
     },
   });

@@ -2,13 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $Site = {
-    description: `A MAAS installation.`,
+export const $SiteUpdateRequest = {
+    description: `Update a site without setting it's name_unique.`,
     properties: {
-        id: {
-            type: 'number',
-            isRequired: true,
-        },
         name: {
             type: 'string',
             isRequired: true,
@@ -20,7 +16,6 @@ export const $Site = {
             }, {
                 type: 'null',
             }],
-            isRequired: true,
         },
         country: {
             type: 'any-of',
@@ -31,7 +26,6 @@ export const $Site = {
             }, {
                 type: 'null',
             }],
-            isRequired: true,
         },
         latitude: {
             type: 'any-of',
@@ -40,7 +34,6 @@ export const $Site = {
             }, {
                 type: 'null',
             }],
-            isRequired: true,
         },
         longitude: {
             type: 'any-of',
@@ -49,7 +42,6 @@ export const $Site = {
             }, {
                 type: 'null',
             }],
-            isRequired: true,
         },
         note: {
             type: 'any-of',
@@ -58,7 +50,6 @@ export const $Site = {
             }, {
                 type: 'null',
             }],
-            isRequired: true,
         },
         state: {
             type: 'any-of',
@@ -67,7 +58,6 @@ export const $Site = {
             }, {
                 type: 'null',
             }],
-            isRequired: true,
         },
         address: {
             type: 'any-of',
@@ -76,7 +66,6 @@ export const $Site = {
             }, {
                 type: 'null',
             }],
-            isRequired: true,
         },
         postal_code: {
             type: 'any-of',
@@ -85,7 +74,6 @@ export const $Site = {
             }, {
                 type: 'null',
             }],
-            isRequired: true,
         },
         timezone: {
             type: 'any-of',
@@ -94,27 +82,9 @@ export const $Site = {
             }, {
                 type: 'null',
             }],
-            isRequired: true,
         },
         url: {
             type: 'string',
-            isRequired: true,
-        },
-        name_unique: {
-            type: 'boolean',
-            isRequired: true,
-        },
-        connection_status: {
-            type: 'ConnectionStatus',
-            isRequired: true,
-        },
-        stats: {
-            type: 'any-of',
-            contains: [{
-                type: 'SiteData',
-            }, {
-                type: 'null',
-            }],
             isRequired: true,
         },
     },
