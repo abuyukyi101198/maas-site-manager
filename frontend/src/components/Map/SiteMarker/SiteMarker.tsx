@@ -1,12 +1,11 @@
 import classNames from "classnames";
 import type { LeafletEventHandlerFnMap } from "leaflet";
 import L from "leaflet";
-import { flushSync } from "react-dom";
-import { createRoot } from "react-dom/client";
 import { Marker, Popup, useMap } from "react-leaflet";
 
 import SiteSummary from "@/components/Map/SiteSummary";
 import type { SiteMarkerType } from "@/components/Map/types";
+import { renderToHtmlString } from "@/components/Map/utils";
 
 type MarkerApprearance = "base" | "selected";
 
@@ -33,16 +32,8 @@ const SiteMarkerSvg = ({ appearance = "base" }: { appearance?: MarkerApprearance
   );
 };
 
-const getMarkerHtml = (appearance: MarkerApprearance): string => {
-  const div = document.createElement("div");
-  const root = createRoot(div);
-
-  flushSync(() => {
-    root.render(<SiteMarkerSvg appearance={appearance} />);
-  });
-
-  return div.innerHTML;
-};
+const getMarkerHtml = (appearance: MarkerApprearance): string =>
+  renderToHtmlString(<SiteMarkerSvg appearance={appearance} />);
 
 const createDivIcon = (appearance: MarkerApprearance) => {
   return new L.DivIcon({
