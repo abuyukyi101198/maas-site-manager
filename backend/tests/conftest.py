@@ -6,7 +6,10 @@ from .fixtures.db import (
     db_setup,
     transaction_middleware_class,
 )
-from .fixtures.env import settings_environ
+from .fixtures.env import (
+    settings_environ,
+    unset_settings_environ,
+)
 from .fixtures.factory import factory
 
 __all__ = [
@@ -16,6 +19,7 @@ __all__ = [
     "factory",
     "settings_environ",
     "transaction_middleware_class",
+    "unset_settings_environ",
 ]
 
 

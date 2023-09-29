@@ -1,8 +1,18 @@
+import os
 from typing import Iterator
 
 import pytest
 
 from .db import DBConfig
+
+
+@pytest.fixture(autouse=True)
+def unset_settings_environ(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
+    """Ensure environment variables related to settings are not set."""
+    for var in os.environ:
+        if var.startswith("MSM_"):
+            monkeypatch.delenv(var)
+    yield
 
 
 @pytest.fixture
