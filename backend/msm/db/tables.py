@@ -10,18 +10,20 @@ from sqlalchemy import (
     MetaData,
     Table,
     Text,
-    types,
 )
 from sqlalchemy.dialects.postgresql import (
     JSONB,
     UUID,
 )
-from sqlalchemy.types import DateTime
+from sqlalchemy.types import (
+    DateTime,
+    UserDefinedType,
+)
 
 METADATA = MetaData()
 
 
-class Point(types.UserDefinedType):  # type: ignore
+class Point(UserDefinedType):  # type: ignore
     """
     The postgresql POINT
     https://www.postgresql.org/docs/current/datatype-geometric.html#DATATYPE-GEOMETRIC-POINTS

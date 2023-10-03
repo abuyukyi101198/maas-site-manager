@@ -8,7 +8,6 @@ from typing import (
 )
 
 from sqlalchemy import (
-    and_,
     case,
     delete,
     exists,
@@ -100,9 +99,7 @@ class SiteService(Service):
     async def is_name_unique(self, id: int, name: str) -> bool:
         """Check if the given name is unique"""
         stmt = select(Site).where(
-            select(Site)
-            .where(and_(Site.c.name == name, Site.c.id != id))
-            .exists()
+            select(Site).where(Site.c.name == name, Site.c.id != id).exists()
         )
         if result := await self.conn.execute(stmt):
             return result.scalar() is None
