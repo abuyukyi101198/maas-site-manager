@@ -15,8 +15,7 @@ export type Site = {
     name: string;
     city: (string | null);
     country: (string | null);
-    latitude: (string | null);
-    longitude: (string | null);
+    coordinates: (any[] | null);
     note: (string | null);
     state: (string | null);
     address: (string | null);

@@ -27,18 +27,13 @@ export const $SiteUpdateRequest = {
                 type: 'null',
             }],
         },
-        latitude: {
+        coordinates: {
             type: 'any-of',
             contains: [{
-                type: 'string',
-            }, {
-                type: 'null',
-            }],
-        },
-        longitude: {
-            type: 'any-of',
-            contains: [{
-                type: 'string',
+                type: 'array',
+                contains: {
+                    type: 'number',
+                },
             }, {
                 type: 'null',
             }],

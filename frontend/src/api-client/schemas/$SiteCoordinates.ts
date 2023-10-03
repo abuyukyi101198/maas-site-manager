@@ -9,19 +9,12 @@ export const $SiteCoordinates = {
             type: 'number',
             isRequired: true,
         },
-        latitude: {
+        coordinates: {
             type: 'any-of',
             contains: [{
-                type: 'string',
-            }, {
-                type: 'null',
-            }],
-            isRequired: true,
-        },
-        longitude: {
-            type: 'any-of',
-            contains: [{
-                type: 'string',
+                type: 'any[]',
+                maxItems: 2,
+                minItems: 2,
             }, {
                 type: 'null',
             }],

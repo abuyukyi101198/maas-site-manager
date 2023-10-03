@@ -8,7 +8,6 @@
  */
 export type SiteCoordinates = {
     id: number;
-    latitude: (string | null);
-    longitude: (string | null);
+    coordinates: (any[] | null);
 };
 

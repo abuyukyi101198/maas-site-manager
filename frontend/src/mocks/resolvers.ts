@@ -69,7 +69,7 @@ export const createMockSitesResolver =
 export const createMockSitesCoordinatesResolver =
   (sites = sitesList): SitesResponseResolver =>
   (req, res, ctx) => {
-    const response = sites.map(({ id, latitude, longitude }) => ({ id, latitude, longitude }));
+    const response = sites.map(({ id, coordinates }) => ({ id, coordinates }));
 
     return res(ctx.json(response));
   };

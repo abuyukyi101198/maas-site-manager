@@ -19,7 +19,11 @@ const countryOptions = [
   })),
 ] as const;
 
-type Coordinates = `${NonNullable<Site["latitude"]>},${NonNullable<Site["longitude"]>}` | "";
+type Coordinates = NonNullable<Site["coordinates"]> extends (infer T)[]
+  ? T extends number
+    ? `${NonNullable<T>},${NonNullable<T>}`
+    : ""
+  : "";
 
 const baseInitialValues: Record<keyof Pick<Site, "country" | "state" | "address" | "city" | "postal_code">, string> &
   Record<"coordinates", Coordinates> = {
@@ -82,13 +86,16 @@ const EditSiteContent = ({
         state: site.state ?? "",
         country: site.country ?? "",
         postal_code: site.postal_code ?? "",
-        coordinates: `${site.latitude}, ${site.longitude}`,
+        coordinates: site.coordinates ? `${site.coordinates?.[0]}, ${site.coordinates?.[1]}` : "",
       });
     }
   }, [site]);
 
   const handleSubmit = async (values: SiteFormValues) => {
-    const [latitude, longitude] = values.coordinates.replace(/\s+/g, "").split(",");
+    const coordinates = values.coordinates
+      .replace(/\s+/g, "")
+      .split(",")
+      .map((coordinate) => Number(coordinate));
     const { address, city, postal_code, state, country } = values;
     const requestBody = {
       name: site!.name,
@@ -98,8 +105,7 @@ const EditSiteContent = ({
       postal_code,
       state,
       country,
-      latitude,
-      longitude,
+      coordinates,
     };
     updateSite.mutate({ id: site!.id, requestBody });
   };
