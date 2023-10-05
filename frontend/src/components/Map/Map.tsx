@@ -40,6 +40,7 @@ const Map = ({
       center={[0, 0]}
       className="map"
       id={id}
+      minZoom={1}
       zoom={3}
       zoomControl={false}
     >
@@ -52,6 +53,7 @@ const Map = ({
       <TileLayer
         attribution='<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
         data-testid="tile-layer"
+        noWrap
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       {markers?.map(({ position, id }) => (
