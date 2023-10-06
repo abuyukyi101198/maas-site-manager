@@ -10,6 +10,7 @@
 @include vf-p-grid;
 @include vf-p-buttons;
 @include vf-p-forms;
+@include vf-p-form-help-text;
 @include vf-p-links;
 @include vf-p-side-navigation;
 @include vf-p-navigation;
@@ -84,8 +85,6 @@
 @import "@/components/base/ControlsBar/ControlsBar";
 @import "@/components/base/TooltipButton/TooltipButton";
 @import "@/components/DynamicTable/DynamicTable";
-@import "@/components/PasswordUpdate/PasswordUpdate";
-@import "@/components/PersonalDetailsUpdate/PersonalDetailsUpdate";
 @import "@/components/Map/Map";
 @import "@/components/SitesMap/SitesMap";
 @import "@/components/Map/SiteSummary/SiteSummary";

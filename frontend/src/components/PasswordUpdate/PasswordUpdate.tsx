@@ -31,7 +31,7 @@ const PasswordUpdate = () => {
 
   return (
     <Row>
-      <Col className="password-update" size={6}>
+      <Col size={6}>
         <Formik
           initialValues={initialValues}
           onSubmit={handleSubmit}
@@ -39,8 +39,8 @@ const PasswordUpdate = () => {
           validationSchema={PasswordUpdateSchema}
         >
           {({ isSubmitting, errors, touched, isValid, dirty }) => (
-            <Form aria-label="update password" aria-labelledby={headingId} className="password-update-form" noValidate>
-              <Label className="password-update-form__label" htmlFor={currentPasswordId}>
+            <Form aria-label="update password" aria-labelledby={headingId} noValidate>
+              <Label htmlFor={currentPasswordId} required>
                 Current password
               </Label>
               <Field
@@ -53,7 +53,7 @@ const PasswordUpdate = () => {
                 required
                 type="password"
               />
-              <Label className="password-update-form__label" htmlFor={newPasswordId}>
+              <Label htmlFor={newPasswordId} required>
                 New password
               </Label>
               <Field
@@ -64,7 +64,7 @@ const PasswordUpdate = () => {
                 required
                 type="password"
               />
-              <Label className="password-update-form__label" htmlFor={newPasswordConfirmId}>
+              <Label htmlFor={newPasswordConfirmId} required>
                 New password (again)
               </Label>
               <Field

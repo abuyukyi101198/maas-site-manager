@@ -67,12 +67,7 @@ const PersonalDetailsUpdate = () => {
           validationSchema={PersonalDetailsUpdateSchema}
         >
           {({ isSubmitting, errors, touched, isValid, dirty }) => (
-            <Form
-              aria-label="update personal details"
-              aria-labelledby={headingId}
-              className="personal-details-update-form"
-              noValidate
-            >
+            <Form aria-label="update personal details" aria-labelledby={headingId} noValidate>
               <Label className="is-required" htmlFor={usernameId}>
                 Username
               </Label>
