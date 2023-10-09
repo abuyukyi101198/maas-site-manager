@@ -51,7 +51,7 @@ testing = [
   "pytest-xdist",
 ]
 [project.scripts]
-msm-admin = "msm.cmd.admin:run"
+msm-admin = "msm.cmd.admin:script"
 msm-user-api = "msm.user_api:run"
 [project.entry-points."snaphelpers.hooks"]
 configure = "msm.snap:configure_hook"
