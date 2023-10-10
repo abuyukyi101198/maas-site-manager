@@ -1,7 +1,9 @@
 import pytest
+from pytest_mock import MockerFixture
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from msm.db.models import Config
+from msm.service import _config
 from msm.service._config import ConfigService
 
 from ..fixtures.factory import Factory
@@ -34,6 +36,18 @@ class TestConfigService:
         assert {config["name"] for config in configs} == set(
             Config.model_fields
         )
+
+    async def test_ensure_generate_key(
+        self,
+        mocker: MockerFixture,
+        factory: Factory,
+        db_connection: AsyncConnection,
+    ) -> None:
+        mocker.patch.object(_config, "generate_key").return_value = "abcde"
+        service = ConfigService(db_connection)
+        await service.ensure()
+        configs = await factory.get("config")
+        assert configs == [{"name": "token_secret_key", "value": "abcde"}]
 
     async def test_ensure_keep_existing(
         self, factory: Factory, db_connection: AsyncConnection
