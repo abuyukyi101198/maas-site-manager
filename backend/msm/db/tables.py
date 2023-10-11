@@ -46,18 +46,18 @@ Site = Table(
     "site",
     METADATA,
     Column("id", Integer, primary_key=True),
-    Column("address", Text),
-    Column("city", Text),
-    Column("country", Text),  # ISO 3166 Alpha2
+    Column("address", Text, nullable=False, default=""),
+    Column("city", Text, nullable=False, default=""),
+    Column("country", Text, nullable=False, default=""),  # ISO 3166 Alpha2
     Column("coordinates", Point),
-    Column("name", Text),
-    Column("name_unique", Boolean),
-    Column("note", Text),
-    Column("postal_code", Text),
-    Column("state", Text),
-    Column("timezone", Text),
-    Column("url", Text, nullable=False),
-    Column("accepted", Boolean, nullable=False, index=True, default=False),
+    Column("name", Text, nullable=False, default=""),
+    Column("name_unique", Boolean, nullable=False, default=True),
+    Column("note", Text, nullable=False, default=""),
+    Column("postal_code", Text, nullable=False, default=""),
+    Column("state", Text, nullable=False, default=""),
+    Column("timezone", Text, nullable=False, default=""),
+    Column("url", Text, nullable=False, default=""),
+    Column("accepted", Boolean, nullable=False, default=False, index=True),
     Column("created", DateTime, nullable=False, default=datetime.utcnow),
 )
 
@@ -66,18 +66,18 @@ User = Table(
     "user",
     METADATA,
     Column("id", Integer, primary_key=True),
-    Column("email", Text, unique=True, index=True),
-    Column("username", Text, unique=True, index=True),
-    Column("full_name", Text),
-    Column("password", Text),  # this is the hashed password
-    Column("is_admin", Boolean),
+    Column("email", Text, nullable=False, unique=True, index=True),
+    Column("username", Text, nullable=False, unique=True, index=True),
+    Column("full_name", Text, nullable=False, default=""),
+    Column("password", Text, nullable=False),  # this is the hashed password
+    Column("is_admin", Boolean, nullable=False, default=False),
     Column(
         "auth_id",
         UUID(as_uuid=True),
         nullable=False,
+        default=uuid4,
         unique=True,
         index=True,
-        default=uuid4,
     ),
 )
 
@@ -101,10 +101,10 @@ SiteData = Table(
     Column(
         "site_id", Integer, ForeignKey("site.id"), unique=True, nullable=False
     ),
-    Column("allocated_machines", Integer),
-    Column("deployed_machines", Integer),
-    Column("ready_machines", Integer),
-    Column("error_machines", Integer),
-    Column("other_machines", Integer),
+    Column("allocated_machines", Integer, nullable=False, default=0),
+    Column("deployed_machines", Integer, nullable=False, default=0),
+    Column("ready_machines", Integer, nullable=False, default=0),
+    Column("error_machines", Integer, nullable=False, default=0),
+    Column("other_machines", Integer, nullable=False, default=0),
     Column("last_seen", DateTime),
 )

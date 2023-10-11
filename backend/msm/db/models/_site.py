@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+from typing import Literal
 
 from pydantic import (
     BaseModel,
@@ -51,18 +52,18 @@ class Site(BaseModel):
 
     id: int
     name: str
-    city: str | None = None
-    country: str | None = Field(default=None, min_length=2, max_length=2)
+    city: str = ""
+    country: str = ""
     coordinates: tuple[
         float, float
     ] | None  # first item is the lon, second is the lat
-    note: str | None = None
-    state: str | None = None
-    address: str | None = None
-    postal_code: str | None = None
+    note: str = ""
+    state: str = ""
+    address: str = ""
+    postal_code: str = ""
     # XXX: mypy can't grok that this is an str/enum with lots of members
-    timezone: TimeZone | None = None  # type: ignore[valid-type]
-    url: str
+    timezone: TimeZone | Literal[""] = ""  # type: ignore[valid-type]
+    url: str = ""
     name_unique: bool
     connection_status: ConnectionStatus
     stats: SiteData | None = None

@@ -158,13 +158,13 @@ class UserService(Service):
     async def update(
         self, user_id: int, details: models.UserUpdate
     ) -> models.User:
-        data = details.model_dump()
+        data = details.model_dump(exclude_none=True)
         if password := data.get("password"):
             data["password"] = hash_password(password)
         stmt = (
             update(User)
             .where(User.c.id == user_id)
-            .values({k: v for k, v in data.items() if v is not None})
+            .values(data)
             .returning(
                 User.c.id,
                 User.c.email,

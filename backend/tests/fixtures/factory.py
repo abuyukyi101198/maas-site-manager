@@ -130,8 +130,8 @@ class Factory:
     async def make_Site(
         self,
         name: str | None = None,
-        city: str | None = None,
-        country: str | None = None,
+        city: str = "",
+        country: str = "",
         url: str | None = None,
         timezone: str | None = None,
         coordinates: tuple[float, float] | None = None,
@@ -153,7 +153,7 @@ class Factory:
                     "city": city,
                     "country": country,
                     "timezone": (
-                        getattr(TimeZone, timezone) if timezone else None
+                        getattr(TimeZone, timezone) if timezone else ""
                     ),
                     "coordinates": coordinates,
                     "name_unique": True,

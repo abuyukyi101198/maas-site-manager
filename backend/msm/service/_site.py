@@ -110,27 +110,7 @@ class SiteService(Service):
         stmt = (
             update(Site)
             .where(Site.c.id == site_id)
-            .values(
-                {
-                    k: v
-                    for k, v in details.model_dump().items()
-                    if v is not None
-                }
-            )
-            .returning(
-                Site.c.id,
-                Site.c.name,
-                Site.c.city,
-                Site.c.country,
-                Site.c.coordinates,
-                Site.c.name_unique,
-                Site.c.note,
-                Site.c.state,
-                Site.c.address,
-                Site.c.postal_code,
-                Site.c.timezone,
-                Site.c.url,
-            )
+            .values(details.model_dump(exclude_none=True))
         )
         await self.conn.execute(stmt)
 
