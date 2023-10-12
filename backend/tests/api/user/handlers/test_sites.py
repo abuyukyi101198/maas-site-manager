@@ -128,10 +128,8 @@ class TestSitesHandler:
 
     async def test_patch(self, user_client: Client, factory: Factory) -> None:
         site = await factory.make_Site(coordinates=(0, 0))
-        site_duplicate = await factory.make_Site()
         update: dict[str, Any] = {
-            "name": "shiny new name",
-            "url": "https://shiny.example.com",
+            "country": "ES",
             "coordinates": [180, 90],
         }
 
@@ -141,19 +139,10 @@ class TestSitesHandler:
         updated = Site(**site.model_dump()).model_dump() | update
         assert response.json() == updated
 
-        # update a site to a non unique name
-        response_duplicate = await user_client.patch(
-            f"/sites/{site_duplicate.id}", json=update
-        )
-        assert response_duplicate.status_code == 200
-        update["name_unique"] = False
-        updated_duplicate = (
-            Site(**site_duplicate.model_dump()).model_dump() | update
-        )
-        assert response_duplicate.json() == updated_duplicate
-
-        # try to update a non existent site
-        response = await user_client.patch("/sites/42", json=update)
+    async def test_patch_nonexistent(
+        self, user_client: Client, factory: Factory
+    ) -> None:
+        response = await user_client.patch("/sites/42", json={"country": "IT"})
         assert response.status_code == 404
 
     async def test_get_connection_status(

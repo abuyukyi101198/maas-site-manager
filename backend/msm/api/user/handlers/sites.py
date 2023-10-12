@@ -65,7 +65,6 @@ class SitesGetResponse(PaginatedResults):
 class SiteUpdateRequest(BaseModel):
     """Update a site without setting it's name_unique."""
 
-    name: str
     city: str | None = None
     country: str | None = Field(default=None, min_length=2, max_length=2)
     coordinates: list[
@@ -77,7 +76,6 @@ class SiteUpdateRequest(BaseModel):
     postal_code: str | None = None
     # XXX: mypy can't grok that this is an str/enum with lots of members
     timezone: TimeZone | None = None  # type: ignore[valid-type]
-    url: str
 
 
 @v1_router.get("/sites")
@@ -107,7 +105,7 @@ async def get(
 async def patch(
     services: Annotated[ServiceCollection, Depends(services)],
     authenticated_user: Annotated[models.User, Depends(authenticated_user)],
-    patch_request: SiteUpdateRequest,
+    request: SiteUpdateRequest,
     id: int,
 ) -> models.Site:
     """Modify a site and make sure that the `name_unique`
@@ -116,16 +114,9 @@ async def patch(
     if not await services.sites.id_exists(id):
         raise not_found("Site")
 
-    raise_on_empty_request(patch_request)
-
-    # if the name exists name_unique should be false
-    site_updated = patch_request.model_dump()
-    site_updated["name_unique"] = await services.sites.is_name_unique(
-        id, site_updated["name"]
-    )
-
-    await services.sites.update(id, models.SiteUpdate(**site_updated))
-
+    raise_on_empty_request(request)
+    data = request.model_dump(exclude_none=True)
+    await services.sites.update(id, models.SiteUpdate(**data))
     return cast(models.Site, await services.sites.get_by_id(id))
 
 

@@ -17,9 +17,9 @@ def not_found(entity: str) -> HTTPException:
     )
 
 
-def raise_on_empty_request(patch_request: BaseModel) -> None:
-    """Check if given `patch_request` is empty and raise 422 in that case"""
-    if all(v is None for v in patch_request.model_dump().values()):
+def raise_on_empty_request(request: BaseModel) -> None:
+    """Check if given `request` is empty and raise 422 in that case"""
+    if not request.model_dump(exclude_none=True):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail={"message": "Request body empty."},

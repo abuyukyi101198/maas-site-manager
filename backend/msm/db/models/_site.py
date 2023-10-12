@@ -31,7 +31,6 @@ class SiteData(BaseModel):
 class SiteUpdate(BaseModel):
     """The allowed updates to a Site from a user."""
 
-    name: str
     city: str | None = None
     country: str | None = Field(default=None, min_length=2, max_length=2)
     coordinates: tuple[
@@ -43,8 +42,7 @@ class SiteUpdate(BaseModel):
     postal_code: str | None = None
     # XXX: mypy can't grok that this is an str/enum with lots of members
     timezone: TimeZone | None = None  # type: ignore[valid-type]
-    url: str
-    name_unique: bool
+    name_unique: bool | None = None
 
 
 class Site(BaseModel):
