@@ -27,6 +27,10 @@ export const protectedRoutes = {
     path: "/settings/users",
     title: "Users",
   },
+  mapSettings: {
+    path: "/settings/map",
+    title: "Map",
+  },
   account: {
     path: "/account",
     title: "",

@@ -1,6 +1,7 @@
 import RequireLogin from "./RequireLogin";
 
 import MainLayout from "@/components/MainLayout";
+import MapSettings from "@/components/MapSettings";
 import NotFound from "@/pages/404";
 import Account from "@/pages/account";
 import Password from "@/pages/account/password";
@@ -89,6 +90,14 @@ export const routes = createRoutesFromElements(
           </RequireLogin>
         }
         path="users"
+      />
+      <Route
+        element={
+          <RequireLogin>
+            <MapSettings />
+          </RequireLogin>
+        }
+        path="map"
       />
     </Route>
     <Route

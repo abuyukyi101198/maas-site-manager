@@ -15,6 +15,14 @@ $box-shadow:
     }
   }
 
+  .sites-view-control {
+    @media only screen and (min-width: $breakpoint-large) {
+      .p-segmented-control__button {
+        margin-bottom: 0;
+      }
+    }
+  }
+
   &.is-map-view {
     .site-control-heading {
       font-weight: $font-weight-regular-text;
@@ -24,10 +32,6 @@ $box-shadow:
     .remove-btn,
     .sites-view-control {
       box-shadow: $box-shadow;
-
-      .p-segmented-control__button {
-        margin-bottom: 0;
-      }
     }
   }
 }

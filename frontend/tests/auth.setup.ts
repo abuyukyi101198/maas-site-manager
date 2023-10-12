@@ -8,5 +8,15 @@ setup("authenticate", async ({ page }) => {
   await page.getByRole("textbox", { name: "Password" }).type("admin");
   await page.getByRole("button", { name: "Login" }).click();
   await expect(page.getByRole("link", { name: "Log out" })).toBeVisible();
+
+  // Accept OSM ToS so that the map is enabled
+  await page.goto(routesConfig.mapSettings.path);
+  await page
+    .getByRole("checkbox", {
+      name: "I have read and accept the OpenStreetMap term of service and their fair use policy.",
+    })
+    .click();
+  await page.getByRole("button", { name: "Save" }).click();
+
   await page.context().storageState({ path: adminAuthFile });
 });
