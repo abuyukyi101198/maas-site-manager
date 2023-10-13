@@ -86,8 +86,13 @@ Token = Table(
     "token",
     METADATA,
     Column("id", Integer, primary_key=True),
+    Column("value", Text, nullable=False),
     Column(
-        "value", UUID(as_uuid=True), nullable=False, index=True, default=uuid4
+        "auth_id",
+        UUID(as_uuid=True),
+        nullable=False,
+        unique=True,
+        index=True,
     ),
     Column("expired", DateTime, nullable=False),
     Column("created", DateTime, nullable=False, default=datetime.utcnow),

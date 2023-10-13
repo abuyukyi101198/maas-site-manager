@@ -3,7 +3,6 @@ from datetime import (
     timedelta,
 )
 from typing import Annotated
-from uuid import UUID
 
 from fastapi import (
     APIRouter,
@@ -12,6 +11,7 @@ from fastapi import (
 from pydantic import BaseModel
 
 from ....db.models import (
+    Config,
     Token,
     User,
 )
@@ -22,7 +22,10 @@ from ....schema import (
 )
 from ....service import ServiceCollection
 from ..._csv import CSVResponse
-from ..._dependencies import services
+from ..._dependencies import (
+    config,
+    services,
+)
 from .._auth import authenticated_user
 
 v1_router = APIRouter(prefix="/v1")
@@ -63,11 +66,12 @@ class TokensPostResponse(BaseModel):
     """List of created tokens, along with their duration."""
 
     expired: datetime
-    tokens: list[UUID]
+    tokens: list[str]
 
 
 @v1_router.post("/tokens")
 async def post(
+    config: Annotated[Config, Depends(config)],
     services: Annotated[ServiceCollection, Depends(services)],
     authenticated_user: Annotated[User, Depends(authenticated_user)],
     create_request: TokensPostRequest,
@@ -79,6 +83,7 @@ async def post(
     expired, tokens = await services.tokens.create(
         create_request.duration,
         count=create_request.count,
+        secret_key=config.token_secret_key,
     )
     return TokensPostResponse(expired=expired, tokens=list(tokens))
 

@@ -3,7 +3,7 @@ from datetime import (
     timedelta,
 )
 from typing import Iterable
-from uuid import UUID
+from uuid import uuid4
 
 from sqlalchemy import (
     delete,
@@ -15,27 +15,36 @@ from ..db import (
     queries,
 )
 from ..db.tables import Token
+from ..jwt import create_token
 from ._base import Service
 
 
 class TokenService(Service):
     async def create(
-        self, duration: timedelta, count: int = 1
-    ) -> tuple[datetime, Iterable[UUID]]:
-        """Create tokens, returning their expiration and UUIDs."""
+        self,
+        duration: timedelta,
+        count: int = 1,
+        secret_key: str = "",
+    ) -> tuple[datetime, Iterable[str]]:
+        """Create tokens, returning their expiration and values."""
         created = datetime.utcnow()
         expired = created + duration
-        result = await self.conn.execute(
-            Token.insert().returning(Token.c.value),
-            [
+        tokens_data = []
+        token_values = []
+        for _ in range(count):
+            auth_id = uuid4()
+            value = create_token(str(auth_id), secret_key, duration=duration)
+            token_values.append(value)
+            tokens_data.append(
                 {
                     "expired": expired,
                     "created": created,
+                    "value": value,
+                    "auth_id": auth_id,
                 }
-                for _ in range(count)
-            ],
-        )
-        return expired, (row[0] for row in result)
+            )
+        await self.conn.execute(Token.insert(), tokens_data)
+        return expired, token_values
 
     async def get(
         self,

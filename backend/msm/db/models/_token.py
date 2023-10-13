@@ -1,5 +1,4 @@
 from datetime import datetime
-from uuid import UUID
 
 from pydantic import BaseModel
 
@@ -8,6 +7,6 @@ class Token(BaseModel):
     """A registration token for a site."""
 
     id: int
-    value: UUID
+    value: str
     expired: datetime
     created: datetime

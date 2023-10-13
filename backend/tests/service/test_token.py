@@ -7,6 +7,7 @@ import uuid
 import pytest
 from sqlalchemy.ext.asyncio import AsyncConnection
 
+from msm.jwt import validate_token
 from msm.service._token import TokenService
 
 from ..fixtures.factory import Factory
@@ -20,22 +21,38 @@ class TestTokenService:
         now = datetime.utcnow()
         duration = timedelta(minutes=10)
         service = TokenService(db_connection)
-        expiration, uuids = await service.create(duration=duration, count=10)
-        assert len(list(uuids)) == 10
+        expiration, values = await service.create(
+            duration=duration,
+            count=10,
+        )
+        assert len(list(values)) == 10
         assert expiration > now + duration
+
+    async def test_create_value_is_jwt(
+        self, factory: Factory, db_connection: AsyncConnection
+    ) -> None:
+        secret_key = "abcde"
+        duration = timedelta(minutes=10)
+        service = TokenService(db_connection)
+        _, [value] = await service.create(
+            duration=duration, secret_key=secret_key
+        )
+        auth_id = validate_token(value, secret_key)
+        [token] = await factory.get("token")
+        assert token["auth_id"] == uuid.UUID(auth_id)
 
     async def test_get_includes_only_active(
         self, factory: Factory, db_connection: AsyncConnection
     ) -> None:
         uuid1, uuid2, uuid3 = [uuid.uuid4() for _ in range(3)]
-        await factory.make_Token(value=uuid1, lifetime=timedelta(hours=-1))
-        await factory.make_Token(value=uuid2, lifetime=timedelta(hours=1))
-        await factory.make_Token(value=uuid3, lifetime=timedelta(hours=2))
+        await factory.make_Token(auth_id=uuid1, lifetime=timedelta(hours=-1))
+        await factory.make_Token(auth_id=uuid2, lifetime=timedelta(hours=1))
+        await factory.make_Token(auth_id=uuid3, lifetime=timedelta(hours=2))
 
         service = TokenService(db_connection)
         count, tokens = await service.get()
         assert count == 2
-        assert set(token.value for token in tokens) == {
-            uuid2,
-            uuid3,
+        assert {validate_token(token.value) for token in tokens} == {
+            str(uuid2),
+            str(uuid3),
         }

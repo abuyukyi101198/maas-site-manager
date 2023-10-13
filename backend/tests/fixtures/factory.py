@@ -28,6 +28,7 @@ from msm.db.models import (
     User,
 )
 from msm.db.tables import METADATA
+from msm.jwt import create_token
 from msm.password import hash_password
 from msm.schema import TimeZone
 
@@ -104,21 +105,22 @@ class Factory:
 
     async def make_Token(
         self,
-        value: UUID | None = None,
-        site_id: int | None = None,
+        auth_id: UUID | None = None,
         lifetime: timedelta = timedelta(minutes=5),
+        key: str = "",
     ) -> Token:
         """Create a Token."""
         id = await self.next_id("token")
-        if value is None:
-            value = uuid4()
+        if auth_id is None:
+            auth_id = uuid4()
+        value = create_token(str(auth_id), key=key, duration=lifetime)
         now = datetime.utcnow()
         [row] = await self.create(
             "token",
             [
                 {
                     "id": id,
-                    "site_id": site_id,
+                    "auth_id": auth_id,
                     "value": value,
                     "created": now,
                     "expired": now + lifetime,
