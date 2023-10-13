@@ -9,9 +9,9 @@ import pytest
 
 from msm.jwt import (
     create_token,
+    decode_token,
     InvalidToken,
     TOKEN_DURATION_MINUTES,
-    validate_token,
 )
 
 SAMPLE_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
@@ -40,15 +40,16 @@ class TestCreateToken:
         )
 
 
-class TestValidateToken:
+class TestDecodeToken:
     def test_valid(self) -> None:
         subject = "subject"
-        token = create_token(subject)
-        assert validate_token(token) == subject
+        data = {"foo": "bar"}
+        token = create_token(subject, data=data)
+        assert decode_token(token) == (subject, data)
 
     def test_invalid(self) -> None:
         with pytest.raises(InvalidToken):
-            validate_token("garbage")
+            decode_token("garbage")
 
     @pytest.mark.parametrize(
         "data",
@@ -60,9 +61,9 @@ class TestValidateToken:
     def test_invalid_missing_fields(self, data: dict[str, Any]) -> None:
         encoded = jwt.encode(data, key=SAMPLE_KEY, algorithm="HS256")
         with pytest.raises(InvalidToken):
-            validate_token(str(encoded))
+            decode_token(str(encoded))
 
     def test_expired(self) -> None:
         token = create_token("subject", duration=timedelta(days=-1))
         with pytest.raises(InvalidToken):
-            validate_token(token)
+            decode_token(token)

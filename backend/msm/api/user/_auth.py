@@ -12,8 +12,8 @@ from ...db.models import (
     User,
 )
 from ...jwt import (
+    decode_token,
     InvalidToken,
-    validate_token,
 )
 from ...service import (
     ServiceCollection,
@@ -49,7 +49,7 @@ async def authenticated_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        auth_id = validate_token(token, key=config.token_secret_key)
+        auth_id, _ = decode_token(token, key=config.token_secret_key)
         if user := await services.users.get_by_auth_id(auth_id):
             return user
     except (InvalidToken, ValueError):

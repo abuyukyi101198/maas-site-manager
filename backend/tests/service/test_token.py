@@ -7,7 +7,7 @@ import uuid
 import pytest
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from msm.jwt import validate_token
+from msm.jwt import decode_token
 from msm.service._token import TokenService
 
 from ..fixtures.factory import Factory
@@ -37,7 +37,7 @@ class TestTokenService:
         _, [value] = await service.create(
             duration=duration, secret_key=secret_key
         )
-        auth_id = validate_token(value, secret_key)
+        auth_id, _ = decode_token(value, secret_key)
         [token] = await factory.get("token")
         assert token["auth_id"] == uuid.UUID(auth_id)
 
@@ -52,7 +52,7 @@ class TestTokenService:
         service = TokenService(db_connection)
         count, tokens = await service.get()
         assert count == 2
-        assert {validate_token(token.value) for token in tokens} == {
+        assert {decode_token(token.value)[0] for token in tokens} == {
             str(uuid2),
             str(uuid3),
         }

@@ -3,7 +3,10 @@ from datetime import (
     timedelta,
 )
 import os
-from typing import cast
+from typing import (
+    Any,
+    cast,
+)
 
 from jose import (
     jwt,
@@ -25,33 +28,40 @@ def generate_key() -> str:
 
 
 def create_token(
-    subject: str, key: str = "", duration: timedelta | None = None
+    subject: str,
+    key: str = "",
+    duration: timedelta | None = None,
+    data: dict[str, Any] | None = None,
 ) -> str:
-    """Create a JWT token and return it's encoded form as string."""
+    """Create a JWT token and return its encoded form as string."""
     if duration is None:
         duration = timedelta(minutes=TOKEN_DURATION_MINUTES)
-    data = {
+    if data is None:
+        data = {}
+    payload = data | {
         "sub": subject,
         "iss": "MAAS site manager",
         "exp": datetime.utcnow() + duration,
     }
-    encoded = jwt.encode(data, key, algorithm=TOKEN_ALGORITHM)
+    encoded = jwt.encode(payload, key, algorithm=TOKEN_ALGORITHM)
     return str(encoded)
 
 
-def validate_token(token: str, key: str = "") -> str:
-    """Validate a JWT token and return its subject."""
+def decode_token(token: str, key: str = "") -> tuple[str, dict[str, Any]]:
+    """Decode a JWT and return its subject and data."""
     try:
         payload = jwt.decode(token, key, algorithms=[TOKEN_ALGORITHM])
     except JWTError:
         raise InvalidToken()
-    subject = payload.get("sub")
-    if subject is None:
+    try:
+        subject = payload.pop("sub")
+    except KeyError:
         raise InvalidToken()
-    expiration = payload.get("exp")
+    expiration = payload.pop("exp", None)
     if (
         not expiration
         or datetime.utcfromtimestamp(expiration) < datetime.utcnow()
     ):
         raise InvalidToken()
-    return cast(str, subject)
+    payload.pop("iss", None)  # don't include it in returned data
+    return cast(str, subject), payload
