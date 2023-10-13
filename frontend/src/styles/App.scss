@@ -61,6 +61,11 @@
 @include vf-l-application-panels;
 @include vf-l-full-width;
 @include vf-l-site;
+
+// MAAS React Components
+@import "@canonical/maas-react-components/dist/style.css";
+
+// custom styles
 @import "@/styles/utils";
 @import "@/styles/patterns_icons";
 @import "@/styles/patterns_typography";
@@ -71,7 +76,6 @@
 @import "@/components/Navigation/Navigation";
 @import "@/components/SecondaryNavigation/SecondaryNavigation";
 @import "@/components/Popover/Popover";
-@import "@/components/Meter/Meter";
 @import "@/components/TokensCreate/TokensCreate";
 @import "@/components/SitesList/SitesTable/SitesTableControls/SitesTableControls";
 @import "@/components/SitesList/SitesTable/SitesTableControls/ColumnsVisibilityControl/ColumnsVisibilityControl";

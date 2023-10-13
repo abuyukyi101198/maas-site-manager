@@ -1,5 +1,6 @@
+import { Meter, meterColor as color } from "@canonical/maas-react-components";
+
 import type { Stats } from "@/api/types";
-import Meter, { color } from "@/components/Meter";
 import Popover from "@/components/Popover/Popover";
 
 const AggregatedStatus = ({ stats, hideLabel }: { stats: Stats; hideLabel?: boolean }) => {
