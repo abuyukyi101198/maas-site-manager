@@ -46,11 +46,11 @@ Site = Table(
     "site",
     METADATA,
     Column("id", Integer, primary_key=True),
+    Column("name", Text, nullable=False, index=True, default=""),
     Column("address", Text, nullable=False, default=""),
     Column("city", Text, nullable=False, default=""),
     Column("country", Text, nullable=False, default=""),  # ISO 3166 Alpha2
     Column("coordinates", Point),
-    Column("name", Text, nullable=False, default=""),
     Column("note", Text, nullable=False, default=""),
     Column("postal_code", Text, nullable=False, default=""),
     Column("state", Text, nullable=False, default=""),
