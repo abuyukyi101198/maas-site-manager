@@ -1,4 +1,5 @@
-import ExternalLink from "@/components/ExternalLink";
+import { ExternalLink } from "@canonical/maas-react-components";
+
 import TableCaption from "@/components/TableCaption";
 import docsUrls from "@/config/docsUrls";
 import { useRequestsCountQuery } from "@/hooks/react-query";

@@ -1,8 +1,8 @@
 import { useId } from "react";
 
+import { ExternalLink } from "@canonical/maas-react-components";
 import { Icon } from "@canonical/react-components";
 
-import ExternalLink from "@/components/ExternalLink/ExternalLink";
 import type { NavLink } from "@/components/Navigation/types";
 import { isSelected } from "@/components/Navigation/utils";
 import type { RoutePath } from "@/config/routes";

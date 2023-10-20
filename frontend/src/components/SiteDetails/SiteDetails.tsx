@@ -1,9 +1,9 @@
+import { ExternalLink } from "@canonical/maas-react-components";
 import { Spinner, Notification, Button, Icon } from "@canonical/react-components";
 import classNames from "classnames";
 import { get } from "lodash";
 
 import ErrorMessage from "@/components/ErrorMessage";
-import ExternalLink from "@/components/ExternalLink/ExternalLink";
 import {
   connectionIcons,
   connectionLabels,

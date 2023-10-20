@@ -1,10 +1,10 @@
+import { ExternalLink } from "@canonical/maas-react-components";
 import { Button, Icon, Tooltip } from "@canonical/react-components";
 import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import classNames from "classnames";
 import pick from "lodash/fp/pick";
 
 import type { Site } from "@/api/types";
-import ExternalLink from "@/components/ExternalLink/ExternalLink";
 import type { SitesColumnDef } from "@/components/SitesList/SitesTable/SitesTable";
 
 type Props = {

@@ -1,10 +1,10 @@
+import { ExternalLink } from "@canonical/maas-react-components";
 import { Button, Card, Icon, Notification, Spinner } from "@canonical/react-components";
 import classNames from "classnames";
 import { get } from "lodash";
 
 import type { Site } from "@/api/types";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
-import ExternalLink from "@/components/ExternalLink/ExternalLink";
 import AggregatedStatus from "@/components/SitesList/SitesTable/AggregatedStatus/AggregatedStatus";
 import {
   connectionIcons,

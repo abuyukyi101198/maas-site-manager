@@ -1,12 +1,12 @@
 import { useEffect, useMemo } from "react";
 
+import { ExternalLink } from "@canonical/maas-react-components";
 import { useReactTable, flexRender, getCoreRowModel } from "@tanstack/react-table";
 import type { Column, ColumnDef } from "@tanstack/react-table";
 
 import type { PendingSite } from "@/api-client/models/PendingSite";
 import DateTime from "@/components/DateTime";
 import DynamicTable from "@/components/DynamicTable/DynamicTable";
-import ExternalLink from "@/components/ExternalLink";
 import SelectAllCheckbox from "@/components/SelectAllCheckbox";
 import TableCaption from "@/components/TableCaption";
 import docsUrls from "@/config/docsUrls";

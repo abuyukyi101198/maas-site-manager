@@ -1,10 +1,10 @@
+import { ExternalLink } from "@canonical/maas-react-components";
 import { Button, Col, Row, Notification } from "@canonical/react-components";
 import pluralize from "pluralize";
 
 import TokensTable from "./components/TokensTable/TokensTable";
 
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
-import ExternalLink from "@/components/ExternalLink";
 import PaginationBar from "@/components/base/PaginationBar";
 import RemoveButton from "@/components/base/RemoveButton";
 import docsUrls from "@/config/docsUrls";

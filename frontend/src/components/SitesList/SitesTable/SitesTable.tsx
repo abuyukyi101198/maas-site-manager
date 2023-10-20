@@ -1,6 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import React, { useEffect, useMemo } from "react";
 
+import { ExternalLink } from "@canonical/maas-react-components";
 import { useReactTable, flexRender, getCoreRowModel } from "@tanstack/react-table";
 import type { ColumnDef, Column, Getter, Row, SortingState } from "@tanstack/react-table";
 import classNames from "classnames";
@@ -14,7 +15,6 @@ import SitesTableControls from "./SitesTableControls/SitesTableControls";
 
 import type { SitesQueryResult } from "@/api/types";
 import DynamicTable from "@/components/DynamicTable/DynamicTable";
-import ExternalLink from "@/components/ExternalLink";
 import NoSites from "@/components/NoSites";
 import SelectAllCheckbox from "@/components/SelectAllCheckbox";
 import TableCaption from "@/components/TableCaption/TableCaption";
