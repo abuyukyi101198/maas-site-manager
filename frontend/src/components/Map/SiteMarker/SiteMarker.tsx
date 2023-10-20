@@ -1,13 +1,9 @@
 import classNames from "classnames";
-import type { LeafletEventHandlerFnMap } from "leaflet";
 import L from "leaflet";
-import { Marker, Popup, useMap } from "react-leaflet";
 
-import SiteSummary from "@/components/Map/SiteSummary";
-import type { SiteMarkerType } from "@/components/Map/types";
 import { renderToHtmlString } from "@/components/Map/utils";
 
-type MarkerApprearance = "base" | "selected";
+export type MarkerApprearance = "base" | "selected";
 
 const SiteMarkerSvg = ({ appearance = "base" }: { appearance?: MarkerApprearance }) => {
   return (
@@ -60,65 +56,7 @@ export const getSiteMarker = (appearance: keyof typeof markerIcon) => {
   return markerIcon[appearance];
 };
 
-const HOVER_DELAY = 750;
-
-const SiteMarker = ({
-  id,
-  position,
-  handleMarkerClick,
-}: SiteMarkerType & { handleMarkerClick: (id: SiteMarkerType["id"]) => void }) => {
-  const popupContentRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const resetTimeout = () => timeoutRef.current && clearTimeout(timeoutRef.current);
-  const map = useMap();
-
-  const handleClick = useCallback(() => {
-    map.closePopup();
-    handleMarkerClick(id);
-  }, [map, handleMarkerClick, id]);
-
-  const eventHandlers = useMemo(
-    () =>
-      ({
-        mouseover(event) {
-          timeoutRef.current = setTimeout(() => {
-            event.target.openPopup();
-          }, HOVER_DELAY);
-        },
-        mouseout(event) {
-          resetTimeout();
-          // ignore mouseout events within the popup content
-          if (event.originalEvent.relatedTarget === popupContentRef.current?.firstElementChild) {
-            return;
-          } else {
-            map.closePopup();
-          }
-        },
-        dragend() {},
-        click() {
-          handleClick();
-        },
-        keypress() {
-          handleClick();
-        },
-      }) as LeafletEventHandlerFnMap,
-    [map, handleClick],
-  );
-
-  return (
-    <Marker eventHandlers={eventHandlers} icon={getSiteMarker("base")} keyboard position={position}>
-      <Popup minWidth={385}>
-        <div
-          onMouseLeave={() => {
-            map.closePopup();
-          }}
-          ref={popupContentRef}
-        >
-          <SiteSummary id={id} />
-        </div>
-      </Popup>
-    </Marker>
-  );
+export const createCustomClusterIcon = function (_appearance: MarkerApprearance, _count: number) {
+  // TODO: implement cluster icon
+  return new L.DivIcon();
 };
-
-export default SiteMarker;

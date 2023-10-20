@@ -1,76 +1,72 @@
-import type { LeafletEventHandlerFn } from "leaflet";
-import type { MapContainerProps } from "react-leaflet";
-import { MapContainer, TileLayer, ZoomControl, useMapEvents } from "react-leaflet";
+import type { FC } from "react";
+import { useEffect } from "react";
 
-import SiteMarker from "./SiteMarker";
-import { type SiteMarkerType } from "./types";
+import type { TileLayerOptions } from "leaflet";
+import L from "leaflet";
 
-import { useAppLayoutContext } from "@/context";
-import { useSiteDetailsContext } from "@/context/SiteDetailsContext";
+import { useMapEvents } from "./hooks";
+import type { MapProps } from "./types";
+
+import LeafletMapContainer from "@/components/Map/LeafletMapContainer";
+import MarkersLayer from "@/components/Map/MarkersLayer";
+import { useLeafletMap } from "@/context/LeafletMapContext";
 import useWindowSize from "@/hooks/useWindowSize";
 import { computeMinZoom } from "@/utils";
 
-const MapEvents = ({ onEvent }: { onEvent: LeafletEventHandlerFn }) => {
-  useMapEvents({
-    zoomend: onEvent,
-    moveend: onEvent,
-  });
+const TileLayer = ({ url, attribution }: { url: string } & Pick<TileLayerOptions, "attribution">) => {
+  const map = useLeafletMap();
+  useEffect(() => {
+    const tileLayer = L.tileLayer(url, { attribution }).addTo(map);
+    return () => {
+      map.removeLayer(tileLayer);
+    };
+  }, [map, url, attribution]);
   return null;
 };
 
-const Map = ({
-  id = "map-container",
-  markers,
-  onBoundsChange,
-}: MapContainerProps & {
-  markers: SiteMarkerType[] | null;
-  onBoundsChange?: (bounds: string) => void;
-}) => {
-  const { setSidebar } = useAppLayoutContext();
-  const { setSelected: setSiteId } = useSiteDetailsContext();
-  const { screenHeight, screenWidth } = useWindowSize();
-  const handleMarkerClick = (id: SiteMarkerType["id"]) => {
-    setSiteId(id);
-    setSidebar("siteDetails");
-  };
+const Map: FC<MapProps> = ({ onBoundsChange, markers }) => {
+  const map = useLeafletMap();
 
-  const minZoom = useMemo(() => computeMinZoom({ screenHeight, screenWidth }), [screenHeight, screenWidth]);
+  const handleBoundsChange = useCallback(() => {
+    onBoundsChange?.(map.getBounds().toBBoxString());
+  }, [map, onBoundsChange]);
+
+  useMapEvents({ zoomend: handleBoundsChange, moveend: handleBoundsChange });
 
   return (
-    <MapContainer
-      boundsOptions={{
-        // TODO: set the correct padding to accomodate for SitesTableControls and the sidebar
-        paddingTopLeft: [50, 0],
-      }}
-      center={[0, 0]}
-      className="map"
-      id={id}
-      maxBounds={[
-        [-90, -180],
-        [90, 180],
-      ]}
-      maxBoundsViscosity={0.8}
-      minZoom={minZoom}
-      zoom={3}
-      zoomControl={false}
-    >
-      <MapEvents
-        onEvent={(e) => {
-          onBoundsChange?.(e.target.getBounds().toBBoxString());
-        }}
-      />
-      <ZoomControl position="bottomright" />
+    <>
+      {markers ? <MarkersLayer markers={markers} /> : null}
       <TileLayer
-        attribution='<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
-        data-testid="tile-layer"
-        noWrap
+        attribution={`<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>`}
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      {markers?.map(({ position, id }) => (
-        <SiteMarker handleMarkerClick={handleMarkerClick} id={id} key={id} position={position} />
-      ))}
-    </MapContainer>
+    </>
   );
 };
 
-export default Map;
+const MapContainer: FC<MapProps> = (props) => {
+  const { screenHeight, screenWidth } = useWindowSize();
+  const minZoom = useMemo(() => computeMinZoom({ screenHeight, screenWidth }), [screenHeight, screenWidth]);
+
+  return (
+    <LeafletMapContainer
+      className="map"
+      options={{
+        center: [0, 0],
+        zoom: 3,
+        zoomControlOptions: { position: "bottomright" },
+        maxBoundsViscosity: 0.8,
+        minZoom,
+        maxBounds: [
+          [-90, -180],
+          [90, 180],
+        ],
+        boundsOptions: { paddingTopLeft: [50, 0] },
+      }}
+    >
+      <Map {...props} />
+    </LeafletMapContainer>
+  );
+};
+
+export default MapContainer;

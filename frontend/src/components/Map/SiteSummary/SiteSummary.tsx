@@ -1,3 +1,5 @@
+import type { DOMAttributes } from "react";
+
 import { ExternalLink } from "@canonical/maas-react-components";
 import { Button, Card, Icon, Notification, Spinner } from "@canonical/react-components";
 import classNames from "classnames";
@@ -15,14 +17,17 @@ import { useAppLayoutContext } from "@/context";
 import { useSiteDetailsContext } from "@/context/SiteDetailsContext";
 import { useSiteQuery } from "@/hooks/react-query";
 
-const SiteSummary = ({ id }: { id: Site["id"] }) => {
+interface SiteSummaryProps extends DOMAttributes<HTMLElement> {
+  id: Site["id"];
+}
+const SiteSummary = ({ id, ...props }: SiteSummaryProps) => {
   const { data: site, error, isLoading } = useSiteQuery({ id });
   const { setSidebar } = useAppLayoutContext();
   const { setSelected: setSiteId } = useSiteDetailsContext();
   const stats = site?.stats;
 
   return (
-    <Card className="site-summary" title="Site details">
+    <Card className="site-summary" title="Site details" {...props}>
       {error ? (
         <Notification severity="negative" title="Error while fetching site">
           <ErrorMessage error={error} />

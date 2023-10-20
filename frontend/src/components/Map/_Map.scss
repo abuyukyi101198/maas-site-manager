@@ -79,3 +79,7 @@ $grid-margin-default: map_get($grid-margin-widths, default);
     z-index: 100;
 }
 
+.popup-container {
+  min-width: 21rem;
+}
+
