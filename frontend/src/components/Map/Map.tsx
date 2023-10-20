@@ -57,6 +57,7 @@ const MapContainer: FC<MapProps> = (props) => {
         zoomControlOptions: { position: "bottomright" },
         maxBoundsViscosity: 0.8,
         minZoom,
+        maxZoom: 17,
         maxBounds: [
           [-90, -180],
           [90, 180],

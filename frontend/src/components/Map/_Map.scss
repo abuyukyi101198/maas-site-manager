@@ -79,6 +79,44 @@ $grid-margin-default: map_get($grid-margin-widths, default);
     z-index: 100;
 }
 
+.site-marker-cluster {
+  text-align: center;
+
+  .site-marker-cluster__body {
+    stroke: $color-light;
+  }
+
+  .site-marker-cluster__text {
+    color: white;
+    position: relative;
+    left: 0;
+  }
+}
+
+.site-marker-cluster--x-large {
+  .site-marker-cluster__text {
+    bottom: 85%;
+  }
+}
+
+.site-marker-cluster--large {
+  .site-marker-cluster__text {
+    bottom: 95%;
+  }
+}
+
+.site-marker-cluster--medium {
+  .site-marker-cluster__text {
+    bottom: 95%;
+  }
+}
+
+.site-marker-cluster--small {
+  .site-marker-cluster__text {
+    bottom: 108%;
+  }
+}
+
 .popup-container {
   min-width: 21rem;
 }

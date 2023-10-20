@@ -48,42 +48,42 @@ it("displays open street map attribution", () => {
   ).toHaveAttribute("href", "https://www.openstreetmap.org/copyright");
 });
 
-it("displays map markers", () => {
-  const sites = siteFactory.buildList(2);
+it("displays individual map markers", () => {
+  const sites = [siteFactory.build({ coordinates: [0, 0] })];
   const markers = sites.map(formatSiteMarker);
-  render(<Map markers={markers} />);
 
-  const markerButtons = screen.getAllByRole("button", {
-    name: /site location marker/,
-  });
-  expect(markerButtons).toHaveLength(sites.length);
-  markerButtons.forEach((marker) => {
-    expect(marker).toBeVisible();
-  });
+  render(<Map markers={markers} />);
+  expect(
+    screen.getByRole("button", {
+      name: /site location marker/,
+    }),
+  ).toBeVisible();
+});
+
+it("displays nearby map markers as clusters", () => {
+  const sites = siteFactory.buildList(2, { coordinates: [0, 0] });
+  const markers = sites.map(formatSiteMarker);
+
+  render(<Map markers={markers} />);
+  expect(
+    screen.queryByRole("button", {
+      name: /site location marker/,
+    }),
+  ).not.toBeInTheDocument();
+
+  expect(screen.getByRole("button", { name: `${sites.length}` })).toBeInTheDocument();
 });
 
 it("updates markers correctly when the markers prop changes", () => {
-  const markers = markerFactory.buildList(2);
+  const markers = markerFactory.buildList(2, { position: [0, 0] });
   const { rerender } = render(<Map markers={markers} />);
 
-  const markerButtons = screen.getAllByRole("button", {
-    name: /site location marker/,
-  });
-  expect(markerButtons).toHaveLength(markers.length);
-  markerButtons.forEach((marker) => {
-    expect(marker).toBeVisible();
-  });
+  expect(screen.getByRole("button", { name: `${markers.length}` })).toBeInTheDocument();
 
-  const newMarkers = markerFactory.buildList(3);
+  const newMarkers = markerFactory.buildList(3, { position: [0, 0] });
   rerender(<Map markers={newMarkers} />);
 
-  const newMarkerButtons = screen.getAllByRole("button", {
-    name: /site location marker/,
-  });
-  expect(newMarkerButtons).toHaveLength(newMarkers.length);
-  newMarkerButtons.forEach((marker) => {
-    expect(marker).toBeVisible();
-  });
+  expect(screen.getByRole("button", { name: `${newMarkers.length}` })).toBeInTheDocument();
 });
 
 it("displays site details after clicking a marker", async () => {
@@ -91,8 +91,7 @@ it("displays site details after clicking a marker", async () => {
   renderWithMemoryRouter(<Map markers={markers} />, { withMainLayout: true });
   expect(screen.getByLabelText(/site location marker/)).toBeInTheDocument();
   const marker = screen.getByRole("button", { name: /site location marker/ });
-  const siteDetails = /Site details/i;
-  expect(screen.queryByLabelText(siteDetails)).not.toBeInTheDocument();
+  expect(screen.queryByLabelText("Site details")).not.toBeInTheDocument();
   await userEvent.click(marker);
-  expect(screen.getByLabelText(siteDetails)).toBeInTheDocument();
+  expect(screen.getByLabelText("Site details")).toBeInTheDocument();
 });

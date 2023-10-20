@@ -56,7 +56,31 @@ export const getSiteMarker = (appearance: keyof typeof markerIcon) => {
   return markerIcon[appearance];
 };
 
-export const createCustomClusterIcon = function (_appearance: MarkerApprearance, _count: number) {
-  // TODO: implement cluster icon
-  return new L.DivIcon();
+const getClusterSvg = (
+  appearance: MarkerApprearance,
+  count: number,
+  size: number,
+) => `<svg fill="none" height=${size} viewBox="0 0 ${size} ${size}" width=${size} xmlns="http://www.w3.org/2000/svg">
+    <rect
+      class=${classNames("site-marker-cluster__body", { "has-selected": appearance === "selected" })}
+      fill="#E95420"
+      height=${size - 1}
+      rx="28.5"
+      width=${size - 1}
+      x="0.5"
+      y="0.5"
+    />
+    <span class="site-marker-cluster__text p-heading--${count < 20 ? "5" : "4"}">${count}</span>
+  </svg>`;
+
+export const createCustomClusterIcon = function (appearance: MarkerApprearance, count: number) {
+  const size = count >= 30 ? 58 : count >= 20 ? 48 : count >= 10 ? 38 : 28;
+  const sizeModifier = count >= 30 ? "x-large" : count >= 20 ? "large" : count >= 10 ? "medium" : "small";
+  const html = getClusterSvg(appearance, count, size);
+
+  return new L.DivIcon({
+    html,
+    className: `site-marker-cluster site-marker-cluster--${sizeModifier}`,
+    iconSize: L.point(size, size, true),
+  });
 };

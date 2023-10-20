@@ -3,7 +3,10 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import L from "leaflet";
 import ReactDOM from "react-dom";
 
-import { getSiteMarker } from "@/components/Map/SiteMarker";
+import "leaflet.markercluster";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+
+import { createCustomClusterIcon, getSiteMarker } from "@/components/Map/SiteMarker";
 import SiteSummary from "@/components/Map/SiteSummary";
 import type { MapProps, SiteMarkerType } from "@/components/Map/types";
 import { useAppLayoutContext } from "@/context";
@@ -45,8 +48,13 @@ const MarkersLayer = ({ markers }: MapProps) => {
     // set default marker icon
     L.Marker.prototype.options.icon = getSiteMarker("base");
 
-    // create markers group
-    const markersGroup = L.layerGroup();
+    // Create a new marker cluster group
+    const markerClusterGroup = L.markerClusterGroup({
+      iconCreateFunction: function (cluster) {
+        return createCustomClusterIcon("base", cluster.getChildCount());
+      },
+      showCoverageOnHover: false,
+    });
     markers.forEach((marker) => {
       const leafletMarker = L.marker(marker.position);
       leafletMarker.on("click", (event) => {
@@ -70,14 +78,17 @@ const MarkersLayer = ({ markers }: MapProps) => {
       leafletMarker.on("popupopen", () => {
         setSitePopupId(marker.id);
       });
-      leafletMarker.addTo(markersGroup);
+
+      // Add markers to the cluster group
+      markerClusterGroup.addLayer(leafletMarker);
     });
 
-    markersGroup.addTo(map);
+    // Add the cluster group to the map
+    map.addLayer(markerClusterGroup);
 
-    // remove the markers group when markers change
+    // remove the cluster group when markers change
     return () => {
-      map.removeLayer(markersGroup);
+      map.removeLayer(markerClusterGroup);
     };
   }, [map, popup, markers, handleMarkerClick]);
 
