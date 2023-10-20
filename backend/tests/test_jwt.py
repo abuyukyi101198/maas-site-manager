@@ -8,21 +8,20 @@ from jose import jwt
 import pytest
 
 from msm.jwt import (
-    create_token,
-    decode_token,
     InvalidToken,
+    JWT,
     TOKEN_DURATION_MINUTES,
 )
 
 SAMPLE_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 
 
-class TestCreateToken:
+class TestJWT:
     @pytest.mark.parametrize("key", ["", SAMPLE_KEY])
     def test_create(self, key: str) -> None:
         subject = "subject"
-        token = create_token(subject, key=key)
-        payload = jwt.decode(token, key, algorithms=["HS256"])
+        token = JWT.create(subject, key=key)
+        payload = jwt.decode(token.encoded, key, algorithms=["HS256"])
         assert payload["sub"] == subject
         assert payload["iss"] == "MAAS site manager"
         assert datetime.utcfromtimestamp(
@@ -32,24 +31,22 @@ class TestCreateToken:
     @pytest.mark.parametrize("key", ["", SAMPLE_KEY])
     def test_create_with_duration(self, key: str) -> None:
         duration = timedelta(minutes=1)
-        token = create_token("user@example.com", key=key, duration=duration)
-        payload = jwt.decode(token, key, algorithms=["HS256"])
+        token = JWT.create("user@example.com", key=key, duration=duration)
+        payload = jwt.decode(token.encoded, key, algorithms=["HS256"])
         assert (
             datetime.utcfromtimestamp(payload["exp"])
             < datetime.utcnow() + duration
         )
 
-
-class TestDecodeToken:
-    def test_valid(self) -> None:
+    def test_decode_valid(self) -> None:
         subject = "subject"
         data = {"foo": "bar"}
-        token = create_token(subject, data=data)
-        assert decode_token(token) == (subject, data)
+        token = JWT.create(subject, data=data)
+        assert JWT.decode(token.encoded) == token
 
-    def test_invalid(self) -> None:
+    def test_decode_invalid(self) -> None:
         with pytest.raises(InvalidToken):
-            decode_token("garbage")
+            JWT.decode("garbage")
 
     @pytest.mark.parametrize(
         "data",
@@ -58,12 +55,12 @@ class TestDecodeToken:
             {"sub": "subject"},
         ],
     )
-    def test_invalid_missing_fields(self, data: dict[str, Any]) -> None:
+    def test_decode_invalid_missing_fields(self, data: dict[str, Any]) -> None:
         encoded = jwt.encode(data, key=SAMPLE_KEY, algorithm="HS256")
         with pytest.raises(InvalidToken):
-            decode_token(str(encoded))
+            JWT.decode(str(encoded))
 
     def test_expired(self) -> None:
-        token = create_token("subject", duration=timedelta(days=-1))
+        token = JWT.create("subject", duration=timedelta(days=-1))
         with pytest.raises(InvalidToken):
-            decode_token(token)
+            JWT.decode(token.encoded)

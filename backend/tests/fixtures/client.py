@@ -5,7 +5,7 @@ from httpx import (
     Response,
 )
 
-from msm.jwt import create_token
+from msm.jwt import JWT
 
 
 class Client(AsyncClient):
@@ -19,7 +19,7 @@ class Client(AsyncClient):
         if auth_id is None:
             self._auth_token = ""
         else:
-            self._auth_token = create_token(str(auth_id))
+            self._auth_token = JWT.create(str(auth_id)).encoded
 
     async def request(self, *args, **kwargs) -> Response:  # type: ignore
         """Generate a request, setting the auth token if set.

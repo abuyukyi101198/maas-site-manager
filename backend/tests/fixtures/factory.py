@@ -30,7 +30,7 @@ from msm.db.models import (
     User,
 )
 from msm.db.tables import METADATA
-from msm.jwt import create_token
+from msm.jwt import JWT
 from msm.password import hash_password
 from msm.schema import TimeZone
 
@@ -115,7 +115,7 @@ class Factory:
         id = await self.next_id("token")
         if auth_id is None:
             auth_id = uuid4()
-        value = create_token(str(auth_id), key=key, duration=lifetime)
+        token = JWT.create(str(auth_id), key=key, duration=lifetime)
         now = datetime.utcnow()
         [row] = await self.create(
             "token",
@@ -123,9 +123,9 @@ class Factory:
                 {
                     "id": id,
                     "auth_id": auth_id,
-                    "value": value,
+                    "value": token.encoded,
                     "created": now,
-                    "expired": now + lifetime,
+                    "expired": token.expiration,
                 }
             ],
         )

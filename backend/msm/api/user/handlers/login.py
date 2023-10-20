@@ -9,7 +9,7 @@ from fastapi import (
 from pydantic import BaseModel
 
 from ....db.models import Config
-from ....jwt import create_token
+from ....jwt import JWT
 from ....service import ServiceCollection
 from ..._dependencies import (
     config,
@@ -49,5 +49,5 @@ async def post(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token = create_token(str(user.auth_id), key=config.token_secret_key)
-    return LoginPostResponse(access_token=access_token, token_type="bearer")
+    token = JWT.create(str(user.auth_id), key=config.token_secret_key)
+    return LoginPostResponse(access_token=token.encoded, token_type="bearer")

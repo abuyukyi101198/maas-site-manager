@@ -15,7 +15,7 @@ from ..db import (
     queries,
 )
 from ..db.tables import Token
-from ..jwt import create_token
+from ..jwt import JWT
 from ._base import Service
 
 
@@ -33,13 +33,13 @@ class TokenService(Service):
         token_values = []
         for _ in range(count):
             auth_id = uuid4()
-            value = create_token(str(auth_id), secret_key, duration=duration)
-            token_values.append(value)
+            token = JWT.create(str(auth_id), secret_key, duration=duration)
+            token_values.append(token.encoded)
             tokens_data.append(
                 {
-                    "expired": expired,
+                    "expired": token.expiration,
                     "created": created,
-                    "value": value,
+                    "value": token.encoded,
                     "auth_id": auth_id,
                 }
             )
