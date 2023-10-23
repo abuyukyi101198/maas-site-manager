@@ -48,9 +48,12 @@ Object.defineProperty(window, "scrollTo", { value: vi.fn(), writable: true });
 
 beforeAll(() => {
   // fail a test whenver console.error is called
-  vi.spyOn(console, "error").mockImplementation((...args: unknown[]) => {
-    throw new Error(args.join(" "));
-  });
+  // enabled on CI only as it's noisy and not helpful during development
+  if (process.env.CI) {
+    vi.spyOn(console, "error").mockImplementation((...args: unknown[]) => {
+      throw new Error(args.join(" "));
+    });
+  }
   vi.stubGlobal("AbortController", NodeAbortController);
 });
 
