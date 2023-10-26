@@ -42,7 +42,7 @@ const EditSiteSchema = Yup.object().shape({
   postal_code: Yup.string(),
   coordinates: Yup.string()
     .matches(
-      /^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$/,
+      /^(-?\d+(\.\d*)?),\s*(-?\d+(\.\d*)?)$/,
       "Latitude and Longitude input can only contain numerical characters (0-9), a decimal point (.), a comma (,), or a minus (-).",
     )
     .matches(

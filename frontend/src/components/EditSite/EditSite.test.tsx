@@ -93,3 +93,19 @@ it("displays an error if invalid coordinates are entered", async () => {
     ),
   ).toBeInTheDocument();
 });
+
+it("displays the 'Invalid' message for coordinates with a decimal point but no decimals", async () => {
+  await renderForm();
+
+  await userEvent.clear(screen.getByRole("textbox", { name: "Latitude and Longitude" }));
+
+  await userEvent.type(screen.getByRole("textbox", { name: "Latitude and Longitude" }), "69., -69.");
+
+  await userEvent.tab();
+
+  expect(
+    screen.getByText(
+      /Invalid latitude and longitude. Please make sure the coordinates provided are valid and separated by a comma \(,\)./i,
+    ),
+  ).toBeInTheDocument();
+});
