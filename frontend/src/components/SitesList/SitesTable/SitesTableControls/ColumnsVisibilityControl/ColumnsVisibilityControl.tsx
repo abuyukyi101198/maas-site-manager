@@ -19,6 +19,7 @@ function ColumnsVisibilityControl({ columns }: { columns: SitesColumn[] }) {
 
   return (
     <ContextualMenu
+      dropdownClassName="columns-visibility__dropdown"
       dropdownProps={{ "aria-label": "columns menu" }}
       position="right"
       toggleAppearance="base"
