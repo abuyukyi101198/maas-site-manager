@@ -10,6 +10,7 @@ $grid-margin-default: map_get($grid-margin-widths, default);
     position: relative;
     background: #fff;
     width: calc(100% + #{2 * $grid-margin-small});
+    cursor: default;
 
     @media (min-width: $threshold-4-6-col) {
         width: calc(100% + #{2 * $grid-margin-default});

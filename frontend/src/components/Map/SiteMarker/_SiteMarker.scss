@@ -1,10 +1,12 @@
 .site-marker {
   @include vf-transition(transform, snap, out);
 
+  transition-delay: 0;
   transform-origin: bottom center;
 
   &:hover {
     transform: scale(1.25);
+    transition-delay: 750ms;
   }
 
   .site-marker__body {

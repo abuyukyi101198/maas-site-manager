@@ -36,6 +36,7 @@ const createDivIcon = (appearance: MarkerApprearance) => {
     html: markerHtml[appearance],
     iconAnchor: [14.5, 47],
     iconSize: [29, 47],
+    popupAnchor: [0, -18],
   });
 };
 

@@ -75,7 +75,7 @@ const MarkersLayer = ({ markers }: MapProps) => {
       leafletMarker.on("keypress", (event) => {
         handleMarkerClick(event, marker.id);
       });
-      leafletMarker.bindPopup(popup);
+      leafletMarker.bindPopup(popup, { keepInView: true, autoPanPadding: [50, 50] });
       leafletMarker.on("mouseover", () => {
         timeoutRef.current = setTimeout(() => {
           leafletMarker.openPopup();
@@ -83,9 +83,11 @@ const MarkersLayer = ({ markers }: MapProps) => {
       });
       leafletMarker.on("mouseout", (e) => {
         resetTimeout();
-        if (e.originalEvent.relatedTarget !== popup?.firstElementChild) {
-          leafletMarker.closePopup();
-        }
+        timeoutRef.current = setTimeout(() => {
+          if (e.originalEvent.relatedTarget !== popup?.firstElementChild) {
+            leafletMarker.closePopup();
+          }
+        }, MARKER_HOVER_DELAY);
       });
       leafletMarker.on("popupopen", () => {
         setSitePopupId(marker.id);
