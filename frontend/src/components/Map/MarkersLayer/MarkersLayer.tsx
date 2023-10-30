@@ -67,6 +67,11 @@ const MarkersLayer = ({ markers }: MapProps) => {
       showCoverageOnHover: false,
     });
 
+    // redraw icons on zoom to ensure correct relative cluster sizes for each zoom level
+    markerClusterGroup.on("animationend", () => {
+      markerClusterGroup.refreshClusters();
+    });
+
     markers.forEach((marker) => {
       const leafletMarker = L.marker(marker.position);
       leafletMarker.on("click", (event) => {
@@ -102,6 +107,7 @@ const MarkersLayer = ({ markers }: MapProps) => {
     // remove the cluster group when markers change
     return () => {
       map.removeLayer(markerClusterGroup);
+      map.off("zoom");
     };
   }, [map, popup, markers, handleMarkerClick]);
 
