@@ -12,7 +12,8 @@ import {
 import { TimeZone } from "@/api-client";
 
 beforeEach(() => {
-  vi.useFakeTimers();
+  const date = new Date("Fri Apr 21 2023 12:00:00 GMT+0100 (GMT)");
+  vi.setSystemTime(date);
 });
 
 afterEach(() => {
@@ -57,13 +58,11 @@ it("should modify multiple search params", () => {
   });
 });
 
-const date = new Date("Fri Apr 21 2023 12:00:00 GMT+0100 (GMT)");
 [
   ["2023-04-21T10:30:00.000Z", "30 minutes ago"],
   ["2023-04-21T11:15:00.000Z", "in 15 minutes"],
 ].forEach(([time, expected]) => {
   it(`returns ${expected} time distance for ${time}`, () => {
-    vi.setSystemTime(date);
     const result = formatDistanceToNow(time);
     expect(result).toBe(expected);
   });
