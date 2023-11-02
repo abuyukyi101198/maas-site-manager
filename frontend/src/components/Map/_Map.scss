@@ -47,6 +47,8 @@ $grid-margin-default: map_get($grid-margin-widths, default);
 
     .leaflet-popup {
         margin-bottom: 47px;
+        // Account for map marker width (currently 29px) and offset
+        margin-left: -14.5px;
     }
 }
 
