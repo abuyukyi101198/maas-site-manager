@@ -26,7 +26,7 @@ const SitesViewControl = () => {
             role="tab"
             to={{ pathname: "/sites/map", search }}
           >
-            <Icon name="exposed" />
+            <Icon name="map" />
             <span>Map</span>
           </Button>
         </Tooltip>
