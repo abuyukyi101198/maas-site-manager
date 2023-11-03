@@ -2,25 +2,16 @@ from argparse import (
     ArgumentParser,
     Namespace,
 )
-from contextlib import (
-    aclosing,
-    asynccontextmanager,
-)
-from typing import AsyncIterator
-
-from sqlalchemy.ext.asyncio import AsyncConnection
 
 from .. import (
-    AsyncAction,
+    DatabaseAction,
     do_exit,
 )
-from ...db import Database
 from ...db.models import UserCreate
 from ...service import UserService
-from ...settings import Settings
 
 
-class CreateUserAction(AsyncAction):
+class CreateUserAction(DatabaseAction):
     name = "create-user"
     description = "Create a user"
 
@@ -66,7 +57,7 @@ class CreateUserAction(AsyncAction):
         password: str,
         admin: bool,
     ) -> None:
-        async with self._database_connection() as conn:
+        async with self.database_connection() as conn:
             users = UserService(conn)
             if await users.exists(email=email, username=username):
                 do_exit(
@@ -83,10 +74,3 @@ class CreateUserAction(AsyncAction):
                     is_admin=admin,
                 )
             )
-
-    @asynccontextmanager
-    async def _database_connection(self) -> AsyncIterator[AsyncConnection]:
-        settings = Settings()
-        db = Database(settings.db_dsn)
-        async with aclosing(db), db.transaction() as conn:
-            yield conn

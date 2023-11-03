@@ -1,6 +1,17 @@
 import argparse
 import asyncio
+from contextlib import (
+    aclosing,
+    asynccontextmanager,
+)
+from functools import cached_property
 from itertools import chain
+from typing import AsyncIterator
+
+from sqlalchemy.ext.asyncio import AsyncConnection
+
+from ..db import Database
+from ..settings import Settings
 
 
 class Action:
@@ -15,6 +26,11 @@ class Action:
     def __call__(self, options: argparse.Namespace) -> int:
         """Call the action."""
         return self.execute(options)
+
+    @cached_property
+    def settings(self) -> Settings:
+        """Application settings."""
+        return Settings()
 
     def add_arguments(self, parser: argparse.ArgumentParser) -> None:
         """Add options for the actions to the subparser."""
@@ -53,3 +69,17 @@ class AsyncAction(Action):
         Subclasses must implement this.
         """
         return 0
+
+
+class DatabaseAction(AsyncAction):
+    """An action with database access."""
+
+    @cached_property
+    def db(self) -> Database:
+        return Database(self.settings.db_dsn)
+
+    @asynccontextmanager
+    async def database_connection(self) -> AsyncIterator[AsyncConnection]:
+        """Context manager to execute code in a database transaction."""
+        async with aclosing(self.db), self.db.transaction() as conn:
+            yield conn
