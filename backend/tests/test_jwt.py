@@ -10,7 +10,7 @@ import pytest
 from msm.jwt import (
     InvalidToken,
     JWT,
-    TOKEN_DURATION_MINUTES,
+    TOKEN_DURATION,
 )
 
 SAMPLE_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
@@ -24,9 +24,11 @@ class TestJWT:
         payload = jwt.decode(token.encoded, key, algorithms=["HS256"])
         assert payload["sub"] == subject
         assert payload["iss"] == "MAAS site manager"
-        assert datetime.utcfromtimestamp(
-            payload["exp"]
-        ) < datetime.utcnow() + timedelta(minutes=TOKEN_DURATION_MINUTES)
+        assert (
+            datetime.utcfromtimestamp(payload["exp"])
+            < datetime.utcnow() + TOKEN_DURATION
+        )
+        assert datetime.utcfromtimestamp(payload["iat"]) < datetime.utcnow()
 
     @pytest.mark.parametrize("key", ["", SAMPLE_KEY])
     def test_create_with_duration(self, key: str) -> None:
@@ -37,6 +39,7 @@ class TestJWT:
             datetime.utcfromtimestamp(payload["exp"])
             < datetime.utcnow() + duration
         )
+        assert datetime.utcfromtimestamp(payload["iat"]) < datetime.utcnow()
 
     def test_decode_valid(self) -> None:
         subject = "subject"

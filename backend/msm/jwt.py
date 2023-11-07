@@ -17,7 +17,7 @@ from jose import (
 
 TOKEN_ALGORITHM = "HS256"
 TOKEN_SECRET_KEY_BYTES = 32
-TOKEN_DURATION_MINUTES = 30
+TOKEN_DURATION = timedelta(minutes=30)
 
 
 class InvalidToken(Exception):
@@ -34,11 +34,15 @@ class JWT:
     payload: dict[str, Any]
     encoded: str
 
-    _REQUIRED_FIELDS = frozenset(("sub", "iss", "exp"))
+    _REQUIRED_FIELDS = frozenset(("iat", "iss", "exp", "sub"))
 
     @cached_property
     def subject(self) -> str:
         return cast(str, self.payload["sub"])
+
+    @cached_property
+    def issued(self) -> datetime:
+        return datetime.utcfromtimestamp(self.payload["iat"])
 
     @cached_property
     def expiration(self) -> datetime:
@@ -57,18 +61,18 @@ class JWT:
         cls,
         subject: str,
         key: str = "",
-        duration: timedelta | None = None,
+        duration: timedelta = TOKEN_DURATION,
         data: dict[str, Any] | None = None,
     ) -> "JWT":
         """Create a JWT."""
-        if duration is None:
-            duration = timedelta(minutes=TOKEN_DURATION_MINUTES)
         if data is None:
             data = {}
-        expiration = datetime.utcnow() + duration
+        issued = datetime.utcnow()
+        expiration = issued + duration
         payload = data | {
             "sub": subject,
             "iss": "MAAS site manager",
+            "iat": issued,
             "exp": expiration,
         }
         encoded = jwt.encode(payload, key, algorithm=TOKEN_ALGORITHM)
