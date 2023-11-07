@@ -1,0 +1,203 @@
+from datetime import (
+    datetime,
+    timedelta,
+)
+from uuid import uuid4
+
+from sqlalchemy.ext.asyncio import AsyncConnection
+
+from ._db import (
+    ModelCollection,
+    SampleDataModel,
+)
+
+
+async def make_fixture_sites(conn: AsyncConnection) -> list[SampleDataModel]:
+    collection = ModelCollection("site")
+    collection.add(
+        city="London",
+        postal_code="SE1 1JA",
+        country="GB",
+        coordinates=(-0.092200, 51.501990),
+        name="Canonical Group Limited",
+        note="4th Floor",
+        state="",
+        address="201 Borough High Street",
+        timezone="Europe/London",
+        url="https://london.canonical.example.com",
+        accepted=True,
+        auth_id=uuid4(),
+    )
+    collection.add(
+        city="Austin",
+        postal_code="TX 78701",
+        country="US",
+        coordinates=(-97.741057, 30.269612),
+        name="Canonical USA Inc.",
+        note="Perry Brooks Building - Suite 300",
+        state="",
+        address="720 Brazos Street",
+        timezone="America/Chicago",
+        url="https://austin.canonical.example.com",
+        accepted=True,
+        auth_id=uuid4(),
+    )
+    collection.add(
+        city="Boston",
+        postal_code="MA 024251",
+        country="US",
+        coordinates=(-71.059615, 42.358859),
+        name="Canonical USA Inc. 001",
+        note="Suite 210",
+        state="",
+        address="18 Tremont Street",
+        timezone="America/Chicago",
+        url="https://boston.canonical.example.com",
+        accepted=True,
+        auth_id=uuid4(),
+    )
+    collection.add(
+        city="Shanghai",
+        postal_code="200030",
+        country="CN",
+        coordinates=(121.436829, 31.187270),
+        name="Canonical China",
+        note="上海市漕溪北路331号12楼1246室",
+        state="",
+        address="No. 331 North Caoxi Road",
+        timezone="Asia/Shanghai",
+        url="https://shanghai.canonical.example.com",
+        accepted=False,
+        auth_id=uuid4(),
+    )
+    collection.add(
+        city="Beijing",
+        postal_code="100004",
+        country="CN",
+        coordinates=(116.448690, 39.908447),
+        name="Canonical China 001",
+        note="China World Office 1; 北京市朝阳区建国门外大街1号国贸写字楼1座11层1118-19室",
+        state="Chaoyang District",
+        address="1 Jianguomenwai Avenue",
+        timezone="Asia/Shanghai",
+        url="https://shanghai.canonical.example.com",
+        accepted=True,
+        auth_id=uuid4(),
+    )
+    collection.add(
+        city="Taipei City",
+        postal_code="號12 樓",
+        country="TW",
+        coordinates=(121.543406, 25.058098),
+        name="Canonical Group Limited - Taiwan Branch",
+        note="105402 台北市松山區民生東路三段100",
+        state="Songshan Dist.",
+        address="12F.,No. 100,Sec. 3,Minsheng E. Rd.",
+        timezone="Asia/Taipei",
+        url="https://taiwan.canonical.example.com",
+        accepted=True,
+        auth_id=uuid4(),
+    )
+    collection.add(
+        city="Douglas",
+        postal_code="IM99 1TT",
+        country="IM",
+        coordinates=(-4.481012, 54.153072),
+        name="Canonical Limited",
+        note="2nd Floor - Clarendon House",
+        state="",
+        address="ictoria Street",
+        timezone="Europe/London",
+        url="https://canonical.example.com",
+        accepted=False,
+        auth_id=uuid4(),
+    )
+    collection.add(
+        city="Tokyo",
+        postal_code="100-0014",
+        country="JP",
+        coordinates=(139.740669, 35.673242),
+        name="Canonical Japan K.K",
+        note="3rd Floor - Sanno Park Tower",
+        state="",
+        address="2-11-1 Nagata-cho Chiyoda-ku",
+        timezone="Japan",
+        url="https://japan.canonical.example.com",
+        accepted=True,
+        auth_id=uuid4(),
+    )
+    collection.add(
+        city="Tokyo",
+        postal_code="100-0014",
+        country="JP",
+        coordinates=(139.740669, 35.673242),
+        name="Canonical Japan K.K",
+        note="Duplicate",
+        state="",
+        address="2-11-1 Nagata-cho Chiyoda-ku",
+        timezone="Japan",
+        url="https://japan.canonical.example.com",
+        accepted=True,
+        auth_id=uuid4(),
+    )
+    sites = await collection.create(conn)
+
+    collection = ModelCollection("site_data")
+
+    now = datetime.utcnow()
+    collection.add(
+        site_id=sites[0].id,
+        allocated_machines=10,
+        deployed_machines=1,
+        ready_machines=8,
+        error_machines=1,
+        other_machines=2,
+        last_seen=now - timedelta(minutes=10),
+    )
+    collection.add(
+        site_id=sites[1].id,
+        allocated_machines=11,
+        deployed_machines=0,
+        ready_machines=8,
+        error_machines=3,
+        other_machines=0,
+        last_seen=now - timedelta(seconds=30),
+    )
+    collection.add(
+        site_id=sites[2].id,
+        allocated_machines=12,
+        deployed_machines=2,
+        ready_machines=4,
+        error_machines=6,
+        other_machines=1,
+        last_seen=now - timedelta(hours=1),
+    )
+    collection.add(
+        site_id=sites[3].id,
+        allocated_machines=13,
+        deployed_machines=0,
+        ready_machines=13,
+        error_machines=0,
+        other_machines=0,
+        last_seen=now - timedelta(seconds=5),
+    )
+    collection.add(
+        site_id=sites[4].id,
+        allocated_machines=14,
+        deployed_machines=13,
+        ready_machines=1,
+        error_machines=0,
+        other_machines=4,
+        last_seen=now - timedelta(days=1),
+    )
+    collection.add(
+        site_id=sites[5].id,
+        allocated_machines=15,
+        deployed_machines=2,
+        ready_machines=10,
+        error_machines=3,
+        other_machines=7,
+        last_seen=now - timedelta(minutes=20),
+    )
+    await collection.create(conn)
+    return sites

@@ -130,8 +130,8 @@ There are CSV files available that can be used as test data.
 
 If you are running the app in docker you can easily load those
 
-- export the `POSTGRES_*` environment vars as needed
-- run the loading script `../test-data/import.sh`
+- export the `MSM_DB_*` environment vars as needed
+- run `tox run -e sampledata -- create-fixtures`
 
 ### Interact with the API
 

@@ -1,3 +1,0 @@
-email, username, full_name, password (admin), is_admin, auth_id
-admin@example.com,admin,MAAS Admin,$2b$12$F5sgrhRNtWAOehcoVO.XK.oSvupmcg8.0T2jCHOTg15M8N8LrpRwS,true,12cd6454-2f75-11ee-9dc0-00163ef7588c
-user@example.com,user,MAAS User,$2b$12$iEPLFcNocyeUDgu2ywDVGeFHyrksI89bzSvdAwvU1N4zYFtofme3S,false,1b47ed7a-2f75-11ee-bbb3-00163ef7588c
