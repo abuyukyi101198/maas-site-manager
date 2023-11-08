@@ -2,19 +2,19 @@ import RequireLogin from "./RequireLogin";
 
 import MainLayout from "@/components/MainLayout";
 import MapSettings from "@/components/MapSettings";
-import NotFound from "@/pages/404";
-import Account from "@/pages/account";
-import Password from "@/pages/account/password";
-import Login from "@/pages/login";
-import Logout from "@/pages/logout";
-import PersonalDetails from "@/pages/personalDetails";
-import Requests from "@/pages/requests";
-import Settings from "@/pages/settings";
-import Sites from "@/pages/sites";
-import List from "@/pages/sites/list";
-import Map from "@/pages/sites/map";
-import Tokens from "@/pages/tokens/tokens";
-import Users from "@/pages/users";
+import NotFound from "@/routes/404";
+import Account from "@/routes/account";
+import Password from "@/routes/account/password";
+import Login from "@/routes/login";
+import Logout from "@/routes/logout";
+import PersonalDetails from "@/routes/personalDetails";
+import Requests from "@/routes/requests";
+import Settings from "@/routes/settings";
+import Sites from "@/routes/sites";
+import List from "@/routes/sites/list";
+import Map from "@/routes/sites/map";
+import Tokens from "@/routes/tokens/tokens";
+import Users from "@/routes/users";
 import { createRoutesFromElements, Route, redirect } from "@/utils/router";
 
 export const routes = createRoutesFromElements(

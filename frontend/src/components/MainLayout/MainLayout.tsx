@@ -17,7 +17,7 @@ import { routesConfig } from "@/config/routes";
 import { useAppLayoutContext, useAuthContext } from "@/context";
 import type { Sidebar } from "@/context/AppLayoutContext";
 import { siteFactory } from "@/mocks/factories";
-import TokensCreate from "@/pages/tokens/create";
+import TokensCreate from "@/routes/tokens/create";
 import { matchPath, Outlet, useLocation } from "@/utils/router";
 
 export const sidebarLabels: Record<NonNullable<Sidebar>, string> = {
