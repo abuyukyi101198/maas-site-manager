@@ -24,6 +24,7 @@ from .._dependencies import (
     config,
     services,
 )
+from .._utils import INVALID_TOKEN_ERROR
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/login")
 
@@ -44,20 +45,15 @@ async def authenticated_user(
     services: Annotated[ServiceCollection, Depends(services)],
     token: Annotated[str, Depends(oauth2_scheme)],
 ) -> User:
-    auth_error = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
     try:
         decoded_token = JWT.decode(token, key=config.token_secret_key)
         decoded_token.validate(config.service_identifier)
     except (InvalidToken, ValueError):
-        raise auth_error
+        raise INVALID_TOKEN_ERROR
     auth_id = UUID(decoded_token.subject)
     if user := await services.users.get_by_auth_id(auth_id):
         return user
-    raise auth_error
+    raise INVALID_TOKEN_ERROR
 
 
 async def authenticated_admin(

@@ -2,6 +2,7 @@ from ._config import Config
 from ._site import (
     ConnectionStatus,
     PendingSite,
+    PendingSiteCreate,
     Site,
     SiteCoordinates,
     SiteData,
@@ -18,6 +19,7 @@ __all__ = [
     "Config",
     "ConnectionStatus",
     "PendingSite",
+    "PendingSiteCreate",
     "Site",
     "SiteUpdate",
     "SiteCoordinates",

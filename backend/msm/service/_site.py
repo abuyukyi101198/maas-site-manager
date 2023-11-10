@@ -12,6 +12,7 @@ from sqlalchemy import (
     delete,
     exists,
     func,
+    insert,
     select,
     Select,
     update,
@@ -83,7 +84,7 @@ class SiteService(Service):
         return count, self.objects_from_result(models.Site, result)
 
     async def get_by_id(self, id: int) -> models.Site | None:
-        """Gets a Site by id."""
+        """Get a site by id."""
         stmt = self._select_statement().where(Site.c.id == id)
         if result := await self.conn.execute(stmt):
             if site := result.one_or_none():
@@ -109,6 +110,22 @@ class SiteService(Service):
         """Deletes a site by ID."""
         stmt = delete(Site).where(Site.c.id == site_id)
         await self.conn.execute(stmt)
+
+    async def create_pending(
+        self, details: models.PendingSiteCreate
+    ) -> models.PendingSite:
+        """Create a pending site."""
+        data = details.model_dump()
+        stmt = insert(Site).returning(
+            Site.c.id,
+            Site.c.name,
+            Site.c.url,
+            Site.c.created,
+            Site.c.auth_id,
+        )
+        result = await self.conn.execute(stmt, [data])
+        pending_site = result.one()
+        return models.PendingSite(**pending_site._asdict())
 
     async def get_pending(
         self,

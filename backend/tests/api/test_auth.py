@@ -15,6 +15,7 @@ from msm.jwt import JWT
 from ..fixtures.client import Client
 
 AUTHENTICATED_ROUTES = [
+    # user API
     ("GET", "/api/v1/requests"),
     ("POST", "/api/v1/requests"),
     ("GET", "/api/v1/sites"),
@@ -34,6 +35,8 @@ AUTHENTICATED_ROUTES = [
     ("GET", "/api/v1/users/{id}"),
     ("PATCH", "/api/v1/users/{id}"),
     ("DELETE", "/api/v1/users/{id}"),
+    # site API
+    ("POST", "/site/v1/enroll"),
 ]
 
 UNAUTHENTICATED_ROUTES = [

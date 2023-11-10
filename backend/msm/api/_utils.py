@@ -6,6 +6,12 @@ from fastapi import (
 )
 from pydantic import BaseModel
 
+INVALID_TOKEN_ERROR = HTTPException(
+    status_code=status.HTTP_401_UNAUTHORIZED,
+    detail="Invalid token",
+    headers={"WWW-Authenticate": "Bearer"},
+)
+
 
 def not_found(entity: str) -> HTTPException:
     """Raise a 404 error for an something described by 'entity'

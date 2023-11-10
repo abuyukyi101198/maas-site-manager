@@ -1,7 +1,10 @@
+from uuid import uuid4
+
 import pytest
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from msm.db.models import (
+    PendingSiteCreate,
     Site,
     SiteCoordinates,
 )
@@ -47,3 +50,19 @@ class TestSiteService:
             SiteCoordinates(id=site1.id, coordinates=[10, -1]),
             SiteCoordinates(id=site2.id, coordinates=[20, -2]),
         ]
+
+    async def test_create_pending(
+        self,
+        factory: Factory,
+        db_connection: AsyncConnection,
+    ) -> None:
+        service = SiteService(db_connection)
+        pending_site = await service.create_pending(
+            PendingSiteCreate(
+                name="site",
+                url="https://site.example.com",
+                auth_id=uuid4(),
+            )
+        )
+        assert pending_site.name == "site"
+        assert pending_site.url == "https://site.example.com"

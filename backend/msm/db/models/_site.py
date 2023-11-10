@@ -1,6 +1,7 @@
 from datetime import datetime
 from enum import Enum
 from typing import Literal
+from uuid import UUID
 
 from pydantic import (
     BaseModel,
@@ -82,3 +83,11 @@ class PendingSite(BaseModel):
     name: str
     url: str
     created: datetime
+
+
+class PendingSiteCreate(BaseModel):
+    """Details to create a pending site."""
+
+    name: str
+    url: str
+    auth_id: UUID
