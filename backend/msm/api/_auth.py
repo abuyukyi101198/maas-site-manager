@@ -1,9 +1,34 @@
+from typing import Callable
 from uuid import UUID
 
+from fastapi import Depends
+from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 
 from ..db.models import Config
-from ..jwt import JWT
+from ..jwt import (
+    InvalidToken,
+    JWT,
+)
+from ._dependencies import config
+from ._utils import INVALID_TOKEN_ERROR
+
+
+def auth_id_from_token(
+    oauth2_scheme: OAuth2PasswordBearer,
+) -> Callable[[Config, str], UUID]:
+    def auth_id_dep(
+        config: Config = Depends(config),
+        token: str = Depends(oauth2_scheme),
+    ) -> UUID:
+        try:
+            decoded_token = JWT.decode(token, key=config.token_secret_key)
+            decoded_token.validate(config.service_identifier)
+        except (InvalidToken, ValueError):
+            raise INVALID_TOKEN_ERROR
+        return UUID(decoded_token.subject)
+
+    return auth_id_dep
 
 
 class AccessTokenResponse(BaseModel):

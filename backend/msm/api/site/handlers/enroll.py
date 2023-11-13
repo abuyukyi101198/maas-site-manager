@@ -1,5 +1,4 @@
-from typing import Annotated
-import uuid
+from uuid import UUID
 
 from fastapi import (
     APIRouter,
@@ -10,24 +9,15 @@ from fastapi import (
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 
-from ....db.models import (
-    Config,
-    PendingSiteCreate,
-)
-from ....jwt import (
-    InvalidToken,
-    JWT,
-)
+from ....db.models import PendingSiteCreate
 from ....service import ServiceCollection
-from ..._dependencies import (
-    config,
-    services,
-)
+from ..._auth import auth_id_from_token
+from ..._dependencies import services
 from ..._utils import INVALID_TOKEN_ERROR
 
 v1_router = APIRouter(prefix="/v1")
 
-oauth2_scheme = OAuth2PasswordBearer(
+OAUTH2_SCHEME = OAuth2PasswordBearer(
     tokenUrl="token"
 )  # XXX update url once defined
 
@@ -41,19 +31,11 @@ class EnrollPostRequest(BaseModel):
 
 @v1_router.post("/enroll")
 async def post(
-    response: Response,
-    config: Annotated[Config, Depends(config)],
-    services: Annotated[ServiceCollection, Depends(services)],
     request: EnrollPostRequest,
-    token: Annotated[str, Depends(oauth2_scheme)],
+    response: Response,
+    services: ServiceCollection = Depends(services),
+    auth_id: UUID = Depends(auth_id_from_token(OAUTH2_SCHEME)),
 ) -> None:
-    try:
-        decoded_token = JWT.decode(token, key=config.token_secret_key)
-        decoded_token.validate(issuer=config.service_identifier)
-    except InvalidToken:
-        raise INVALID_TOKEN_ERROR
-
-    auth_id = uuid.UUID(decoded_token.subject)
     db_token = await services.tokens.get_by_auth_id(auth_id)
     if db_token is None or db_token.is_expired():
         raise INVALID_TOKEN_ERROR
