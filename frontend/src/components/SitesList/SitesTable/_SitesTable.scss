@@ -54,7 +54,7 @@
   .sites-table-row:hover,
   .sites-table-row:focus-within {
     @include vf-transition($property: #{background}, $duration: fast);
-  
+
     background-color: $colors--light-theme--background-hover;
 
     .table-actions {
@@ -63,7 +63,7 @@
   }
 
   .status-icon::before {
-    top: -4px;
+    top: -5px;
   }
 
   .p-checkbox.is-label-visually-hidden .p-checkbox__label {

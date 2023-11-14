@@ -1,5 +1,5 @@
 .site-details {
-  .site-details__name{
+  .site-details__name {
     margin: 0;
   }
 
@@ -12,7 +12,7 @@
   .site-details__table {
     margin: 0;
 
-    td{
+    td {
       padding: 1.5rem 0 0.5rem;
     }
 
@@ -21,7 +21,7 @@
     }
 
     .site-details__table-item {
-      padding-left: 1.5rem;
+      padding-left: $connection-status-icon-width;
       vertical-align: bottom;
     }
 
@@ -38,9 +38,9 @@
       display: grid;
       grid-template-columns: 1fr 1fr 100%;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.4rem;
       position: relative;
-      right: 1.5rem;
+      right: $connection-status-icon-width;
 
       .site-details__machines-status-count {
         text-align: right;
