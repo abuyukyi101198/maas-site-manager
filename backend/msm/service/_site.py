@@ -6,6 +6,7 @@ from typing import (
     Any,
     Iterable,
 )
+from uuid import UUID
 
 from sqlalchemy import (
     case,
@@ -195,6 +196,23 @@ class SiteService(Service):
             await self.conn.execute(
                 delete(Site).where(Site.c.id.in_(site_ids))
             )
+        return None
+
+    async def get_enrolling(
+        self, auth_id: UUID
+    ) -> models.EnrollingSite | None:
+        """Return details for a site in enrollment process, if found."""
+        stmt = (
+            select(
+                Site.c.id,
+                Site.c.accepted,
+            )
+            .select_from(Site)
+            .where(Site.c.auth_id == auth_id)
+        )
+        result = await self.conn.execute(stmt)
+        if row := result.one_or_none():
+            return models.EnrollingSite(**row._asdict())
         return None
 
     def _select_statement(self) -> Select[Any]:

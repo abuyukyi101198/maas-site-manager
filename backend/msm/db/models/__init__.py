@@ -1,6 +1,7 @@
 from ._config import Config
 from ._site import (
     ConnectionStatus,
+    EnrollingSite,
     PendingSite,
     PendingSiteCreate,
     Site,
@@ -18,12 +19,13 @@ from ._user import (
 __all__ = [
     "Config",
     "ConnectionStatus",
+    "EnrollingSite",
     "PendingSite",
     "PendingSiteCreate",
     "Site",
-    "SiteUpdate",
     "SiteCoordinates",
     "SiteData",
+    "SiteUpdate",
     "Token",
     "User",
     "UserCreate",

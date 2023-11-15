@@ -36,6 +36,7 @@ AUTHENTICATED_ROUTES = [
     ("PATCH", "/api/v1/users/{id}"),
     ("DELETE", "/api/v1/users/{id}"),
     # site API
+    ("GET", "/site/v1/enroll"),
     ("POST", "/site/v1/enroll"),
 ]
 

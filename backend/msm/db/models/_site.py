@@ -85,6 +85,13 @@ class PendingSite(BaseModel):
     created: datetime
 
 
+class EnrollingSite(BaseModel):
+    """Details for a site that's in the enrollment process."""
+
+    id: int
+    accepted: bool
+
+
 class PendingSiteCreate(BaseModel):
     """Details to create a pending site."""
 

@@ -3,12 +3,15 @@ from uuid import uuid4
 
 import pytest
 
+from msm.db.models import Config
+from msm.jwt import JWT
+
 from ....fixtures.client import Client
 from ....fixtures.factory import Factory
 
 
 @pytest.mark.asyncio
-class TestEnrollHandler:
+class TestEnrollPostHandler:
     async def test_post(self, factory: Factory, app_client: Client) -> None:
         auth_id = uuid4()
         await factory.make_Token(auth_id=auth_id)
@@ -25,7 +28,7 @@ class TestEnrollHandler:
         assert pending_site["auth_id"] == auth_id
         assert not pending_site["accepted"]
 
-    async def test_post_no_token_match(
+    async def test_no_token_match(
         self, factory: Factory, app_client: Client
     ) -> None:
         app_client.authenticate(uuid4())
@@ -35,7 +38,7 @@ class TestEnrollHandler:
         )
         assert response.status_code == 401
 
-    async def test_post_token_expired(
+    async def test_token_expired(
         self, factory: Factory, app_client: Client
     ) -> None:
         auth_id = uuid4()
@@ -46,3 +49,37 @@ class TestEnrollHandler:
             json={"name": "new-site", "url": "https://site.example.com"},
         )
         assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+class TestEnrollGetHandler:
+    async def test_pending(
+        self,
+        factory: Factory,
+        app_client: Client,
+    ) -> None:
+        auth_id = uuid4()
+        await factory.make_PendingSite(auth_id=auth_id)
+        app_client.authenticate(auth_id)
+
+        response = await app_client.get("/site/v1/enroll")
+        assert response.status_code == 204
+
+    async def test_accepted(
+        self,
+        factory: Factory,
+        api_config: Config,
+        app_client: Client,
+    ) -> None:
+        auth_id = uuid4()
+        await factory.make_Site(auth_id=auth_id)
+        app_client.authenticate(auth_id)
+
+        response = await app_client.get("/site/v1/enroll")
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["token_type"] == "Bearer"
+        token = JWT.decode(
+            payload["access_token"], key=api_config.token_secret_key
+        )
+        assert token.subject == str(auth_id)
