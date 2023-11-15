@@ -15,11 +15,9 @@ export const $Site = {
         },
         city: {
             type: 'string',
-            isRequired: true,
         },
         country: {
             type: 'string',
-            isRequired: true,
         },
         coordinates: {
             type: 'any-of',
@@ -34,30 +32,24 @@ export const $Site = {
         },
         note: {
             type: 'string',
-            isRequired: true,
         },
         state: {
             type: 'string',
-            isRequired: true,
         },
         address: {
             type: 'string',
-            isRequired: true,
         },
         postal_code: {
             type: 'string',
-            isRequired: true,
         },
         timezone: {
             type: 'any-of',
             contains: [{
                 type: 'TimeZone',
             }],
-            isRequired: true,
         },
         url: {
             type: 'string',
-            isRequired: true,
         },
         name_unique: {
             type: 'boolean',
@@ -74,7 +66,6 @@ export const $Site = {
             }, {
                 type: 'null',
             }],
-            isRequired: true,
         },
     },
 } as const;

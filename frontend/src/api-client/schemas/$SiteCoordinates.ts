@@ -18,7 +18,6 @@ export const $SiteCoordinates = {
             }, {
                 type: 'null',
             }],
-            isRequired: true,
         },
     },
 } as const;

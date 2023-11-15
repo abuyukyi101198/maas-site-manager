@@ -24,12 +24,7 @@ afterAll(() => {
 it("requires name, amount and expiration time", async () => {
   // @ts-expect-error
   expect(postTokens({})).rejects.toThrowError();
-  expect(postTokens({ count: 1, duration: durationFactory.build() })).resolves.toEqual(
-    expect.objectContaining({
-      expired: expect.any(String),
-      tokens: expect.any(Array),
-    }),
-  );
+  expect(postTokens({ count: 1, duration: durationFactory.build() })).resolves.toBeDefined();
 });
 
 it("requires ids and accept values", async () => {

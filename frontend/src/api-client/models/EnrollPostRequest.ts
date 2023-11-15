@@ -4,10 +4,10 @@
 /* eslint-disable */
 
 /**
- * User login response with JSON Web Token.
+ * Request to enroll a site.
  */
-export type LoginPostResponse = {
-    access_token: string;
-    token_type: string;
+export type EnrollPostRequest = {
+    name: string;
+    url: string;
 };
 

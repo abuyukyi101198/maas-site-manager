@@ -12,7 +12,6 @@ export const $Token = {
         value: {
             type: 'string',
             isRequired: true,
-            format: 'uuid',
         },
         expired: {
             type: 'string',

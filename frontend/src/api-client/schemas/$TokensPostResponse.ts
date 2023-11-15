@@ -3,18 +3,12 @@
 /* tslint:disable */
 /* eslint-disable */
 export const $TokensPostResponse = {
-    description: `List of created tokens, along with their duration.`,
+    description: `Response containing generated tokens.`,
     properties: {
-        expired: {
-            type: 'string',
-            isRequired: true,
-            format: 'date-time',
-        },
-        tokens: {
+        items: {
             type: 'array',
             contains: {
-                type: 'string',
-                format: 'uuid',
+                type: 'Token',
             },
             isRequired: true,
         },

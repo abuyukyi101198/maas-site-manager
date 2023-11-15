@@ -114,10 +114,7 @@ export const createMockTokensResolver = (): TokensResponseResolver => async (req
   } else {
     return res(ctx.status(400));
   }
-  const response: TokensPostResponse = {
-    expired: "",
-    tokens,
-  };
+  const response: TokensPostResponse = { items: tokens };
 
   return res(ctx.json(response));
 };

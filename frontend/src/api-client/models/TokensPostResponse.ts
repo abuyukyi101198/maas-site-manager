@@ -3,11 +3,12 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { Token } from './Token';
+
 /**
- * List of created tokens, along with their duration.
+ * Response containing generated tokens.
  */
 export type TokensPostResponse = {
-    expired: string;
-    tokens: Array<string>;
+    items: Array<Token>;
 };
 

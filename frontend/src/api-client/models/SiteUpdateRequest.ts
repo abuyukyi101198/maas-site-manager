@@ -6,10 +6,9 @@
 import type { TimeZone } from './TimeZone';
 
 /**
- * Update a site without setting it's name_unique.
+ * Update a site.
  */
 export type SiteUpdateRequest = {
-    name: string;
     city?: (string | null);
     country?: (string | null);
     coordinates?: (Array<number> | null);
@@ -18,6 +17,5 @@ export type SiteUpdateRequest = {
     address?: (string | null);
     postal_code?: (string | null);
     timezone?: (TimeZone | null);
-    url: string;
 };
 

@@ -41,7 +41,7 @@ const SiteDetailsContent = ({ id }: { id: NonNullable<SiteDetailsContextValue["s
       ) : site ? (
         <>
           <h3 className="p-heading--4 site-details__name">{site.name}</h3>
-          <ExternalLink to={site.url}>{site.url}</ExternalLink>
+          {site.url ? <ExternalLink to={site.url}>{site.url}</ExternalLink> : null}
           <table className="site-details__table">
             <tbody>
               <tr>

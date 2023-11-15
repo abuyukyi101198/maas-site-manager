@@ -2,11 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { AccessTokenResponse } from '../models/AccessTokenResponse';
+import type { EnrollPostRequest } from '../models/EnrollPostRequest';
 import type { LoginPostRequest } from '../models/LoginPostRequest';
-import type { LoginPostResponse } from '../models/LoginPostResponse';
 import type { PendingSitesGetResponse } from '../models/PendingSitesGetResponse';
 import type { PendingSitesPostRequest } from '../models/PendingSitesPostRequest';
-import type { RootGetResponse } from '../models/RootGetResponse';
 import type { Site } from '../models/Site';
 import type { SiteCoordinates } from '../models/SiteCoordinates';
 import type { SitesGetResponse } from '../models/SitesGetResponse';
@@ -29,28 +29,15 @@ export class DefaultService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
 
     /**
-     * Get
-     * Root endpoint.
-     * @returns RootGetResponse Successful Response
-     * @throws ApiError
-     */
-    public getApiV1Get(): CancelablePromise<RootGetResponse> {
-        return this.httpRequest.request({
-            method: 'GET',
-            url: '/api/v1/',
-        });
-    }
-
-    /**
      * Post
-     * @returns LoginPostResponse Successful Response
+     * @returns AccessTokenResponse Successful Response
      * @throws ApiError
      */
     public postApiV1LoginPost({
         requestBody,
     }: {
         requestBody: LoginPostRequest,
-    }): CancelablePromise<LoginPostResponse> {
+    }): CancelablePromise<AccessTokenResponse> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/api/v1/login',
@@ -120,8 +107,7 @@ export class DefaultService {
 
     /**
      * Patch
-     * Modify a site and make sure that the `name_unique`
-     * flag is updated accordingly.
+     * Modify a site.
      * @returns Site Successful Response
      * @throws ApiError
      */
@@ -281,7 +267,7 @@ export class DefaultService {
 
     /**
      * Post
-     * Create one or more tokens.
+     * Create enrollment tokens for sites.
      *
      * Token duration (TTL) is expressed as an ISO-8601 duration string.
      * @returns TokensPostResponse Successful Response
@@ -529,6 +515,46 @@ export class DefaultService {
             path: {
                 'id': id,
             },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Get
+     * Check the site enrollment status.
+     *
+     * If the site is pending, a `204 No Content` response is returned.
+     *
+     * If the site has been accepted, a new authentication token is returned to be
+     * used for turther interaction with the API.
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public getSiteV1EnrollGet(): CancelablePromise<(AccessTokenResponse | null)> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/site/v1/enroll',
+        });
+    }
+
+    /**
+     * Post
+     * Request to enroll a new site.
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public postSiteV1EnrollPost({
+        requestBody,
+    }: {
+        requestBody: EnrollPostRequest,
+    }): CancelablePromise<any> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/site/v1/enroll',
+            body: requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },

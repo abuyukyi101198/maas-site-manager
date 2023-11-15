@@ -2,10 +2,14 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $RootGetResponse = {
-    description: `Root handler response.`,
+export const $EnrollPostRequest = {
+    description: `Request to enroll a site.`,
     properties: {
-        version: {
+        name: {
+            type: 'string',
+            isRequired: true,
+        },
+        url: {
             type: 'string',
             isRequired: true,
         },

@@ -13,17 +13,17 @@ import type { TimeZone } from './TimeZone';
 export type Site = {
     id: number;
     name: string;
-    city: string;
-    country: string;
+    city?: string;
+    country?: string;
     coordinates: (any[] | null);
-    note: string;
-    state: string;
-    address: string;
-    postal_code: string;
-    timezone: TimeZone;
-    url: string;
+    note?: string;
+    state?: string;
+    address?: string;
+    postal_code?: string;
+    timezone?: TimeZone;
+    url?: string;
     name_unique: boolean;
     connection_status: ConnectionStatus;
-    stats: (SiteData | null);
+    stats?: (SiteData | null);
 };
 

@@ -3,12 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export const $SiteUpdateRequest = {
-    description: `Update a site without setting it's name_unique.`,
+    description: `Update a site.`,
     properties: {
-        name: {
-            type: 'string',
-            isRequired: true,
-        },
         city: {
             type: 'any-of',
             contains: [{
@@ -77,10 +73,6 @@ export const $SiteUpdateRequest = {
             }, {
                 type: 'null',
             }],
-        },
-        url: {
-            type: 'string',
-            isRequired: true,
         },
     },
 } as const;

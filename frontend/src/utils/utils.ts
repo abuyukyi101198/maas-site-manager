@@ -6,8 +6,7 @@ import * as countries from "i18n-iso-countries";
 import { getName } from "i18n-iso-countries";
 import en from "i18n-iso-countries/langs/en.json";
 
-import type { Site } from "@/api/types";
-import type { TimeZone } from "@/api-client";
+import type { SiteCoordinates, TimeZone } from "@/api-client";
 import type { SiteMarkerType } from "@/components/Map/types";
 
 if (typeof window !== "undefined") {
@@ -58,7 +57,7 @@ export const getTimezoneUTCString = (timezone: TimeZone, date?: Date | number) =
   }
 };
 
-export const formatSiteMarker = (site: Pick<Site, "id" | "coordinates">): SiteMarkerType => ({
+export const formatSiteMarker = (site: SiteCoordinates): SiteMarkerType => ({
   id: site.id,
   position: site.coordinates as SiteMarkerType["position"],
 });

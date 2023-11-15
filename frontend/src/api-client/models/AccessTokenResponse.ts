@@ -4,9 +4,10 @@
 /* eslint-disable */
 
 /**
- * Root handler response.
+ * Content for a response returning a JWT.
  */
-export type RootGetResponse = {
-    version: string;
+export type AccessTokenResponse = {
+    token_type: string;
+    access_token: string;
 };
 

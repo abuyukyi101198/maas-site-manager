@@ -2,14 +2,14 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $LoginPostResponse = {
-    description: `User login response with JSON Web Token.`,
+export const $AccessTokenResponse = {
+    description: `Content for a response returning a JWT.`,
     properties: {
-        access_token: {
+        token_type: {
             type: 'string',
             isRequired: true,
         },
-        token_type: {
+        access_token: {
             type: 'string',
             isRequired: true,
         },

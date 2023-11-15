@@ -48,7 +48,7 @@ const SiteSummary = ({ id, ...props }: SiteSummaryProps) => {
                 <Icon name="edit" /> Edit
               </Button>
             </span>
-            <ExternalLink to={site.url}>{site.url}</ExternalLink>
+            {site.url ? <ExternalLink to={site.url}>{site.url}</ExternalLink> : null}
           </div>
           <table className="site-summary__table">
             <tbody>
