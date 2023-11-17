@@ -1,3 +1,4 @@
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import (
@@ -37,10 +38,10 @@ class EnrollPostRequest(BaseModel):
 
 @v1_router.post("/enroll")
 async def post(
-    request: EnrollPostRequest,
     response: Response,
-    services: ServiceCollection = Depends(services),
-    auth_id: UUID = Depends(auth_id_from_token(bearer_token)),
+    services: Annotated[ServiceCollection, Depends(services)],
+    auth_id: Annotated[UUID, Depends(auth_id_from_token(bearer_token))],
+    post_request: EnrollPostRequest,
 ) -> None:
     """Request to enroll a new site."""
     db_token = await services.tokens.get_by_auth_id(auth_id)
@@ -48,7 +49,9 @@ async def post(
         raise INVALID_TOKEN_ERROR
 
     await services.sites.create_pending(
-        PendingSiteCreate(name=request.name, url=request.url, auth_id=auth_id)
+        PendingSiteCreate(
+            name=post_request.name, url=post_request.url, auth_id=auth_id
+        )
     )
     await services.tokens.delete(db_token.id)
     response.status_code = status.HTTP_202_ACCEPTED
@@ -57,9 +60,9 @@ async def post(
 @v1_router.get("/enroll")
 async def get(
     response: Response,
-    config: Config = Depends(config),
-    services: ServiceCollection = Depends(services),
-    auth_id: UUID = Depends(auth_id_from_token(bearer_token)),
+    config: Annotated[Config, Depends(config)],
+    services: Annotated[ServiceCollection, Depends(services)],
+    auth_id: Annotated[UUID, Depends(auth_id_from_token(bearer_token))],
 ) -> AccessTokenResponse | None:
     """Check the site enrollment status.
 

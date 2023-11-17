@@ -82,9 +82,11 @@ class SiteUpdateRequest(BaseModel):
 async def get(
     services: Annotated[ServiceCollection, Depends(services)],
     authenticated_user: Annotated[models.User, Depends(authenticated_user)],
-    pagination_params: PaginationParams = Depends(pagination_params),
-    filter_params: SiteFilterParams = Depends(site_filter_parameters),
-    sort_params: list[SortParam] = Depends(site_sort_parameters),
+    pagination_params: Annotated[PaginationParams, Depends(pagination_params)],
+    filter_params: Annotated[
+        SiteFilterParams, Depends(site_filter_parameters)
+    ],
+    sort_params: Annotated[list[SortParam], Depends(site_sort_parameters)],
 ) -> SitesGetResponse:
     """Return accepted sites."""
     total, results = await services.sites.get(
@@ -105,15 +107,15 @@ async def get(
 async def patch(
     services: Annotated[ServiceCollection, Depends(services)],
     authenticated_user: Annotated[models.User, Depends(authenticated_user)],
-    request: SiteUpdateRequest,
     id: int,
+    patch_request: SiteUpdateRequest,
 ) -> models.Site:
     """Modify a site."""
     if not await services.sites.id_exists(id):
         raise not_found("Site")
 
-    raise_on_empty_request(request)
-    data = request.model_dump(exclude_none=True)
+    raise_on_empty_request(patch_request)
+    data = patch_request.model_dump(exclude_none=True)
     await services.sites.update(id, models.SiteUpdate(**data))
     return cast(models.Site, await services.sites.get_by_id(id))
 
@@ -147,7 +149,7 @@ class PendingSitesGetResponse(PaginatedResults):
 async def get_requests(
     services: Annotated[ServiceCollection, Depends(services)],
     authenticated_user: Annotated[models.User, Depends(authenticated_user)],
-    pagination_params: PaginationParams = Depends(pagination_params),
+    pagination_params: Annotated[PaginationParams, Depends(pagination_params)],
 ) -> PendingSitesGetResponse:
     """Return pending sites."""
     total, results = await services.sites.get_pending(

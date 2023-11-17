@@ -38,7 +38,7 @@ class TokensGetResponse(PaginatedResults):
 async def get(
     services: Annotated[ServiceCollection, Depends(services)],
     authenticated_user: Annotated[User, Depends(authenticated_user)],
-    pagination_params: PaginationParams = Depends(pagination_params),
+    pagination_params: Annotated[PaginationParams, Depends(pagination_params)],
 ) -> TokensGetResponse:
     """Return all tokens."""
     total, results = await services.tokens.get(

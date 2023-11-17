@@ -1,4 +1,5 @@
 from typing import (
+    Annotated,
     Awaitable,
     Callable,
 )
@@ -44,8 +45,8 @@ def auth_id_from_token(
     """Return a dependency callable to get the auth ID from the token."""
 
     def auth_id_dep(
-        config: Config = Depends(config),
-        token: str = Depends(bearer_token),
+        config: Annotated[Config, Depends(config)],
+        token: Annotated[str, Depends(bearer_token)],
     ) -> UUID:
         try:
             decoded_token = JWT.decode(

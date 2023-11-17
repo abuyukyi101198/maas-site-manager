@@ -76,10 +76,10 @@ class UsersGetResponse(PaginatedResults):
 async def get(
     services: Annotated[ServiceCollection, Depends(services)],
     authenticated_admin: Annotated[models.User, Depends(authenticated_admin)],
-    pagination_params: PaginationParams = Depends(pagination_params),
-    filter_params: UserFilterParams = Depends(user_filter_params),
-    sort_params: list[SortParam] = Depends(user_sort_params),
-    search_text: SearchTextParam = Depends(search_text_param),
+    pagination_params: Annotated[PaginationParams, Depends(pagination_params)],
+    filter_params: Annotated[UserFilterParams, Depends(user_filter_params)],
+    sort_params: Annotated[list[SortParam], Depends(user_sort_params)],
+    search_text: Annotated[SearchTextParam, Depends(search_text_param)],
 ) -> UsersGetResponse:
     """Return all users"""
     total, results = await services.users.get(
@@ -212,18 +212,18 @@ class UsersPostRequest(BaseModel):
 async def post(
     services: Annotated[ServiceCollection, Depends(services)],
     authenticated_admin: Annotated[models.User, Depends(authenticated_admin)],
-    request: UsersPostRequest,
+    post_request: UsersPostRequest,
 ) -> User:
     """Create a user."""
     if await services.users.exists(
-        email=request.email, username=request.username
+        email=post_request.email, username=post_request.username
     ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"message": "Email or Username already in use."},
         )
     user = await services.users.create(
-        models.UserCreate(**request.model_dump())
+        models.UserCreate(**post_request.model_dump())
     )
     return User.from_model(user)
 

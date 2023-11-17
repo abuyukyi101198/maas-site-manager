@@ -1,3 +1,4 @@
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import (
@@ -31,8 +32,8 @@ async def authenticate_user(
 
 
 async def authenticated_user(
-    services: ServiceCollection = Depends(services),
-    auth_id: UUID = Depends(auth_id_from_token(OAUTH2_SCHEME)),
+    services: Annotated[ServiceCollection, Depends(services)],
+    auth_id: Annotated[UUID, Depends(auth_id_from_token(OAUTH2_SCHEME))],
 ) -> User:
     if user := await services.users.get_by_auth_id(auth_id):
         return user
@@ -40,7 +41,7 @@ async def authenticated_user(
 
 
 def authenticated_admin(
-    user: User = Depends(authenticated_user),
+    user: Annotated[User, Depends(authenticated_user)],
 ) -> User:
     if not user.is_admin:
         raise HTTPException(

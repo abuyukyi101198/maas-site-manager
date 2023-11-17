@@ -1,3 +1,4 @@
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends
@@ -13,8 +14,8 @@ from .._utils import INVALID_TOKEN_ERROR
 
 
 async def authenticated_site(
-    services: ServiceCollection = Depends(services),
-    auth_id: UUID = Depends(auth_id_from_token(bearer_token)),
+    services: Annotated[ServiceCollection, Depends(services)],
+    auth_id: Annotated[UUID, Depends(auth_id_from_token(bearer_token))],
 ) -> Site:
     if site := await services.sites.get_by_auth_id(auth_id):
         return site
