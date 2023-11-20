@@ -11,6 +11,7 @@ from msm.jwt import (
     InvalidToken,
     JWT,
     TOKEN_DURATION,
+    TokenAudience,
 )
 
 SAMPLE_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
@@ -21,8 +22,15 @@ class TestJWT:
     def test_create(self, key: str) -> None:
         issuer = "issuer"
         subject = "subject"
-        token = JWT.create(issuer=issuer, subject=subject, key=key)
-        payload = jwt.decode(token.encoded, key, algorithms=["HS256"])
+        token = JWT.create(
+            issuer=issuer,
+            subject=subject,
+            audience=TokenAudience.API,
+            key=key,
+        )
+        payload = jwt.decode(
+            token.encoded, key, algorithms=["HS256"], audience="api"
+        )
         assert payload["sub"] == subject
         assert payload["iss"] == issuer
         assert (
@@ -30,6 +38,7 @@ class TestJWT:
             < datetime.utcnow() + TOKEN_DURATION
         )
         assert datetime.utcfromtimestamp(payload["iat"]) < datetime.utcnow()
+        assert payload["aud"] == ["api"]
 
     @pytest.mark.parametrize("key", ["", SAMPLE_KEY])
     def test_create_with_duration(self, key: str) -> None:
@@ -37,10 +46,13 @@ class TestJWT:
         token = JWT.create(
             issuer="issuer",
             subject="user@example.com",
+            audience=TokenAudience.API,
             key=key,
             duration=duration,
         )
-        payload = jwt.decode(token.encoded, key, algorithms=["HS256"])
+        payload = jwt.decode(
+            token.encoded, key, algorithms=["HS256"], audience="api"
+        )
         assert (
             datetime.utcfromtimestamp(payload["exp"])
             < datetime.utcnow() + duration
@@ -49,8 +61,18 @@ class TestJWT:
 
     def test_decode_valid(self) -> None:
         data = {"foo": "bar"}
-        token = JWT.create(issuer="issuer", subject="subject", data=data)
-        assert JWT.decode(token.encoded, issuer="issuer") == token
+        token = JWT.create(
+            issuer="issuer",
+            subject="subject",
+            audience=TokenAudience.API,
+            data=data,
+        )
+        assert (
+            JWT.decode(
+                token.encoded, issuer="issuer", audience=TokenAudience.API
+            )
+            == token
+        )
 
     def test_decode_invalid(self) -> None:
         with pytest.raises(InvalidToken):
@@ -71,12 +93,30 @@ class TestJWT:
     def test_decode_expired(self) -> None:
         issuer = "issuer"
         token = JWT.create(
-            issuer=issuer, subject="subject", duration=timedelta(days=-1)
+            issuer=issuer,
+            subject="subject",
+            audience=TokenAudience.SITE,
+            duration=timedelta(days=-1),
         )
         with pytest.raises(InvalidToken):
-            JWT.decode(token.encoded, issuer=issuer)
+            JWT.decode(
+                token.encoded, issuer=issuer, audience=TokenAudience.SITE
+            )
 
     def test_decode_different_issuer(self) -> None:
-        token = JWT.create(issuer="other", subject="subject")
+        token = JWT.create(
+            issuer="other", subject="subject", audience=TokenAudience.API
+        )
         with pytest.raises(InvalidToken):
-            JWT.decode(token.encoded, issuer="issuer")
+            JWT.decode(
+                token.encoded, issuer="issuer", audience=TokenAudience.API
+            )
+
+    def test_decode_invalid_audience(self) -> None:
+        token = JWT.create(
+            issuer="other", subject="subject", audience=TokenAudience.API
+        )
+        with pytest.raises(InvalidToken):
+            JWT.decode(
+                token.encoded, issuer="issuer", audience=TokenAudience.SITE
+            )

@@ -9,6 +9,7 @@ from fastapi import (
 from fastapi.security import OAuth2PasswordRequestForm
 
 from ....db.models import Config
+from ....jwt import TokenAudience
 from ....service import ServiceCollection
 from ..._auth import (
     AccessTokenResponse,
@@ -38,4 +39,4 @@ async def post(
             detail="Incorrect credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    return token_response(config, user.auth_id)
+    return token_response(config, user.auth_id, TokenAudience.API)

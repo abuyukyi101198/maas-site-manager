@@ -2,7 +2,10 @@ from uuid import uuid4
 
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from ..jwt import JWT
+from ..jwt import (
+    JWT,
+    TokenAudience,
+)
 from ._db import (
     ModelCollection,
     SampleDataModel,
@@ -14,7 +17,12 @@ async def make_fixture_tokens(
 ) -> list[SampleDataModel]:
     collection = ModelCollection("token")
     for _ in range(10):
-        token = JWT.create(issuer=issuer, subject=str(uuid4()), key=secret_key)
+        token = JWT.create(
+            issuer=issuer,
+            subject=str(uuid4()),
+            audience=TokenAudience.SITE,
+            key=secret_key,
+        )
         collection.add(
             auth_id=token.subject,
             value=token.encoded,

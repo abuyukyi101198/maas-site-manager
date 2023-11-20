@@ -5,7 +5,10 @@ from httpx import (
     Response,
 )
 
-from msm.jwt import JWT
+from msm.jwt import (
+    JWT,
+    TokenAudience,
+)
 
 
 class Client(AsyncClient):
@@ -20,7 +23,11 @@ class Client(AsyncClient):
         self.service_identifier = service_identifier
         self.token_key = key
 
-    def authenticate(self, auth_id: UUID | None) -> None:
+    def authenticate(
+        self,
+        auth_id: UUID | None,
+        token_audience: TokenAudience = TokenAudience.API,
+    ) -> None:
         """Set or unset authentication token for a user ID."""
         if auth_id is None:
             self._auth_token = ""
@@ -28,6 +35,7 @@ class Client(AsyncClient):
             self._auth_token = JWT.create(
                 issuer=self.service_identifier,
                 subject=str(auth_id),
+                audience=token_audience,
                 key=self.token_key,
             ).encoded
 

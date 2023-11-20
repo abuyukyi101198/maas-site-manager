@@ -9,6 +9,7 @@ from fastapi import (
 from fastapi.security import OAuth2PasswordBearer
 
 from ...db.models import User
+from ...jwt import TokenAudience
 from ...service import (
     ServiceCollection,
     UserService,
@@ -33,7 +34,9 @@ async def authenticate_user(
 
 async def authenticated_user(
     services: Annotated[ServiceCollection, Depends(services)],
-    auth_id: Annotated[UUID, Depends(auth_id_from_token(OAUTH2_SCHEME))],
+    auth_id: Annotated[
+        UUID, Depends(auth_id_from_token(OAUTH2_SCHEME, TokenAudience.API))
+    ],
 ) -> User:
     if user := await services.users.get_by_auth_id(auth_id):
         return user

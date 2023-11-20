@@ -18,6 +18,7 @@ from ..db.models import Config
 from ..jwt import (
     InvalidToken,
     JWT,
+    TokenAudience,
 )
 from ._dependencies import config
 from ._utils import INVALID_TOKEN_ERROR
@@ -41,6 +42,7 @@ async def bearer_token(request: Request) -> str:
 
 def auth_id_from_token(
     bearer_token: BearerToken,
+    token_audience: TokenAudience,
 ) -> Callable[[Config, str], UUID]:
     """Return a dependency callable to get the auth ID from the token."""
 
@@ -53,6 +55,7 @@ def auth_id_from_token(
                 token,
                 key=config.token_secret_key,
                 issuer=config.service_identifier,
+                audience=token_audience,
             )
         except (ValueError, InvalidToken):
             raise INVALID_TOKEN_ERROR
@@ -68,11 +71,14 @@ class AccessTokenResponse(BaseModel):
     access_token: str
 
 
-def token_response(config: Config, auth_id: UUID) -> AccessTokenResponse:
+def token_response(
+    config: Config, auth_id: UUID, audience: TokenAudience
+) -> AccessTokenResponse:
     """Retrun an AccessTokenResponse, generating a token."""
     token = JWT.create(
         issuer=config.service_identifier,
         subject=str(auth_id),
+        audience=audience,
         key=config.token_secret_key,
     )
     return AccessTokenResponse(token_type="Bearer", access_token=token.encoded)

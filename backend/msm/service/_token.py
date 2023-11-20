@@ -19,7 +19,10 @@ from ..db import (
     queries,
 )
 from ..db.tables import Token
-from ..jwt import JWT
+from ..jwt import (
+    JWT,
+    TokenAudience,
+)
 from ._base import Service
 
 
@@ -38,6 +41,7 @@ class TokenService(Service):
             token = JWT.create(
                 issuer=issuer,
                 subject=str(auth_id),
+                audience=TokenAudience.SITE,
                 key=secret_key,
                 duration=duration,
             )

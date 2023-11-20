@@ -18,7 +18,10 @@ from msm.db.models import (
     Config,
     User,
 )
-from msm.jwt import JWT
+from msm.jwt import (
+    JWT,
+    TokenAudience,
+)
 
 from ..fixtures.client import Client
 
@@ -118,14 +121,16 @@ async def test_handler_admin_required(
 
 def test_token_response(api_config: Config) -> None:
     auth_id = uuid4()
-    response = token_response(api_config, auth_id)
+    response = token_response(api_config, auth_id, TokenAudience.API)
     assert response.token_type == "Bearer"
     token = JWT.decode(
         response.access_token,
         key=api_config.token_secret_key,
         issuer=api_config.service_identifier,
+        audience=TokenAudience.API,
     )
     assert token.subject == str(auth_id)
+    assert token.audience == [TokenAudience.API]
 
 
 @pytest.mark.asyncio
@@ -150,13 +155,14 @@ class TestAuthIDFromToken:
         token = JWT.create(
             issuer=api_config.service_identifier,
             subject=str(auth_id),
+            audience=TokenAudience.API,
             key=api_config.token_secret_key,
         )
-        get_auth_id = auth_id_from_token(bearer_token)
+        get_auth_id = auth_id_from_token(bearer_token, TokenAudience.API)
         assert get_auth_id(api_config, token.encoded) == auth_id
 
     def test_invalid_token(self, api_config: Config) -> None:
-        get_auth_id = auth_id_from_token(bearer_token)
+        get_auth_id = auth_id_from_token(bearer_token, TokenAudience.API)
         with pytest.raises(HTTPException) as error:
             get_auth_id(api_config, "invalid")
         assert error.value.status_code == 401

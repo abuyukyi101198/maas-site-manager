@@ -30,7 +30,10 @@ from msm.db.models import (
     User,
 )
 from msm.db.tables import METADATA
-from msm.jwt import JWT
+from msm.jwt import (
+    JWT,
+    TokenAudience,
+)
 from msm.password import hash_password
 from msm.schema import TimeZone
 
@@ -120,6 +123,7 @@ class Factory:
         token = JWT.create(
             issuer=issuer,
             subject=str(auth_id),
+            audience=TokenAudience.SITE,
             key=key,
             duration=lifetime,
         )
