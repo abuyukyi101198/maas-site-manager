@@ -16,7 +16,7 @@ export const connectionIcons: Record<Site["connection_status"], string> = {
 export const connectionLabels: Record<Site["connection_status"], string> = {
   stable: "Stable",
   lost: "Lost",
-  unknown: "Waiting for first",
+  unknown: "Waiting for first heartbeat",
 } as const;
 
 type ConnectionInfoProps = { connection: Site["connection_status"]; lastSeen?: SiteData["last_seen"] };
@@ -29,7 +29,7 @@ export const getLastSeenText = ({
   if (!lastSeen) {
     return null;
   }
-  const description = connection === "unknown" ? "heartbeat since" : "last seen";
+  const description = connection === "unknown" ? "since" : "last seen";
   return `${format === "long" ? description : ""} ${formatDistanceToNow(lastSeen)}`;
 };
 

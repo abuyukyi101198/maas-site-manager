@@ -34,5 +34,5 @@ it("displays last seen text relative to local time correctly", () => {
 
 it("displays 'waiting for first' text for the unknown status", () => {
   render(<ConnectionInfo connection={ConnectionStatus.UNKNOWN} />);
-  expect(screen.getByText(/waiting for first/i)).toBeInTheDocument();
+  expect(screen.getByText(/waiting for first heartbeat/i)).toBeInTheDocument();
 });

@@ -79,7 +79,9 @@ const SiteSummary = ({ id, ...props }: SiteSummaryProps) => {
               </tr>
               <tr>
                 <td className="u-text--muted site-summary__table-item">Machine status</td>
-                <td>{stats ? <AggregatedStatus hideLabel stats={stats} /> : null}</td>
+                <td className="site-summary__table-meter-wrapper">
+                  {stats ? <AggregatedStatus hideLabel stats={stats} /> : null}
+                </td>
               </tr>
             </tbody>
           </table>
