@@ -46,13 +46,15 @@ const SitesTableControls = ({
             value={searchText}
           />
         </div>
-        <div className="u-flex u-flex--column u-flex--row-small u-flex u-flex--justify-end">
-          <RemoveButton
-            disabled={isRemoveDisabled}
-            onClick={() => setSidebar("removeSites")}
-            showDeleteIcon
-            type="button"
-          />
+        <div className="u-flex u-flex--column u-flex--row-small u-flex u-flex--justify-end u-flex--align-start">
+          <span className="remove-button__wrapper">
+            <RemoveButton
+              disabled={isRemoveDisabled}
+              onClick={() => setSidebar("removeSites")}
+              showDeleteIcon
+              type="button"
+            />
+          </span>
           <SitesViewControl />
         </div>
       </div>

@@ -7,6 +7,21 @@
   .sites-hidden-btn {
     border-color: map.get($colors-light-theme--tinted-borders, "caution");
     background-color: map.get($colors-light-theme--tinted-backgrounds, "caution", "default");
+    position: relative;
+
+    /* Add a white underlay background because the selected background color
+      is transparent and not easily visible. 
+      We should remove this if colors are changed in the future.   */
+    &::before {
+      content: "";
+      position: absolute;
+      width: 100%;
+      background-color: $color-x-light;
+      top: 0;
+      left: 0;
+      height: 100%;
+      z-index: -1;
+    }
   }
 }
 

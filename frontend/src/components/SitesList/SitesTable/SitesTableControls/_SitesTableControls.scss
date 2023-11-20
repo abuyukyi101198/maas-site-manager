@@ -16,10 +16,18 @@ $box-shadow:
   }
 
   .sites-view-control {
-    @media only screen and (min-width: $breakpoint-large) {
-      .p-segmented-control__button {
-        margin-bottom: 0;
-      }
+    .p-segmented-control__button {
+      margin-bottom: 0;
+    }
+  }
+
+  .remove-button__wrapper {
+    background-color: $color-x-light;
+    margin-right: $sph--large;
+    margin-bottom: $sph--large;
+
+    .remove-btn {
+      margin-bottom: 0;
     }
   }
 
@@ -29,7 +37,7 @@ $box-shadow:
     }
 
     .p-search-box__input,
-    .remove-btn,
+    .remove-button__wrapper,
     .sites-view-control {
       box-shadow: $box-shadow;
     }
