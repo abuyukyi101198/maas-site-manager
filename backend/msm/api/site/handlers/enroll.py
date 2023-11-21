@@ -13,7 +13,10 @@ from ....db.models import (
     Config,
     PendingSiteCreate,
 )
-from ....jwt import TokenAudience
+from ....jwt import (
+    TokenAudience,
+    TokenPurpose,
+)
 from ....service import ServiceCollection
 from ..._auth import (
     AccessTokenResponse,
@@ -42,7 +45,14 @@ async def post(
     response: Response,
     services: Annotated[ServiceCollection, Depends(services)],
     auth_id: Annotated[
-        UUID, Depends(auth_id_from_token(bearer_token, TokenAudience.SITE))
+        UUID,
+        Depends(
+            auth_id_from_token(
+                bearer_token,
+                TokenAudience.SITE,
+                token_purpose=TokenPurpose.ENROLLMENT,
+            )
+        ),
     ],
     post_request: EnrollPostRequest,
 ) -> None:
@@ -66,7 +76,14 @@ async def get(
     config: Annotated[Config, Depends(config)],
     services: Annotated[ServiceCollection, Depends(services)],
     auth_id: Annotated[
-        UUID, Depends(auth_id_from_token(bearer_token, TokenAudience.SITE))
+        UUID,
+        Depends(
+            auth_id_from_token(
+                bearer_token,
+                TokenAudience.SITE,
+                token_purpose=TokenPurpose.ENROLLMENT,
+            )
+        ),
     ],
 ) -> AccessTokenResponse | None:
     """Check the site enrollment status.
@@ -83,4 +100,6 @@ async def get(
     if not site.accepted:
         response.status_code = status.HTTP_204_NO_CONTENT
         return None
-    return token_response(config, auth_id, TokenAudience.SITE)
+    return token_response(
+        config, auth_id, TokenAudience.SITE, purpose=TokenPurpose.ACCESS
+    )

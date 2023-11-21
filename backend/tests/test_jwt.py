@@ -12,6 +12,7 @@ from msm.jwt import (
     JWT,
     TOKEN_DURATION,
     TokenAudience,
+    TokenPurpose,
 )
 
 SAMPLE_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
@@ -47,8 +48,8 @@ class TestJWT:
             issuer="issuer",
             subject="user@example.com",
             audience=TokenAudience.API,
-            key=key,
             duration=duration,
+            key=key,
         )
         payload = jwt.decode(
             token.encoded, key, algorithms=["HS256"], audience="api"
@@ -70,6 +71,23 @@ class TestJWT:
         assert (
             JWT.decode(
                 token.encoded, issuer="issuer", audience=TokenAudience.API
+            )
+            == token
+        )
+
+    def test_decode_with_purpose(self) -> None:
+        token = JWT.create(
+            issuer="issuer",
+            subject="subject",
+            audience=TokenAudience.SITE,
+            purpose=TokenPurpose.ENROLLMENT,
+        )
+        assert (
+            JWT.decode(
+                token.encoded,
+                issuer="issuer",
+                audience=TokenAudience.SITE,
+                purpose=TokenPurpose.ENROLLMENT,
             )
             == token
         )
@@ -119,4 +137,18 @@ class TestJWT:
         with pytest.raises(InvalidToken):
             JWT.decode(
                 token.encoded, issuer="issuer", audience=TokenAudience.SITE
+            )
+
+    def test_decode_missing_purpose(self) -> None:
+        token = JWT.create(
+            issuer="other",
+            subject="subject",
+            audience=TokenAudience.SITE,
+        )
+        with pytest.raises(InvalidToken):
+            JWT.decode(
+                token.encoded,
+                issuer="issuer",
+                audience=TokenAudience.SITE,
+                purpose=TokenPurpose.ENROLLMENT,
             )

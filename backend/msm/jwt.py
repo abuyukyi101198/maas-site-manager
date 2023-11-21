@@ -37,6 +37,13 @@ class TokenAudience(StrEnum):
     SITE = "site"
 
 
+class TokenPurpose(StrEnum):
+    """Valid values for the token purpose."""
+
+    ENROLLMENT = "enrollment"
+    ACCESS = "access"
+
+
 @dataclasses.dataclass(frozen=True)
 class JWT:
     payload: dict[str, Any]
@@ -67,6 +74,11 @@ class JWT:
         return [TokenAudience(entry) for entry in self.payload["aud"]]
 
     @cached_property
+    def purpose(self) -> TokenPurpose | None:
+        value = self.payload.get("purpose")
+        return TokenPurpose(value) if value else None
+
+    @cached_property
     def data(self) -> dict[str, Any]:
         return {
             key: value
@@ -80,9 +92,10 @@ class JWT:
         issuer: str,
         subject: str,
         audience: TokenAudience,
-        key: str = "",
-        duration: timedelta = TOKEN_DURATION,
+        purpose: TokenPurpose | None = None,
         data: dict[str, Any] | None = None,
+        duration: timedelta = TOKEN_DURATION,
+        key: str = "",
     ) -> "JWT":
         """Create a JWT."""
         if data is None:
@@ -96,6 +109,8 @@ class JWT:
             "exp": expiration,
             "aud": [audience],
         }
+        if purpose:
+            payload["purpose"] = purpose
         encoded = jwt.encode(payload, key, algorithm=TOKEN_ALGORITHM)
         return cls(
             payload=payload,
@@ -109,6 +124,7 @@ class JWT:
         key: str = "",
         issuer: str | None = None,
         audience: TokenAudience | None = None,
+        purpose: TokenPurpose | None = None,
     ) -> "JWT":
         """Decode a token string."""
         try:
@@ -125,8 +141,12 @@ class JWT:
         # check that all required fields are there
         if cls._REQUIRED_FIELDS - set(payload):
             raise InvalidToken()
-
-        return JWT(
+        token = JWT(
             payload=payload,
             encoded=encoded,
         )
+
+        if purpose and token.purpose != purpose:
+            raise InvalidToken()
+
+        return token

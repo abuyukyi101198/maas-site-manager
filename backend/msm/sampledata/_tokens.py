@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncConnection
 from ..jwt import (
     JWT,
     TokenAudience,
+    TokenPurpose,
 )
 from ._db import (
     ModelCollection,
@@ -21,6 +22,7 @@ async def make_fixture_tokens(
             issuer=issuer,
             subject=str(uuid4()),
             audience=TokenAudience.SITE,
+            purpose=TokenPurpose.ENROLLMENT,
             key=secret_key,
         )
         collection.add(

@@ -8,6 +8,7 @@ from httpx import (
 from msm.jwt import (
     JWT,
     TokenAudience,
+    TokenPurpose,
 )
 
 
@@ -27,6 +28,7 @@ class Client(AsyncClient):
         self,
         auth_id: UUID | None,
         token_audience: TokenAudience = TokenAudience.API,
+        token_purpose: TokenPurpose | None = None,
     ) -> None:
         """Set or unset authentication token for a user ID."""
         if auth_id is None:
@@ -36,6 +38,7 @@ class Client(AsyncClient):
                 issuer=self.service_identifier,
                 subject=str(auth_id),
                 audience=token_audience,
+                purpose=token_purpose,
                 key=self.token_key,
             ).encoded
 

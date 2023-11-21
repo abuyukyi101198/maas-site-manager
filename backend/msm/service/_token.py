@@ -22,6 +22,7 @@ from ..db.tables import Token
 from ..jwt import (
     JWT,
     TokenAudience,
+    TokenPurpose,
 )
 from ._base import Service
 
@@ -42,6 +43,7 @@ class TokenService(Service):
                 issuer=issuer,
                 subject=str(auth_id),
                 audience=TokenAudience.SITE,
+                purpose=TokenPurpose.ENROLLMENT,
                 key=secret_key,
                 duration=duration,
             )

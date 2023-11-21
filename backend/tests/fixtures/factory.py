@@ -33,6 +33,7 @@ from msm.db.tables import METADATA
 from msm.jwt import (
     JWT,
     TokenAudience,
+    TokenPurpose,
 )
 from msm.password import hash_password
 from msm.schema import TimeZone
@@ -124,6 +125,7 @@ class Factory:
             issuer=issuer,
             subject=str(auth_id),
             audience=TokenAudience.SITE,
+            purpose=TokenPurpose.ENROLLMENT,
             key=key,
             duration=lifetime,
         )

@@ -4,7 +4,10 @@ from uuid import UUID
 from fastapi import Depends
 
 from ...db.models import Site
-from ...jwt import TokenAudience
+from ...jwt import (
+    TokenAudience,
+    TokenPurpose,
+)
 from ...service import ServiceCollection
 from .._auth import (
     auth_id_from_token,
@@ -17,7 +20,14 @@ from .._utils import INVALID_TOKEN_ERROR
 async def authenticated_site(
     services: Annotated[ServiceCollection, Depends(services)],
     auth_id: Annotated[
-        UUID, Depends(auth_id_from_token(bearer_token, TokenAudience.SITE))
+        UUID,
+        Depends(
+            auth_id_from_token(
+                bearer_token,
+                TokenAudience.SITE,
+                token_purpose=TokenPurpose.ACCESS,
+            )
+        ),
     ],
 ) -> Site:
     if site := await services.sites.get_by_auth_id(auth_id):

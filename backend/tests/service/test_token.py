@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncConnection
 from msm.jwt import (
     JWT,
     TokenAudience,
+    TokenPurpose,
 )
 from msm.service._token import TokenService
 
@@ -50,6 +51,7 @@ class TestTokenService:
             key=secret_key,
             issuer=issuer,
             audience=TokenAudience.SITE,
+            purpose=TokenPurpose.ENROLLMENT,
         )
         [db_token] = await factory.get("token")
         assert db_token["auth_id"] == uuid.UUID(decoded_token.subject)
@@ -67,7 +69,9 @@ class TestTokenService:
         assert count == 2
         assert {
             JWT.decode(
-                token.value, issuer="issuer", audience=TokenAudience.SITE
+                token.value,
+                issuer="issuer",
+                audience=TokenAudience.SITE,
             ).subject
             for token in tokens
         } == {
