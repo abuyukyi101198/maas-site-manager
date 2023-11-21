@@ -10,6 +10,14 @@ The quickest way to get started is run frontend with mock backend which is enabl
 yarn dev
 ```
 
+## Updating API Client
+
+You can update TypeScript API Client from the OpenAPI schema by running the following command. Make sure that the back-end is running beforehand.
+
+```bash
+yarn generate-api-client
+```
+
 ### Using a local backend
 
 Setup local environment variables
@@ -55,10 +63,4 @@ yarn test
 
 Run `yarn upgrade-all` to attempt to upgrade all packages to latest version.
 
-## TypeScript API Client
 
-You can update TypeScript API Client from the OpenAPI schema by running the following command. Make sure that the back-end is running beforehand.
-
-```bash
-yarn generate-api-client
-```

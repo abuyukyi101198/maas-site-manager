@@ -13,7 +13,7 @@ import ConnectionInfo from "./ConnectionInfo";
 import ColumnsVisibilityControl from "./SitesTableControls/ColumnsVisibilityControl";
 import SitesTableControls from "./SitesTableControls/SitesTableControls";
 
-import type { SitesQueryResult } from "@/api/types";
+import type { SitesGetResponse } from "@/api-client";
 import DynamicTable from "@/components/DynamicTable/DynamicTable";
 import NoSites from "@/components/NoSites";
 import SelectAllCheckbox from "@/components/SelectAllCheckbox";
@@ -36,7 +36,7 @@ const createAccessor =
   (row: T) =>
     pick(keys, row);
 
-export type Site = SitesQueryResult["items"][number];
+export type Site = SitesGetResponse["items"][number];
 export type SitesColumnDef = ColumnDef<Site, Partial<Site>>;
 export type SitesColumn = Column<Site, unknown>;
 
@@ -208,7 +208,7 @@ const SitesTable = ({
         ),
         cell: ({ getValue }) => {
           const { stats } = getValue();
-          return stats ? stats.total_machines : null;
+          return stats ? stats.machines_total : null;
         },
       },
       {

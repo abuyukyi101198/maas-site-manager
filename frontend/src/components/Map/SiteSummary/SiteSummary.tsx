@@ -24,7 +24,7 @@ const SiteSummary = ({ id, ...props }: SiteSummaryProps) => {
   const { data: site, error, isLoading } = useSiteQuery({ id });
   const { setSidebar } = useAppLayoutContext();
   const { setSelected: setSiteId } = useSiteDetailsContext();
-  const stats = site?.stats;
+  const { stats } = site || {};
 
   return (
     <Card className="site-summary" title="Site details" {...props}>
@@ -75,7 +75,7 @@ const SiteSummary = ({ id, ...props }: SiteSummaryProps) => {
               </tr>
               <tr>
                 <td className="u-text--muted site-summary__table-item">Machines</td>
-                <td>{stats?.total_machines}</td>
+                <td>{stats?.machines_total}</td>
               </tr>
               <tr>
                 <td className="u-text--muted site-summary__table-item">Machine status</td>

@@ -7,12 +7,12 @@
  * Data for a site.
  */
 export type SiteData = {
-    total_machines: number;
-    allocated_machines: number;
-    deployed_machines: number;
-    ready_machines: number;
-    error_machines: number;
-    other_machines: number;
+    machines_total: number;
+    machines_allocated: number;
+    machines_deployed: number;
+    machines_ready: number;
+    machines_error: number;
+    machines_other: number;
     last_seen: string;
 };
 

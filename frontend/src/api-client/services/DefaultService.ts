@@ -50,6 +50,54 @@ export class DefaultService {
     }
 
     /**
+     * Get Pending
+     * Return pending sites.
+     * @returns PendingSitesGetResponse Successful Response
+     * @throws ApiError
+     */
+    public getPendingApiV1SitesPendingGet({
+        page = 1,
+        size = 20,
+    }: {
+        page?: number,
+        size?: number,
+    }): CancelablePromise<PendingSitesGetResponse> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/v1/sites/pending',
+            query: {
+                'page': page,
+                'size': size,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Post Pending
+     * Accept or reject pending sites.
+     * @returns void
+     * @throws ApiError
+     */
+    public postPendingApiV1SitesPendingPost({
+        requestBody,
+    }: {
+        requestBody: PendingSitesPostRequest,
+    }): CancelablePromise<void> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/v1/sites/pending',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Get
      * Return accepted sites.
      * @returns SitesGetResponse Successful Response
@@ -106,29 +154,15 @@ export class DefaultService {
     }
 
     /**
-     * Patch
-     * Modify a site.
-     * @returns Site Successful Response
+     * Get Coordinates
+     * Return coordinates for all accepted sites.
+     * @returns SiteCoordinates Successful Response
      * @throws ApiError
      */
-    public patchApiV1SitesIdPatch({
-        id,
-        requestBody,
-    }: {
-        id: number,
-        requestBody: SiteUpdateRequest,
-    }): CancelablePromise<Site> {
+    public getCoordinatesApiV1SitesCoordinatesGet(): CancelablePromise<Array<SiteCoordinates>> {
         return this.httpRequest.request({
-            method: 'PATCH',
-            url: '/api/v1/sites/{id}',
-            path: {
-                'id': id,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
+            method: 'GET',
+            url: '/api/v1/sites/coordinates',
         });
     }
 
@@ -156,6 +190,33 @@ export class DefaultService {
     }
 
     /**
+     * Patch
+     * Modify a site.
+     * @returns Site Successful Response
+     * @throws ApiError
+     */
+    public patchApiV1SitesIdPatch({
+        id,
+        requestBody,
+    }: {
+        id: number,
+        requestBody: SiteUpdateRequest,
+    }): CancelablePromise<Site> {
+        return this.httpRequest.request({
+            method: 'PATCH',
+            url: '/api/v1/sites/{id}',
+            path: {
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Delete
      * Delete a site from the database.
      * @returns void
@@ -172,67 +233,6 @@ export class DefaultService {
             path: {
                 'id': id,
             },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-
-    /**
-     * Get Coordinates
-     * Return coordinates for all accepted sites.
-     * @returns SiteCoordinates Successful Response
-     * @throws ApiError
-     */
-    public getCoordinatesApiV1SitesCoordinatesGet(): CancelablePromise<Array<SiteCoordinates>> {
-        return this.httpRequest.request({
-            method: 'GET',
-            url: '/api/v1/sites/coordinates',
-        });
-    }
-
-    /**
-     * Get Requests
-     * Return pending sites.
-     * @returns PendingSitesGetResponse Successful Response
-     * @throws ApiError
-     */
-    public getRequestsApiV1RequestsGet({
-        page = 1,
-        size = 20,
-    }: {
-        page?: number,
-        size?: number,
-    }): CancelablePromise<PendingSitesGetResponse> {
-        return this.httpRequest.request({
-            method: 'GET',
-            url: '/api/v1/requests',
-            query: {
-                'page': page,
-                'size': size,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-
-    /**
-     * Post Requests
-     * Accept or reject pending sites.
-     * @returns void
-     * @throws ApiError
-     */
-    public postRequestsApiV1RequestsPost({
-        requestBody,
-    }: {
-        requestBody: PendingSitesPostRequest,
-    }): CancelablePromise<void> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/api/v1/requests',
-            body: requestBody,
-            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },

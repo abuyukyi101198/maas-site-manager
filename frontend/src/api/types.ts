@@ -1,4 +1,6 @@
+import type { PendingSitesGetResponse, SitesGetResponse, TokensGetResponse, UsersGetResponse } from "@/api-client";
 import type { Site as SiteModel } from "@/api-client/models/Site";
+import type { Prettify } from "@/types";
 
 export type Site = SiteModel;
 export type AccessToken = {
@@ -6,23 +8,10 @@ export type AccessToken = {
   token_type: "bearer";
 };
 
-export type Stats = {
-  allocated_machines: number;
-  deployed_machines: number;
-  ready_machines: number;
-  error_machines: number;
-  total_machines: number;
-  last_seen: string; // <ISO 8601 date string>
-};
+export type PaginatedQueryResult = Prettify<
+  PendingSitesGetResponse | SitesGetResponse | TokensGetResponse | UsersGetResponse
+>;
 
-export type PaginatedQueryResult<D extends unknown> = {
-  items: D[];
-  total: number;
-  page: number;
-  size: number;
-};
-
-export type SitesQueryResult = PaginatedQueryResult<Site>;
 export type SitesCoordinatesQueryResult = { items: Pick<Site, "id" | "coordinates">[] };
 
 export type Token = {
@@ -31,7 +20,6 @@ export type Token = {
   expired: string; //<ISO 8601 date string>,
   created: string; //<ISO 8601 date string>
 };
-export type PostTokensResult = PaginatedQueryResult<Token>;
 
 export type EnrollmentRequest = {
   id: string;
@@ -40,8 +28,6 @@ export type EnrollmentRequest = {
   created: string; // <ISO 8601 date>,
 };
 
-export type EnrollmentRequestsQueryResult = PaginatedQueryResult<EnrollmentRequest>;
-
 export type User = {
   id: number;
   full_name: string;
@@ -49,5 +35,3 @@ export type User = {
   email: string;
   is_admin: boolean;
 };
-
-export type UsersQueryResult = PaginatedQueryResult<User>;

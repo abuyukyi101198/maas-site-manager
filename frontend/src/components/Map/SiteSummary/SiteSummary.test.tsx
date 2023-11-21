@@ -32,12 +32,12 @@ it("displays data for a site", async () => {
 
   expect(screen.getByRole("link", { name: site.url })).toBeInTheDocument();
   expect(screen.getByText(new RegExp(site.connection_status, "i"))).toBeInTheDocument();
-  expect(screen.getByText(stats.total_machines)).toBeInTheDocument();
+  expect(screen.getByText(stats.machines_total)).toBeInTheDocument();
 
   await userEvent.click(screen.getByTestId("popover-container"));
 
-  expect(screen.getByTestId("deployed")).toHaveTextContent(stats.deployed_machines.toString());
-  expect(screen.getByTestId("allocated")).toHaveTextContent(stats.allocated_machines.toString());
-  expect(screen.getByTestId("ready")).toHaveTextContent(stats.ready_machines.toString());
-  expect(screen.getByTestId("error")).toHaveTextContent(stats.error_machines.toString());
+  expect(screen.getByTestId("deployed")).toHaveTextContent(stats.machines_deployed.toString());
+  expect(screen.getByTestId("allocated")).toHaveTextContent(stats.machines_allocated.toString());
+  expect(screen.getByTestId("ready")).toHaveTextContent(stats.machines_ready.toString());
+  expect(screen.getByTestId("error")).toHaveTextContent(stats.machines_error.toString());
 });

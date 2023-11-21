@@ -3,8 +3,14 @@ import { sub, add } from "date-fns";
 import { Factory } from "fishery";
 import { uniqueNamesGenerator, adjectives, colors, animals, starWars } from "unique-names-generator";
 
-import type { AccessToken, PaginatedQueryResult, Token } from "@/api/types";
-import type { PendingSite } from "@/api-client";
+import type { Token } from "@/api/types";
+import type {
+  PendingSite,
+  AccessTokenResponse,
+  SitesGetResponse,
+  UsersGetResponse,
+  PendingSitesGetResponse,
+} from "@/api-client";
 import { ConnectionStatus } from "@/api-client/models/ConnectionStatus";
 import type { Site } from "@/api-client/models/Site";
 import type { SiteData } from "@/api-client/models/SiteData";
@@ -22,15 +28,15 @@ export const statsFactory = Factory.define<SiteData>(({ sequence }) => {
   const chance = new Chance(`maas-${sequence}`);
   const now = new Date();
   const machines = {
-    deployed_machines: chance.integer({ min: 0, max: 500 }),
-    allocated_machines: chance.integer({ min: 0, max: 500 }),
-    ready_machines: chance.integer({ min: 0, max: 500 }),
-    error_machines: chance.integer({ min: 0, max: 500 }),
-    other_machines: chance.integer({ min: 0, max: 500 }),
+    machines_deployed: chance.integer({ min: 0, max: 500 }),
+    machines_allocated: chance.integer({ min: 0, max: 500 }),
+    machines_ready: chance.integer({ min: 0, max: 500 }),
+    machines_error: chance.integer({ min: 0, max: 500 }),
+    machines_other: chance.integer({ min: 0, max: 500 }),
   };
   return {
     ...machines,
-    total_machines: Object.values(machines).reduce((acc, val) => acc + val, 0),
+    machines_total: Object.values(machines).reduce((acc, val) => acc + val, 0),
     last_seen: new Date(chance.date({ min: sub(now, { minutes: 15 }), max: now })).toISOString(),
   };
 });
@@ -50,7 +56,12 @@ export const markerFactory = Factory.define<SiteMarkerType>(({ sequence }) => {
   };
 });
 
-export const siteFactory = Factory.define<Site>(({ sequence }) => {
+const coordinatesFactory = Factory.define<Site["coordinates"]>(({ sequence }) => {
+  const chance = new Chance(`maas-${sequence}`);
+  return [chance.latitude(), chance.longitude()];
+});
+
+export const siteFactory = Factory.define<NonNullable<Site>>(({ sequence }) => {
   const chance = new Chance(`maas-${sequence}`);
   const name = uniqueNamesGenerator({
     dictionaries: [adjectives, colors, animals],
@@ -59,7 +70,7 @@ export const siteFactory = Factory.define<Site>(({ sequence }) => {
     seed: sequence,
   });
 
-  return {
+  const site = {
     id: sequence,
     name,
     name_unique: chance.bool(),
@@ -68,14 +79,15 @@ export const siteFactory = Factory.define<Site>(({ sequence }) => {
     city: chance.city(),
     note: "",
     region: null,
-    coordinates: [chance.latitude(), chance.longitude()],
+    coordinates: coordinatesFactory.build(),
     postal_code: chance.zip(),
     address: chance.address(),
     state: chance.province(),
     timezone: chance.pickone(Object.values(TimeZone)),
     connection_status: connectionFactory.build(),
-    stats: statsFactory.build(),
-  };
+    stats: statsFactory.build() as SiteData,
+  } as const;
+  return site;
 });
 
 export const userFactory = Factory.define<User>(({ sequence }) => {
@@ -101,14 +113,15 @@ export const userFactory = Factory.define<User>(({ sequence }) => {
   };
 });
 
-export const paginatedQueryResultFactory = <T extends unknown>() =>
-  Factory.define<PaginatedQueryResult<T>>(() => {
-    return { items: [], total: 0, page: 0, size: 0 };
-  });
-
-export const enrollmentRequestQueryResultFactory = paginatedQueryResultFactory<PendingSite>();
-export const sitesQueryResultFactory = paginatedQueryResultFactory<Site>();
-export const usersQueryResultFactory = paginatedQueryResultFactory<User>();
+export const enrollmentRequestQueryResultFactory = Factory.define<PendingSitesGetResponse>(() => {
+  return { items: [], total: 0, page: 0, size: 0 };
+});
+export const sitesQueryResultFactory = Factory.define<SitesGetResponse>(() => {
+  return { items: [], total: 0, page: 0, size: 0 };
+});
+export const usersQueryResultFactory = Factory.define<UsersGetResponse>(() => {
+  return { items: [], total: 0, page: 0, size: 0 };
+});
 
 export const durationFactory = Factory.define<string>(() => "P7DT0H0M0S");
 export const tokenFactory = Factory.define<Token>(({ sequence }) => {
@@ -122,7 +135,7 @@ export const tokenFactory = Factory.define<Token>(({ sequence }) => {
   };
 });
 
-export const accessTokenFactory = Factory.define<AccessToken>(({ sequence }) => {
+export const accessTokenFactory = Factory.define<AccessTokenResponse>(({ sequence }) => {
   const chance = new Chance(`maas-${sequence}`);
   return {
     access_token: chance.hash({ length: 64 }),

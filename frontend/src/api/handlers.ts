@@ -1,7 +1,13 @@
 import { apiClient } from "./api";
 import type { Token, User } from "./types";
 
-import type { Body_post_api_v1_login_post, PendingSitesPostRequest, Site, TokensPostRequest } from "@/api-client";
+import type {
+  SitesGetResponse,
+  Body_post_api_v1_login_post,
+  PendingSitesPostRequest,
+  Site,
+  TokensPostRequest,
+} from "@/api-client";
 
 export const postLogin = async (data: Body_post_api_v1_login_post) => {
   if (!data?.username || !data?.password) {
@@ -15,15 +21,7 @@ export const postLogin = async (data: Body_post_api_v1_login_post) => {
   }
 };
 
-export type PostRegisterData = {
-  username: string;
-  password: string;
-};
-
-export type PaginationParams = {
-  page: string;
-  size: string;
-};
+export type PaginationParams = Pick<SitesGetResponse, "page" | "size">;
 
 export type SortDirection = "asc" | "desc";
 
@@ -35,7 +33,7 @@ export type SortingParams<T extends SitesSortKey | UserSortKey> = {
   sortBy: SortBy<T>;
 };
 
-export type GetSitesQueryParams = PaginationParams & SortingParams<SitesSortKey> & {};
+export type GetSitesQueryParams = Parameters<typeof apiClient.default.getApiV1SitesGet>[0];
 
 // TODO: integrate supported API params https://warthogs.atlassian.net/browse/MAASENG-2081
 export const getSites = (params: Parameters<typeof apiClient.default.getApiV1SitesGet>[0]) =>
@@ -129,8 +127,8 @@ export const deleteTokens = async (data: Token["id"][]) => {
 export const getEnrollmentRequests = async ({
   page,
   size,
-}: Parameters<typeof apiClient.default.getRequestsApiV1RequestsGet>[0]) => {
-  const response = await apiClient.default.getRequestsApiV1RequestsGet({ page, size });
+}: Parameters<typeof apiClient.default.getPendingApiV1SitesPendingGet>[0]) => {
+  const response = await apiClient.default.getPendingApiV1SitesPendingGet({ page, size });
   return response;
 };
 
@@ -140,12 +138,12 @@ export type PostEnrollmentRequestsData = {
 };
 export const postEnrollmentRequests = async (
   data: PendingSitesPostRequest,
-): Promise<ReturnType<typeof apiClient.default.postRequestsApiV1RequestsPost>> => {
+): Promise<ReturnType<typeof apiClient.default.postPendingApiV1SitesPendingPost>> => {
   if (!data?.ids || typeof data?.accept !== "boolean") {
     throw Error("Missing required fields");
   }
   try {
-    const response = await apiClient.default.postRequestsApiV1RequestsPost({ requestBody: data });
+    const response = await apiClient.default.postPendingApiV1SitesPendingPost({ requestBody: data });
     return response;
   } catch (error) {
     throw error;

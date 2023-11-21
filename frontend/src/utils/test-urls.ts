@@ -12,6 +12,6 @@ export const apiUrls = {
   tokens: getApiUrl("/tokens"),
   tokensExport: getApiUrl("/tokens/export"),
   users: getApiUrl("/users"),
-  enrollmentRequests: getApiUrl("/requests"),
+  enrollmentRequests: getApiUrl("/sites/pending"),
   currentUser: getApiUrl("/users/me"),
 };

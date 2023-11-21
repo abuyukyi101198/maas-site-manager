@@ -39,6 +39,7 @@ type SitesResponseResolver = ResponseResolver<RestRequest, typeof restContext>;
 export const createMockSitesResolver =
   (sites = sitesList): SitesResponseResolver =>
   (req, res, ctx) => {
+    debugger;
     const searchParams = new URLSearchParams(req.url.search);
     const page = Number(searchParams.get("page"));
     const size = Number(searchParams.get("size"));
@@ -294,6 +295,7 @@ export const allResolvers = [
   postLogin,
   getSites,
   getSitesCoordinates,
+  getEnrollmentRequests,
   getSite,
   deleteSites,
   deleteSite,
@@ -302,7 +304,6 @@ export const allResolvers = [
   deleteTokens,
   deleteToken,
   getTokens,
-  getEnrollmentRequests,
   postEnrollmentRequests,
   getCurrentUser,
   updateUser,

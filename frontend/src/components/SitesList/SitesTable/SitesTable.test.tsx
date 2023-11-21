@@ -150,11 +150,11 @@ it("displays full name of the country", () => {
 it("displays correct number of deployed machines", () => {
   const item = siteFactory.build({
     stats: statsFactory.build({
-      total_machines: 1000,
-      deployed_machines: 100,
-      allocated_machines: 200,
-      ready_machines: 300,
-      error_machines: 400,
+      machines_total: 1000,
+      machines_deployed: 100,
+      machines_allocated: 200,
+      machines_ready: 300,
+      machines_error: 400,
     }),
   });
   renderWithMemoryRouter(

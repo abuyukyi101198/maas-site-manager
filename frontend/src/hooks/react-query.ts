@@ -22,8 +22,14 @@ import {
   deleteSites,
   updateSite,
 } from "@/api/handlers";
-import type { SitesQueryResult, PostTokensResult, Site, UsersQueryResult, User } from "@/api/types";
-import type { PendingSitesPostRequest } from "@/api-client";
+import type {
+  PendingSitesPostRequest,
+  SitesGetResponse,
+  Site,
+  UsersGetResponse,
+  User,
+  TokensGetResponse,
+} from "@/api-client";
 import { saveToFile } from "@/utils";
 
 export type UseSitesQueryResult = ReturnType<typeof useSitesQuery>;
@@ -32,7 +38,7 @@ const refetchInterval = Number(import.meta.env.VITE_POLLING_INTERVAL_MS);
 
 // TODO: integrate supported API params https://warthogs.atlassian.net/browse/MAASENG-2081
 export const useSitesQuery = ({ page, size, sortBy }: Parameters<typeof apiClient.default.getApiV1SitesGet>[0]) =>
-  useQuery<SitesQueryResult>({
+  useQuery<SitesGetResponse>({
     queryKey: ["sites", page, size, sortBy],
     queryFn: () => getSites({ page, size, sortBy }),
     keepPreviousData: true,
@@ -54,7 +60,7 @@ export const useSiteQueryData = (id: Site["id"]): Site | null => {
   const queryClient = useQueryClient();
   // query cache data for all pages
   // this is to ensure we can request a site that is not on the current page
-  const queryDataList = queryClient.getQueriesData<SitesQueryResult>({
+  const queryDataList = queryClient.getQueriesData<SitesGetResponse>({
     queryKey: ["sites"],
     exact: false,
     type: "all",
@@ -99,7 +105,7 @@ export const useUsersQuery = ({
   sortBy,
   searchText,
 }: Parameters<typeof apiClient.default.getApiV1UsersGet>[0]) =>
-  useQuery<UsersQueryResult>({
+  useQuery<UsersGetResponse>({
     queryKey: ["users", page, size, sortBy, searchText],
     queryFn: () => getUsers({ page, size, sortBy, searchText }),
     keepPreviousData: true,
@@ -116,7 +122,7 @@ export const useUserQuery = ({ id, enabled = true }: { id: User["id"]; enabled?:
 
 export type useTokensQueryResult = ReturnType<typeof useTokensQuery>;
 export const useTokensQuery = ({ page, size }: Parameters<typeof getTokens>[0]) =>
-  useQuery<PostTokensResult>({
+  useQuery<TokensGetResponse>({
     queryKey: ["tokens", page, size],
     queryFn: () => getTokens({ page, size }),
     keepPreviousData: true,
@@ -170,7 +176,10 @@ export const useDeleteTokensMutation = (
 };
 
 export type UseEnrollmentRequestsQueryResult = ReturnType<typeof useRequestsQuery>;
-export const useRequestsQuery = ({ page, size }: Parameters<typeof apiClient.default.getRequestsApiV1RequestsGet>[0]) =>
+export const useRequestsQuery = ({
+  page,
+  size,
+}: Parameters<typeof apiClient.default.getPendingApiV1SitesPendingGet>[0]) =>
   useQuery({
     queryKey: ["requests", page, size],
     queryFn: () => getEnrollmentRequests({ page, size }),

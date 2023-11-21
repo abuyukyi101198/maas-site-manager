@@ -5,27 +5,27 @@
 export const $SiteData = {
     description: `Data for a site.`,
     properties: {
-        total_machines: {
+        machines_total: {
             type: 'number',
             isRequired: true,
         },
-        allocated_machines: {
+        machines_allocated: {
             type: 'number',
             isRequired: true,
         },
-        deployed_machines: {
+        machines_deployed: {
             type: 'number',
             isRequired: true,
         },
-        ready_machines: {
+        machines_ready: {
             type: 'number',
             isRequired: true,
         },
-        error_machines: {
+        machines_error: {
             type: 'number',
             isRequired: true,
         },
-        other_machines: {
+        machines_other: {
             type: 'number',
             isRequired: true,
         },

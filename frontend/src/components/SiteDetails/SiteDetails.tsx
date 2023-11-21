@@ -95,7 +95,7 @@ const SiteDetailsContent = ({ id }: { id: NonNullable<SiteDetailsContextValue["s
               </tr>
               <tr>
                 <td className="u-text--muted site-details__table-row-label">Machines</td>
-                <td className="site-details__table-item">{stats?.total_machines}</td>
+                <td className="site-details__table-item">{stats?.machines_total}</td>
               </tr>
               <tr>
                 <td className="u-text--muted site-details__table-row-label">Machines status</td>
@@ -104,25 +104,25 @@ const SiteDetailsContent = ({ id }: { id: NonNullable<SiteDetailsContextValue["s
                     <span className="site-details__machines-statuses">
                       <i className="p-icon--status-deployed"></i>
                       <span className="site-details__machines-status-count" data-testid="deployed-machines">
-                        {stats.deployed_machines}
+                        {stats.machines_deployed}
                       </span>
                       <span>Deployed</span>
 
                       <i className="p-icon--status-allocated"></i>
                       <span className="site-details__machines-status-count" data-testid="allocated-machines">
-                        {stats.allocated_machines}
+                        {stats.machines_allocated}
                       </span>
                       <span>Allocated</span>
 
                       <i className="p-icon--status-ready"></i>
                       <span className="site-details__machines-status-count" data-testid="ready-machines">
-                        {stats.ready_machines}
+                        {stats.machines_ready}
                       </span>
                       <span>Ready / New</span>
 
                       <span></span>
                       <span className="site-details__machines-status-count" data-testid="error-machines">
-                        {stats.error_machines}
+                        {stats.machines_error}
                       </span>
                       <span>Error</span>
                     </span>

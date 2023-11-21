@@ -51,10 +51,10 @@ it("renders the correct details for a site", async () => {
   expect(
     screen.getByText(`${getTimeInTimezone(new Date(), site.timezone!)} UTC${getTimezoneUTCString(site.timezone!)}`),
   ).toBeInTheDocument();
-  expect(screen.getByText(stats.total_machines)).toBeInTheDocument();
+  expect(screen.getByText(stats.machines_total)).toBeInTheDocument();
 
-  expect(screen.getByTestId("deployed-machines")).toHaveTextContent(stats.deployed_machines.toString());
-  expect(screen.getByTestId("allocated-machines")).toHaveTextContent(stats.allocated_machines.toString());
-  expect(screen.getByTestId("ready-machines")).toHaveTextContent(stats.ready_machines.toString());
-  expect(screen.getByTestId("error-machines")).toHaveTextContent(stats.error_machines.toString());
+  expect(screen.getByTestId("deployed-machines")).toHaveTextContent(stats.machines_deployed.toString());
+  expect(screen.getByTestId("allocated-machines")).toHaveTextContent(stats.machines_allocated.toString());
+  expect(screen.getByTestId("ready-machines")).toHaveTextContent(stats.machines_ready.toString());
+  expect(screen.getByTestId("error-machines")).toHaveTextContent(stats.machines_error.toString());
 });
