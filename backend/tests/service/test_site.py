@@ -9,6 +9,8 @@ from msm.db.models import (
     PendingSiteCreate,
     Site,
     SiteCoordinates,
+    SiteDetailsUpdate,
+    SiteUpdate,
 )
 from msm.service._site import SiteService
 
@@ -118,3 +120,34 @@ class TestSiteService:
     ) -> None:
         service = SiteService(db_connection)
         assert await service.get_enrolling(uuid4()) is None
+
+    async def test_update_details(
+        self,
+        factory: Factory,
+        db_connection: AsyncConnection,
+    ) -> None:
+        service = SiteService(db_connection)
+        site = await factory.make_Site()
+        await service.update(
+            site.id,
+            SiteDetailsUpdate(
+                name="new-name", url="https://new-site.example.com"
+            ),
+        )
+        [db_site] = await factory.get("site")
+        assert db_site["name"] == "new-name"
+        assert db_site["url"] == "https://new-site.example.com"
+
+    async def test_update(
+        self,
+        factory: Factory,
+        db_connection: AsyncConnection,
+    ) -> None:
+        service = SiteService(db_connection)
+        site = await factory.make_Site()
+        await service.update(
+            site.id, SiteUpdate(city="New York", country="US")
+        )
+        [db_site] = await factory.get("site")
+        assert db_site["city"] == "New York"
+        assert db_site["country"] == "US"

@@ -106,8 +106,10 @@ class SiteService(Service):
         result = await self.conn.execute(stmt)
         return result.scalar() is True
 
-    async def update(self, id: int, details: models.SiteUpdate) -> None:
-        """Update a site"""
+    async def update(
+        self, id: int, details: models.SiteUpdate | models.SiteDetailsUpdate
+    ) -> None:
+        """Update details about a site."""
         stmt = (
             update(Site)
             .where(Site.c.id == id)
@@ -124,6 +126,17 @@ class SiteService(Service):
                 index_elements=[SiteData.c.site_id],
                 set_={"last_seen": last_seen},
             )
+        )
+        await self.conn.execute(stmt)
+
+    async def update_data(
+        self, id: int, details: models.SiteDataUpdate
+    ) -> None:
+        """Update stats data for a site."""
+        stmt = (
+            update(SiteData)
+            .where(SiteData.c.site_id == id)
+            .values(details.model_dump())
         )
         await self.conn.execute(stmt)
 

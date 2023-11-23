@@ -230,6 +230,8 @@ class Factory:
         last_seen: datetime | None = None,
     ) -> SiteData:
         """Create SiteData for a Site."""
+        if last_seen is None:
+            last_seen = datetime.utcnow()
         [row] = await self.create(
             "site_data",
             [

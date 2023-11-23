@@ -1,10 +1,17 @@
 from fastapi import APIRouter
 
-from . import enroll
+from . import (
+    enroll,
+    report,
+)
 
 
 def api_router() -> APIRouter:
     """Return a router for API routes."""
     router = APIRouter()
-    router.include_router(enroll.v1_router)
+    for r in (
+        enroll.v1_router,
+        report.v1_router,
+    ):
+        router.include_router(r)
     return router

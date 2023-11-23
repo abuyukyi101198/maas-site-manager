@@ -29,22 +29,6 @@ class SiteData(BaseModel):
     last_seen: datetime
 
 
-class SiteUpdate(BaseModel):
-    """The allowed updates to a Site from a user."""
-
-    city: str | None = None
-    country: str | None = Field(default=None, min_length=2, max_length=2)
-    coordinates: tuple[
-        float, float
-    ] | None  # first item is the lon, second is the lat
-    note: str | None = None
-    state: str | None = None
-    address: str | None = None
-    postal_code: str | None = None
-    # XXX: mypy can't grok that this is an str/enum with lots of members
-    timezone: TimeZone | None = None  # type: ignore[valid-type]
-
-
 class Site(BaseModel):
     """A MAAS installation."""
 
@@ -67,15 +51,6 @@ class Site(BaseModel):
     stats: SiteData | None = None
 
 
-class SiteCoordinates(BaseModel):
-    """Coordinates for a MAAS site."""
-
-    id: int
-    coordinates: tuple[
-        float, float
-    ] | None = None  # first item is the lon, second is the lat
-
-
 class PendingSite(BaseModel):
     """A pending MAAS site."""
 
@@ -90,6 +65,46 @@ class EnrollingSite(BaseModel):
 
     id: int
     accepted: bool
+
+
+class SiteCoordinates(BaseModel):
+    """Coordinates for a MAAS site."""
+
+    id: int
+    coordinates: tuple[
+        float, float
+    ] | None = None  # first item is the lon, second is the lat
+
+
+class SiteUpdate(BaseModel):
+    """The allowed updates to a Site from a user."""
+
+    city: str | None = None
+    country: str | None = Field(default=None, min_length=2, max_length=2)
+    coordinates: tuple[float, float] | None = None  # latitude, longitude
+    note: str | None = None
+    state: str | None = None
+    address: str | None = None
+    postal_code: str | None = None
+    # XXX: mypy can't grok that this is an str/enum with lots of members
+    timezone: TimeZone | None = None  # type: ignore[valid-type]
+
+
+class SiteDetailsUpdate(BaseModel):
+    """Allowed updates for a Site from the site itself."""
+
+    name: str | None
+    url: str | None
+
+
+class SiteDataUpdate(BaseModel):
+    """Update site data."""
+
+    machines_allocated: int | None
+    machines_deployed: int | None
+    machines_ready: int | None
+    machines_error: int | None
+    machines_other: int | None
 
 
 class PendingSiteCreate(BaseModel):

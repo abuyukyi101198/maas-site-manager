@@ -7,6 +7,8 @@ from ._site import (
     Site,
     SiteCoordinates,
     SiteData,
+    SiteDataUpdate,
+    SiteDetailsUpdate,
     SiteUpdate,
 )
 from ._token import Token
@@ -25,6 +27,8 @@ __all__ = [
     "Site",
     "SiteCoordinates",
     "SiteData",
+    "SiteDataUpdate",
+    "SiteDetailsUpdate",
     "SiteUpdate",
     "Token",
     "User",

@@ -49,6 +49,7 @@ AUTHENTICATED_ROUTES = [
     # site API
     ("GET", "/site/v1/enroll"),
     ("POST", "/site/v1/enroll"),
+    ("POST", "/site/v1/details"),
 ]
 
 UNAUTHENTICATED_ROUTES = [
