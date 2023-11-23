@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Annotated
 from uuid import UUID
 
@@ -30,6 +31,13 @@ async def authenticated_site(
         ),
     ],
 ) -> Site:
-    if site := await services.sites.get_by_auth_id(auth_id):
-        return site
-    raise INVALID_TOKEN_ERROR
+    """Dependency to return the authenticated site.
+
+    This also updates the `last_seen` timestamp for the site.
+    """
+    site = await services.sites.get_by_auth_id(auth_id)
+    if not site:
+        raise INVALID_TOKEN_ERROR
+
+    await services.sites.update_last_seen(site.id, datetime.utcnow())
+    return site

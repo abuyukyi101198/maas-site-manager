@@ -13,11 +13,11 @@ from sqlalchemy import (
     delete,
     exists,
     func,
-    insert,
     select,
     Select,
     update,
 )
+from sqlalchemy.dialects.postgresql import insert
 
 from ..db import (
     models,
@@ -30,7 +30,7 @@ from ..db.tables import (
 from ..schema import SortParam
 from ._base import Service
 
-LOST_CONNECTION_THRESHOLD_SECONDS = 60
+LOST_CONNECTION_THRESHOLD = timedelta(seconds=60)
 
 
 class InvalidPendingSites(Exception):
@@ -87,17 +87,17 @@ class SiteService(Service):
     async def get_by_id(self, id: int) -> models.Site | None:
         """Get a site by id."""
         stmt = self._select_statement().where(Site.c.id == id)
-        if result := await self.conn.execute(stmt):
-            if site := result.one_or_none():
-                return models.Site(**site._asdict())
+        result = await self.conn.execute(stmt)
+        if row := result.one_or_none():
+            return models.Site(**row._asdict())
         return None
 
     async def get_by_auth_id(self, auth_id: UUID) -> models.Site | None:
         """Get a site by authentication ID."""
         stmt = self._select_statement().where(Site.c.auth_id == auth_id)
-        if result := await self.conn.execute(stmt):
-            if site := result.one_or_none():
-                return models.Site(**site._asdict())
+        result = await self.conn.execute(stmt)
+        if row := result.one_or_none():
+            return models.Site(**row._asdict())
         return None
 
     async def id_exists(self, id: int) -> bool:
@@ -106,18 +106,30 @@ class SiteService(Service):
         result = await self.conn.execute(stmt)
         return result.scalar() is True
 
-    async def update(self, site_id: int, details: models.SiteUpdate) -> None:
+    async def update(self, id: int, details: models.SiteUpdate) -> None:
         """Update a site"""
         stmt = (
             update(Site)
-            .where(Site.c.id == site_id)
+            .where(Site.c.id == id)
             .values(details.model_dump(exclude_none=True))
         )
         await self.conn.execute(stmt)
 
-    async def delete(self, site_id: int) -> None:
+    async def update_last_seen(self, id: int, last_seen: datetime) -> None:
+        """Update when a site has been last seen."""
+        stmt = (
+            insert(SiteData)
+            .values(site_id=id, last_seen=last_seen)
+            .on_conflict_do_update(
+                index_elements=[SiteData.c.site_id],
+                set_={"last_seen": last_seen},
+            )
+        )
+        await self.conn.execute(stmt)
+
+    async def delete(self, id: int) -> None:
         """Deletes a site by ID."""
-        stmt = delete(Site).where(Site.c.id == site_id)
+        stmt = delete(Site).where(Site.c.id == id)
         await self.conn.execute(stmt)
 
     async def create_pending(
@@ -224,9 +236,7 @@ class SiteService(Service):
         return None
 
     def _select_statement(self) -> Select[Any]:
-        connection_lost_timedelta = datetime.utcnow() - timedelta(
-            seconds=LOST_CONNECTION_THRESHOLD_SECONDS
-        )
+        connection_lost_limit = datetime.utcnow() - LOST_CONNECTION_THRESHOLD
         return select(
             Site.c.id,
             Site.c.address,
@@ -251,7 +261,7 @@ class SiteService(Service):
                     models.ConnectionStatus.UNKNOWN,
                 ),
                 (
-                    SiteData.c.last_seen > connection_lost_timedelta,
+                    SiteData.c.last_seen > connection_lost_limit,
                     models.ConnectionStatus.STABLE,
                 ),
                 else_=models.ConnectionStatus.LOST,
