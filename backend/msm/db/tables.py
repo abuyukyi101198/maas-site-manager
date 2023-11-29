@@ -134,7 +134,11 @@ SiteData = Table(
     METADATA,
     Column("id", Integer, primary_key=True),
     Column(
-        "site_id", Integer, ForeignKey("site.id"), unique=True, nullable=False
+        "site_id",
+        Integer,
+        ForeignKey("site.id", onupdate="CASCADE", ondelete="CASCADE"),
+        unique=True,
+        nullable=False,
     ),
     Column("machines_allocated", Integer, nullable=False, default=0),
     Column("machines_deployed", Integer, nullable=False, default=0),
