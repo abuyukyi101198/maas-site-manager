@@ -3,6 +3,7 @@ import { setupServer } from "msw/node";
 
 import type { ResponseInterceptor } from "./FetchHttpRequestWithInterceptors";
 import { FetchHttpRequestWithInterceptors } from "./FetchHttpRequestWithInterceptors";
+import { baseURL } from "./config";
 
 import { ApiError, OpenAPI } from "@/api-client";
 import type { ApiRequestOptions } from "@/api-client/core/ApiRequestOptions";
@@ -12,6 +13,7 @@ const server = setupServer();
 let fetchHttpRequestWithInterceptors: FetchHttpRequestWithInterceptors;
 let mockInterceptor: ResponseInterceptor;
 const url = apiUrls.sites;
+const relativeUrl = apiUrls.sites.replace(baseURL, "");
 
 beforeAll(() => {
   server.listen();
@@ -23,7 +25,7 @@ afterAll(() => {
 
 beforeEach(() => {
   mockInterceptor = vi.fn();
-  fetchHttpRequestWithInterceptors = new FetchHttpRequestWithInterceptors(OpenAPI);
+  fetchHttpRequestWithInterceptors = new FetchHttpRequestWithInterceptors({ ...OpenAPI, BASE: baseURL });
   fetchHttpRequestWithInterceptors.addResponseInterceptor(mockInterceptor);
 });
 
@@ -34,7 +36,7 @@ it("should call interceptor for a successful response", async () => {
       return res(ctx.json(responseData));
     }),
   );
-  const requestOptions = { url, method: "GET" } as ApiRequestOptions;
+  const requestOptions = { url: relativeUrl, method: "GET" } as ApiRequestOptions;
   const responsePromise = fetchHttpRequestWithInterceptors.request(requestOptions);
 
   await expect(responsePromise).resolves.toEqual(responseData);
@@ -47,7 +49,7 @@ it("should call interceptor for a failed response", async () => {
       return res(ctx.status(500), ctx.text("Something went wrong"));
     }),
   );
-  const requestOptions = { url, method: "GET" } as ApiRequestOptions;
+  const requestOptions = { url: relativeUrl, method: "GET" } as ApiRequestOptions;
 
   await expect(fetchHttpRequestWithInterceptors.request(requestOptions)).rejects.toThrowError(expect.any(Error));
   expect(mockInterceptor).toHaveBeenCalledWith(null, expect.any(ApiError));

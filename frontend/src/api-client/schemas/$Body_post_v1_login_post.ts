@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $Body_post_api_v1_login_post = {
+export const $Body_post_v1_login_post = {
     properties: {
         grant_type: {
             type: 'any-of',

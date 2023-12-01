@@ -18,7 +18,7 @@ export class ApiClient {
 
     constructor(config?: Partial<OpenAPIConfig>, HttpRequest: HttpRequestConstructor = FetchHttpRequest) {
         this.request = new HttpRequest({
-            BASE: config?.BASE ?? '',
+            BASE: config?.BASE ?? '/api',
             VERSION: config?.VERSION ?? '0.0.1',
             WITH_CREDENTIALS: config?.WITH_CREDENTIALS ?? false,
             CREDENTIALS: config?.CREDENTIALS ?? 'include',

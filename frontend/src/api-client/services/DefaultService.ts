@@ -3,8 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { AccessTokenResponse } from '../models/AccessTokenResponse';
-import type { Body_post_api_v1_login_post } from '../models/Body_post_api_v1_login_post';
-import type { EnrollPostRequest } from '../models/EnrollPostRequest';
+import type { Body_post_v1_login_post } from '../models/Body_post_v1_login_post';
 import type { PendingSitesGetResponse } from '../models/PendingSitesGetResponse';
 import type { PendingSitesPostRequest } from '../models/PendingSitesPostRequest';
 import type { Site } from '../models/Site';
@@ -33,14 +32,14 @@ export class DefaultService {
      * @returns AccessTokenResponse Successful Response
      * @throws ApiError
      */
-    public postApiV1LoginPost({
+    public postV1LoginPost({
         formData,
     }: {
-        formData: Body_post_api_v1_login_post,
+        formData: Body_post_v1_login_post,
     }): CancelablePromise<AccessTokenResponse> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/v1/login',
+            url: '/v1/login',
             formData: formData,
             mediaType: 'application/x-www-form-urlencoded',
             errors: {
@@ -55,7 +54,7 @@ export class DefaultService {
      * @returns PendingSitesGetResponse Successful Response
      * @throws ApiError
      */
-    public getPendingApiV1SitesPendingGet({
+    public getPendingV1SitesPendingGet({
         page = 1,
         size = 20,
     }: {
@@ -64,7 +63,7 @@ export class DefaultService {
     }): CancelablePromise<PendingSitesGetResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/v1/sites/pending',
+            url: '/v1/sites/pending',
             query: {
                 'page': page,
                 'size': size,
@@ -81,14 +80,14 @@ export class DefaultService {
      * @returns void
      * @throws ApiError
      */
-    public postPendingApiV1SitesPendingPost({
+    public postPendingV1SitesPendingPost({
         requestBody,
     }: {
         requestBody: PendingSitesPostRequest,
     }): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/v1/sites/pending',
+            url: '/v1/sites/pending',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -103,7 +102,7 @@ export class DefaultService {
      * @returns SitesGetResponse Successful Response
      * @throws ApiError
      */
-    public getApiV1SitesGet({
+    public getV1SitesGet({
         page = 1,
         size = 20,
         city,
@@ -132,7 +131,7 @@ export class DefaultService {
     }): CancelablePromise<SitesGetResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/v1/sites',
+            url: '/v1/sites',
             query: {
                 'page': page,
                 'size': size,
@@ -159,10 +158,10 @@ export class DefaultService {
      * @returns SiteCoordinates Successful Response
      * @throws ApiError
      */
-    public getCoordinatesApiV1SitesCoordinatesGet(): CancelablePromise<Array<SiteCoordinates>> {
+    public getCoordinatesV1SitesCoordinatesGet(): CancelablePromise<Array<SiteCoordinates>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/v1/sites/coordinates',
+            url: '/v1/sites/coordinates',
         });
     }
 
@@ -172,14 +171,14 @@ export class DefaultService {
      * @returns Site Successful Response
      * @throws ApiError
      */
-    public getIdApiV1SitesIdGet({
+    public getIdV1SitesIdGet({
         id,
     }: {
         id: number,
     }): CancelablePromise<Site> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/v1/sites/{id}',
+            url: '/v1/sites/{id}',
             path: {
                 'id': id,
             },
@@ -195,7 +194,7 @@ export class DefaultService {
      * @returns Site Successful Response
      * @throws ApiError
      */
-    public patchApiV1SitesIdPatch({
+    public patchV1SitesIdPatch({
         id,
         requestBody,
     }: {
@@ -204,7 +203,7 @@ export class DefaultService {
     }): CancelablePromise<Site> {
         return this.httpRequest.request({
             method: 'PATCH',
-            url: '/api/v1/sites/{id}',
+            url: '/v1/sites/{id}',
             path: {
                 'id': id,
             },
@@ -222,14 +221,14 @@ export class DefaultService {
      * @returns void
      * @throws ApiError
      */
-    public deleteApiV1SitesIdDelete({
+    public deleteV1SitesIdDelete({
         id,
     }: {
         id: number,
     }): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'DELETE',
-            url: '/api/v1/sites/{id}',
+            url: '/v1/sites/{id}',
             path: {
                 'id': id,
             },
@@ -245,7 +244,7 @@ export class DefaultService {
      * @returns TokensGetResponse Successful Response
      * @throws ApiError
      */
-    public getApiV1TokensGet({
+    public getV1TokensGet({
         page = 1,
         size = 20,
     }: {
@@ -254,7 +253,7 @@ export class DefaultService {
     }): CancelablePromise<TokensGetResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/v1/tokens',
+            url: '/v1/tokens',
             query: {
                 'page': page,
                 'size': size,
@@ -273,14 +272,14 @@ export class DefaultService {
      * @returns TokensPostResponse Successful Response
      * @throws ApiError
      */
-    public postApiV1TokensPost({
+    public postV1TokensPost({
         requestBody,
     }: {
         requestBody: TokensPostRequest,
     }): CancelablePromise<TokensPostResponse> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/v1/tokens',
+            url: '/v1/tokens',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -295,10 +294,10 @@ export class DefaultService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public getExportApiV1TokensExportGet(): CancelablePromise<any> {
+    public getExportV1TokensExportGet(): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/v1/tokens/export',
+            url: '/v1/tokens/export',
         });
     }
 
@@ -308,14 +307,14 @@ export class DefaultService {
      * @returns void
      * @throws ApiError
      */
-    public deleteApiV1TokensIdDelete({
+    public deleteV1TokensIdDelete({
         id,
     }: {
         id: number,
     }): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'DELETE',
-            url: '/api/v1/tokens/{id}',
+            url: '/v1/tokens/{id}',
             path: {
                 'id': id,
             },
@@ -331,7 +330,7 @@ export class DefaultService {
      * @returns UsersGetResponse Successful Response
      * @throws ApiError
      */
-    public getApiV1UsersGet({
+    public getV1UsersGet({
         page = 1,
         size = 20,
         email,
@@ -352,7 +351,7 @@ export class DefaultService {
     }): CancelablePromise<UsersGetResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/v1/users',
+            url: '/v1/users',
             query: {
                 'page': page,
                 'size': size,
@@ -375,14 +374,14 @@ export class DefaultService {
      * @returns User Successful Response
      * @throws ApiError
      */
-    public postApiV1UsersPost({
+    public postV1UsersPost({
         requestBody,
     }: {
         requestBody: UsersPostRequest,
     }): CancelablePromise<User> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/v1/users',
+            url: '/v1/users',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -397,10 +396,10 @@ export class DefaultService {
      * @returns User Successful Response
      * @throws ApiError
      */
-    public getMeApiV1UsersMeGet(): CancelablePromise<User> {
+    public getMeV1UsersMeGet(): CancelablePromise<User> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/v1/users/me',
+            url: '/v1/users/me',
         });
     }
 
@@ -410,14 +409,14 @@ export class DefaultService {
      * @returns User Successful Response
      * @throws ApiError
      */
-    public patchMeApiV1UsersMePatch({
+    public patchMeV1UsersMePatch({
         requestBody,
     }: {
         requestBody: UsersPatchMeRequest,
     }): CancelablePromise<User> {
         return this.httpRequest.request({
             method: 'PATCH',
-            url: '/api/v1/users/me',
+            url: '/v1/users/me',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -432,14 +431,14 @@ export class DefaultService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public patchMePasswordApiV1UsersMePasswordPatch({
+    public patchMePasswordV1UsersMePasswordPatch({
         requestBody,
     }: {
         requestBody: UsersPasswordPatchRequest,
     }): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'PATCH',
-            url: '/api/v1/users/me/password',
+            url: '/v1/users/me/password',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -454,14 +453,14 @@ export class DefaultService {
      * @returns User Successful Response
      * @throws ApiError
      */
-    public getIdApiV1UsersIdGet({
+    public getIdV1UsersIdGet({
         id,
     }: {
         id: number,
     }): CancelablePromise<User> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/v1/users/{id}',
+            url: '/v1/users/{id}',
             path: {
                 'id': id,
             },
@@ -477,7 +476,7 @@ export class DefaultService {
      * @returns User Successful Response
      * @throws ApiError
      */
-    public patchApiV1UsersIdPatch({
+    public patchV1UsersIdPatch({
         id,
         requestBody,
     }: {
@@ -486,7 +485,7 @@ export class DefaultService {
     }): CancelablePromise<User> {
         return this.httpRequest.request({
             method: 'PATCH',
-            url: '/api/v1/users/{id}',
+            url: '/v1/users/{id}',
             path: {
                 'id': id,
             },
@@ -504,73 +503,20 @@ export class DefaultService {
      * @returns void
      * @throws ApiError
      */
-    public deleteApiV1UsersIdDelete({
+    public deleteV1UsersIdDelete({
         id,
     }: {
         id: number,
     }): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'DELETE',
-            url: '/api/v1/users/{id}',
+            url: '/v1/users/{id}',
             path: {
                 'id': id,
             },
             errors: {
                 422: `Validation Error`,
             },
-        });
-    }
-
-    /**
-     * Get
-     * Check the site enrollment status.
-     *
-     * If the site is pending, a `204 No Content` response is returned.
-     *
-     * If the site has been accepted, a new authentication token is returned to be
-     * used for turther interaction with the API.
-     * @returns any Successful Response
-     * @throws ApiError
-     */
-    public getSiteV1EnrollGet(): CancelablePromise<(AccessTokenResponse | null)> {
-        return this.httpRequest.request({
-            method: 'GET',
-            url: '/site/v1/enroll',
-        });
-    }
-
-    /**
-     * Post
-     * Request to enroll a new site.
-     * @returns any Successful Response
-     * @throws ApiError
-     */
-    public postSiteV1EnrollPost({
-        requestBody,
-    }: {
-        requestBody: EnrollPostRequest,
-    }): CancelablePromise<any> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/site/v1/enroll',
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-
-    /**
-     * Metrics
-     * Endpoint that serves Prometheus metrics.
-     * @returns any Successful Response
-     * @throws ApiError
-     */
-    public metricsMetricsGet(): CancelablePromise<any> {
-        return this.httpRequest.request({
-            method: 'GET',
-            url: '/metrics',
         });
     }
 

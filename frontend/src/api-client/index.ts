@@ -11,9 +11,8 @@ export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { AccessTokenResponse } from './models/AccessTokenResponse';
-export type { Body_post_api_v1_login_post } from './models/Body_post_api_v1_login_post';
+export type { Body_post_v1_login_post } from './models/Body_post_v1_login_post';
 export { ConnectionStatus } from './models/ConnectionStatus';
-export type { EnrollPostRequest } from './models/EnrollPostRequest';
 export type { HTTPValidationError } from './models/HTTPValidationError';
 export type { PendingSite } from './models/PendingSite';
 export type { PendingSitesGetResponse } from './models/PendingSitesGetResponse';
@@ -37,9 +36,8 @@ export type { UsersPostRequest } from './models/UsersPostRequest';
 export type { ValidationError } from './models/ValidationError';
 
 export { $AccessTokenResponse } from './schemas/$AccessTokenResponse';
-export { $Body_post_api_v1_login_post } from './schemas/$Body_post_api_v1_login_post';
+export { $Body_post_v1_login_post } from './schemas/$Body_post_v1_login_post';
 export { $ConnectionStatus } from './schemas/$ConnectionStatus';
-export { $EnrollPostRequest } from './schemas/$EnrollPostRequest';
 export { $HTTPValidationError } from './schemas/$HTTPValidationError';
 export { $PendingSite } from './schemas/$PendingSite';
 export { $PendingSitesGetResponse } from './schemas/$PendingSitesGetResponse';

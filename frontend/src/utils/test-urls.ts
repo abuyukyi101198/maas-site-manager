@@ -1,7 +1,7 @@
 import { baseURL } from "@/api/config";
 
 export const getApiUrl = (path: string): string => {
-  return `${baseURL}/api/v1${path}`;
+  return `${baseURL}/v1${path}`;
 };
 
 export const apiUrls = {

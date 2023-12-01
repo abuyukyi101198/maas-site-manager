@@ -8,12 +8,18 @@ import packageInfo from "../package.json";
 import App from "@/App";
 import { baseURL } from "@/api";
 import { useMockData } from "@/constants";
+import { getApiUrl } from "@/utils/test-urls";
 
 /* c8 ignore next 4 */
 if (useMockData) {
   const { worker } = await import("./mocks/browser");
+  // eslint-disable-next-line no-console
+  console.info("msw baseUrl %s", baseURL);
+  // eslint-disable-next-line no-console
+  console.info("msw API URL %s", getApiUrl(""));
   await worker.start({
     onUnhandledRequest(req) {
+      console.info(req.method, req.url.href);
       if (req.url.href.includes(baseURL)) {
         // eslint-disable-next-line no-console
         console.warn("Found an unhandled %s request to %s", req.method, req.url.href);

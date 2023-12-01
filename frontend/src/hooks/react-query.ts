@@ -37,7 +37,7 @@ export type UseSitesQueryResult = ReturnType<typeof useSitesQuery>;
 const refetchInterval = Number(import.meta.env.VITE_POLLING_INTERVAL_MS);
 
 // TODO: integrate supported API params https://warthogs.atlassian.net/browse/MAASENG-2081
-export const useSitesQuery = ({ page, size, sortBy }: Parameters<typeof apiClient.default.getApiV1SitesGet>[0]) =>
+export const useSitesQuery = ({ page, size, sortBy }: Parameters<typeof apiClient.default.getV1SitesGet>[0]) =>
   useQuery<SitesGetResponse>({
     queryKey: ["sites", page, size, sortBy],
     queryFn: () => getSites({ page, size, sortBy }),
@@ -52,7 +52,7 @@ export const useSitesCoordinatesQuery = (queryText?: string) =>
     keepPreviousData: true,
     refetchInterval,
   });
-export const useSiteQuery = ({ id }: Parameters<typeof apiClient.default.getIdApiV1SitesIdGet>[0]) =>
+export const useSiteQuery = ({ id }: Parameters<typeof apiClient.default.getIdV1SitesIdGet>[0]) =>
   useQuery<Site>({ queryKey: ["sites", id], queryFn: () => getSite({ id }), keepPreviousData: true });
 
 // return single site data from query cache
@@ -104,7 +104,7 @@ export const useUsersQuery = ({
   size,
   sortBy,
   searchText,
-}: Parameters<typeof apiClient.default.getApiV1UsersGet>[0]) =>
+}: Parameters<typeof apiClient.default.getV1UsersGet>[0]) =>
   useQuery<UsersGetResponse>({
     queryKey: ["users", page, size, sortBy, searchText],
     queryFn: () => getUsers({ page, size, sortBy, searchText }),
@@ -176,10 +176,7 @@ export const useDeleteTokensMutation = (
 };
 
 export type UseEnrollmentRequestsQueryResult = ReturnType<typeof useRequestsQuery>;
-export const useRequestsQuery = ({
-  page,
-  size,
-}: Parameters<typeof apiClient.default.getPendingApiV1SitesPendingGet>[0]) =>
+export const useRequestsQuery = ({ page, size }: Parameters<typeof apiClient.default.getPendingV1SitesPendingGet>[0]) =>
   useQuery({
     queryKey: ["requests", page, size],
     queryFn: () => getEnrollmentRequests({ page, size }),

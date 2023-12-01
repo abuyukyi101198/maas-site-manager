@@ -4,14 +4,14 @@ import React, { createContext, useContext, useReducer } from "react";
 import useLocalStorageState from "use-local-storage-state";
 
 import type { FetchHttpRequestWithInterceptors } from "@/api/FetchHttpRequestWithInterceptors";
-import type { ApiClient, Body_post_api_v1_login_post } from "@/api-client";
+import type { ApiClient, Body_post_v1_login_post } from "@/api-client";
 import { OpenAPI } from "@/api-client";
 import { useLoginMutation } from "@/hooks/react-query";
 type AuthStatus = "initial" | "authenticated" | "unauthorised";
 
 interface AuthContextType {
   status: AuthStatus;
-  login: ({ username, password }: Pick<Body_post_api_v1_login_post, "username" | "password">) => void;
+  login: ({ username, password }: Pick<Body_post_v1_login_post, "username" | "password">) => void;
   logout: () => Promise<void>;
   isError: boolean;
   failureReason: unknown | null;

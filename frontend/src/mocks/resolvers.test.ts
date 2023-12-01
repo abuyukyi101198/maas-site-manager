@@ -18,7 +18,7 @@ afterAll(() => {
 
 it("returns list of tokens", async () => {
   const count = 1;
-  const result = await apiClient.default.postApiV1TokensPost({
+  const result = await apiClient.default.postV1TokensPost({
     requestBody: { duration: durationFactory.build(), count },
   });
   expect(result.items).toHaveLength(count);

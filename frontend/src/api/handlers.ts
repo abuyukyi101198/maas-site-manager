@@ -3,18 +3,18 @@ import type { Token, User } from "./types";
 
 import type {
   SitesGetResponse,
-  Body_post_api_v1_login_post,
+  Body_post_v1_login_post,
   PendingSitesPostRequest,
   Site,
   TokensPostRequest,
 } from "@/api-client";
 
-export const postLogin = async (data: Body_post_api_v1_login_post) => {
+export const postLogin = async (data: Body_post_v1_login_post) => {
   if (!data?.username || !data?.password) {
     throw Error("Missing required fields");
   }
   try {
-    const response = await apiClient.default.postApiV1LoginPost({ formData: data });
+    const response = await apiClient.default.postV1LoginPost({ formData: data });
     return response;
   } catch (error) {
     throw error;
@@ -33,11 +33,11 @@ export type SortingParams<T extends SitesSortKey | UserSortKey> = {
   sortBy: SortBy<T>;
 };
 
-export type GetSitesQueryParams = Parameters<typeof apiClient.default.getApiV1SitesGet>[0];
+export type GetSitesQueryParams = Parameters<typeof apiClient.default.getV1SitesGet>[0];
 
 // TODO: integrate supported API params https://warthogs.atlassian.net/browse/MAASENG-2081
-export const getSites = (params: Parameters<typeof apiClient.default.getApiV1SitesGet>[0]) =>
-  apiClient.default.getApiV1SitesGet({
+export const getSites = (params: Parameters<typeof apiClient.default.getV1SitesGet>[0]) =>
+  apiClient.default.getV1SitesGet({
     page: Number(params.page),
     size: Number(params.size),
     sortBy: params.sortBy || null,
@@ -45,15 +45,15 @@ export const getSites = (params: Parameters<typeof apiClient.default.getApiV1Sit
 
 // TODO: pass search params once API supports it https://warthogs.atlassian.net/browse/MAASENG-2080
 export const getSitesCoordinates = async (_queryText?: string) =>
-  apiClient.default.getCoordinatesApiV1SitesCoordinatesGet();
+  apiClient.default.getCoordinatesV1SitesCoordinatesGet();
 
-export const getSite = async ({ id }: Parameters<typeof apiClient.default.getIdApiV1SitesIdGet>[0]) => {
-  const response = await apiClient.default.getIdApiV1SitesIdGet({ id });
+export const getSite = async ({ id }: Parameters<typeof apiClient.default.getIdV1SitesIdGet>[0]) => {
+  const response = await apiClient.default.getIdV1SitesIdGet({ id });
   return response;
 };
 
-export const updateSite = ({ id, requestBody }: Parameters<typeof apiClient.default.patchApiV1SitesIdPatch>[0]) =>
-  apiClient.default.patchApiV1SitesIdPatch({ id, requestBody });
+export const updateSite = ({ id, requestBody }: Parameters<typeof apiClient.default.patchV1SitesIdPatch>[0]) =>
+  apiClient.default.patchV1SitesIdPatch({ id, requestBody });
 
 export const deleteSites = async (data: Site["id"][]) => {
   if (data.length === 0) {
@@ -61,7 +61,7 @@ export const deleteSites = async (data: Site["id"][]) => {
   }
   try {
     const responses = data.map((id) => {
-      return apiClient.default.deleteApiV1SitesIdDelete({ id });
+      return apiClient.default.deleteV1SitesIdDelete({ id });
     });
     return await Promise.allSettled(responses);
   } catch (error) {
@@ -74,7 +74,7 @@ export const postTokens = async (data: TokensPostRequest) => {
     throw Error("Missing required fields");
   }
   try {
-    const response = await apiClient.default.postApiV1TokensPost({ requestBody: data });
+    const response = await apiClient.default.postV1TokensPost({ requestBody: data });
     return response;
   } catch (error) {
     throw error;
@@ -83,7 +83,7 @@ export const postTokens = async (data: TokensPostRequest) => {
 
 export const getTokensExport = async () => {
   try {
-    const response = await apiClient.default.getExportApiV1TokensExportGet();
+    const response = await apiClient.default.getExportV1TokensExportGet();
     return response;
   } catch (error) {
     throw error;
@@ -91,12 +91,12 @@ export const getTokensExport = async () => {
 };
 
 export type GetTokensQueryParams = PaginationParams & {};
-export const getTokens = ({ page, size }: Parameters<typeof apiClient.default.getApiV1TokensGet>[0]) =>
-  apiClient.default.getApiV1TokensGet({ page, size });
+export const getTokens = ({ page, size }: Parameters<typeof apiClient.default.getV1TokensGet>[0]) =>
+  apiClient.default.getV1TokensGet({ page, size });
 
-export const getUsers = async (params: Parameters<typeof apiClient.default.getApiV1UsersGet>[0]) => {
+export const getUsers = async (params: Parameters<typeof apiClient.default.getV1UsersGet>[0]) => {
   try {
-    const response = await apiClient.default.getApiV1UsersGet({
+    const response = await apiClient.default.getV1UsersGet({
       ...params,
     });
     return response;
@@ -105,8 +105,8 @@ export const getUsers = async (params: Parameters<typeof apiClient.default.getAp
   }
 };
 
-export const getUser = async ({ id }: Parameters<typeof apiClient.default.getIdApiV1UsersIdGet>[0]) => {
-  const response = await apiClient.default.getIdApiV1UsersIdGet({ id });
+export const getUser = async ({ id }: Parameters<typeof apiClient.default.getIdV1UsersIdGet>[0]) => {
+  const response = await apiClient.default.getIdV1UsersIdGet({ id });
   return response;
 };
 
@@ -116,7 +116,7 @@ export const deleteTokens = async (data: Token["id"][]) => {
   }
   try {
     const responses = data.map((id) => {
-      return apiClient.default.deleteApiV1TokensIdDelete({ id });
+      return apiClient.default.deleteV1TokensIdDelete({ id });
     });
     return await Promise.allSettled(responses);
   } catch (error) {
@@ -127,8 +127,8 @@ export const deleteTokens = async (data: Token["id"][]) => {
 export const getEnrollmentRequests = async ({
   page,
   size,
-}: Parameters<typeof apiClient.default.getPendingApiV1SitesPendingGet>[0]) => {
-  const response = await apiClient.default.getPendingApiV1SitesPendingGet({ page, size });
+}: Parameters<typeof apiClient.default.getPendingV1SitesPendingGet>[0]) => {
+  const response = await apiClient.default.getPendingV1SitesPendingGet({ page, size });
   return response;
 };
 
@@ -138,12 +138,12 @@ export type PostEnrollmentRequestsData = {
 };
 export const postEnrollmentRequests = async (
   data: PendingSitesPostRequest,
-): Promise<ReturnType<typeof apiClient.default.postPendingApiV1SitesPendingPost>> => {
+): Promise<ReturnType<typeof apiClient.default.postPendingV1SitesPendingPost>> => {
   if (!data?.ids || typeof data?.accept !== "boolean") {
     throw Error("Missing required fields");
   }
   try {
-    const response = await apiClient.default.postPendingApiV1SitesPendingPost({ requestBody: data });
+    const response = await apiClient.default.postPendingV1SitesPendingPost({ requestBody: data });
     return response;
   } catch (error) {
     throw error;
@@ -151,7 +151,7 @@ export const postEnrollmentRequests = async (
 };
 
 export const getCurrentUser = async () => {
-  const response = await apiClient.default.getMeApiV1UsersMeGet();
+  const response = await apiClient.default.getMeV1UsersMeGet();
   return response;
 };
 
@@ -162,11 +162,11 @@ export type UpdateUserPayload = {
   userData: Partial<UserUpdateData>;
 };
 
-export const updateUser = ({ id, requestBody }: Parameters<typeof apiClient.default.patchApiV1UsersIdPatch>[0]) =>
-  apiClient.default.patchApiV1UsersIdPatch({ id, requestBody });
+export const updateUser = ({ id, requestBody }: Parameters<typeof apiClient.default.patchV1UsersIdPatch>[0]) =>
+  apiClient.default.patchV1UsersIdPatch({ id, requestBody });
 
-export const addUser = ({ requestBody }: Parameters<typeof apiClient.default.postApiV1UsersPost>[0]) =>
-  apiClient.default.postApiV1UsersPost({ requestBody });
+export const addUser = ({ requestBody }: Parameters<typeof apiClient.default.postV1UsersPost>[0]) =>
+  apiClient.default.postV1UsersPost({ requestBody });
 
-export const deleteUser = ({ id }: Parameters<typeof apiClient.default.deleteApiV1UsersIdDelete>[0]) =>
-  apiClient.default.deleteApiV1UsersIdDelete({ id });
+export const deleteUser = ({ id }: Parameters<typeof apiClient.default.deleteV1UsersIdDelete>[0]) =>
+  apiClient.default.deleteV1UsersIdDelete({ id });
