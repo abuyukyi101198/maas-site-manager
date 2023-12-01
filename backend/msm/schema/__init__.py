@@ -3,12 +3,12 @@
 from ._fields import TimeZone
 from ._pagination import (
     PaginatedResults,
-    pagination_params,
     PaginationParams,
+    pagination_params,
 )
 from ._search import (
-    search_text_param,
     SearchTextParam,
+    search_text_param,
 )
 from ._sorting import (
     SortParam,

@@ -4,8 +4,8 @@ from ._action import (
     DatabaseAction,
 )
 from ._script import (
-    do_exit,
     Script,
+    do_exit,
 )
 
 __all__ = ["Action", "AsyncAction", "DatabaseAction", "do_exit", "Script"]

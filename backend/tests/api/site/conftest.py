@@ -1,7 +1,4 @@
-from typing import (
-    AsyncIterator,
-    Iterator,
-)
+from collections.abc import AsyncIterator, Iterator
 import uuid
 
 from fastapi import FastAPI

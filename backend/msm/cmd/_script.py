@@ -48,7 +48,7 @@ class Script:
             if options.debug:
                 _, _, traceback = sys.exc_info()
                 message += "".join(format_tb(traceback))
-            message += f"Command failed: {str(e)}"
+            message += f"Command failed: {e!s}"
             do_exit(message, code=2)
         return 0
 

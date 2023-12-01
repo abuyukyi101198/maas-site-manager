@@ -19,7 +19,6 @@ classifiers = [
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
 ]
 dynamic = [
   "version",
@@ -67,23 +66,6 @@ version = {attr = "msm.__version__"}
 [tool.setuptools.packages.find]
 include = ["msm*"]
 
-[tool.black]
-line-length = 79
-
-[tool.isort]
-combine_as_imports = true
-force_grid_wrap = 2
-force_sort_within_sections = true
-from_first = false
-include_trailing_comma = true
-multi_line_output = 3
-order_by_type = false
-profile = "black"
-use_parentheses = true
-
-[tool.flake8]
-max-line-length = 79
-
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = [
@@ -108,3 +90,17 @@ plugins = [
   "pydantic.mypy"
 ]
 strict = true
+
+[tool.ruff]
+line-length = 79
+
+[tool.ruff.lint]
+select = [
+  "I",   # isort
+  "RUF", # ruff
+  "UP",  # pyupgrade
+]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+force-sort-within-sections = true

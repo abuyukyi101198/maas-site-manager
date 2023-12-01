@@ -3,12 +3,12 @@ from argparse import (
     Namespace,
 )
 
+from ...db.models import UserCreate
+from ...service import UserService
 from .. import (
     DatabaseAction,
     do_exit,
 )
-from ...db.models import UserCreate
-from ...service import UserService
 
 
 class CreateUserAction(DatabaseAction):

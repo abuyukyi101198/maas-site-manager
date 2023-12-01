@@ -2,16 +2,16 @@ from argparse import Namespace
 
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from .. import DatabaseAction
 from ...api import ensure_config
 from ...db.models import Config
 from ...sampledata import (
+    SampleDataModel,
     make_fixture_sites,
     make_fixture_tokens,
     make_fixture_users,
-    SampleDataModel,
 )
 from ...service import ConfigService
+from .. import DatabaseAction
 
 
 class FixturesAction(DatabaseAction):

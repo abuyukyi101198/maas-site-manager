@@ -1,14 +1,14 @@
+from collections.abc import Iterable
 from datetime import timedelta
 from typing import (
     Any,
-    Iterable,
 )
 import uuid
 
 from sqlalchemy import (
+    Select,
     delete,
     select,
-    Select,
 )
 
 from ..db import (

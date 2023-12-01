@@ -19,12 +19,12 @@ from pydantic import (
 from ....db import models
 from ....schema import (
     PaginatedResults,
-    pagination_params,
     PaginationParams,
-    search_text_param,
     SearchTextParam,
     SortParam,
     SortParamParser,
+    pagination_params,
+    search_text_param,
 )
 from ....service import ServiceCollection
 from ..._dependencies import services
@@ -35,8 +35,8 @@ from .._auth import (
     authenticated_user,
 )
 from .._forms import (
-    user_filter_params,
     UserFilterParams,
+    user_filter_params,
 )
 
 v1_router = APIRouter(prefix="/v1")

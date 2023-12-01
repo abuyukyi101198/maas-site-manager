@@ -5,9 +5,9 @@ from jose import jwt
 import pytest
 
 from msm.jwt import (
-    InvalidToken,
     JWT,
     TOKEN_DURATION,
+    InvalidToken,
     TokenAudience,
     TokenPurpose,
 )

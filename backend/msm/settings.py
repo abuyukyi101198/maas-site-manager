@@ -14,9 +14,9 @@ from pydantic_settings import (
     SettingsConfigDict,
 )
 from snaphelpers import (
-    is_snap,
     Snap,
     SnapConfigOptions,
+    is_snap,
 )
 from sqlalchemy import URL
 
@@ -81,7 +81,7 @@ class Settings(BaseSettings):
             dotenv_settings,
             file_secret_settings,
         )
-        return sources + (SnapSettingsSource(settings_cls),)
+        return (*sources, SnapSettingsSource(settings_cls))
 
     @property
     def db_dsn(self) -> URL:

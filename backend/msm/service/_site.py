@@ -1,20 +1,20 @@
+from collections.abc import Iterable
 from datetime import (
     datetime,
     timedelta,
 )
 from typing import (
     Any,
-    Iterable,
 )
 from uuid import UUID
 
 from sqlalchemy import (
+    Select,
     case,
     delete,
     exists,
     func,
     select,
-    Select,
     update,
 )
 from sqlalchemy.dialects.postgresql import insert
@@ -71,7 +71,7 @@ class SiteService(Service):
             timezone=timezone,
             url=url,
         )
-        filters.append(Site.c.accepted == True)  # noqa
+        filters.append(Site.c.accepted == True)
         order_by = queries.order_by_from_arguments(sort_params=sort_params)
         count = await queries.row_count(self.conn, Site, *filters)
         stmt = (
@@ -168,7 +168,7 @@ class SiteService(Service):
         limit: int | None = None,
     ) -> tuple[int, Iterable[models.PendingSite]]:
         """Return pending sites."""
-        filters = [Site.c.accepted == False]  # noqa
+        filters = [Site.c.accepted == False]
         count = await queries.row_count(self.conn, Site, *filters)
         stmt = (
             select(
@@ -195,7 +195,7 @@ class SiteService(Service):
                 Site.c.coordinates,
             )
             .select_from(Site)
-            .where(Site.c.accepted == True)  # noqa
+            .where(Site.c.accepted == True)
         )
         result = await self.conn.execute(stmt)
         return self.objects_from_result(models.SiteCoordinates, result)
@@ -212,7 +212,7 @@ class SiteService(Service):
             .select_from(Site)
             .where(
                 Site.c.id.in_(site_ids),
-                Site.c.accepted == False,  # noqa
+                Site.c.accepted == False,
             )
         )
         result = await self.conn.execute(stmt)
@@ -271,7 +271,7 @@ class SiteService(Service):
             Site.c.url,
             case(
                 (
-                    SiteData.c.site_id == None,  # noqa: E711
+                    SiteData.c.site_id == None,
                     models.ConnectionStatus.UNKNOWN,
                 ),
                 (
@@ -282,7 +282,7 @@ class SiteService(Service):
             ).label("connection_status"),
             case(
                 (
-                    SiteData.c.site_id != None,  # noqa: E711
+                    SiteData.c.site_id != None,
                     func.json_build_object(
                         "machines_total",
                         (

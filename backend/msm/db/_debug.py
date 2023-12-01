@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from pprint import pprint
 import sys
 from typing import (
-    Any,
     IO,
+    Any,
 )
 
 from sqlalchemy.dialects import postgresql

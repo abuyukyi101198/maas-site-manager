@@ -1,3 +1,4 @@
+from collections.abc import Iterator
 from datetime import (
     datetime,
     timedelta,
@@ -5,7 +6,6 @@ from datetime import (
 from typing import (
     Any,
     cast,
-    Iterator,
 )
 from uuid import (
     UUID,
@@ -15,9 +15,9 @@ from uuid import (
 import pytest
 from sqlalchemy import (
     ColumnOperators,
+    Sequence,
     func,
     select,
-    Sequence,
 )
 from sqlalchemy.ext.asyncio import AsyncConnection
 

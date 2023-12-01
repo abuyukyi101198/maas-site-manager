@@ -1,9 +1,6 @@
+from collections.abc import AsyncIterator, Iterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from typing import (
-    AsyncIterator,
-    Iterator,
-)
 
 import pytest
 from pytest_postgresql.executor import PostgreSQLExecutor

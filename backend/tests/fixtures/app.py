@@ -1,8 +1,7 @@
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from typing import (
     Any,
-    Callable,
-    Iterator,
 )
 
 from fastapi import FastAPI

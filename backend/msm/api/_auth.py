@@ -1,7 +1,6 @@
+from collections.abc import Awaitable, Callable
 from typing import (
     Annotated,
-    Awaitable,
-    Callable,
 )
 from uuid import UUID
 
@@ -16,8 +15,8 @@ from pydantic import BaseModel
 
 from ..db.models import Config
 from ..jwt import (
-    InvalidToken,
     JWT,
+    InvalidToken,
     TokenAudience,
     TokenPurpose,
 )

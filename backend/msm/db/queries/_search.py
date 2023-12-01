@@ -3,13 +3,13 @@ from operator import or_
 from typing import Any
 
 from sqlalchemy import (
-    asc,
     ColumnOperators,
-    desc,
     String,
     Table,
     Text,
     UnaryExpression,
+    asc,
+    desc,
 )
 
 from ...schema import SortParam
@@ -41,7 +41,7 @@ def filters_from_arguments(
 
     def compare_expr(name: str, value: Any) -> ColumnOperators:
         column = table.c[name]
-        if isinstance(column.type, (Text, String)):
+        if isinstance(column.type, Text | String):
             return column.icontains(value, autoescape=True)
         else:
             return column.__eq__(value)

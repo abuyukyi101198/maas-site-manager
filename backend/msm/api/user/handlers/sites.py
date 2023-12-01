@@ -1,7 +1,7 @@
+from collections.abc import Iterable
 from typing import (
     Annotated,
     cast,
-    Iterable,
 )
 
 from fastapi import (
@@ -18,11 +18,11 @@ from pydantic import (
 from ....db import models
 from ....schema import (
     PaginatedResults,
-    pagination_params,
     PaginationParams,
     SortParam,
     SortParamParser,
     TimeZone,
+    pagination_params,
 )
 from ....service import (
     InvalidPendingSites,
@@ -35,8 +35,8 @@ from ..._utils import (
 )
 from .._auth import authenticated_user
 from .._forms import (
-    site_filter_parameters,
     SiteFilterParams,
+    site_filter_parameters,
 )
 
 v1_router = APIRouter(prefix="/v1")

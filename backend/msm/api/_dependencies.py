@@ -1,7 +1,6 @@
+from collections.abc import AsyncIterator, Iterator
 from typing import (
     Annotated,
-    AsyncIterator,
-    Iterator,
 )
 
 from fastapi import (

@@ -1,10 +1,8 @@
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 import time
 from typing import (
     Any,
-    AsyncIterator,
-    Awaitable,
-    Callable,
 )
 
 from fastapi import (

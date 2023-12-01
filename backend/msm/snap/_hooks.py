@@ -4,8 +4,8 @@ from pathlib import Path
 from snaphelpers import Snap
 
 from msm.db import (
-    check_server_version,
     Database,
+    check_server_version,
 )
 from msm.settings import Settings
 

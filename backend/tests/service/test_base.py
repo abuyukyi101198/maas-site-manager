@@ -1,5 +1,5 @@
+from collections.abc import Iterator
 from operator import itemgetter
-from typing import Iterator
 
 from pydantic import BaseModel
 import pytest

@@ -1,6 +1,6 @@
 """Common utility functions for the API"""
 
-from typing import Iterable
+from collections.abc import Iterable
 
 from fastapi import (
     APIRouter,

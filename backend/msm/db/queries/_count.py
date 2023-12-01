@@ -12,8 +12,6 @@ async def row_count(
 ) -> int:
     """Count specified entries."""
     stmt = (
-        select(func.count())
-        .select_from(what)
-        .where(*filters)  # type: ignore[arg-type]
+        select(func.count()).select_from(what).where(*filters)  # type: ignore[arg-type]
     )
     return (await conn.execute(stmt)).scalar() or 0

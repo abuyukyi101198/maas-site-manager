@@ -12,9 +12,9 @@ from msm.db.models import (
 from msm.service._site import LOST_CONNECTION_THRESHOLD
 from msm.time import now_utc
 
-from ... import api_timestamp
 from ....fixtures.client import Client
 from ....fixtures.factory import Factory
+from ... import api_timestamp
 
 
 def site_details(site: Site, stats: SiteData | None = None) -> dict[str, Any]:

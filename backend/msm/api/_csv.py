@@ -1,6 +1,6 @@
+from collections.abc import Iterable
 import csv
 from io import StringIO
-from typing import Iterable
 
 from fastapi import Response
 from pydantic import BaseModel

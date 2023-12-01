@@ -1,3 +1,4 @@
+from collections.abc import AsyncGenerator
 from contextlib import (
     aclosing,
     asynccontextmanager,
@@ -6,14 +7,13 @@ from logging import Logger
 from pathlib import Path
 from typing import (
     Any,
-    AsyncGenerator,
 )
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import (
-    CollectorRegistry,
     REGISTRY,
+    CollectorRegistry,
 )
 from sqlalchemy.ext.asyncio import AsyncConnection
 import uvicorn
@@ -23,8 +23,8 @@ import msm
 
 from .. import __version__
 from ..db import (
-    check_server_version,
     Database,
+    check_server_version,
 )
 from ..middleware import (
     DatabaseMetricsMiddleware,

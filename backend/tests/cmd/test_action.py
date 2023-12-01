@@ -2,7 +2,7 @@ from argparse import (
     Action as ArgparseAction,
     ArgumentParser,
 )
-from typing import Iterator
+from collections.abc import Iterator
 
 import pytest
 

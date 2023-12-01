@@ -11,8 +11,8 @@ from typing import (
 )
 
 from jose import (
-    jwt,
     JWTError,
+    jwt,
 )
 from strenum import StrEnum
 

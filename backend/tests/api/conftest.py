@@ -1,7 +1,4 @@
-from typing import (
-    AsyncIterator,
-    Iterator,
-)
+from collections.abc import AsyncIterator, Iterator
 
 from fastapi import FastAPI
 from prometheus_client import CollectorRegistry

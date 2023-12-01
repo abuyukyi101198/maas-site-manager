@@ -1,16 +1,14 @@
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from typing import (
     Any,
-    AsyncIterator,
-    Awaitable,
-    Callable,
-    cast,
     TypeVar,
+    cast,
 )
 
 from sqlalchemy import (
-    text,
     URL,
+    text,
 )
 from sqlalchemy.ext.asyncio import (
     AsyncConnection,

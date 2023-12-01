@@ -1,12 +1,12 @@
 import argparse
 import asyncio
+from collections.abc import AsyncIterator
 from contextlib import (
     aclosing,
     asynccontextmanager,
 )
 from functools import cached_property
 from itertools import chain
-from typing import AsyncIterator
 
 from sqlalchemy.ext.asyncio import AsyncConnection
 

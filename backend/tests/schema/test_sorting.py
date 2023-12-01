@@ -79,6 +79,5 @@ class TestSortParamParser:
             parser(sort_by_query_param)
 
         assert (
-            "Duplicate"
-            in execution_exception.value.detail["message"]  # type: ignore
+            "Duplicate" in execution_exception.value.detail["message"]  # type: ignore
         )

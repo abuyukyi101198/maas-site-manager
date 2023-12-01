@@ -28,18 +28,23 @@ class UserFilterParams(NamedTuple):
 
 async def site_filter_parameters(
     city: list[str] | None = Query(default=None, title="Filter for cities"),
-    country: list[str]
-    | None = Query(default=None, title="Filter for country"),
+    country: list[str] | None = Query(
+        default=None, title="Filter for country"
+    ),
     name: list[str] | None = Query(default=None, title="Filter for names"),
     note: list[str] | None = Query(default=None, title="Filter for notes"),
-    state: list[str]
-    | None = Query(default=None, title="Filter for administrative regions"),
-    address: list[str]
-    | None = Query(default=None, title="Filter for streets"),
-    postal_code: list[str]
-    | None = Query(default=None, title="Filter for postal code"),
-    timezone: list[str]
-    | None = Query(default=None, title="Filter for timezones"),
+    state: list[str] | None = Query(
+        default=None, title="Filter for administrative regions"
+    ),
+    address: list[str] | None = Query(
+        default=None, title="Filter for streets"
+    ),
+    postal_code: list[str] | None = Query(
+        default=None, title="Filter for postal code"
+    ),
+    timezone: list[str] | None = Query(
+        default=None, title="Filter for timezones"
+    ),
     url: list[str] | None = Query(default=None, title="Filter for urls"),
 ) -> SiteFilterParams:
     """Return parameters for site filtering."""
@@ -57,14 +62,18 @@ async def site_filter_parameters(
 
 
 async def user_filter_params(
-    email: list[str]
-    | None = Query(default=None, title="Filter for email address"),
-    username: list[str]
-    | None = Query(default=None, title="Filter for username"),
-    full_name: list[str]
-    | None = Query(default=None, title="Filter for full name"),
-    is_admin: list[bool]
-    | None = Query(default=None, title="Filter for admin status"),
+    email: list[str] | None = Query(
+        default=None, title="Filter for email address"
+    ),
+    username: list[str] | None = Query(
+        default=None, title="Filter for username"
+    ),
+    full_name: list[str] | None = Query(
+        default=None, title="Filter for full name"
+    ),
+    is_admin: list[bool] | None = Query(
+        default=None, title="Filter for admin status"
+    ),
 ) -> UserFilterParams:
     """Return parameters for user filtering."""
     return UserFilterParams(

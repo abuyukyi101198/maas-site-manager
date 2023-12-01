@@ -7,9 +7,9 @@ import pytest
 
 from msm.time import now_utc
 
-from ... import api_timestamp
 from ....fixtures.client import Client
 from ....fixtures.factory import Factory
+from ... import api_timestamp
 
 
 def iso8601_duration(duration: timedelta) -> str:

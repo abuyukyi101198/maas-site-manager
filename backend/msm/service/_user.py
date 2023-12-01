@@ -1,13 +1,13 @@
+from collections.abc import Iterable
 from typing import (
     Any,
-    Iterable,
 )
 from uuid import UUID
 
 from sqlalchemy import (
+    Select,
     delete,
     insert,
-    Select,
     select,
     update,
 )

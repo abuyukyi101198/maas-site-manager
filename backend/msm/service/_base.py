@@ -1,19 +1,19 @@
+from collections.abc import Iterable
 from functools import cached_property
 from typing import (
     Any,
-    cast,
     Generic,
-    Iterable,
     TypeVar,
+    cast,
 )
 
 from pydantic import BaseModel
 from sqlalchemy import (
     CursorResult,
+    Table,
     delete,
     insert,
     select,
-    Table,
     update,
 )
 from sqlalchemy.ext.asyncio import AsyncConnection
