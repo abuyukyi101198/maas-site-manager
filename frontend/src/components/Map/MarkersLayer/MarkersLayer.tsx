@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 
+import type { PointTuple } from "leaflet";
 import L from "leaflet";
 import ReactDOM from "react-dom";
 
@@ -43,6 +44,20 @@ const MarkersLayer = ({ markers }: MapProps) => {
     [setSiteId, setSidebar],
   );
 
+  const calculatePopupOffset: (markerLat: number) => PointTuple = useCallback(
+    (markerLat: number) => {
+      // account for popup & marker heights when offsetting
+      const topHalfOffset = 350;
+      const centerLat = map.getCenter().lat;
+      let verticalOffset = 0;
+      if (markerLat > centerLat) {
+        verticalOffset = topHalfOffset;
+      }
+      return [0, verticalOffset];
+    },
+    [map],
+  );
+
   // update markers
   useEffect(() => {
     if (!markers) return;
@@ -80,7 +95,12 @@ const MarkersLayer = ({ markers }: MapProps) => {
       leafletMarker.on("keypress", (event) => {
         handleMarkerClick(event, marker.id);
       });
-      leafletMarker.bindPopup(popup, { keepInView: true, autoPanPadding: [50, 50] });
+      const popupOffset = calculatePopupOffset(leafletMarker.getLatLng().lat);
+      leafletMarker.bindPopup(popup, {
+        keepInView: true,
+        autoPanPadding: [50, 50],
+        offset: popupOffset,
+      });
       leafletMarker.on("mouseover", () => {
         timeoutRef.current = setTimeout(() => {
           leafletMarker.openPopup();
@@ -97,6 +117,12 @@ const MarkersLayer = ({ markers }: MapProps) => {
       leafletMarker.on("popupopen", () => {
         setSitePopupId(marker.id);
       });
+      map.on("moveend", () => {
+        const markerPopup = leafletMarker.getPopup();
+        if (markerPopup) {
+          markerPopup.options.offset = calculatePopupOffset(leafletMarker.getLatLng().lat);
+        }
+      });
       // Add markers to the cluster group
       markerClusterGroup.addLayer(leafletMarker);
     });
@@ -109,7 +135,7 @@ const MarkersLayer = ({ markers }: MapProps) => {
       map.removeLayer(markerClusterGroup);
       map.off("zoom");
     };
-  }, [map, popup, markers, handleMarkerClick]);
+  }, [map, popup, markers, handleMarkerClick, calculatePopupOffset]);
 
   return (
     <div>

@@ -36,7 +36,7 @@ const SiteSummary = ({ id, ...props }: SiteSummaryProps) => {
         <>
           <div>
             <span className="site-summary__header">
-              <h4 className="site-summary__name">{site.name}</h4>
+              <h4 className="site-summary__name u-truncate">{site.name}</h4>
               <Button
                 appearance="base"
                 className="site-summary__button--edit"

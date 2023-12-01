@@ -19,6 +19,7 @@
     .site-summary__name {
       padding-top: 0.25rem;
       margin: 0;
+      width: 70%;
     }
 
     .site-summary__button--edit {
@@ -61,6 +62,14 @@
 
     .status-icon::before {
       top: 0.45rem;
+    }
+
+    .connection__text {
+      overflow: hidden;
+      -webkit-line-clamp: 2;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
     }
 
     .site-summary__table-meter-wrapper {
