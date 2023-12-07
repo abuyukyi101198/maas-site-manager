@@ -1,3 +1,4 @@
+import { MainToolbar } from "@canonical/maas-react-components";
 import { SearchBox } from "@canonical/react-components";
 import type { SortingState } from "@tanstack/react-table";
 
@@ -39,21 +40,19 @@ const UserList = () => {
 
   return (
     <section className="user-list">
-      <header className="user-list__header">
-        <div className="u-flex--grow">
+      <MainToolbar>
+        <MainToolbar.Controls>
           <SearchBox
             className="user-list__search"
             externallyControlled
             onChange={handleSearchInput}
             placeholder="Search"
           />
-        </div>
-        <div className="u-flex u-flex--justify-end">
           <button onClick={() => setSidebar("addUser")} type="button">
             Add user
           </button>
-        </div>
-      </header>
+        </MainToolbar.Controls>
+      </MainToolbar>
       <PaginationBar
         currentPage={page}
         dataContext="users"

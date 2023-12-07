@@ -46,6 +46,8 @@ if (!globalThis.TextEncoder || !globalThis.TextDecoder) {
 
 Object.defineProperty(window, "scrollTo", { value: vi.fn(), writable: true });
 
+const originalObserver = window.ResizeObserver;
+
 beforeAll(() => {
   // fail a test whenver console.error is called
   // enabled on CI only as it's noisy and not helpful during development
@@ -57,11 +59,20 @@ beforeAll(() => {
   vi.stubGlobal("AbortController", NodeAbortController);
 });
 
-afterAll(() => {
-  vi.unstubAllGlobals();
+beforeEach(() => {
+  window.ResizeObserver = vi.fn(() => ({
+    observe: vi.fn(),
+    unobserve: vi.fn(),
+    disconnect: vi.fn(),
+  }));
 });
 
-// runs a cleanup after each test case (e.g. clearing jsdom)
 afterEach(() => {
+  window.ResizeObserver = originalObserver;
+  // runs a cleanup after each test case (e.g. clearing jsdom)
   cleanup();
+});
+
+afterAll(() => {
+  vi.unstubAllGlobals();
 });

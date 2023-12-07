@@ -1,3 +1,4 @@
+import { MainToolbar } from "@canonical/maas-react-components";
 import { Button, Notification } from "@canonical/react-components";
 
 import EnrollmentNotification from "./EnrollmentNotification";
@@ -24,7 +25,7 @@ const EnrollmentActions: React.FC = () => {
 
   return (
     <>
-      <div className="u-fixed-width">
+      <div className="u-fixed-width enrollment-actions">
         {enrollmentRequestsMutation.isSuccess ? (
           <EnrollmentNotification {...enrollmentRequestsMutation.variables} />
         ) : null}
@@ -33,12 +34,14 @@ const EnrollmentActions: React.FC = () => {
             There was an error processing enrolment request(s).
           </Notification>
         ) : null}
-        <div className="u-flex u-flex--justify-end">
-          <RemoveButton disabled={isActionDisabled} label="Deny" onClick={handleDeny} type="button" />
-          <Button appearance="positive" disabled={isActionDisabled} onClick={handleAccept} type="button">
-            Accept
-          </Button>
-        </div>
+        <MainToolbar>
+          <MainToolbar.Controls>
+            <RemoveButton disabled={isActionDisabled} label="Deny" onClick={handleDeny} type="button" />
+            <Button appearance="positive" disabled={isActionDisabled} onClick={handleAccept} type="button">
+              Accept
+            </Button>
+          </MainToolbar.Controls>
+        </MainToolbar>
       </div>
     </>
   );

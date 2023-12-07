@@ -12,10 +12,12 @@ const mockServer = createMockGetServer(apiUrls.sites, createMockSitesResolver(si
 beforeAll(() => {
   mockServer.listen();
 });
+
 afterEach(() => {
   mockServer.resetHandlers();
   localStorage.clear();
 });
+
 afterAll(() => {
   mockServer.close();
 });

@@ -1,11 +1,6 @@
 .user-list {
-  .user-list__header {
-    display: flex;
-
-    .user-list__search {
-      width: auto;
-      margin: 0 1rem 0 0;
-    }
+  .main-toolbar {
+    padding-bottom: $spv--large;
   }
 
   .user-list__table {

@@ -75,7 +75,7 @@ test("can close remove site panel using Escape key", async ({ page }) => {
 test("hides columns dropdown in the map view", async ({ page }) => {
   const searchAndFilter = page.getByRole("searchbox", { name: /Search and filter/i });
   const columnsDropdown = page.getByRole("button", { name: /Columns/i });
-  const controlsHeading = page.getByRole("heading", { level: 2, name: /MAAS sites/i });
+  const controlsHeading = page.getByRole("heading", { level: 1, name: /MAAS sites/i });
 
   await expect(searchAndFilter).toBeVisible();
   await expect(columnsDropdown).toBeVisible();

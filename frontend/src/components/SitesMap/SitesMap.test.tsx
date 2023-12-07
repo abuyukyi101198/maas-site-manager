@@ -11,10 +11,12 @@ const mockServer = createMockGetServer(apiUrls.sitesCoordinates, createMockSites
 beforeAll(() => {
   mockServer.listen();
 });
+
 afterEach(() => {
   mockServer.resetHandlers();
   localStorage.clear();
 });
+
 afterAll(() => {
   mockServer.close();
 });

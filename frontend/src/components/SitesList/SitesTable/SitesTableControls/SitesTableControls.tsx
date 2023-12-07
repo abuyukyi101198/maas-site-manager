@@ -1,3 +1,4 @@
+import { MainToolbar } from "@canonical/maas-react-components";
 import { SearchBox } from "@canonical/react-components";
 import classNames from "classnames";
 
@@ -30,23 +31,20 @@ const SitesTableControls = ({
   const isMapView = pathname === "/sites/map";
 
   return (
-    <div className={classNames("u-fixed-width sites-table-controls", { "is-map-view": isMapView })}>
-      <div className="u-flex--large">
-        <div>
-          <h2 className="p-heading--4 u-no-padding--top site-control-heading">
-            <SitesCount isPending={isPending} totalSites={totalSites} />
-          </h2>
-        </div>
-        <div className="u-flex--grow">
+    <span className={classNames("sites-table-controls", { "is-map-view": isMapView })}>
+      <MainToolbar>
+        <MainToolbar.Title>
+          <SitesCount isPending={isPending} totalSites={totalSites} />
+        </MainToolbar.Title>
+        <MainToolbar.Controls>
           <SearchBox
+            aria-label="Search and filter"
             className="sites-table-controls__search"
             externallyControlled
             onChange={handleSearchInput}
             placeholder="Search and filter"
             value={searchText}
           />
-        </div>
-        <div className="u-flex u-flex--column u-flex--row-small u-flex u-flex--justify-end u-flex--align-start">
           <span className="remove-button__wrapper">
             <RemoveButton
               disabled={isRemoveDisabled}
@@ -56,9 +54,9 @@ const SitesTableControls = ({
             />
           </span>
           <SitesViewControl />
-        </div>
-      </div>
-    </div>
+        </MainToolbar.Controls>
+      </MainToolbar>
+    </span>
   );
 };
 

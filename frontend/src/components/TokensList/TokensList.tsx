@@ -1,4 +1,4 @@
-import { ExternalLink } from "@canonical/maas-react-components";
+import { ExternalLink, MainToolbar } from "@canonical/maas-react-components";
 import { Button, Col, Row, Notification } from "@canonical/react-components";
 import pluralize from "pluralize";
 
@@ -97,19 +97,17 @@ const TokensList = () => {
             </code>
           </Col>
         </Row>
-        <Row>
-          <Col size={12}>
-            <div className="u-flex u-flex--justify-end">
-              <Button disabled={isExportTokensLoading} onClick={exportTokens}>
-                Export
-              </Button>
-              <RemoveButton disabled={!Object.keys(rowSelection).length} label="Delete" onClick={handleTokenDelete} />
-              <Button className="p-button--positive" onClick={() => setSidebar("createToken")} type="button">
-                Generate tokens
-              </Button>
-            </div>
-          </Col>
-        </Row>
+        <MainToolbar>
+          <MainToolbar.Controls>
+            <Button disabled={isExportTokensLoading} onClick={exportTokens}>
+              Export
+            </Button>
+            <RemoveButton disabled={!Object.keys(rowSelection).length} label="Delete" onClick={handleTokenDelete} />
+            <Button className="p-button--positive" onClick={() => setSidebar("createToken")} type="button">
+              Generate tokens
+            </Button>
+          </MainToolbar.Controls>
+        </MainToolbar>
         <PaginationBar
           currentPage={page}
           dataContext="tokens"

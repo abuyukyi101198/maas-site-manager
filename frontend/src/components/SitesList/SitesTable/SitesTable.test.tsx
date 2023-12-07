@@ -35,9 +35,12 @@ const commonProps = {
   searchText: "",
 };
 
+beforeAll(() => {
+  mockServer.listen();
+});
+
 beforeEach(() => {
   vi.useFakeTimers();
-  mockServer.listen();
 });
 
 afterEach(() => {
