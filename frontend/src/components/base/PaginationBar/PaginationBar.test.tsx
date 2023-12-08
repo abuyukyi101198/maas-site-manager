@@ -7,12 +7,10 @@ it("should render the PaginationBar component correctly", () => {
     <PaginationBar
       currentPage={1}
       dataContext="tokens"
-      handlePageSizeChange={() => {}}
+      handlePageSizeChange={vi.fn()}
       isPending={false}
       itemsPerPage={10}
-      onNextClick={() => {}}
-      onPreviousClick={() => {}}
-      setCurrentPage={() => {}}
+      setCurrentPage={vi.fn()}
       totalItems={50}
     />,
   );

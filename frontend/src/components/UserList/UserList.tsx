@@ -15,8 +15,7 @@ import { getSortBy, parseSearchTextToUrlFreeTextSearch } from "@/utils";
 const DEFAULT_PAGE_SIZE = 50;
 
 const UserList = () => {
-  const { page, debouncedPage, size, handleNextClick, handlePreviousClick, handlePageSizeChange, setPage } =
-    usePagination(DEFAULT_PAGE_SIZE);
+  const { page, debouncedPage, size, handlePageSizeChange, setPage } = usePagination(DEFAULT_PAGE_SIZE);
   const [searchText, setSearchText] = useState("");
   const debounceSearchText = useDebounce(searchText);
   const { setSidebar } = useAppLayoutContext();
@@ -59,8 +58,6 @@ const UserList = () => {
         handlePageSizeChange={handlePageSizeChange}
         isPending={isPending}
         itemsPerPage={size}
-        onNextClick={handleNextClick}
-        onPreviousClick={handlePreviousClick}
         setCurrentPage={setPage}
         totalItems={data?.total || 0}
       />

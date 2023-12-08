@@ -18,8 +18,7 @@ const DEFAULT_PAGE_SIZE = 50;
 const TokensList = () => {
   const { setSidebar } = useAppLayoutContext();
   const { rowSelection, setRowSelection } = useRowSelectionContext("tokens");
-  const { page, debouncedPage, size, handleNextClick, handlePreviousClick, handlePageSizeChange, setPage } =
-    usePagination(DEFAULT_PAGE_SIZE);
+  const { page, debouncedPage, size, handlePageSizeChange, setPage } = usePagination(DEFAULT_PAGE_SIZE);
 
   const { error, data, isPending } = useTokensQuery({
     page: debouncedPage,
@@ -114,8 +113,6 @@ const TokensList = () => {
           handlePageSizeChange={handlePageSizeChange}
           isPending={isPending}
           itemsPerPage={size}
-          onNextClick={handleNextClick}
-          onPreviousClick={handlePreviousClick}
           setCurrentPage={setPage}
           totalItems={data?.total || 0}
         />

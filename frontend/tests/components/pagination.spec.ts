@@ -12,7 +12,7 @@ for (const pageWithTable of pagesWithPagination) {
     test(`${pageWithTable.title} page`, async ({ page }) => {
       await page.goto(pageWithTable.path);
 
-      const currentPage = page.getByRole("spinbutton", { name: /current page/i });
+      const currentPage = page.getByRole("spinbutton", { name: /page number/i });
       const nextPage = page.getByRole("button", { name: /next page/i });
       const previousPage = page.getByRole("button", { name: /previous page/i });
 

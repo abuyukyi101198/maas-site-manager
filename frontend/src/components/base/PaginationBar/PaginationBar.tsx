@@ -1,13 +1,15 @@
 import type { ChangeEvent } from "react";
 import { useMemo } from "react";
 
+import { PaginationContainer } from "@canonical/maas-react-components";
 import { Select } from "@canonical/react-components";
 
 import ControlsBar from "@/components/base/ControlsBar";
-import type { AppPaginationProps } from "@/components/base/TablePagination/TablePagination";
-import TablePagination from "@/components/base/TablePagination/TablePagination";
 
-export type PaginationBarProps = AppPaginationProps & {
+export type PaginationBarProps = {
+  currentPage: number;
+  itemsPerPage: number;
+  totalItems: number;
   handlePageSizeChange: (size: number) => void;
   dataContext: string;
   setCurrentPage: (page: number) => void;
@@ -18,8 +20,6 @@ const PaginationBar = ({
   currentPage,
   itemsPerPage,
   totalItems,
-  onNextClick,
-  onPreviousClick,
   handlePageSizeChange,
   dataContext,
   setCurrentPage,
@@ -31,14 +31,14 @@ const PaginationBar = ({
     [pageCounts],
   );
 
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+
   const handleSizeChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const { value } = e.target;
     handlePageSizeChange(Number(value));
   };
 
   const getDisplayedDataCount = () => {
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-
     if (currentPage === totalPages) {
       return itemsPerPage - (totalPages * itemsPerPage - totalItems);
     } else if (currentPage < totalPages) {
@@ -54,14 +54,11 @@ const PaginationBar = ({
         Showing {getDisplayedDataCount()} out of {totalItems} {dataContext}
       </ControlsBar.Left>
       <ControlsBar.Right>
-        <TablePagination
+        <PaginationContainer
           currentPage={currentPage}
-          isPending={isPending}
-          itemsPerPage={itemsPerPage}
-          onNextClick={onNextClick}
-          onPreviousClick={onPreviousClick}
-          setCurrentPage={setCurrentPage}
-          totalItems={totalItems}
+          disabled={isPending}
+          paginate={setCurrentPage}
+          totalPages={totalPages}
         />
         <Select
           aria-label="Items per page"

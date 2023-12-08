@@ -86,7 +86,6 @@
 @import "@/components/TokensList/components/TokensTable/TokensTable";
 @import "@/components/UserList/UserList";
 @import "@/components/base/CopyButton/CopyButton";
-@import "@/components/base/TablePagination/TablePagination";
 @import "@/components/base/ControlsBar/ControlsBar";
 @import "@/components/base/TooltipButton/TooltipButton";
 @import "@/components/DynamicTable/DynamicTable";
@@ -98,4 +97,5 @@
 @import "@/components/Map/SiteMarker/SiteMarker";
 @import "@/components/base/TableActions/TableActions";
 @import "@/components/SiteSelection/SiteSelectionTable/SiteSelectionTable";
-@import "@/components/EnrollmentActions/EnrollmentActions"
+@import "@/components/EnrollmentActions/EnrollmentActions";
+@import "@/components/base/PaginationBar/PaginationBar";

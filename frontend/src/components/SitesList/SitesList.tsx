@@ -14,8 +14,7 @@ import { useSearchParams, useNavigate } from "@/utils/router";
 const DEFAULT_PAGE_SIZE = 50;
 
 const SitesList = () => {
-  const { page, debouncedPage, size, handleNextClick, handlePreviousClick, handlePageSizeChange, setPage } =
-    usePagination(DEFAULT_PAGE_SIZE);
+  const { page, debouncedPage, size, handlePageSizeChange, setPage } = usePagination(DEFAULT_PAGE_SIZE);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [isFirstVisit, setIsFirstVisit] = useState(true);
@@ -62,8 +61,6 @@ const SitesList = () => {
           handlePageSizeChange,
           isPending,
           itemsPerPage: size,
-          onNextClick: handleNextClick,
-          onPreviousClick: handlePreviousClick,
           setCurrentPage: setPage,
           totalItems: data?.total || 0,
         }}

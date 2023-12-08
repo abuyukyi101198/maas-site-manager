@@ -1100,10 +1100,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@canonical/maas-react-components@1.8.1":
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/@canonical/maas-react-components/-/maas-react-components-1.8.1.tgz#b6683e6d84a53a04d2a256695b7cbfe41ffc5119"
-  integrity sha512-vf1Hq9wDsEZXB/b7Umo/3selAXnVhgkIpo5YBDVQIxMZUCBsculTBq5PybBp1zPSLUGtIsO140XKtZeutYv+gw==
+"@canonical/maas-react-components@1.12.0":
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/@canonical/maas-react-components/-/maas-react-components-1.12.0.tgz#da33c2ea281c10e1d068871b4df9c2aea38b9eb3"
+  integrity sha512-0yMKN44eZRsqdgC/0PSS+OqmKJHcMnC17yH3zI+EcutzHYlLJTjycpDDPu1cyIe9gFKDL+IW3vVqST47Jq6GFg==
 
 "@canonical/react-components@0.44.0":
   version "0.44.0"

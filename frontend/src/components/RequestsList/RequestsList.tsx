@@ -8,8 +8,7 @@ import usePagination from "@/hooks/usePagination";
 
 const DEFAULT_PAGE_SIZE = 50;
 const Requests: React.FC = () => {
-  const { page, debouncedPage, size, handleNextClick, handlePreviousClick, handlePageSizeChange, setPage } =
-    usePagination(DEFAULT_PAGE_SIZE);
+  const { page, debouncedPage, size, handlePageSizeChange, setPage } = usePagination(DEFAULT_PAGE_SIZE);
   const { error, data, isPending } = useRequestsQuery({
     page: debouncedPage,
     size,
@@ -26,8 +25,6 @@ const Requests: React.FC = () => {
             handlePageSizeChange={handlePageSizeChange}
             isPending={isPending}
             itemsPerPage={size}
-            onNextClick={handleNextClick}
-            onPreviousClick={handlePreviousClick}
             setCurrentPage={setPage}
             totalItems={data?.total || 0}
           />
