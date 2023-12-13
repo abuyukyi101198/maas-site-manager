@@ -8,10 +8,6 @@ export const login = async ({ page }: { page: Page }) => {
   await page.getByRole("button", { name: "Login" }).click();
 };
 
-test.afterEach(async ({ page }) => {
-  await page.getByRole("link", { name: "Log out" }).click();
-});
-
 protectedPages.forEach(({ path }) => {
   test(`user is redirected to login page when attempting to visit ${path}`, async ({ page }) => {
     await page.goto(path);
