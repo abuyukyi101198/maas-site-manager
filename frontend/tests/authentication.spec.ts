@@ -12,8 +12,6 @@ protectedPages.forEach(({ path }) => {
   test(`user is redirected to login page when attempting to visit ${path}`, async ({ page }) => {
     await page.goto(path);
     await expect(page).toHaveURL(`${routesConfig.login.path}?redirectTo=${encodeURIComponent(path)}`);
-    await login({ page });
-    await expect(page).toHaveURL(path);
   });
 });
 

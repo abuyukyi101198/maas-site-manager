@@ -19,6 +19,7 @@ if (useMockData) {
   console.info("msw API URL %s", getApiUrl(""));
   await worker.start({
     onUnhandledRequest(req) {
+      // eslint-disable-next-line no-console
       console.info(req.method, req.url.href);
       if (req.url.href.includes(baseURL)) {
         // eslint-disable-next-line no-console
