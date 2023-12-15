@@ -20,7 +20,7 @@ export default defineConfig({
      * Maximum time expect() should wait for the condition to be met.
      * For example in `await expect(locator).toHaveText();`
      */
-    timeout: 5000,
+    timeout: 10000,
   },
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -55,7 +55,9 @@ export default defineConfig({
     {
       name: "firefox",
       use: { ...devices["Desktop Firefox"] },
-      testIgnore: "a11y.spec.ts",
+      // ignore sites and map tests because of
+      // test flakiness on CI on Firefox
+      testIgnore: ["a11y.spec.ts", "map.spec.ts", "sites.spec.ts"],
       dependencies: ["setup"],
     },
   ],

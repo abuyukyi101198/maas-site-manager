@@ -5,6 +5,9 @@ import matchers from "@testing-library/jest-dom/matchers";
 import { fetch, Request, Response } from "@remix-run/web-fetch";
 import { TextEncoder as NodeTextEncoder, TextDecoder as NodeTextDecoder } from "util";
 import { AbortSignal as NodeAbortSignal, AbortController as NodeAbortController } from "abort-controller";
+import "vitest-canvas-mock";
+import "vitest-webgl-canvas-mock";
+import { mockResizeObserver } from "jsdom-testing-mocks";
 
 config();
 
@@ -44,6 +47,10 @@ if (!globalThis.TextEncoder || !globalThis.TextDecoder) {
   globalThis.TextDecoder = NodeTextDecoder;
 }
 
+if (!globalThis.URL.createObjectURL) {
+  window.URL.createObjectURL = vi.fn();
+}
+
 Object.defineProperty(window, "scrollTo", { value: vi.fn(), writable: true });
 
 const originalObserver = window.ResizeObserver;
@@ -56,15 +63,12 @@ beforeAll(() => {
       throw new Error(args.join(" "));
     });
   }
+
   vi.stubGlobal("AbortController", NodeAbortController);
 });
 
 beforeEach(() => {
-  window.ResizeObserver = vi.fn(() => ({
-    observe: vi.fn(),
-    unobserve: vi.fn(),
-    disconnect: vi.fn(),
-  }));
+  mockResizeObserver();
 });
 
 afterEach(() => {

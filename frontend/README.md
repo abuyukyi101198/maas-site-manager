@@ -63,4 +63,12 @@ yarn test
 
 Run `yarn upgrade-all` to attempt to upgrade all packages to latest version.
 
+## Map assets
 
+### Fonts
+
+[Ubuntu Sans Regular](https://github.com/canonical/Ubuntu-fonts/blob/main/fonts/ttf/UbuntuSans-Regular.ttf) conversion into files compatible with MapLibre GL JS (located in `/frontend/public/Ubuntu Sans Regular/0-255.pbf`) is done using [font-maker](https://github.com/maplibre/font-maker).
+
+### Tiles
+
+Natural Earth Vector tiles sourced from <https://github.com/lukasmartinelli/naturalearthtiles/releases/download/v1.0/natural_earth.vector.mbtiles> are converted to pmtiles using <https://github.com/protomaps/PMTiles>.

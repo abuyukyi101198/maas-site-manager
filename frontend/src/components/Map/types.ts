@@ -1,9 +1,8 @@
-import type { LatLngExpression } from "leaflet";
-
 import type { Site } from "@/api/types";
 
 export type SiteMarkerType = Pick<Site, "id"> & {
-  position: LatLngExpression;
+  // Latitute, longitude
+  position: [number, number];
 };
 
 export type MapProps = {

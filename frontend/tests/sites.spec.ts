@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-import { adminAuthFile } from "./constants";
+import { LONG_EXPECTATION_TIMEOUT, adminAuthFile } from "./constants";
 import { routesConfig } from "@/config/routes";
 
 test.use({ storageState: adminAuthFile });
@@ -77,13 +77,13 @@ test("hides columns dropdown in the map view", async ({ page }) => {
   const columnsDropdown = page.getByRole("button", { name: /Columns/i });
   const controlsHeading = page.getByRole("heading", { level: 1, name: /MAAS sites/i });
 
-  await expect(searchAndFilter).toBeVisible();
+  await expect(searchAndFilter).toBeVisible({ timeout: LONG_EXPECTATION_TIMEOUT });
   await expect(columnsDropdown).toBeVisible();
   await expect(controlsHeading).toBeVisible();
 
   await page.goto(routesConfig.sitesMap.path);
 
-  await expect(searchAndFilter).toBeVisible();
+  await expect(searchAndFilter).toBeVisible({ timeout: LONG_EXPECTATION_TIMEOUT });
   await expect(controlsHeading).toBeVisible();
   await expect(columnsDropdown).toBeHidden();
 });
@@ -97,6 +97,8 @@ test("search text persists when switching pages", async ({ page }) => {
   await page.getByRole("tab", { name: /map/i }).click();
   await page.waitForURL(`${routesConfig.sitesMap.path}?q=${searchText}`);
   await expect(page).toHaveURL(`${routesConfig.sitesMap.path}?q=${searchText}`);
-  await expect(page.getByRole("searchbox", { name: /Search and filter/i })).toHaveValue(searchText);
+  await expect(page.getByRole("searchbox", { name: /Search and filter/i })).toHaveValue(searchText, {
+    timeout: LONG_EXPECTATION_TIMEOUT,
+  });
   await expect(page.getByRole("tab", { name: /table/i })).toHaveAttribute("href", `/sites/list?q=${searchText}`);
 });

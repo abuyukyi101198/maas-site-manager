@@ -1,5 +1,4 @@
 @use "sass:math";
-@import "leaflet";
 
 $grid-margin-small: map_get($grid-margin-widths, small);
 $grid-margin-default: map_get($grid-margin-widths, default);
@@ -26,84 +25,56 @@ $grid-margin-default: map_get($grid-margin-widths, default);
         margin-right: -#{$grid-margin-default};
     }
 
-
-    .leaflet-pane {
-        z-index: $map-base-z-index;
-    }
-
-    .leaflet-popup-content-wrapper,
-    .leaflet-popup-content {
-        margin: 0;
-        padding: 0;
-    }
-
-    .leaflet-popup-tip-container {
-        display: none;
-    }
-
-    a.leaflet-popup-close-button {
-        display: none;
-    }
-
-    .leaflet-popup {
-        margin-bottom: 47px;
-        // Account for map marker width (currently 29px) and offset
-        margin-left: -14.5px;
-    }
-}
-
-/* Leaflet zoom styling */
-.leaflet-control-zoom.leaflet-bar.leaflet-control {
-    border: 1px solid $colors--light-theme--border-high-contrast;
-    border-radius: 0;
-
-    .leaflet-control-zoom-in, .leaflet-control-zoom-out {
-        width: 2.25rem;
-        height: 2.25rem;
-
-        &.leaflet-disabled {
-            background: $color-light;
-        }
-    }
-
-    .leaflet-control-zoom-in {
-        border-bottom: 2px solid $color-mid-x-light;
-    }
-}
-
-/* Leaflet marker */ 
-.leaflet-div-icon {
-    background: none;
-    border: none;
-}
-
-/* Ensure controls and attribution are underneath side panel */
-.leaflet-bottom.leaflet-right {
-    z-index: 100;
-}
-
-.site-marker-cluster__body {
-  stroke: $color-light;
-}
-
-.site-marker-cluster__text {
-  text-align: center;
-  color: white;
-  left: 0;
-  padding: 0;
-  margin: 0;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  line-height: 1;
-  width: 100%;
-  font-size: 1rem;
-
-  // Adjust margin-top to simulate correct leading and center the text visually
-  margin-top: -1px;
+  .maplibregl-canvas-container.maplibregl-interactive,
+  .maplibregl-canvas {
+    font-family: inherit;
+    cursor: inherit;
+  }
 }
 
 .popup-container {
   min-width: 21rem;
 }
 
+.maplibregl-popup-tip {
+  display: none;
+}
+
+.maplibregl-map {
+  font-family: inherit;
+}
+
+.maplibregl-popup-content {
+  background: none;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
+.maplibregl-ctrl-bottom-right {
+  right: 0.8rem;
+  bottom: 2rem;
+
+   .maplibregl-ctrl {
+    margin: 0.5rem 0;
+   }
+}
+
+.maplibregl-ctrl.maplibregl-ctrl-attrib {
+  position: fixed;
+  bottom: 0;
+  right: 0.8rem;
+}
+
+.maplibregl-ctrl-group {
+  padding: 0 0.1rem;
+  border-radius: 0;
+}
+
+.maplibregl-ctrl-group button {
+  margin: 0;
+}
+
+.maplibregl-ctrl-attrib-inner {
+  color: #000
+}

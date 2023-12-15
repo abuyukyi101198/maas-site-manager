@@ -1,157 +1,105 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import type { GeoJSONSource } from "maplibre-gl";
 
-import type { PointTuple } from "leaflet";
-import L from "leaflet";
-import ReactDOM from "react-dom";
-
-import "leaflet.markercluster";
-import "leaflet.markercluster/dist/MarkerCluster.css";
-
-import { createCustomClusterIcon, getSiteMarker } from "@/components/Map/SiteMarker";
+import Popup from "@/components/Map/MarkersLayer/Popup";
 import SiteSummary from "@/components/Map/SiteSummary";
-import type { MapProps, SiteMarkerType } from "@/components/Map/types";
+import { useMarkers, usePopup } from "@/components/Map/hooks";
 import { useAppLayoutContext } from "@/context";
-import { useLeafletMap } from "@/context/LeafletMapContext";
+import { useMap } from "@/context/MapContext";
 import { useSiteDetailsContext } from "@/context/SiteDetailsContext";
 
-const MARKER_HOVER_DELAY = 750;
+const markerHeight = 47;
+const markerOffset = parseFloat((markerHeight / 2).toFixed(1));
 
-const usePopupContainer = () => {
-  return useMemo(() => {
-    const popupContainer = document.createElement("div");
-    popupContainer.setAttribute("class", "popup-container");
-    return popupContainer;
-  }, []);
-};
+const createSourceOptions = (geojson: GeoJSON.FeatureCollection) =>
+  ({
+    type: "geojson",
+    data: geojson,
+    cluster: true,
+    clusterMaxZoom: 14,
+    clusterRadius: 100,
+  }) as const;
 
-const MarkersLayer = ({ markers }: MapProps) => {
-  const map = useLeafletMap();
+const createLayerOptions = () =>
+  ({
+    id: "clusters",
+    type: "circle",
+    source: "markers",
+    paint: {
+      "circle-color": "transparent",
+    },
+  }) as const;
+
+const MarkersLayer = ({ geojson }: { geojson: GeoJSON.FeatureCollection }) => {
+  const map = useMap();
   const { setSidebar } = useAppLayoutContext();
   const { setSelected: setSiteId } = useSiteDetailsContext();
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>();
-  const resetTimeout = () => clearTimeout(timeoutRef.current);
-  const [sitePopupId, setSitePopupId] = useState<number | null>(null);
-  const popup = usePopupContainer();
-  const highestClusterChildCount = useRef(0);
+  const { popupRef, popup, showPopup, hidePopup, handleMouseEnter } = usePopup();
 
   const handleMarkerClick = useCallback(
-    async (e: L.LeafletEvent, id: SiteMarkerType["id"]) => {
-      // immediately close the popup as there's no way of preventing this behaviour
-      setTimeout(() => e.target.closePopup?.());
-      setSiteId(id);
-      setSidebar("siteDetails");
-    },
-    [setSiteId, setSidebar],
-  );
-
-  const calculatePopupOffset: (markerLat: number) => PointTuple = useCallback(
-    (markerLat: number) => {
-      // account for popup & marker heights when offsetting
-      const topHalfOffset = 350;
-      const centerLat = map.getCenter().lat;
-      let verticalOffset = 0;
-      if (markerLat > centerLat) {
-        verticalOffset = topHalfOffset;
+    (id: number) => {
+      if (id) {
+        setSiteId(id);
+        setSidebar("siteDetails");
       }
-      return [0, verticalOffset];
+      hidePopup({ isImmediate: true });
     },
-    [map],
+    [setSiteId, setSidebar, hidePopup],
   );
 
-  // update markers
-  useEffect(() => {
-    if (!markers) return;
-    // set default marker icon
-    L.Marker.prototype.options.icon = getSiteMarker("base");
-
-    map.on("zoom", () => {
-      highestClusterChildCount.current = 0;
-    });
-
-    // Create a new marker cluster group
-    const markerClusterGroup = L.markerClusterGroup({
-      iconCreateFunction: function (cluster) {
-        const childCount = cluster.getChildCount();
-
-        // Keep track of the highestClusterChildCount
-        if (childCount > highestClusterChildCount.current) {
-          highestClusterChildCount.current = childCount;
-        }
-        return createCustomClusterIcon("base", childCount, highestClusterChildCount.current);
-      },
-      showCoverageOnHover: false,
-    });
-
-    // redraw icons on zoom to ensure correct relative cluster sizes for each zoom level
-    markerClusterGroup.on("animationend", () => {
-      markerClusterGroup.refreshClusters();
-    });
-
-    markers.forEach((marker) => {
-      const leafletMarker = L.marker(marker.position);
-      leafletMarker.on("click", (event) => {
-        handleMarkerClick(event, marker.id);
-      });
-      leafletMarker.on("keypress", (event) => {
-        handleMarkerClick(event, marker.id);
-      });
-      const popupOffset = calculatePopupOffset(leafletMarker.getLatLng().lat);
-      leafletMarker.bindPopup(popup, {
-        keepInView: true,
-        autoPanPadding: [50, 50],
-        offset: popupOffset,
-      });
-      leafletMarker.on("mouseover", () => {
-        timeoutRef.current = setTimeout(() => {
-          leafletMarker.openPopup();
-        }, MARKER_HOVER_DELAY);
-      });
-      leafletMarker.on("mouseout", (e) => {
-        resetTimeout();
-        timeoutRef.current = setTimeout(() => {
-          if (e.originalEvent.relatedTarget !== popup?.firstElementChild) {
-            leafletMarker.closePopup();
+  useMarkers({
+    eventHandlers: {
+      mouseenter:
+        ({ properties, coords }) =>
+        () => {
+          showPopup({ id: properties.id, coords });
+        },
+      click:
+        ({ properties }) =>
+        () => {
+          handleMarkerClick(properties.id);
+        },
+      mouseout:
+        ({ marker }) =>
+        (e) => {
+          // ignore mouseout events within marker itself or popup
+          const relatedTarget = (e.relatedTarget as Node) || undefined;
+          if (marker.getElement().contains(relatedTarget)) {
+            e.preventDefault();
+          } else {
+            hidePopup();
           }
-        }, MARKER_HOVER_DELAY);
-      });
-      leafletMarker.on("popupopen", () => {
-        setSitePopupId(marker.id);
-      });
-      map.on("moveend", () => {
-        const markerPopup = leafletMarker.getPopup();
-        if (markerPopup) {
-          markerPopup.options.offset = calculatePopupOffset(leafletMarker.getLatLng().lat);
-        }
-      });
-      // Add markers to the cluster group
-      markerClusterGroup.addLayer(leafletMarker);
-    });
+        },
+    },
+  });
 
-    // Add the cluster group to the map
-    map.addLayer(markerClusterGroup);
+  const handleMapLoad = useCallback(() => {
+    if (!map.getSource("markers")) {
+      map.addSource("markers", createSourceOptions(geojson));
+      // add a transparent layer to make features available for queries and custom rendering
+      map.addLayer(createLayerOptions());
+    }
+  }, [geojson, map]);
 
-    // remove the cluster group when markers change
-    return () => {
-      map.removeLayer(markerClusterGroup);
-      map.off("zoom");
-    };
-  }, [map, popup, markers, handleMarkerClick, calculatePopupOffset]);
+  useEffect(() => {
+    if (!map || !geojson) return;
+    map.on("load", handleMapLoad);
+    if (map.isStyleLoaded()) {
+      const source = map.getSource("markers") as GeoJSONSource;
+      source?.setData?.(geojson);
+    }
+  }, [map, geojson, handleMapLoad]);
 
-  return (
-    <div>
-      {ReactDOM.createPortal(
-        sitePopupId ? (
-          <SiteSummary
-            id={sitePopupId}
-            onMouseLeave={() => {
-              map?.closePopup();
-            }}
-          />
-        ) : null,
-        popup,
-      )}
-    </div>
-  );
+  return popup ? (
+    <Popup className="popup-container" coordinates={popup.coords} offset={markerOffset} ref={popupRef}>
+      <SiteSummary
+        id={popup.id}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={() => {
+          hidePopup();
+        }}
+      />
+    </Popup>
+  ) : null;
 };
 
 export default MarkersLayer;

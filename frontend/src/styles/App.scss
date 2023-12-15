@@ -66,6 +66,9 @@
 // MAAS React Components
 @import "@canonical/maas-react-components/dist/style.css";
 
+// MapLibre Map base styles
+@import "maplibre-gl/dist/maplibre-gl.css";
+
 // custom styles
 @import "@/styles/utils";
 @import "@/styles/patterns_icons";

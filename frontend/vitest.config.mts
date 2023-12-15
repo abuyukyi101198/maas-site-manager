@@ -18,7 +18,12 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "jsdom",
-    setupFiles: ["./setupTests.ts"],
+    server: {
+      deps: {
+        inline: ["vitest-canvas-mock"],
+      },
+    },
+    setupFiles: ["./mock-web-worker.ts", "./setupTests.ts"],
     exclude: [...configDefaults.exclude, "**/tests/**"],
     coverage: {
       // exclude index files as they're only used to export other files

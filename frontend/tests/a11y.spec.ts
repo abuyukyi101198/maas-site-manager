@@ -11,10 +11,10 @@ const a11yTest =
     await test(`${title} page does not have any automatically detectable accessibility issues in ${colorScheme} mode`, async ({
       page,
     }) => {
-      await page.emulateMedia({ colorScheme });
+      await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
       // eslint-disable-next-line playwright/no-networkidle
       await page.goto(path, {
-        // leaflet map tends to trigger continuous network requests disallowing the use of networkidle
+        // map tends to trigger continuous network requests disallowing the use of networkidle
         waitUntil: path.includes(routesConfig.sitesMap.path) ? "domcontentloaded" : "networkidle",
       });
       // verify the correct page has been displayed
@@ -24,8 +24,6 @@ const a11yTest =
         // @canonical/react-components Accordion is known to have accessibility issues
         .exclude(".p-accordion")
         // TODO: https://warthogs.atlassian.net/browse/MAASENG-2043
-        // leaflet markers do not allow for aria-label
-        .exclude(".leaflet-marker-icon")
         .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
         .analyze();
 

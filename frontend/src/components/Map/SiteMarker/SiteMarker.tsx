@@ -1,17 +1,18 @@
 import classNames from "classnames";
-import L from "leaflet";
 
-import { renderToHtmlString } from "@/components/Map/utils";
+import { createElementFromHTML, renderToHtmlString } from "@/components/Map/utils";
 
 export type MarkerApprearance = "base" | "selected";
 
-const SiteMarkerSvg = ({ appearance = "base" }: { appearance?: MarkerApprearance }) => {
+export const SiteMarkerSvg = ({ appearance = "base" }: { appearance?: MarkerApprearance }) => {
   return (
     <svg
       aria-label="site location marker"
       className={classNames("site-marker", { "is-selected": appearance === "selected" })}
       fill="none"
       height="47"
+      role="button"
+      tabIndex={0}
       viewBox="0 0 29 47"
       width="29"
       xmlns="http://www.w3.org/2000/svg"
@@ -31,36 +32,20 @@ const SiteMarkerSvg = ({ appearance = "base" }: { appearance?: MarkerApprearance
 const getMarkerHtml = (appearance: MarkerApprearance): string =>
   renderToHtmlString(<SiteMarkerSvg appearance={appearance} />);
 
-const createDivIcon = (appearance: MarkerApprearance) => {
-  return new L.DivIcon({
-    html: markerHtml[appearance],
-    iconAnchor: [14.5, 47],
-    iconSize: [29, 47],
-    popupAnchor: [0, -18],
-  });
-};
-
 const markerHtml = {
   base: getMarkerHtml("base"),
   selected: getMarkerHtml("selected"),
 } as const;
 
-const markerIcon = {
-  base: createDivIcon("base"),
-  selected: createDivIcon("selected"),
+export const baseMarker = markerHtml.base;
+export const selectedMarker = markerHtml.selected;
+
+export const getSiteMarker = (appearance: keyof typeof markerHtml) => {
+  return createElementFromHTML(markerHtml[appearance]);
 };
 
-export const BaseMarker = markerIcon.base;
-export const SelectedMarker = markerIcon.selected;
-
-export const getSiteMarker = (appearance: keyof typeof markerIcon) => {
-  return markerIcon[appearance];
-};
-
-const getClusterSvg = (
-  appearance: MarkerApprearance,
-  count: number,
-) => `<svg fill="none" viewBox="0 0 32 32" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+export const getClusterSvg = (appearance: MarkerApprearance, count: number) =>
+  `<svg tabindex="0" fill="none" role="button" aria-label="${count} sites cluster" viewBox="0 0 32 32" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
     <rect
       class=${classNames("site-marker-cluster__body", { "has-selected": appearance === "selected" })}
       fill="#E95420"
@@ -70,8 +55,8 @@ const getClusterSvg = (
       x="0.5"
       y="0.5"
     />
-    <span class="site-marker-cluster__text">${count}</span>
-  </svg>`;
+  </svg>
+  <span class="site-marker-cluster__text">${count}</span>`;
 
 export const getClusterSize = (count: number, maxCount: number) => {
   const sizeModifiers = [
@@ -86,11 +71,9 @@ export const getClusterSize = (count: number, maxCount: number) => {
 
 export const createCustomClusterIcon = function (appearance: MarkerApprearance, count: number, maxCount = 100) {
   const iconSize = getClusterSize(count, maxCount);
-  const html = getClusterSvg(appearance, count);
+  const svg = getClusterSvg(appearance, count);
 
-  return new L.DivIcon({
-    html,
-    className: "site-marker-cluster",
-    iconSize: L.point(iconSize, iconSize, true),
-  });
+  return createElementFromHTML(
+    `<div class="site-marker-cluster" style="width: ${iconSize}px; height: ${iconSize}px;">${svg}</div>`,
+  );
 };

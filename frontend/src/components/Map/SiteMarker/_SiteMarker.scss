@@ -1,22 +1,25 @@
 .site-marker {
+  display: block;
+  cursor: pointer;
+
   @include vf-transition(transform, fast, out);
 
   transition-delay: 750ms;
   transform-origin: bottom center;
-
-  &:hover {
-    transform: scale(1.1);
-
-    .site-marker__body {
-      fill: adjust-color($color-brand, $lightness: -$hover-background-opacity-percentage);
-    }
-  }
 
   .site-marker__body {
     fill: $color-brand;
     stroke: $color-light;
     transition-delay: 750ms;
   }
+
+    &:hover {
+      transform: scale(1.1);
+  
+      .site-marker__body {
+        fill: adjust-color($color-brand, $lightness: -$hover-background-opacity-percentage);
+      }
+    }
 
   .site-marker__circle {
     fill: $color-light;
@@ -31,5 +34,33 @@
     .site-marker__circle {
       fill: black;
     }
+  }
+}
+
+.site-marker-cluster {
+  cursor: pointer;
+
+  // cluster size change transition
+  transition: all 250ms;
+
+  .site-marker-cluster__body {
+    stroke: $color-light;
+  }
+
+  .site-marker-cluster__text {
+    text-align: center;
+    color: white;
+    left: 0;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    line-height: 1;
+    width: 100%;
+    font-size: 1rem;
+
+    // Adjust margin-top to simulate correct leading and center the text visually
+    margin-top: -1px;
   }
 }

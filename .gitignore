@@ -26,6 +26,7 @@ logs
 /frontend/.yarn
 /frontend/.stylelintcache
 *.local
+*.pmtiles
 
 # dotrun
 .docker-project

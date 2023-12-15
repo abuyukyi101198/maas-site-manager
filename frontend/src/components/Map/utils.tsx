@@ -1,9 +1,11 @@
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 
+import type { SiteMarkerType } from "./types";
+
 /**
  * Renders the React element to an HTML string synchronously.
- * This is required as Leaflet only accepts HTML.
+ * This is required as MapLibreGL only accepts HTML.
  * Note: this should be used cautiously and sparingly.
  * @see {@link https://react.dev/reference/react-dom/server/renderToString#removing-rendertostring-from-the-client-code}
  */
@@ -17,3 +19,24 @@ export const renderToHtmlString = (element: React.ReactNode): string => {
 
   return div.innerHTML;
 };
+
+export const createElementFromHTML = (htmlString: string): HTMLDivElement => {
+  const div = document.createElement("div");
+  div.innerHTML = htmlString.trim();
+  return div;
+};
+
+export const getGeoJson = (markers: SiteMarkerType[]): GeoJSON.FeatureCollection => ({
+  type: "FeatureCollection",
+  features: markers.map((marker) => ({
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      // longitude, latitude
+      coordinates: [marker.position[1], marker.position[0]],
+    },
+    properties: {
+      id: marker.id,
+    },
+  })),
+});
