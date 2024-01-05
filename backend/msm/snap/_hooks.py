@@ -26,7 +26,7 @@ def configure_hook(snap: Snap) -> None:
 
 def _validate_settings(settings: Settings) -> None:
     # check connection to the database and server version
-    db = Database(settings.db_dsn)
+    db = Database(settings.db_dsn())
     asyncio.run(db.execute_in_transaction(check_server_version))
 
 

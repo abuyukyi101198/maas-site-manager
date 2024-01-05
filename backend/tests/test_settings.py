@@ -25,3 +25,18 @@ class TestSettings:
         settings = Settings()
         assert settings.db_user == "myuser"
         assert settings.db_name == "mydb"
+
+    @pytest.mark.parametrize(
+        "async_engine,engine",
+        [(True, "postgresql+asyncpg"), (False, "postgresql+psycopg")],
+    )
+    def test_db_dsn(
+        self, monkeypatch: pytest.MonkeyPatch, async_engine: bool, engine: str
+    ) -> None:
+        monkeypatch.setenv("MSM_DB_USER", "myuser")
+        monkeypatch.setenv("MSM_DB_NAME", "mydb")
+        settings = Settings()
+        assert (
+            str(settings.db_dsn(async_engine=async_engine))
+            == f"{engine}://myuser@localhost:5432/mydb"
+        )

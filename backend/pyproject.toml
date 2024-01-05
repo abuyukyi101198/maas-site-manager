@@ -24,6 +24,7 @@ dynamic = [
   "version",
 ]
 dependencies = [
+  "alembic[tz]",
   "fastapi",
   "Jinja2",
   "passlib[bcrypt]",
@@ -34,7 +35,7 @@ dependencies = [
   "python-multipart",
   "pytz",
   "snap-helpers",
-  "SQLAlchemy[postgresql_asyncpg]",
+  "SQLAlchemy[postgresql_asyncpg,postgresql_psycopg]",
   "StrEnum", # emulate enum.StrEnum, which is available in Python3.11
   "ujson", # faster JSON encoding/decoding (for fastapi)
   "uvicorn[standard]",
@@ -58,7 +59,11 @@ msm-sampledata = "msm.cmd.sampledata:script"
 configure = "msm.snap:configure_hook"
 
 [tool.setuptools.package-data]
-msm = ["snap/templates/*"]
+msm = [
+  "db/alembic/alembic.ini",
+  "db/alembic/script.py.mako",
+  "snap/templates/*",
+]
 
 [tool.setuptools.dynamic]
 version = {attr = "msm.__version__"}
@@ -81,6 +86,7 @@ skip_covered = true
 
 [tool.coverage.run]
 source = ["msm"]
+omit = ["msm/db/alembic/env.py"]
 
 [tool.mypy]
 install_types = true

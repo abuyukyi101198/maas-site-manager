@@ -70,7 +70,7 @@ def create_app(
     """Create the API (FastAPI) ASGI application."""
     settings = Settings()
     if not db:
-        db = Database(settings.db_dsn)
+        db = Database(settings.db_dsn())
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:

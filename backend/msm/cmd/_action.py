@@ -76,7 +76,7 @@ class DatabaseAction(AsyncAction):
 
     @cached_property
     def db(self) -> Database:
-        return Database(self.settings.db_dsn)
+        return Database(self.settings.db_dsn())
 
     @asynccontextmanager
     async def database_connection(self) -> AsyncIterator[AsyncConnection]:

@@ -83,14 +83,13 @@ class Settings(BaseSettings):
         )
         return (*sources, SnapSettingsSource(settings_cls))
 
-    @property
-    def db_dsn(self) -> URL:
+    def db_dsn(self, async_engine: bool = True) -> URL:
         """The DSN, from configured settings."""
         password = (
             self.db_password.get_secret_value() if self.db_password else None
         )
         return URL.create(
-            "postgresql+asyncpg",
+            "postgresql+asyncpg" if async_engine else "postgresql+psycopg",
             host=self.db_host,
             port=self.db_port,
             database=self.db_name,
