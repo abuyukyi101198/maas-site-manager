@@ -14,6 +14,7 @@ export type Sidebar =
   | "uploadImage"
   | "downloadImages"
   | "deleteImages"
+  | "deleteOrKeepImages"
   | null;
 export const AppLayoutContext = createContext<{
   previousSidebar: Sidebar;

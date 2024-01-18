@@ -11,6 +11,9 @@ import Logout from "@/routes/logout";
 import PersonalDetails from "@/routes/personalDetails";
 import Requests from "@/routes/requests";
 import Settings from "@/routes/settings";
+import ImagesMaas from "@/routes/settings/images/maas";
+import ImageServer from "@/routes/settings/images/server";
+import ImageTransfer from "@/routes/settings/images/transfer";
 import Sites from "@/routes/sites";
 import List from "@/routes/sites/list";
 import Map from "@/routes/sites/map";
@@ -113,6 +116,33 @@ export const routes = createRoutesFromElements(
         }
         path="map"
       />
+      <Route path="images">
+        <Route element={<RequireLogin />} index loader={() => redirect("/settings/images/server")} />
+        <Route
+          element={
+            <RequireLogin>
+              <ImageServer />
+            </RequireLogin>
+          }
+          path="server"
+        />
+        <Route
+          element={
+            <RequireLogin>
+              <ImagesMaas />
+            </RequireLogin>
+          }
+          path="maas"
+        />
+        <Route
+          element={
+            <RequireLogin>
+              <ImageTransfer />
+            </RequireLogin>
+          }
+          path="transfer"
+        />
+      </Route>
     </Route>
     <Route
       element={

@@ -8,6 +8,7 @@ import {
   accessTokenFactory,
   userFactory,
   imageFactory,
+  settingsFactory,
 } from "./factories";
 
 import type { GetSitesQueryParams, SortDirection, SitesSortKey, UserSortKey } from "@/api/handlers";
@@ -318,6 +319,25 @@ export const createMockImagesResolver =
 
 export const getImages = rest.get(apiUrls.images, createMockImagesResolver(imageFactory.buildList(10)));
 
+type SettingsResponseResolver = ResponseResolver<RestRequest, typeof restContext>;
+
+const defaultSettings = settingsFactory.build();
+export const createMockGetSettingsResolver =
+  (settings = defaultSettings): SettingsResponseResolver =>
+  (req, res, ctx) => {
+    return res(ctx.json(settings));
+  };
+
+export const createMockPatchSettingsResolver = (): SettingsResponseResolver => async (req, res, ctx) => {
+  const body = await req.json();
+  const updatedSettings = { ...defaultSettings, ...body };
+  return res(ctx.json(updatedSettings));
+};
+
+const getSettings = rest.get(apiUrls.settings, createMockGetSettingsResolver());
+
+const patchSettings = rest.patch(apiUrls.settings, createMockPatchSettingsResolver());
+
 export const allResolvers = [
   postLogin,
   getSites,
@@ -340,5 +360,7 @@ export const allResolvers = [
   deleteUser,
   getTokensExport,
   getImages,
+  getSettings,
+  patchSettings,
   ...(import.meta.env.VITE_USE_MOCK_TILES === "true" ? [tileHandler] : []),
 ];

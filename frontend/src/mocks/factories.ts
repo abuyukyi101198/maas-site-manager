@@ -3,6 +3,7 @@ import { sub, add } from "date-fns";
 import { Factory } from "fishery";
 import { uniqueNamesGenerator, adjectives, colors, animals, starWars } from "unique-names-generator";
 
+import type { TSettings } from "@/api/handlers";
 import type { Token } from "@/api/types";
 import type {
   PendingSite,
@@ -171,6 +172,14 @@ export type Image = {
   is_custom_image: boolean;
   last_synced: Date;
 };
+
+// TODO: replace with actual Settings type
+// once settings api is updated
+// https://warthogs.atlassian.net/browse/MAASENG-2594
+export const settingsFactory = Factory.define<TSettings>(() => ({
+  service_url: "http://localhost:3000",
+  images_connect_to_maas: true,
+}));
 
 export const imageFactory = Factory.define<Image>(() => ({
   id: Math.floor(Math.random() * 1000),

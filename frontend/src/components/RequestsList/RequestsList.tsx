@@ -1,5 +1,4 @@
 import { ContentSection } from "@canonical/maas-react-components";
-import { Col, Row } from "@canonical/react-components";
 
 import EnrollmentActions from "@/components/EnrollmentActions";
 import RequestsTable from "@/components/RequestsTable";
@@ -19,25 +18,19 @@ const Requests: React.FC = () => {
     <ContentSection>
       <ContentSection.Header>
         <EnrollmentActions />
-        <Row>
-          <Col size={12}>
-            <PaginationBar
-              currentPage={page}
-              dataContext="open enrolment requests"
-              handlePageSizeChange={handlePageSizeChange}
-              isPending={isPending}
-              itemsPerPage={size}
-              setCurrentPage={setPage}
-              totalItems={data?.total || 0}
-            />
-          </Col>
-        </Row>
+        <PaginationBar
+          currentPage={page}
+          dataContext="open enrolment requests"
+          handlePageSizeChange={handlePageSizeChange}
+          isPending={isPending}
+          itemsPerPage={size}
+          setCurrentPage={setPage}
+          totalItems={data?.total || 0}
+        />
       </ContentSection.Header>
-      <Row>
-        <Col size={12}>
-          <RequestsTable data={data} error={error} isPending={isPending} />
-        </Col>
-      </Row>
+      <ContentSection.Content>
+        <RequestsTable data={data} error={error} isPending={isPending} />
+      </ContentSection.Content>
     </ContentSection>
   );
 };

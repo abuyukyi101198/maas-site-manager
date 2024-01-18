@@ -1,11 +1,11 @@
 import { ContentSection } from "@canonical/maas-react-components";
 
-const UploadImage = () => {
+const ImageTransfer = () => {
   return (
     <ContentSection>
-      <ContentSection.Title>Upload image</ContentSection.Title>
+      <ContentSection.Title>Transfer images</ContentSection.Title>
     </ContentSection>
   );
 };
 
-export default UploadImage;
+export default ImageTransfer;

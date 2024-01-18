@@ -7,9 +7,10 @@ import { TextEncoder as NodeTextEncoder, TextDecoder as NodeTextDecoder } from "
 import { AbortSignal as NodeAbortSignal, AbortController as NodeAbortController } from "abort-controller";
 import "vitest-canvas-mock";
 import "vitest-webgl-canvas-mock";
-import { mockResizeObserver } from "jsdom-testing-mocks";
+import { mockResizeObserver, configMocks } from "jsdom-testing-mocks";
 
 config();
+configMocks({ beforeEach, afterEach, afterAll });
 
 // extends Vitest's expect method with methods from react-testing-library
 expect.extend(matchers);

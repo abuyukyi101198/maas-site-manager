@@ -1,4 +1,5 @@
-import { Button, Col, Input, Label, Notification, Row } from "@canonical/react-components";
+import { ContentSection } from "@canonical/maas-react-components";
+import { Button, Input, Label, Notification } from "@canonical/react-components";
 import { useQueryClient } from "@tanstack/react-query";
 import type { FormikHelpers } from "formik";
 import { Field, Form, Formik } from "formik";
@@ -50,57 +51,50 @@ const PersonalDetailsUpdate = () => {
   };
 
   return (
-    <Row>
+    <ContentSection variant="narrow">
+      <ContentSection.Title>Personal Details</ContentSection.Title>
       {updateUser.isSuccess && (
-        <Col size={12}>
-          <Notification severity="positive" title="Details Updated">
-            Your details were updated successfully
-          </Notification>
-        </Col>
+        <Notification severity="positive" title="Details Updated">
+          Your details were updated successfully
+        </Notification>
       )}
-      <Col size={6}>
-        <Formik
-          enableReinitialize
-          initialValues={initialValues}
-          onSubmit={handleSubmit}
-          validateOnBlur={false}
-          validationSchema={PersonalDetailsUpdateSchema}
-        >
-          {({ isSubmitting, errors, touched, isValid, dirty }) => (
-            <Form aria-label="update personal details" aria-labelledby={headingId} noValidate>
-              <Label className="is-required" htmlFor={usernameId}>
-                Username
-              </Label>
-              <Field
-                as={Input}
-                error={touched.username && errors.username}
-                id={usernameId}
-                name="username"
-                required
-                type="text"
-              />
-              <Label className="" htmlFor={nameId}>
-                Full name (optional)
-              </Label>
-              <Field
-                as={Input}
-                error={touched.full_name && errors.full_name}
-                id={nameId}
-                name="full_name"
-                type="text"
-              />
-              <Label className="is-required" htmlFor={emailId}>
-                Email Address
-              </Label>
-              <Field as={Input} error={touched.email && errors.email} id={emailId} name="email" required type="email" />
+      <Formik
+        enableReinitialize
+        initialValues={initialValues}
+        onSubmit={handleSubmit}
+        validateOnBlur={false}
+        validationSchema={PersonalDetailsUpdateSchema}
+      >
+        {({ isSubmitting, errors, touched, isValid, dirty }) => (
+          <Form aria-label="update personal details" aria-labelledby={headingId} noValidate>
+            <Label className="is-required" htmlFor={usernameId}>
+              Username
+            </Label>
+            <Field
+              as={Input}
+              error={touched.username && errors.username}
+              id={usernameId}
+              name="username"
+              required
+              type="text"
+            />
+            <Label className="" htmlFor={nameId}>
+              Full name (optional)
+            </Label>
+            <Field as={Input} error={touched.full_name && errors.full_name} id={nameId} name="full_name" type="text" />
+            <Label className="is-required" htmlFor={emailId}>
+              Email Address
+            </Label>
+            <Field as={Input} error={touched.email && errors.email} id={emailId} name="email" required type="email" />
+            <ContentSection.Footer>
               <Button appearance="positive" disabled={!dirty || !isValid || isSubmitting} type="submit">
                 Save
               </Button>
-            </Form>
-          )}
-        </Formik>
-      </Col>
-    </Row>
+            </ContentSection.Footer>
+          </Form>
+        )}
+      </Formik>
+    </ContentSection>
   );
 };
 

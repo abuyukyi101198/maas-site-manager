@@ -10,8 +10,10 @@ const createMockGetServer = (endpoint: string, resolver: ReturnType<typeof creat
   setupServer(rest.get(endpoint, resolver));
 const createMockPostServer = (endpoint: string, resolver: ReturnType<typeof createMockSitesResolver>) =>
   setupServer(rest.post(endpoint, resolver));
+const createMockPatchServer = (endpoint: string, resolver: ReturnType<typeof createMockSitesResolver>) =>
+  setupServer(rest.patch(endpoint, resolver));
 
 const mockSitesServer = createMockGetServer(apiUrls.sites, createMockSitesResolver());
 const mockPostTokensServer = createMockPostServer(apiUrls.tokens, createMockSitesResolver());
 
-export { createMockGetServer, createMockPostServer, mockSitesServer, mockPostTokensServer };
+export { createMockGetServer, createMockPostServer, createMockPatchServer, mockSitesServer, mockPostTokensServer };

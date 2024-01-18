@@ -4,13 +4,14 @@ import { Col, Row, useOnEscapePressed, usePrevious } from "@canonical/react-comp
 import classNames from "classnames";
 
 import DeleteImages from "@/components/DeleteImages";
+import DeleteOrKeepImages from "@/components/DeleteOrKeepImages";
 import DeleteUser from "@/components/DeleteUser";
 import DownloadImages from "@/components/DownloadImages";
 import EditSite from "@/components/EditSite";
 import RemoveSites from "@/components/RemoveSites";
 import SiteDetails from "@/components/SiteDetails";
 import SiteSelection from "@/components/SiteSelection/SiteSelection";
-import { UploadImage } from "@/components/UploadImage";
+import UploadImage from "@/components/UploadImage";
 import UserForm from "@/components/UserForm";
 import { useAppLayoutContext } from "@/context";
 import type { Sidebar } from "@/context/AppLayoutContext";
@@ -30,6 +31,7 @@ export const sidebarLabels: Record<NonNullable<Sidebar>, string> = {
   uploadImage: "Upload image",
   downloadImages: "Download images",
   deleteImages: "Delete images",
+  deleteOrKeepImages: "Delete images",
 };
 
 const mockSelectedSites = siteFactory.buildList(3);
@@ -50,6 +52,7 @@ export const sidebarComponent: Record<NonNullable<Sidebar>, React.FC> = {
   uploadImage: UploadImage,
   downloadImages: DownloadImages,
   deleteImages: DeleteImages,
+  deleteOrKeepImages: DeleteOrKeepImages,
 } as const;
 
 export const SidebarComponents = ({ sidebar }: { sidebar: NonNullable<Sidebar> }) => {

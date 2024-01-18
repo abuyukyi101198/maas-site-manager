@@ -1,6 +1,6 @@
-import { render, screen } from "@testing-library/react";
-
 import ErrorMessage from "./ErrorMessage";
+
+import { render, screen } from "@/utils/test-utils";
 
 it("renders the error message if error is an instance of Error", () => {
   const testError = new Error("Test error message");

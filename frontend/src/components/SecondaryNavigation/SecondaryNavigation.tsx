@@ -1,12 +1,12 @@
 import classNames from "classnames";
 
-import type { RoutePath } from "@/config/routes";
+import type { RoutePath, RouteTitle } from "@/config/routes";
 import useSecondaryNavContext from "@/hooks/useSecondaryNavContext";
 import { matchPath, Link, useLocation } from "@/utils/router";
 import type { Location } from "@/utils/router";
 
 export type NavItem = {
-  label: string;
+  label: RouteTitle;
   path?: RoutePath;
   items?: NavItem[];
 };
@@ -101,7 +101,7 @@ export type SecondaryNavContext = "settings" | "account";
 
 export type SecondaryNavInfoType = {
   [key in SecondaryNavContext]: {
-    title: string;
+    title: RouteTitle;
     navItems: NavItem[];
   };
 };
@@ -131,6 +131,20 @@ const secondaryNavInfo: SecondaryNavInfoType = {
       {
         label: "Map",
         path: "/settings/map",
+      },
+      {
+        label: "Images",
+        items: [
+          { path: "settings/images/server", label: "Image server" },
+          {
+            path: "settings/images/maas",
+            label: "maas.io",
+          },
+          {
+            path: "settings/images/transfer",
+            label: "Transfer images",
+          },
+        ],
       },
     ],
   },

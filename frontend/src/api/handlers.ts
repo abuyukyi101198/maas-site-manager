@@ -7,6 +7,8 @@ import type {
   PendingSitesPostRequest,
   Site,
   TokensPostRequest,
+  SettingsPatchRequest,
+  Settings,
 } from "@/api-client";
 import type { Image } from "@/mocks/factories";
 import { apiUrls } from "@/utils/test-urls";
@@ -17,6 +19,32 @@ export const postLogin = async (data: Body_post_v1_login_post) => {
   }
   try {
     const response = await apiClient.default.postV1LoginPost({ formData: data });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// TODO: replace with actual Settings type
+// once settings api is updated
+// https://warthogs.atlassian.net/browse/MAASENG-2594
+export type TSettings = Settings & { images_connect_to_maas: boolean };
+export const getSettings = async () => {
+  try {
+    const response = await apiClient.default.getV1SettingsGet();
+    return response as TSettings;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// TODO: replace with actual SettingsPatchRequest type
+// once settings api is updated
+// https://warthogs.atlassian.net/browse/MAASENG-2594
+export type TSettingsPatchRequest = SettingsPatchRequest & { images_connect_to_maas: boolean };
+export const updateSettings = async (data: TSettingsPatchRequest) => {
+  try {
+    const response = await apiClient.default.patchV1SettingsPatch({ requestBody: data });
     return response;
   } catch (error) {
     throw error;

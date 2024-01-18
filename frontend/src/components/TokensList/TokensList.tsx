@@ -1,5 +1,5 @@
 import { ContentSection, ExternalLink, MainToolbar } from "@canonical/maas-react-components";
-import { Button, Col, Row, Notification } from "@canonical/react-components";
+import { Button, Notification } from "@canonical/react-components";
 import pluralize from "pluralize";
 
 import TokensTable from "./components/TokensTable/TokensTable";
@@ -40,62 +40,46 @@ const TokensList = () => {
   return (
     <ContentSection>
       {tokensDeleteMutation.isSuccess && deletedTokensCount ? (
-        <Row>
-          <Col size={12}>
-            <Notification severity="information" title="Deleted">
-              {`${deletedTokensCount === 1 ? "An" : ""} ${pluralize(
-                "enrollment token",
-                deletedTokensCount,
-                deletedTokensCount > 1,
-              )} ${deletedTokensCount === 1 ? "was" : "were"} deleted.`}
-            </Notification>
-          </Col>
-        </Row>
+        <Notification severity="information" title="Deleted">
+          {`${deletedTokensCount === 1 ? "An" : ""} ${pluralize(
+            "enrollment token",
+            deletedTokensCount,
+            deletedTokensCount > 1,
+          )} ${deletedTokensCount === 1 ? "was" : "were"} deleted.`}
+        </Notification>
       ) : null}
       {exportTokensError ? (
-        <Row>
-          <Col size={12}>
-            <Notification severity="negative" title="Error">
-              <ErrorMessage error={exportTokensError} />
-            </Notification>
-          </Col>
-        </Row>
+        <Notification severity="negative" title="Error">
+          <ErrorMessage error={exportTokensError} />
+        </Notification>
       ) : null}
       {tokensDeleteMutation.isError ? (
-        <Row>
-          <Col size={12}>
-            <Notification severity="negative" title="Error">
-              <ErrorMessage
-                defaultMessage="An error occured while deleting the tokens"
-                error={tokensDeleteMutation.error}
-              />
-            </Notification>
-          </Col>
-        </Row>
+        <Notification severity="negative" title="Error">
+          <ErrorMessage
+            defaultMessage="An error occured while deleting the tokens"
+            error={tokensDeleteMutation.error}
+          />
+        </Notification>
       ) : null}
       <ContentSection.Header className="tokens-list-header">
-        <Row>
-          <Col size={12}>
-            <p className="tokens-list-instructions">
-              Follow the enrolment steps outlined in the{" "}
-              {/* TODO: Update link once documentation is live https://warthogs.atlassian.net/browse/MAASENG-1585 */}
-              <ExternalLink to={docsUrls.enrollmentRequest}>documentation</ExternalLink> to enrol new sites. Once an
-              enrolment request was made use the following certificate data to compare against the certificate shown in
-              the enrolment request:
-            </p>
-            {/* TODO: Add actual certificate here once endpoint is ready https://warthogs.atlassian.net/browse/MAASENG-1584 */}
-            <code className="tokens-list-certificate">
-              <span>CN:</span>
-              <span>sitemanager.example.com</span>
-              <span>Expiration date:</span>
-              <span>Thu, 29 Jul. 2035</span>
-              <span>Fingerprint:</span>
-              <span>15cf96e8bad3eea3ef3c10badcd88f66fe236e0de99027451120bc7cd69c0012</span>
-              <span>Issued by:</span>
-              <span>Let's Encrypt</span>
-            </code>
-          </Col>
-        </Row>
+        <p className="tokens-list-instructions">
+          Follow the enrolment steps outlined in the{" "}
+          {/* TODO: Update link once documentation is live https://warthogs.atlassian.net/browse/MAASENG-1585 */}
+          <ExternalLink to={docsUrls.enrollmentRequest}>documentation</ExternalLink> to enrol new sites. Once an
+          enrolment request was made use the following certificate data to compare against the certificate shown in the
+          enrolment request:
+        </p>
+        {/* TODO: Add actual certificate here once endpoint is ready https://warthogs.atlassian.net/browse/MAASENG-1584 */}
+        <code className="tokens-list-certificate">
+          <span>CN:</span>
+          <span>sitemanager.example.com</span>
+          <span>Expiration date:</span>
+          <span>Thu, 29 Jul. 2035</span>
+          <span>Fingerprint:</span>
+          <span>15cf96e8bad3eea3ef3c10badcd88f66fe236e0de99027451120bc7cd69c0012</span>
+          <span>Issued by:</span>
+          <span>Let's Encrypt</span>
+        </code>
         <MainToolbar>
           <MainToolbar.Controls>
             <Button disabled={isExportTokensLoading} onClick={exportTokens}>

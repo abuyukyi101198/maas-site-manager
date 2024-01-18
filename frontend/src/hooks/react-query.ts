@@ -22,6 +22,8 @@ import {
   deleteSites,
   updateSite,
   getImages,
+  getSettings,
+  updateSettings,
 } from "@/api/handlers";
 import type {
   PendingSitesPostRequest,
@@ -204,6 +206,28 @@ export const useEnrollmentRequestsMutation = (options: MutateOptions<unknown, un
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ["requests"] });
       options?.onSuccess?.(...args);
+    },
+  });
+};
+
+export const useSettingsQuery = () =>
+  useQuery({
+    queryKey: ["settings"],
+    queryFn: getSettings,
+    placeholderData: keepPreviousData,
+    refetchInterval,
+  });
+
+export const useUpdateSettingsMutation = (
+  options?: Omit<UseMutationOptions<any, unknown, Parameters<typeof updateSettings>[0], unknown>, "mutationFn">,
+) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: updateSettings,
+    ...options,
+    onSuccess: (...args) => {
+      options?.onSuccess?.(...args);
+      queryClient.invalidateQueries({ queryKey: ["settings"] });
     },
   });
 };

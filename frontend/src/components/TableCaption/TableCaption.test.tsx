@@ -1,6 +1,6 @@
-import { render, screen } from "@testing-library/react";
-
 import TableCaption from "./TableCaption";
+
+import { render, screen } from "@/utils/test-utils";
 
 test("TableCaption displays children as caption", () => {
   render(
