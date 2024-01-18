@@ -65,6 +65,10 @@ beforeAll(() => {
     });
   }
 
+  // simulate reduced motion enabled
+  vi.stubGlobal("matchMedia", (query: string) =>
+    query === "(prefers-reduced-motion)" ? { matches: true } : { matches: false },
+  );
   vi.stubGlobal("AbortController", NodeAbortController);
 });
 

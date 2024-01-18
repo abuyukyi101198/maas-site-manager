@@ -45,6 +45,14 @@ const MapContainer: React.FC<MapContainerProps> = ({ children, initialOptions, .
   }, [map, minZoom]);
 
   useEffect(() => {
+    if (map) {
+      map.on("load", () => {
+        map.getCanvas().className += " is-visible";
+      });
+    }
+  }, [map, minZoom]);
+
+  useEffect(() => {
     if (!map) return;
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
     return () => {

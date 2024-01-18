@@ -1,3 +1,9 @@
+@import "@/styles/mixins";
+
+.maplibregl-marker {
+  @include fade-in;
+}
+
 .site-marker {
   display: block;
   cursor: pointer;

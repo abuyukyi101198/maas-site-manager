@@ -1,0 +1,9 @@
+  @mixin fade-in {
+    opacity: 0;
+
+    @include vf-transition(opacity, fast, out);
+
+    &.is-visible {
+      opacity: 1;
+    }
+  }

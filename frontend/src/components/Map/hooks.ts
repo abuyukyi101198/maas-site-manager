@@ -8,7 +8,7 @@ import { useMap } from "@/context/MapContext";
 
 type Feature = maplibregl.MapGeoJSONFeature;
 type Features = maplibregl.MapGeoJSONFeature[];
-type Markers = Record<number, maplibregl.Marker>;
+type Markers = Map<number, maplibregl.Marker>;
 
 export type MarkerProps = {
   marker: maplibregl.Marker;
@@ -37,8 +37,8 @@ type UseMarkers = {
 
 export const useMarkers = ({ eventHandlers }: UseMarkers) => {
   const map = useMap();
-  const markers = useRef<Markers>({});
-  const markersOnScreen = useRef<Markers>({});
+  const markers = useRef<Markers>(new Map());
+  const markersOnScreen = useRef<Set<number>>(new Set());
 
   const getClustersMaxCount = useCallback((features: Features) => {
     return features.reduce((maxCount, { properties }) => {
@@ -122,11 +122,26 @@ export const useMarkers = ({ eventHandlers }: UseMarkers) => {
     [handleClusterClick],
   );
 
-  const removeUnusedMarkers = useCallback((markersToDelete: Markers) => {
-    for (const id in markersOnScreen.current) {
-      if (!markersToDelete[id]) {
-        markersOnScreen.current[id].remove();
-        delete markersOnScreen.current[id];
+  const removeMarker = (id: number) => {
+    markers.current.get(id)?.remove();
+    markers.current.delete(id);
+    markersOnScreen.current.delete(id);
+  };
+
+  const removeUnusedMarkers = useCallback((newMarkers: Markers) => {
+    for (const [id] of markers.current) {
+      if (!newMarkers.has(id)) {
+        markers.current.get(id)?.removeClassName("is-visible");
+        requestAnimationFrame(() => {
+          if (!matchMedia("(prefers-reduced-motion)").matches) {
+            markers.current
+              .get(id)
+              ?.getElement()
+              .addEventListener("transitionend", () => removeMarker(Number(id)));
+          } else {
+            removeMarker(Number(id));
+          }
+        });
       }
     }
   }, []);
@@ -144,7 +159,7 @@ export const useMarkers = ({ eventHandlers }: UseMarkers) => {
 
   const generateMarkers = useCallback(
     ({ features, maxCount }: { features: Features } & ClusterProps) => {
-      const newMarkers: Markers = {};
+      const newMarkers: Markers = new Map();
       for (const { geometry, properties } of features) {
         const coords =
           "coordinates" in geometry && geometry.coordinates.length === 2
@@ -154,16 +169,18 @@ export const useMarkers = ({ eventHandlers }: UseMarkers) => {
         if (!coords) {
           throw new Error(`Error: The feature does not have coordinates: ${JSON.stringify({ geometry, properties })}`);
         }
-        let marker = markers.current[id];
+        let marker = markers.current.get(id);
         if (!marker && coords.length === 2) {
           marker = properties.cluster
             ? createNewClusterMarker({ coords, properties, maxCount })
             : createNewMarker({ coords, properties });
-          markers.current[id] = marker;
-        } else if (properties.cluster) {
+          markers.current.set(id, marker);
+        } else if (marker && properties.cluster) {
           marker = updateClusterMarker({ marker, properties, maxCount });
         }
-        newMarkers[id] = marker;
+        if (marker) {
+          newMarkers.set(id, marker);
+        }
       }
       return newMarkers;
     },
@@ -172,12 +189,16 @@ export const useMarkers = ({ eventHandlers }: UseMarkers) => {
 
   const renderMarkers = useCallback(
     (newMarkers: Markers) => {
-      for (const id in newMarkers) {
-        if (!markersOnScreen.current[id]) {
-          newMarkers[id].addTo(map);
+      for (const [id] of newMarkers) {
+        if (id && !markersOnScreen.current.has(id)) {
+          newMarkers.get(id)?.removeClassName("is-visible");
+          newMarkers.get(id)?.addTo(map);
+          markersOnScreen.current.add(id);
+          requestAnimationFrame(() => {
+            newMarkers.get(id)?.addClassName("is-visible");
+          });
         }
       }
-      markersOnScreen.current = newMarkers;
     },
     [map],
   );
@@ -216,8 +237,6 @@ export const useMarkers = ({ eventHandlers }: UseMarkers) => {
       }
     };
   }, [map, updateMarkers, throttledUpdateMarkers]);
-
-  return markersOnScreen.current;
 };
 
 export const usePopup = () => {

@@ -1,4 +1,5 @@
 @use "sass:math";
+@import "@/styles/mixins";
 
 $grid-margin-small: map_get($grid-margin-widths, small);
 $grid-margin-default: map_get($grid-margin-widths, default);
@@ -29,6 +30,10 @@ $grid-margin-default: map_get($grid-margin-widths, default);
   .maplibregl-canvas {
     font-family: inherit;
     cursor: inherit;
+  }
+
+  .maplibregl-canvas {
+    @include fade-in;
   }
 }
 
@@ -75,6 +80,6 @@ $grid-margin-default: map_get($grid-margin-widths, default);
   margin: 0;
 }
 
-.maplibregl-ctrl-attrib-inner {
+.maplibregl-ctrl-attrib-inner a {
   color: #000
 }
