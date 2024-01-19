@@ -25,6 +25,7 @@ logs
 /frontend/coverage
 /frontend/.yarn
 /frontend/.stylelintcache
+/frontend/public/assets/fonts/Noto Sans*
 *.local
 *.pmtiles
 

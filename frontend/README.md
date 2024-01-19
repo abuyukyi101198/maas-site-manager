@@ -67,7 +67,7 @@ Run `yarn upgrade-all` to attempt to upgrade all packages to latest version.
 
 ### Fonts
 
-[Ubuntu Sans Regular](https://github.com/canonical/Ubuntu-fonts/blob/main/fonts/ttf/UbuntuSans-Regular.ttf) conversion into files compatible with MapLibre GL JS (located in `/frontend/public/Ubuntu Sans Regular/0-255.pbf`) is done using [font-maker](https://github.com/maplibre/font-maker).
+Noto Sans fonts in pbf format compatible with MapLibre GL JS (located in `/frontend/public/`) are sourced from  [protomaps](https://github.com/protomaps/basemaps-assets/tree/main/fonts).
 
 ### Tiles
 

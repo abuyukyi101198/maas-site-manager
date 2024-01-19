@@ -3,10 +3,10 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "predev": "yarn run download-pmtiles",
+    "predev": "yarn run download-map-assets",
     "dev": "vite",
-    "prebuild": "yarn run download-pmtiles",
-    "download-pmtiles": "if [ \"$CI\" != \"true\" ] && [ ! -f public/natural_earth.vector.pmtiles ]; then wget https://github.com/petermakowski/pmtiles/raw/main/natural_earth.vector.pmtiles -P public/; fi",
+    "prebuild": "yarn run download-map-assets",
+    "download-map-assets": "chmod +x ./scripts/download-map-assets.sh && ./scripts/download-map-assets.sh",
     "build": "tsc && vite build",
     "test": "vitest",
     "coverage": "vitest run --coverage",
