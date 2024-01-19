@@ -22,7 +22,6 @@ from ....schema import (
     SortParam,
     SortParamParser,
     TimeZone,
-    pagination_params,
 )
 from ....service import (
     InvalidPendingSites,
@@ -64,7 +63,7 @@ class PendingSitesGetResponse(PaginatedResults):
 async def get_pending(
     services: Annotated[ServiceCollection, Depends(services)],
     authenticated_user: Annotated[models.User, Depends(authenticated_user)],
-    pagination_params: Annotated[PaginationParams, Depends(pagination_params)],
+    pagination_params: Annotated[PaginationParams, Depends()],
 ) -> PendingSitesGetResponse:
     """Return pending sites."""
     total, results = await services.sites.get_pending(
@@ -117,7 +116,7 @@ class SitesGetResponse(PaginatedResults):
 async def get(
     services: Annotated[ServiceCollection, Depends(services)],
     authenticated_user: Annotated[models.User, Depends(authenticated_user)],
-    pagination_params: Annotated[PaginationParams, Depends(pagination_params)],
+    pagination_params: Annotated[PaginationParams, Depends()],
     filter_params: Annotated[
         SiteFilterParams, Depends(site_filter_parameters)
     ],

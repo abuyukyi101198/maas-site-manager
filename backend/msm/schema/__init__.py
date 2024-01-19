@@ -4,7 +4,6 @@ from ._fields import TimeZone
 from ._pagination import (
     PaginatedResults,
     PaginationParams,
-    pagination_params,
 )
 from ._search import (
     SearchTextParam,
@@ -18,7 +17,6 @@ from ._sorting import (
 __all__ = [
     "PaginatedResults",
     "PaginationParams",
-    "pagination_params",
     "SortParam",
     "SortParamParser",
     "SearchTextParam",

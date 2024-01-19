@@ -15,7 +15,6 @@ from ....db.models import (
 from ....schema import (
     PaginatedResults,
     PaginationParams,
-    pagination_params,
 )
 from ....service import ServiceCollection
 from ..._csv import CSVResponse
@@ -38,7 +37,7 @@ class TokensGetResponse(PaginatedResults):
 async def get(
     services: Annotated[ServiceCollection, Depends(services)],
     authenticated_user: Annotated[User, Depends(authenticated_user)],
-    pagination_params: Annotated[PaginationParams, Depends(pagination_params)],
+    pagination_params: Annotated[PaginationParams, Depends()],
 ) -> TokensGetResponse:
     """Return all tokens."""
     total, results = await services.tokens.get(

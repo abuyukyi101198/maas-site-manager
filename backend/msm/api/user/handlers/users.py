@@ -23,7 +23,6 @@ from ....schema import (
     SearchTextParam,
     SortParam,
     SortParamParser,
-    pagination_params,
     search_text_param,
 )
 from ....service import ServiceCollection
@@ -76,7 +75,7 @@ class UsersGetResponse(PaginatedResults):
 async def get(
     services: Annotated[ServiceCollection, Depends(services)],
     authenticated_admin: Annotated[models.User, Depends(authenticated_admin)],
-    pagination_params: Annotated[PaginationParams, Depends(pagination_params)],
+    pagination_params: Annotated[PaginationParams, Depends()],
     filter_params: Annotated[UserFilterParams, Depends(user_filter_params)],
     sort_params: Annotated[list[SortParam], Depends(user_sort_params)],
     search_text: Annotated[SearchTextParam, Depends(search_text_param)],

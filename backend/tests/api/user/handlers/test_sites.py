@@ -70,6 +70,15 @@ class TestSitesGetHandler:
             "items": details[1:],
         }
 
+    @pytest.mark.parametrize(
+        "page,size", [(1, 0), (0, 1), (-1, -1), (1, 1001)]
+    )
+    async def test_get_422(
+        self, user_client: Client, page: int, size: int, factory: Factory
+    ) -> None:
+        paginated = await user_client.get(f"/sites?page={page}&size={size}")
+        assert paginated.status_code == 422
+
     async def test_only_accepted(
         self, user_client: Client, factory: Factory
     ) -> None:
