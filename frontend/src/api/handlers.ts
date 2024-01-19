@@ -10,7 +10,7 @@ import type {
   SettingsPatchRequest,
   Settings,
 } from "@/api-client";
-import type { Image } from "@/mocks/factories";
+import type { Image, UpstreamImage } from "@/mocks/factories";
 import { apiUrls } from "@/utils/test-urls";
 
 export const postLogin = async (data: Body_post_v1_login_post) => {
@@ -215,4 +215,65 @@ export const getImages = async (params: Record<string, number>) => {
   });
   const data = (await response.json()) as { items: Image[]; page: number; total: number; size: number };
   return data;
+};
+
+// TODO: replace with api client once API supports it https://warthogs.atlassian.net/browse/MAASENG-2569
+export const getUpstreamImages = async (params: Record<string, number>) => {
+  let stringParams: Record<string, string> = {};
+  for (const [key, value] of Object.entries(params)) {
+    stringParams[key] = String(value);
+  }
+  const response = await fetch(`${apiUrls.upstreamImages}?${new URLSearchParams(stringParams)}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  const data = (await response.json()) as { items: UpstreamImage[]; page: number; total: number; size: number };
+  return data;
+};
+
+export type UpstreamImageSource = {
+  upstreamSource: string;
+  keepUpdated: boolean;
+  credentials: string;
+};
+
+// TODO: replace with api client once API supports it https://warthogs.atlassian.net/browse/MAASENG-2569
+export const updateUpstreamImageSource = async (payload: UpstreamImageSource) => {
+  try {
+    const response = await fetch(apiUrls.upstreamImageSource, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export type SelectUpstreamImagesPayload = {
+  id: UpstreamImage["id"];
+  download: boolean;
+};
+
+// TODO: replace with api client once API supports it https://warthogs.atlassian.net/browse/MAASENG-2569
+export const selectUpstreamImages = async (payload: SelectUpstreamImagesPayload[]) => {
+  try {
+    const response = await fetch(apiUrls.upstreamImages, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    return response;
+  } catch (error) {
+    throw error;
+  }
 };

@@ -173,6 +173,9 @@ export type Image = {
   last_synced: Date;
 };
 
+// TODO: replace with auto-generated types from the API client https://warthogs.atlassian.net/browse/MAASENG-2569
+export type UpstreamImage = Pick<Image, "id" | "release" | "architecture" | "name" | "size">;
+
 // TODO: replace with actual Settings type
 // once settings api is updated
 // https://warthogs.atlassian.net/browse/MAASENG-2594
@@ -191,4 +194,12 @@ export const imageFactory = Factory.define<Image>(() => ({
   number_of_sites_synced: Math.floor(Math.random() * 100),
   is_custom_image: Math.random() < 0.5,
   last_synced: new Date(),
+}));
+
+export const upstreamImageFactory = Factory.define<UpstreamImage>(() => ({
+  id: Math.floor(Math.random() * 1000),
+  release: "release",
+  architecture: "architecture",
+  name: "name",
+  size: Math.floor(Math.random() * 10000),
 }));

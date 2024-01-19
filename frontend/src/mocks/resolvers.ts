@@ -8,10 +8,18 @@ import {
   accessTokenFactory,
   userFactory,
   imageFactory,
+  upstreamImageFactory,
   settingsFactory,
 } from "./factories";
 
-import type { GetSitesQueryParams, SortDirection, SitesSortKey, UserSortKey } from "@/api/handlers";
+import type {
+  GetSitesQueryParams,
+  SortDirection,
+  SitesSortKey,
+  UserSortKey,
+  UpstreamImageSource,
+  SelectUpstreamImagesPayload,
+} from "@/api/handlers";
 import type { User } from "@/api/types";
 import type { TokensPostResponse } from "@/api-client";
 import type { Site } from "@/api-client/models/Site";
@@ -319,6 +327,52 @@ export const createMockImagesResolver =
 
 export const getImages = rest.get(apiUrls.images, createMockImagesResolver(imageFactory.buildList(10)));
 
+type UpstreamImagesResponseResolver = ResponseResolver<RestRequest, typeof restContext>;
+export const createMockUpstreamImagesResolver =
+  (upstreamImages: ReturnType<typeof upstreamImageFactory.buildList>): UpstreamImagesResponseResolver =>
+  (req, res, ctx) => {
+    const searchParams = new URLSearchParams(req.url.search);
+    const page = Number(searchParams.get("page"));
+    const size = Number(searchParams.get("size"));
+    const items_page = upstreamImages.slice((page - 1) * size, page * size);
+
+    const response = {
+      items: items_page,
+      page,
+      total: upstreamImages.length,
+      size,
+    };
+
+    return res(ctx.status(200), ctx.json(response));
+  };
+
+export const getUpstreamImages = rest.get(
+  apiUrls.upstreamImages,
+  createMockUpstreamImagesResolver(upstreamImageFactory.buildList(10)),
+);
+
+type UpdateUpstreamImageSourceResponseResolver = ResponseResolver<RestRequest<UpstreamImageSource>, typeof restContext>;
+export const createMockUpdateUpstreamImageSourceResolver =
+  (): UpdateUpstreamImageSourceResponseResolver => async (req, res, ctx) => {
+    return res(ctx.status(200));
+  };
+
+export const updateUpstreamImageSource = rest.post(
+  apiUrls.upstreamImageSource,
+  createMockUpdateUpstreamImageSourceResolver(),
+);
+
+type SelectUpstreamImagesResponseResolver = ResponseResolver<
+  RestRequest<SelectUpstreamImagesPayload[]>,
+  typeof restContext
+>;
+export const createMockSelectUpstreamImagesResolver =
+  (): SelectUpstreamImagesResponseResolver => async (req, res, ctx) => {
+    return res(ctx.status(200));
+  };
+
+export const selectUpstreamImages = rest.post(apiUrls.upstreamImages, createMockSelectUpstreamImagesResolver());
+
 type SettingsResponseResolver = ResponseResolver<RestRequest, typeof restContext>;
 
 const defaultSettings = settingsFactory.build();
@@ -360,6 +414,9 @@ export const allResolvers = [
   deleteUser,
   getTokensExport,
   getImages,
+  getUpstreamImages,
+  updateUpstreamImageSource,
+  selectUpstreamImages,
   getSettings,
   patchSettings,
   ...(import.meta.env.VITE_USE_MOCK_TILES === "true" ? [tileHandler] : []),

@@ -22,6 +22,9 @@ import {
   deleteSites,
   updateSite,
   getImages,
+  getUpstreamImages,
+  updateUpstreamImageSource,
+  selectUpstreamImages,
   getSettings,
   updateSettings,
 } from "@/api/handlers";
@@ -278,3 +281,40 @@ export const useImagesQuery = ({ page, size }: Record<string, number>) =>
     placeholderData: keepPreviousData,
     refetchInterval,
   });
+
+export const useUpstreamImagesQuery = ({ page, size }: Record<string, number>) =>
+  useQuery({
+    queryKey: ["upstreamImages", page, size],
+    queryFn: () => getUpstreamImages({ page, size }),
+    placeholderData: keepPreviousData,
+    refetchInterval,
+  });
+
+export const useUpstreamImageSourceMutation = (
+  options?: Omit<
+    UseMutationOptions<any, unknown, Parameters<typeof updateUpstreamImageSource>[0], unknown>,
+    "mutationFn"
+  >,
+) => {
+  return useMutation({
+    mutationFn: updateUpstreamImageSource,
+    ...options,
+    onSuccess: (...args) => {
+      options?.onSuccess?.(...args);
+    },
+  });
+};
+
+export const useSelectUpstreamImagesMutation = (
+  options?: Omit<UseMutationOptions<any, unknown, Parameters<typeof selectUpstreamImages>[0], unknown>, "mutationFn">,
+) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: selectUpstreamImages,
+    ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["images"] });
+      options?.onSuccess?.(...args);
+    },
+  });
+};
