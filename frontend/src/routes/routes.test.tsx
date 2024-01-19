@@ -27,14 +27,15 @@ it("redirects to the default route", async () => {
 });
 
 pages.forEach(({ title, path }) => {
-  it(`displays correct document title for ${title} page`, async () => {
+  it(`displays a correct page for ${path} route`, async () => {
+    const router = createMemoryRouter(routes, { initialEntries: [path], initialIndex: 0 });
+    render(<RouterProvider router={router} />);
+    await waitFor(() => expect(router.state.location.pathname).toEqual(path));
+  });
+  it(`displays correct document title and heading for ${title} page`, async () => {
     const router = createMemoryRouter(routes, { initialEntries: [path], initialIndex: 0 });
     render(<RouterProvider router={router} />);
     expect(document.title).toBe(`${title} | MAAS Site Manager`);
-  });
-  it(`displays correct heading for ${title} page`, async () => {
-    const router = createMemoryRouter(routes, { initialEntries: [path], initialIndex: 0 });
-    render(<RouterProvider router={router} />);
     expect(screen.getByRole("heading", { level: 1, name: `${title} | MAAS Site Manager` })).toBeInTheDocument();
   });
 });

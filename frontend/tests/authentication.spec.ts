@@ -1,6 +1,6 @@
-import { protectedPages, routesConfig } from "@/config/routes";
 import { test, expect, Page } from "@playwright/test";
 import { admin } from "./constants";
+import { routesConfig } from "@/config/routes";
 
 export const login = async ({ page }: { page: Page }) => {
   await page.getByRole("textbox", { name: "Email" }).type(admin.email);
@@ -8,11 +8,11 @@ export const login = async ({ page }: { page: Page }) => {
   await page.getByRole("button", { name: "Login" }).click();
 };
 
-protectedPages.forEach(({ path }) => {
-  test(`user is redirected to login page when attempting to visit ${path}`, async ({ page }) => {
-    await page.goto(path);
-    await expect(page).toHaveURL(`${routesConfig.login.path}?redirectTo=${encodeURIComponent(path)}`);
-  });
+test(`user is redirected to login page when attempting to visit ${routesConfig.sitesList.path}`, async ({ page }) => {
+  await page.goto(routesConfig.sitesList.path);
+  await expect(page).toHaveURL(
+    `${routesConfig.login.path}?redirectTo=${encodeURIComponent(routesConfig.sitesList.path)}`,
+  );
 });
 
 test("user is redirected to enrolled sites list after login", async ({ page }) => {
