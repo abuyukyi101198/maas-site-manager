@@ -25,6 +25,16 @@ $box-shadow: 0 1px 1px 0 rgb(0 0 0 / 15%),
       box-shadow: $box-shadow;
     }
 
+    .main-toolbar .main-toolbar__title {
+      // outline to make text more readable on dark background (e.g. when above map ocean area)
+      text-shadow:
+        1px 1px 0 #FFF, -1px 1px 0 #FFF,
+        1px -1px 0 #FFF, -1px -1px 0 #FFF,
+        0 1px 0 #FFF, 0 -1px 0 #FFF,
+        -1px 0 0 #FFF, 1px 0 0 #FFF;
+      -webkit-font-smoothing: auto;
+    }
+
     .sites-view-control {
       .p-segmented-control__button {
         margin-bottom: 0;
