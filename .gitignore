@@ -18,6 +18,10 @@ logs
 *.sln
 *.sw?
 
+# direnv and asdf
+.tool-versions
+.envrc
+
 # Frontend deps and build
 /frontend/node_modules
 /frontend/dist
@@ -43,6 +47,13 @@ logs
 # Python
 *.py[cod]
 *.egg-info
+
+# Backend venv dirs
+/backend/.env
+/backend/.venv
+/backend/env/
+/backend/venv/
+/backend/ENV/
 
 # Backend tox and build
 /backend/.coverage
