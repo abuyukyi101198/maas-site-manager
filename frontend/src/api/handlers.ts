@@ -240,6 +240,19 @@ export type UpstreamImageSource = {
 };
 
 // TODO: replace with api client once API supports it https://warthogs.atlassian.net/browse/MAASENG-2569
+export const getUpstreamImageSource = async () => {
+  const response = await fetch(apiUrls.upstreamImageSource, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  const data = (await response.json()) as Omit<UpstreamImageSource, "credentials">;
+  return data;
+};
+
+// TODO: replace with api client once API supports it https://warthogs.atlassian.net/browse/MAASENG-2569
 export const updateUpstreamImageSource = async (payload: UpstreamImageSource) => {
   try {
     const response = await fetch(apiUrls.upstreamImageSource, {

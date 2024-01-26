@@ -3,7 +3,7 @@ import { sub, add } from "date-fns";
 import { Factory } from "fishery";
 import { uniqueNamesGenerator, adjectives, colors, animals, starWars } from "unique-names-generator";
 
-import type { TSettings } from "@/api/handlers";
+import type { UpstreamImageSource, TSettings } from "@/api/handlers";
 import type { Token } from "@/api/types";
 import type {
   PendingSite,
@@ -184,22 +184,41 @@ export const settingsFactory = Factory.define<TSettings>(() => ({
   images_connect_to_maas: true,
 }));
 
-export const imageFactory = Factory.define<Image>(() => ({
-  id: Math.floor(Math.random() * 1000),
-  release: "release",
-  architecture: "architecture",
-  name: "name",
-  size: Math.floor(Math.random() * 10000),
-  downloaded: Math.floor(Math.random() * 100),
-  number_of_sites_synced: Math.floor(Math.random() * 100),
-  is_custom_image: Math.random() < 0.5,
-  last_synced: new Date(),
-}));
+const UBUNTU_RELEASES = ["23.10", "23.04", "22.10", "22.04 LTS"];
+const ARCHES = ["amd64", "arm64", "i386", "armhf"];
+const IMAGE_NAMES = ["Ubuntu", "CentOS", "Rocky", "Hannah Montana Linux", "RHEL"];
 
-export const upstreamImageFactory = Factory.define<UpstreamImage>(() => ({
-  id: Math.floor(Math.random() * 1000),
-  release: "release",
-  architecture: "architecture",
-  name: "name",
-  size: Math.floor(Math.random() * 10000),
-}));
+export const imageFactory = Factory.define<Image>(({ sequence }) => {
+  const chance = new Chance(`maas-${sequence}`);
+  return {
+    id: sequence,
+    release: UBUNTU_RELEASES[chance.integer({ min: 0, max: UBUNTU_RELEASES.length - 1 })],
+    architecture: ARCHES[chance.integer({ min: 0, max: ARCHES.length - 1 })],
+    name: IMAGE_NAMES[chance.integer({ min: 0, max: IMAGE_NAMES.length - 1 })],
+    size: Math.floor(chance.floating({ min: 0, max: 1 }) * 10000000000),
+    downloaded: Math.floor(chance.floating({ min: 0, max: 1 }) * 100),
+    number_of_sites_synced: Math.floor(chance.integer({ min: 0, max: 99 })),
+    is_custom_image: chance.bool(),
+    last_synced: chance.date(),
+  };
+});
+
+export const upstreamImageFactory = Factory.define<UpstreamImage>(({ sequence }) => {
+  const chance = new Chance(`maas-${sequence}`);
+  return {
+    id: sequence,
+    release: UBUNTU_RELEASES[chance.integer({ min: 0, max: UBUNTU_RELEASES.length - 1 })],
+    architecture: ARCHES[chance.integer({ min: 0, max: ARCHES.length - 1 })],
+    name: IMAGE_NAMES[chance.integer({ min: 0, max: IMAGE_NAMES.length - 1 })],
+    size: Math.floor(chance.floating({ min: 0, max: 1 }) * 10000),
+  };
+});
+
+export const upstreamImageSourceFactory = Factory.define<Omit<UpstreamImageSource, "credentials">>(({ sequence }) => {
+  const chance = new Chance(`maas-${sequence}`);
+
+  return {
+    keepUpdated: chance.bool(),
+    upstreamSource: `https://images.${chance.domain()}.com`,
+  };
+});

@@ -27,6 +27,7 @@ import {
   selectUpstreamImages,
   getSettings,
   updateSettings,
+  getUpstreamImageSource,
 } from "@/api/handlers";
 import type {
   PendingSitesPostRequest,
@@ -286,6 +287,14 @@ export const useUpstreamImagesQuery = ({ page, size }: Record<string, number>) =
   useQuery({
     queryKey: ["upstreamImages", page, size],
     queryFn: () => getUpstreamImages({ page, size }),
+    placeholderData: keepPreviousData,
+    refetchInterval,
+  });
+
+export const useUpstreamImageSourceQuery = () =>
+  useQuery({
+    queryKey: ["upstreamImageSource"],
+    queryFn: getUpstreamImageSource,
     placeholderData: keepPreviousData,
     refetchInterval,
   });

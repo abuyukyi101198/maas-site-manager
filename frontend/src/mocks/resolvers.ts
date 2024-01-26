@@ -2,6 +2,7 @@ import { rest } from "msw";
 import type { RestRequest, restContext, ResponseResolver } from "msw";
 
 import {
+  upstreamImageSourceFactory,
   siteFactory,
   tokenFactory,
   enrollmentRequestFactory,
@@ -351,6 +352,20 @@ export const getUpstreamImages = rest.get(
   createMockUpstreamImagesResolver(upstreamImageFactory.buildList(10)),
 );
 
+type UpstreamImageSourceResponseResolver = ResponseResolver<RestRequest, typeof restContext>;
+export const createMockUpstreamImageSourceResolver =
+  (upstreamImageSource: ReturnType<typeof upstreamImageSourceFactory.build>): UpstreamImageSourceResponseResolver =>
+  (_req, res, ctx) => {
+    const response = upstreamImageSource;
+
+    return res(ctx.status(200), ctx.json(response));
+  };
+
+export const getUpstreamImageSource = rest.get(
+  apiUrls.upstreamImageSource,
+  createMockUpstreamImageSourceResolver(upstreamImageSourceFactory.build()),
+);
+
 type UpdateUpstreamImageSourceResponseResolver = ResponseResolver<RestRequest<UpstreamImageSource>, typeof restContext>;
 export const createMockUpdateUpstreamImageSourceResolver =
   (): UpdateUpstreamImageSourceResponseResolver => async (req, res, ctx) => {
@@ -415,6 +430,7 @@ export const allResolvers = [
   getTokensExport,
   getImages,
   getUpstreamImages,
+  getUpstreamImageSource,
   updateUpstreamImageSource,
   selectUpstreamImages,
   getSettings,
