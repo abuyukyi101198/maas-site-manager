@@ -6,7 +6,7 @@ import { Field, Form, Formik } from "formik";
 import pluralize from "pluralize";
 import * as Yup from "yup";
 
-import { useAppLayoutContext, useRowSelectionContext } from "@/context";
+import { useAppLayoutContext, useRowSelection } from "@/context";
 import { useDeleteSitesMutation, useSiteQuery } from "@/hooks/react-query";
 
 const initialValues = {
@@ -34,7 +34,7 @@ const createHandleValidate =
   };
 
 const RemoveSites = () => {
-  const { rowSelection, setRowSelection } = useRowSelectionContext("sites");
+  const { rowSelection, clearRowSelection } = useRowSelection("sites");
   const { previousSidebar, setSidebar } = useAppLayoutContext();
   const deleteSitesMutation = useDeleteSitesMutation();
   const sitesCount = rowSelection && Object.keys(rowSelection).length;
@@ -51,7 +51,7 @@ const RemoveSites = () => {
       onSuccess() {
         setSubmitting(false);
         setSidebar(null);
-        setRowSelection({});
+        clearRowSelection();
       },
     });
   };

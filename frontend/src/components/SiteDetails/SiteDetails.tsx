@@ -11,7 +11,7 @@ import {
 } from "@/components/SitesList/SitesTable/ConnectionInfo/ConnectionInfo";
 import LocalTime from "@/components/base/LocalTime/LocalTime";
 import RemoveButton from "@/components/base/RemoveButton";
-import { useAppLayoutContext, useRowSelectionContext } from "@/context";
+import { useAppLayoutContext, useRowSelection } from "@/context";
 import type { SiteDetailsContextValue } from "@/context/SiteDetailsContext";
 import { useSiteDetailsContext } from "@/context/SiteDetailsContext";
 import { useSiteQuery } from "@/hooks/react-query";
@@ -20,7 +20,7 @@ import { getCountryName } from "@/utils";
 const SiteDetailsContent = ({ id }: { id: NonNullable<SiteDetailsContextValue["selected"]> }) => {
   const { data: site, error, isPending } = useSiteQuery({ id });
   const { setSidebar } = useAppLayoutContext();
-  const { setRowSelection } = useRowSelectionContext("sites");
+  const { setRowSelection } = useRowSelection("sites");
   const stats = site?.stats;
 
   return (

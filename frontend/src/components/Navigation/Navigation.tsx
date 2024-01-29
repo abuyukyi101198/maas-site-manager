@@ -20,8 +20,7 @@ export const navItems: LocalNavLink[] = [
   {
     label: "Images",
     url: "/images",
-    // TODO: add images icon https://warthogs.atlassian.net/browse/MAASENG-2566
-    icon: "",
+    icon: "applications",
   },
 ];
 

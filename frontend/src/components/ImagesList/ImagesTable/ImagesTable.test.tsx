@@ -1,21 +1,22 @@
-import ImagesTable from "./ImagesTable";
+import { rest } from "msw";
+
+import ImagesTableContainer, { ImagesTable } from "./ImagesTable";
 
 import { imageFactory } from "@/mocks/factories";
 import { createMockImagesResolver } from "@/mocks/resolvers";
-import { createMockGetServer } from "@/mocks/server";
 import { apiUrls } from "@/utils/test-urls";
-import { renderWithMemoryRouter, screen } from "@/utils/test-utils";
+import { renderWithMemoryRouter, screen, setupServer, waitFor, within } from "@/utils/test-utils";
 
 const images = imageFactory.buildList(2);
-const mockServer = createMockGetServer(apiUrls.images, createMockImagesResolver(images));
+const initialHandlers = [rest.get(apiUrls.images, createMockImagesResolver(images))] as const;
+const mockServer = setupServer(...initialHandlers);
 
 beforeAll(() => {
   mockServer.listen();
 });
 
 afterEach(() => {
-  mockServer.resetHandlers();
-  localStorage.clear();
+  mockServer.resetHandlers(...initialHandlers);
 });
 
 afterAll(() => {
@@ -23,6 +24,40 @@ afterAll(() => {
 });
 
 it("displays images table", () => {
-  renderWithMemoryRouter(<ImagesTable />);
+  renderWithMemoryRouter(<ImagesTableContainer />);
   expect(screen.getByRole("table", { name: /images/ })).toBeInTheDocument();
+});
+
+it("displays loading state", () => {
+  mockServer.resetHandlers(
+    rest.get(apiUrls.images, (req, res, ctx) => {
+      return res(ctx.delay(Infinity));
+    }),
+  );
+  renderWithMemoryRouter(<ImagesTableContainer />);
+  expect(within(screen.getByRole("table", { name: /images/ })).getByText(/Loading/)).toBeInTheDocument();
+});
+
+it("displays empty state if no images are available", async () => {
+  mockServer.resetHandlers(rest.get(apiUrls.images, createMockImagesResolver([])));
+  renderWithMemoryRouter(<ImagesTableContainer />);
+  await waitFor(() => expect(screen.getByText("No images")).toBeInTheDocument());
+});
+
+it("can display error message", async () => {
+  mockServer.resetHandlers(
+    rest.get(apiUrls.images, (req, res, ctx) => {
+      return res(ctx.status(400, "error"));
+    }),
+  );
+  renderWithMemoryRouter(
+    <ImagesTable
+      error={new Error("custom error")}
+      isPending={false}
+      rowSelection={{}}
+      setRowSelection={vi.fn(() => {})}
+      setSidebar={vi.fn(() => {})}
+    />,
+  );
+  await waitFor(() => expect(screen.getByText("custom error")).toBeInTheDocument());
 });

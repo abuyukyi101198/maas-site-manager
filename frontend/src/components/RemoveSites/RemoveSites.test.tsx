@@ -39,7 +39,7 @@ vi.mock("@/context", async () => {
   const actual = await vi.importActual("@/context");
   return {
     ...actual!,
-    useRowSelectionContext: () => ({
+    useRowSelection: () => ({
       rowSelection: {
         "1": true,
         "2": true,

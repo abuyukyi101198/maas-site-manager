@@ -35,3 +35,9 @@ it("displays 'Delete', 'Download images', and 'Upload Image' buttons", () => {
   expect(screen.getByRole("button", { name: /Download images/i })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: /Upload Image/i })).toBeInTheDocument();
 });
+
+it("delete button is disabled when no images are selected", () => {
+  renderWithMemoryRouter(<ImagesList />);
+
+  expect(screen.getByRole("button", { name: /Delete/i })).toBeDisabled();
+});

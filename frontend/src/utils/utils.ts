@@ -5,6 +5,7 @@ import { getTimezoneOffset, format, utcToZonedTime } from "date-fns-tz";
 import * as countries from "i18n-iso-countries";
 import { getName } from "i18n-iso-countries";
 import en from "i18n-iso-countries/langs/en.json";
+import pick from "lodash/fp/pick";
 
 import type { SiteCoordinates, TimeZone } from "@/api-client";
 import type { SiteMarkerType } from "@/components/Map/types";
@@ -108,3 +109,8 @@ export const computeMinZoom = ({
 }): number => {
   return Math.ceil(Math.log2(Math.max(screenWidth, screenHeight) / 256));
 };
+
+export const createAccessor =
+  <T, K extends keyof T>(keys: K[] | K) =>
+  (obj: T) =>
+    pick(keys, obj);

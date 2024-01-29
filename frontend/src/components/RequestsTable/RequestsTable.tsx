@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 
 import { ExternalLink } from "@canonical/maas-react-components";
 import { useReactTable, flexRender, getCoreRowModel } from "@tanstack/react-table";
@@ -11,7 +11,7 @@ import SelectAllCheckbox from "@/components/SelectAllCheckbox";
 import TableCaption from "@/components/TableCaption";
 import docsUrls from "@/config/docsUrls";
 import { isDev } from "@/constants";
-import { useRowSelectionContext } from "@/context/RowSelectionContext";
+import { useRowSelection } from "@/context/RowSelectionContext/RowSelectionContext";
 import type { UseEnrollmentRequestsQueryResult } from "@/hooks/react-query";
 
 export type EnrollmentRequestsColumnDef = ColumnDef<PendingSite, PendingSite[keyof PendingSite]>;
@@ -22,12 +22,7 @@ const RequestsTable = ({
   error,
   isPending,
 }: Pick<UseEnrollmentRequestsQueryResult, "data" | "error" | "isPending">) => {
-  const { rowSelection, setRowSelection } = useRowSelectionContext("requests");
-
-  // clear selection on unmount
-  useEffect(() => {
-    return () => setRowSelection({});
-  }, [setRowSelection]);
+  const { rowSelection, setRowSelection } = useRowSelection("requests", { clearOnUnmount: true });
 
   const columns = useMemo<EnrollmentRequestsColumnDef[]>(
     () => [

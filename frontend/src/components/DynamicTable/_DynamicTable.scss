@@ -1,4 +1,4 @@
-.p-table--dynamic {
+.p-table-dynamic {
   margin-bottom: 0;
 
 
@@ -12,10 +12,6 @@
       scrollbar-gutter: stable;
   }
 
-  tbody {
-    height: auto;
-    min-height: auto;
-  }
 
   thead tr,
   tbody tr {
@@ -23,4 +19,36 @@
     table-layout: fixed;
     width: 100%;
   }
+
+  tbody {
+    height: auto;
+    min-height: auto;
+
+
+    tr:hover,
+    tr:focus-within {
+      @include vf-transition($property: #{background}, $duration: fast);
+  
+      background-color: $colors--light-theme--background-hover;
+    }
+  }
+
+  thead th:last-child,
+  tbody td:last-child {
+    text-align: right;
+  }
+
+  thead th button {
+    padding-top: 0;
+    margin-bottom: 0;
+  }
 }
+
+.p-table-dynamic.p-table-dynamic--with-select {
+  thead th:first-child,
+  tbody td:first-child {
+    width: 3rem;
+  }
+}
+
+

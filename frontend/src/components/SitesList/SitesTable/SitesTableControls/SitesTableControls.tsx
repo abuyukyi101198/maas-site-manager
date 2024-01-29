@@ -7,7 +7,7 @@ import SitesViewControl from "./SitesViewControl";
 
 import RemoveButton from "@/components/base/RemoveButton";
 import { useAppLayoutContext } from "@/context/AppLayoutContext";
-import { useRowSelectionContext } from "@/context/RowSelectionContext";
+import { useRowSelection } from "@/context/RowSelectionContext/RowSelectionContext";
 import type { UseSitesQueryResult } from "@/hooks/react-query";
 import { useLocation } from "@/utils/router";
 
@@ -26,7 +26,7 @@ const SitesTableControls = ({
   };
   const { pathname } = useLocation();
   const { setSidebar } = useAppLayoutContext();
-  const { rowSelection } = useRowSelectionContext("sites");
+  const { rowSelection } = useRowSelection("sites");
   const isRemoveDisabled = Object.keys(rowSelection).length <= 0;
   const isMapView = pathname === "/sites/map";
 

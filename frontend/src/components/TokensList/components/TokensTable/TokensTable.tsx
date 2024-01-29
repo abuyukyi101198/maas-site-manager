@@ -10,7 +10,7 @@ import SelectAllCheckbox from "@/components/SelectAllCheckbox";
 import TableCaption from "@/components/TableCaption";
 import CopyButton from "@/components/base/CopyButton";
 import TooltipButton from "@/components/base/TooltipButton";
-import { useRowSelectionContext } from "@/context/RowSelectionContext";
+import { useRowSelection } from "@/context/RowSelectionContext/RowSelectionContext";
 import type { useTokensQueryResult } from "@/hooks/react-query";
 import { copyToClipboard, formatDistanceToNow, formatUTCDateString } from "@/utils";
 
@@ -25,13 +25,8 @@ export type TokenColumn = Column<Token, unknown>;
 const TokensTable = ({ data, error, isPending }: Pick<useTokensQueryResult, "data" | "error" | "isPending">) => {
   const [copiedText, setCopiedText] = useState("");
 
-  const { rowSelection, setRowSelection } = useRowSelectionContext("tokens");
+  const { rowSelection, setRowSelection } = useRowSelection("tokens", { clearOnUnmount: true });
   const isTokenCopied = useCallback((token: string) => token === copiedText, [copiedText]);
-
-  // clear table selection on unmount
-  useEffect(() => {
-    return () => setRowSelection({});
-  }, [setRowSelection]);
 
   const resetCopiedText = (timeout = 500) => {
     setTimeout(() => {

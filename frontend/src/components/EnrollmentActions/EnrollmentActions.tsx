@@ -4,13 +4,13 @@ import { Button, Notification } from "@canonical/react-components";
 import EnrollmentNotification from "./EnrollmentNotification";
 
 import RemoveButton from "@/components/base/RemoveButton";
-import { useRowSelectionContext } from "@/context/RowSelectionContext";
+import { useRowSelection } from "@/context/RowSelectionContext/RowSelectionContext";
 import { useEnrollmentRequestsMutation } from "@/hooks/react-query";
 
 const EnrollmentActions: React.FC = () => {
-  const { rowSelection, setRowSelection } = useRowSelectionContext("requests");
+  const { rowSelection, clearRowSelection } = useRowSelection("requests");
   const selectedIds = Object.keys(rowSelection).map((id) => Number(id));
-  const enrollmentRequestsMutation = useEnrollmentRequestsMutation({ onSuccess: () => setRowSelection({}) });
+  const enrollmentRequestsMutation = useEnrollmentRequestsMutation({ onSuccess: clearRowSelection });
   const isActionDisabled = Object.keys(rowSelection).length === 0 || enrollmentRequestsMutation.isPending;
   const handleAccept = () =>
     enrollmentRequestsMutation.mutate({

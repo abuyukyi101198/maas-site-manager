@@ -1,11 +1,10 @@
 import type { Dispatch, SetStateAction } from "react";
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 
 import { ContentSection, ExternalLink } from "@canonical/maas-react-components";
 import { useReactTable, flexRender, getCoreRowModel } from "@tanstack/react-table";
 import type { ColumnDef, Column, Getter, Row, SortingState } from "@tanstack/react-table";
 import classNames from "classnames";
-import pick from "lodash/fp/pick";
 import useLocalStorageState from "use-local-storage-state";
 
 import AggregatedStats from "./AggregatedStatus";
@@ -26,15 +25,10 @@ import TableActions from "@/components/base/TableActions";
 import TooltipButton from "@/components/base/TooltipButton/TooltipButton";
 import { isDev } from "@/constants";
 import { useAppLayoutContext } from "@/context";
-import { useRowSelectionContext } from "@/context/RowSelectionContext";
+import { useRowSelection } from "@/context/RowSelectionContext/RowSelectionContext";
 import { useSiteDetailsContext } from "@/context/SiteDetailsContext";
 import type { UseSitesQueryResult } from "@/hooks/react-query";
-import { getCountryName } from "@/utils";
-
-const createAccessor =
-  <T, K extends keyof T>(keys: K[] | K) =>
-  (row: T) =>
-    pick(keys, row);
+import { createAccessor, getCountryName } from "@/utils";
 
 export type Site = SitesGetResponse["items"][number];
 export type SitesColumnDef = ColumnDef<Site, Partial<Site>>;
@@ -61,14 +55,9 @@ const SitesTable = ({
   const [columnVisibility, setColumnVisibility] = useLocalStorageState("sitesTableColumnVisibility", {
     defaultValue: {},
   });
-  const { rowSelection, setRowSelection } = useRowSelectionContext("sites");
+  const { rowSelection, setRowSelection } = useRowSelection("sites", { clearOnUnmount: true });
   const { setSelected: setSiteId } = useSiteDetailsContext();
   const { setSidebar } = useAppLayoutContext();
-
-  // clear selection on unmount
-  useEffect(() => {
-    return () => setRowSelection({});
-  }, [setRowSelection]);
 
   const columns = useMemo<SitesColumnDef[]>(
     () => [

@@ -51,17 +51,6 @@
     }
   }
 
-  .sites-table-row:hover,
-  .sites-table-row:focus-within {
-    @include vf-transition($property: #{background}, $duration: fast);
-
-    background-color: $colors--light-theme--background-hover;
-
-    .table-actions {
-      opacity: 1;
-    }
-  }
-
   .status-icon::before {
     top: -5px;
   }

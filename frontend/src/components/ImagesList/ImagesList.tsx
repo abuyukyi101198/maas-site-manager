@@ -1,43 +1,57 @@
-import { ContentSection, ExternalLink, MainToolbar } from "@canonical/maas-react-components";
+import { MainToolbar, ContentSection } from "@canonical/maas-react-components";
 import { Button } from "@canonical/react-components";
+import type { ColumnDef, Column } from "@tanstack/react-table";
+
+import ImagesTable from "./ImagesTable";
 
 import RemoveButton from "@/components/base/RemoveButton";
-import { useAppLayoutContext } from "@/context";
-import { useImagesQuery } from "@/hooks/react-query";
+import { useAppLayoutContext, useRowSelection } from "@/context";
+import type { Image } from "@/mocks/factories";
 
-const ImagesList = () => {
-  const isActionDisabled = false;
-  const { setSidebar } = useAppLayoutContext();
+export type ImageColumnDef = ColumnDef<Image, Partial<Image>>;
+export type ImageColumn = Column<Image, unknown>;
 
-  // TODO: remove once https://warthogs.atlassian.net/browse/MAASENG-2566 is complete
-  useImagesQuery({ page: 1, size: 10 });
-
+const ImagesList = ({
+  isDeleteDisabled,
+  setSidebar,
+}: {
+  isDeleteDisabled: boolean;
+  setSidebar: ReturnType<typeof useAppLayoutContext>["setSidebar"];
+}) => {
   return (
     <ContentSection>
-      <MainToolbar>
-        <MainToolbar.Title>Images</MainToolbar.Title>
-        <MainToolbar.Controls>
-          <RemoveButton
-            disabled={isActionDisabled}
-            label="Delete"
-            onClick={() => setSidebar("deleteImages")}
-            type="button"
-          />
-          <Button onClick={() => setSidebar("downloadImages")} type="button">
-            Download images
-          </Button>
-          <Button onClick={() => setSidebar("uploadImage")} type="button">
-            Upload Image
-          </Button>
-        </MainToolbar.Controls>
-      </MainToolbar>
-      <p>
-        <ExternalLink to="https://warthogs.atlassian.net/browse/MAASENG-2566">
-          TODO: complete images table implementation
-        </ExternalLink>
-      </p>
+      <ContentSection.Header>
+        <MainToolbar>
+          <MainToolbar.Title>Images</MainToolbar.Title>
+          <MainToolbar.Controls>
+            <RemoveButton
+              disabled={isDeleteDisabled}
+              label="Delete"
+              onClick={() => setSidebar("deleteImages")}
+              type="button"
+            />
+            <Button onClick={() => setSidebar("downloadImages")} type="button">
+              Download images
+            </Button>
+            <Button onClick={() => setSidebar("uploadImage")} type="button">
+              Upload Image
+            </Button>
+          </MainToolbar.Controls>
+        </MainToolbar>
+      </ContentSection.Header>
+      <ContentSection.Content>
+        <ImagesTable />
+      </ContentSection.Content>
     </ContentSection>
   );
 };
 
-export default ImagesList;
+const ImagesListContainer = () => {
+  const { rowSelection } = useRowSelection("images");
+  const isDeleteDisabled = Object.keys(rowSelection).length <= 0;
+  const { setSidebar } = useAppLayoutContext();
+
+  return <ImagesList isDeleteDisabled={isDeleteDisabled} setSidebar={setSidebar} />;
+};
+
+export default ImagesListContainer;

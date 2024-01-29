@@ -9,7 +9,7 @@ import PaginationBar from "@/components/base/PaginationBar";
 import RemoveButton from "@/components/base/RemoveButton";
 import docsUrls from "@/config/docsUrls";
 import { useAppLayoutContext } from "@/context";
-import { useRowSelectionContext } from "@/context/RowSelectionContext";
+import { useRowSelection } from "@/context/RowSelectionContext/RowSelectionContext";
 import { useDeleteTokensMutation, useTokensQuery, useExportTokensToFileQuery } from "@/hooks/react-query";
 import usePagination from "@/hooks/usePagination";
 
@@ -17,7 +17,7 @@ const DEFAULT_PAGE_SIZE = 50;
 
 const TokensList = () => {
   const { setSidebar } = useAppLayoutContext();
-  const { rowSelection, setRowSelection } = useRowSelectionContext("tokens");
+  const { rowSelection, clearRowSelection } = useRowSelection("tokens");
   const { page, debouncedPage, size, handlePageSizeChange, setPage } = usePagination(DEFAULT_PAGE_SIZE);
 
   const { error, data, isPending } = useTokensQuery({
@@ -28,7 +28,7 @@ const TokensList = () => {
   const { error: exportTokensError, isPending: isExportTokensLoading, exportTokens } = useExportTokensToFileQuery();
 
   const tokensDeleteMutation = useDeleteTokensMutation({
-    onSuccess: () => setRowSelection({}),
+    onSuccess: clearRowSelection,
   });
 
   const handleTokenDelete = () => {

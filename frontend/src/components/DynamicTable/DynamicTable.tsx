@@ -7,7 +7,7 @@ import BREAKPOINTS from "@/config/breakpoints";
 
 const DynamicTable = ({ className, children, ...props }: PropsWithChildren<{ className?: string }>) => {
   return (
-    <table {...props} className={classNames("p-table--dynamic", className)}>
+    <table {...props} className={classNames("p-table-dynamic", className)}>
       {children}
     </table>
   );

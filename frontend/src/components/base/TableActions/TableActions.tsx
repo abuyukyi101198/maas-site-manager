@@ -44,7 +44,7 @@ const TableActions = ({
           </Button>
         </Tooltip>
       )}
-      <span className="table-actions-vertical-divider"></span>
+      {onEdit && onDelete ? <span className="table-actions-vertical-divider"></span> : null}
       {onDelete && (
         <Tooltip message={deleteTooltip} position="left">
           <Button

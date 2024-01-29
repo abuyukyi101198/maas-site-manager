@@ -1,1 +1,1 @@
-export { default } from "./ImagesTable";
+export { default, ImagesTable } from "./ImagesTable";
