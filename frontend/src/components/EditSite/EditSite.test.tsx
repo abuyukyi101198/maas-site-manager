@@ -1,4 +1,3 @@
-import type { RenderResult } from "@testing-library/react";
 import { rest } from "msw";
 
 import EditSite from "./EditSite";
@@ -12,8 +11,8 @@ import { render, waitFor, screen, userEvent, setupServer } from "@/utils/test-ut
 const site = siteFactory.build();
 const mockServer = setupServer(rest.get(`${apiUrls.sites}/:id`, createMockSiteResolver([site])));
 
-const renderForm = async (): Promise<RenderResult> => {
-  const { ...rendered } = render(
+const renderForm = async () => {
+  const view = render(
     <SiteDetailsContext.Provider value={{ selected: site.id, setSelected: vi.fn() }}>
       <EditSite />
     </SiteDetailsContext.Provider>,
@@ -23,7 +22,7 @@ const renderForm = async (): Promise<RenderResult> => {
     expect(screen.queryByText(/Loading/i)).not.toBeInTheDocument();
   });
 
-  return rendered;
+  return view;
 };
 
 beforeAll(() => {

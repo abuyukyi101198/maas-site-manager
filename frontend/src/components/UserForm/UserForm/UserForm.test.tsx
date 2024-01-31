@@ -1,4 +1,3 @@
-import type { RenderResult } from "@testing-library/react";
 import { rest } from "msw";
 
 import UserForm from "./UserForm";
@@ -12,7 +11,7 @@ import { render, screen, setupServer, userEvent, waitFor } from "@/utils/test-ut
 const user = userFactory.build({ is_admin: true });
 const mockServer = setupServer(rest.get(`${apiUrls.users}/:id`, createMockGetUserResolver([user])));
 
-const renderEditForm = (): RenderResult => {
+const renderEditForm = () => {
   const setSelected = vi.fn();
   return render(
     <UserSelectionContext.Provider value={{ selected: user.id, setSelected }}>

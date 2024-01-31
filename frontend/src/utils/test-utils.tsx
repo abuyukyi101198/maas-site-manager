@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-imports */
 import type { ReactElement } from "react";
 import * as React from "react";
 
@@ -77,6 +78,9 @@ const getByTextContent = (text: string | RegExp) => {
 };
 
 export { screen, within, waitFor, act, renderHook, fireEvent } from "@testing-library/react";
+
+export type { RenderResult } from "@testing-library/react";
+
 export { customRender as render };
 export { default as userEvent } from "@testing-library/user-event";
 export { renderWithMemoryRouter };

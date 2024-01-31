@@ -85,7 +85,15 @@ module.exports = {
           "error",
           {
             name: "react-router-dom",
-            message: 'Use strictly typed "@/router" import instead of "react-router-dom"',
+            message: 'Use strictly typed "@/router" import instead.',
+          },
+          {
+            name: "@testing-library/react",
+            message: 'Use "@/utils/test-utils" instead.',
+          },
+          {
+            name: "@testing-library/user-event",
+            message: 'Use "@/utils/test-utils" instead.',
           },
         ],
         "@typescript-eslint/consistent-type-imports": 2,

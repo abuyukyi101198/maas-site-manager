@@ -1,4 +1,3 @@
-import { act, renderHook, waitFor } from "@testing-library/react";
 import { rest } from "msw";
 import { setupServer } from "msw/node";
 
@@ -13,7 +12,7 @@ import {
 } from "@/mocks/resolvers";
 import type * as utils from "@/utils";
 import { apiUrls } from "@/utils/test-urls";
-import { Providers } from "@/utils/test-utils";
+import { act, renderHook, waitFor, Providers } from "@/utils/test-utils";
 
 const sitesData = siteFactory.buildList(2);
 const tokensData = tokenFactory.buildList(2);

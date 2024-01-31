@@ -1,4 +1,3 @@
-import type { RenderResult } from "@testing-library/react";
 import { rest } from "msw";
 
 import SiteDetails from "./SiteDetails";
@@ -14,7 +13,7 @@ const stats = statsFactory.build();
 const site = siteFactory.build({ stats });
 const mockServer = setupServer(rest.get(`${apiUrls.sites}/:id`, createMockSiteResolver([site])));
 
-const renderForm = (): RenderResult => {
+const renderForm = () => {
   return renderWithMemoryRouter(
     <SiteDetailsContext.Provider value={{ selected: site.id, setSelected: vi.fn() }}>
       <SiteDetails />
