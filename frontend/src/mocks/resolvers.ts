@@ -428,6 +428,25 @@ export const createMockPatchSettingsResolver = (): SettingsResponseResolver => a
   return res(ctx.json(updatedSettings));
 };
 
+type DeleteImageResponseResolver = ResponseResolver<RestRequest, typeof restContext>;
+export const createMockDeleteImageResolver = (): DeleteImageResponseResolver => async (_req, res, ctx) => {
+  return res(ctx.status(204));
+};
+
+const deleteImage = rest.delete(`${apiUrls.images}/:id`, createMockDeleteImageResolver());
+
+type DeleteImagesResponseResolver = ResponseResolver<RestRequest, typeof restContext>;
+export const createMockDeleteImagesResolver = (): DeleteImagesResponseResolver => async (req, res, ctx) => {
+  const ids = req.json();
+
+  if (Array.isArray(ids) && ids.length > 0) {
+    return res(ctx.status(204));
+  }
+  return res(ctx.status(400));
+};
+
+const deleteImages = rest.delete(apiUrls.images, createMockDeleteImagesResolver());
+
 const getSettings = rest.get(apiUrls.settings, createMockGetSettingsResolver());
 
 const patchSettings = rest.patch(apiUrls.settings, createMockPatchSettingsResolver());
@@ -460,5 +479,7 @@ export const allResolvers = [
   selectUpstreamImages,
   getSettings,
   patchSettings,
+  deleteImage,
+  deleteImages,
   ...(import.meta.env.VITE_USE_MOCK_TILES === "true" ? [tileHandler] : []),
 ];

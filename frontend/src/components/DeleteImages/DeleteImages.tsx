@@ -1,20 +1,39 @@
 import { ContentSection } from "@canonical/maas-react-components";
-import { Button } from "@canonical/react-components";
+import { Button, Notification } from "@canonical/react-components";
 import type { RowSelectionState } from "@tanstack/react-table";
 import pluralize from "pluralize";
 
 import { useAppLayoutContext, useRowSelection } from "@/context";
+import { useDeleteImagesMutation } from "@/hooks/react-query";
 
-export const DeleteImages = ({ count }: { count?: number }) => {
+export const DeleteImages = ({
+  count,
+  error,
+  onCancel,
+  onDelete,
+}: {
+  count?: number;
+  error?: InstanceType<ErrorConstructor> | unknown;
+  onCancel: () => void;
+  onDelete: () => void;
+}) => {
   const imagesCountText = pluralize("image", count || 0, true);
   return (
     <ContentSection>
       <ContentSection.Title>Delete {imagesCountText}</ContentSection.Title>
       <ContentSection.Content>
-        Are you sure you want to delete {imagesCountText}? This will also affect connected MAAS sites.
+        {error ? (
+          <Notification severity="negative" title="Delete failed">
+            {error instanceof Error ? error.message : "An unknown error occured."}
+          </Notification>
+        ) : null}
+        Are you sure you want to delete <strong>{imagesCountText}</strong>? This will also affect connected MAAS sites.
       </ContentSection.Content>
       <ContentSection.Footer>
-        <Button type="button" variant="negative">
+        <Button appearance="base" onClick={onCancel} type="button">
+          Cancel
+        </Button>
+        <Button appearance="negative" onClick={onDelete} type="button">
           Delete {imagesCountText}
         </Button>
       </ContentSection.Footer>
@@ -31,9 +50,16 @@ export const getSelectedIndividualImageRows = (rowSelection: RowSelectionState) 
 };
 
 const DeleteImagesContainer = () => {
-  const { rowSelection } = useRowSelection("images");
+  const { rowSelection, clearRowSelection } = useRowSelection("images");
   const imagesCount = getSelectedIndividualImageRows(rowSelection).length;
   const { setSidebar } = useAppLayoutContext();
+
+  const deleteImagesMutation = useDeleteImagesMutation({
+    onSuccess: () => {
+      setSidebar(null);
+      clearRowSelection();
+    },
+  });
 
   // close sidebar when there are no images selected
   useEffect(() => {
@@ -42,7 +68,19 @@ const DeleteImagesContainer = () => {
     }
   }, [imagesCount, setSidebar]);
 
-  return <DeleteImages count={imagesCount} />;
+  const handleDelete = () => {
+    const selectedIds = Object.keys(rowSelection).map((id) => Number(id));
+    deleteImagesMutation.mutate(selectedIds);
+  };
+
+  return (
+    <DeleteImages
+      count={imagesCount}
+      error={deleteImagesMutation.error}
+      onCancel={() => setSidebar(null)}
+      onDelete={handleDelete}
+    />
+  );
 };
 
 export default DeleteImagesContainer;

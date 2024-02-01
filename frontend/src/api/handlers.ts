@@ -291,3 +291,23 @@ export const selectUpstreamImages = async (payload: SelectUpstreamImagesPayload[
     throw error;
   }
 };
+
+// TODO: replace with api client once API supports it https://warthogs.atlassian.net/browse/MAASENG-2638
+export const deleteImages = async (data: Image["id"][]) => {
+  if (data.length === 0) {
+    throw Error("No images selected");
+  }
+  try {
+    const responses = data.map((id) => {
+      return fetch(`${apiUrls.images}/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    });
+    return await Promise.allSettled(responses);
+  } catch (error) {
+    throw error;
+  }
+};
