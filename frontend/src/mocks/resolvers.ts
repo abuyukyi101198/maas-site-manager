@@ -451,6 +451,14 @@ const getSettings = rest.get(apiUrls.settings, createMockGetSettingsResolver());
 
 const patchSettings = rest.patch(apiUrls.settings, createMockPatchSettingsResolver());
 
+type UploadImageResponseResolver = ResponseResolver<RestRequest, typeof restContext>;
+
+export const createMockUploadImageResolver = (): UploadImageResponseResolver => async (_req, res, ctx) => {
+  return res(ctx.status(201));
+};
+
+const uploadImages = rest.post(apiUrls.images, createMockUploadImageResolver());
+
 export const allResolvers = [
   postLogin,
   getSites,
@@ -481,5 +489,6 @@ export const allResolvers = [
   patchSettings,
   deleteImage,
   deleteImages,
+  uploadImages,
   ...(import.meta.env.VITE_USE_MOCK_TILES === "true" ? [tileHandler] : []),
 ];

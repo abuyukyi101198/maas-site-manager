@@ -29,6 +29,7 @@ import {
   updateSettings,
   getUpstreamImageSource,
   deleteImages,
+  uploadImage,
 } from "@/api/handlers";
 import type {
   PendingSitesPostRequest,
@@ -371,6 +372,20 @@ export const useDeleteImagesMutation = (
     },
     onError: () => {
       queryClient.invalidateQueries({ queryKey: ["images"] });
+    },
+  });
+};
+
+export const useUploadImageMutation = (
+  options?: Omit<UseMutationOptions<any, unknown, Parameters<typeof uploadImage>[0], unknown>, "mutationFn">,
+) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: uploadImage,
+    ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["images", "upstreamImages"] });
+      options?.onSuccess?.(...args);
     },
   });
 };

@@ -311,3 +311,29 @@ export const deleteImages = async (data: Image["id"][]) => {
     throw error;
   }
 };
+
+export type UploadImagePayload = {
+  image: File;
+  imageId: string;
+  release: string;
+  title: string;
+  baseImage?: string;
+  architecture: string;
+};
+
+// TODO: replace with api client once API supports it https://warthogs.atlassian.net/browse/MAASENG-2715
+export const uploadImage = async (payload: UploadImagePayload) => {
+  try {
+    const response = await fetch(apiUrls.images, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
