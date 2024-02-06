@@ -4,7 +4,7 @@ if [ "$CI" == "true" ]; then
     exit 0
 fi
 
-TILES_URL="https://github.com/petermakowski/pmtiles/raw/main/natural_earth.vector_v2.pmtiles"
+TILES_URL="https://github.com/canonical/natural-earth-pmtiles/raw/main/natural_earth.vector_v2.pmtiles"
 TILES_PATH="public/natural_earth.vector_v2.pmtiles"
 
 FONTS_URL="https://github.com/protomaps/basemaps-assets/archive/9fa7b36e3db2ed6b68aba1ffe848728b7cb2b4a2.zip"
