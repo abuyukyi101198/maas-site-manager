@@ -32,4 +32,3 @@ export class ApiClient {
         this.default = new DefaultService(this.request);
     }
 }
-
