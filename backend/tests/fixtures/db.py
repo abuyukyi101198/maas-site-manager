@@ -52,7 +52,7 @@ def db_setup(postgresql_proc: PostgreSQLExecutor) -> Iterator[DBConfig]:
     user = postgresql_proc.user
     socketdir = postgresql_proc.unixsocketdir
     janitor = DatabaseJanitor(
-        user, socketdir, port, TEST_DB_NAME, postgresql_proc.version
+        user=user, host=socketdir, port=port, dbname=TEST_DB_NAME, version=postgresql_proc.version
     )
     with janitor:
         yield DBConfig(TEST_DB_NAME, user, socketdir, port)
