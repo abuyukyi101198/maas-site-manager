@@ -4,7 +4,7 @@ MAAS Site Manager can manage multiple MAAS installations ('sites') at the same t
 
 This repository contains one sub-folder for each sub-project: backend and frontend.
 
-# How to install MAAS Site Manager
+## How to install MAAS Site Manager
 
 TBD:
 
@@ -14,43 +14,54 @@ Description of charm installation
 
 Any links to relevant webpages
 
-# How to set up a development environment
+## How to set up a development environment
 
-## Backend
+### Backend
 
-### Manual setup on your host or on a virtual machine
+#### Manual setup on your host or on a virtual machine
 
 The application is currently supported on Ubuntu 22.04 (Jammy Jellyfish). It is suggested to use an [LXD](https://canonical.com/lxd) container for the development environment.
 
 The following steps are needed for basic setup, after ensuring you are in the right directory (`/backend`):
+
 - ensure make is installed
-```
+
+```bash
 sudo apt install make
 ```
 
 - install project dependencies
-```
+
+```bash
 make install-dependencies
 ```
 
 The application is run using the `uvicorn` ASGI server. It requires a postgres database to connect to. Having installed the (system-wide) PostgreSQL instance with `make install-dependencies`, the required user and database can be set up as follows:
+
 - create new user with password
-```sudo -i -u postgres psql -c "CREATE USER \"msm\" WITH ENCRYPTED PASSWORD 'msm'"
+
+```bash
+sudo -i -u postgres psql -c "CREATE USER \"msm\" WITH ENCRYPTED PASSWORD 'msm'"
 sudo -i -u postgres createdb -O "msm" "msm"
 ```
+
 - edit `pg_hba.conf` (under e.g. `/etc/postgres/14/main/`) to include at the bottom
-```
+
+```txt
 host    msm     msm     0/0     md5
 ```
-### Setup using docker
+
+#### Setup using Docker
 
 Ensure that you have a recent version of [Docker](https://docs.docker.com/get-docker/) installed. To start the backend and the database run,
-```
+
+```bash
 docker compose up --build
 ```
 
 It is simple to launch a PostgreSQL instance via Docker,
-```
+
+```bash
 docker run --rm -it \
     -p 5432:5432 \
     -e POSTGRES_PASSWORD=msm \
@@ -58,17 +69,19 @@ docker run --rm -it \
     postgres:14
 ```
 
-### Running the app
+#### Running the app
 
 When using Docker, to run the application simply execute,
-```
+
+```bash
 docker compose exec backend bash
 ```
 
 Manually, do the following:
 
 - export the following environment variables when running the application
-```
+
+```bash
 export MSM_DB_HOST="localhost"  # change if PostgreSQL is running elsewhere
 export MSM_DB_PORT=5432
 export MSM_DB_NAME="msm"
@@ -77,30 +90,39 @@ export MSM_DB_PASSWORD="msm"
 ```
 
 Then, the application can be run using
-```
+
+```bash
 tox run -e api
 ```
 
 A database schema is created for you on application startup. If the schema changes or you want a fresh start, you can do the following.
 
 Using Docker, you should first stop the app:
-```
+
+```bash
 docker compose down
 ```
+
 and then run:
-```
+
+```bash
 docker volume rm maas-site-manager_postgres-data
 ```
+
 A new database will be automatically created on the next `docker compose up`
 
 To manually recreate the database, do the following,
+
 - connect to your database
-```
+
+```bash
 psql
 \c <database_name>
 ```
+
 - empty and recreate the database
-```
+
+```sql
 DROP SCHEMA public CASCADE;
 CREATE SCHEMA public;
 
@@ -109,6 +131,7 @@ GRANT ALL ON SCHEMA public TO public;
 ```
 
 There is sample data available for testing. To load this, do the following:
+
 - export the `MSM_DB_*` environment variables as needed
 - run `tox run -e sampledata -- create-fixtures`
 
@@ -119,6 +142,7 @@ export TOKEN=$(curl -X 'POST' 'http://localhost:8000/api/v1/login' -H 'accept: a
 ```
 
 and then call the endpoints with,
+
 ```bash
 curl http://localhost:8000/api/v1/sites -H "Authorization: bearer $TOKEN"
 ```
@@ -127,21 +151,23 @@ Database migrations are managed using [Alembic](https://alembic.sqlalchemy.org).
 
 To ensure that the database is up to date with the changes in migrations, run,
 
-```
+```bash
 tox run -e alembic -- upgrade head
 ```
 
 When table definitions are changed, you can create a new patch by running,
-```
+
+```bash
 tox run -e alembic -- revision --autogenerate -m $name
 ```
+
 where `$name` is the desired migration name. The resulting filename will be of the form `$id_$name.py`, where the revision id is automatically incremented from the last one (note that, for this reason, passing `--rev-id` won't have any effect).
 
 The `--autogenerate` parameter can be omitted to create an empty migration which can later be manually edited.
 
 **NB** the database should be at the correct state previous to the modifications that the path should contain. This should be done by calling the env with `upgrade head` before generating new revisions.
 
-### Linting and testing:
+#### Linting and testing
 
 The project uses `tox` for running Python-related workflows.
 
@@ -150,62 +176,76 @@ The project uses `tox` for running Python-related workflows.
 - type checking: `tox -e check`
 
 Unit tests use `pytest`. Tests can be run using,
-```
+
+```bash
 tox run -e test
 ```
+
 or alternatively just,
-```
+
+```bash
 tox
 ```
+
 since this is the default target. This runs all tests in parallel, and reports coverage.
 
 To run the tests sequentially, possibly selecting a subset of them, it is possible to use the default `py` environment passing additional arguments to `pytest`:
-```
+
+```bash
 tox run -e py -- <extra args> ..
 ```
 
+### Frontend
 
-## Frontend
+- When installing the frontend for the first time, read the _note on installing the frontend_ below. Prerequisite steps for running anything with yarn (starting frontend, testing, etc.) are:
 
-* When installing the frontend for the first time, read the _note on installing the frontend_ below. Prerequisite steps for running anything with yarn (starting frontend, testing, etc.) are:
-```
+```bash
 cd frontend
 yarn
 ```
+
 after which you can start the frontend (`yarn dev`).
 Note that when running a local setup, it is not advised to run `make ci-dep`, since, depending on the host system, this might install outdated dependencies and cause issues.
 
 #### A note on installing the frontend
 
 As per default, `apt install yarn` installs `cmdtest`, a distinct package from the one we actually want to use. Instead, we recommend the following steps sourced from [yarn package](https://yarnpkg.com/):
+
 ```bash
 curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
 echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 ```
+
 The yarn package is now added as a source, so install as expected
+
 ```bash
 sudo apt update && sudo apt install --no-install-recommends yarn
 ```
+
 If not already installed, you'll also want NodeJS. We recommend using [nvm](https://github.com/nvm-sh/nvm) to accomplish this:
+
 ```bash
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
 export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
 ```
+
 NodeJS 20 is the minimum recommended version for MAAS Site Manager
+
 ```bash
 nvm install 20
 nvm use 20
 ```
 
 After which you should be able to serve the frontend
+
 ```bash
 cd frontend
 yarn
 yarn dev
 ```
 
-### Updating API Client
+#### Updating API Client
 
 You can update TypeScript API Client from the OpenAPI schema by running the following command. Make sure that the back-end is running beforehand.
 
@@ -213,7 +253,7 @@ You can update TypeScript API Client from the OpenAPI schema by running the foll
 yarn generate-api-client
 ```
 
-### Using a local backend
+#### Using a local backend
 
 Setup local environment variables
 
@@ -223,53 +263,51 @@ cp .env.development .env.local.development
 
 Set `VITE_USE_MOCK_DATA` to `false` in `.env.development.local` and start the backend
 
-### Project conventions
+#### Project conventions
 
-#### CSS
+##### CSS
 
-##### Mobile-first approach
+###### Mobile-first approach
 
 We first write CSS styles specifically for mobile devices, and then progressively enhance them for larger screen sizes using min-width media queries.
 
 Single and consistent direction of media queries (min-width) makes the code easier to read and maintain.
 
-### Testing
+#### Testing
 
 We use [Playwright](https://playwright.dev/) for end-to-end tests and [Vitest](https://vitest.dev/) for unit/integration tests. We prefer integration testing over unit testing as we focus on user-centric testing and avoid testing implementation details. That makes changes and refactoring easier and helps ensure that things continue to work as expected for the end user.
 
-#### How to run tests
+##### How to run tests
 
-##### end-to-end
+###### end-to-end
 
 ```bash
 yarn playwright test
 ```
 
-##### unit/integration
+###### unit/integration
 
 ```bash
 yarn test
 ```
 
-### Keeping packages up-to-date
+#### Keeping packages up-to-date
 
 Run `yarn upgrade-all` to attempt to upgrade all packages to latest version.
 
-### Map assets
+#### Map assets
 
-#### Fonts
+##### Fonts
 
 Noto Sans fonts in pbf format compatible with MapLibre GL JS (located in `/frontend/public/`) are sourced from  [protomaps](https://github.com/protomaps/basemaps-assets/tree/main/fonts).
 
-#### Tiles
+##### Tiles
 
 Natural Earth Vector tiles sourced from <https://github.com/lukasmartinelli/naturalearthtiles/releases/download/v1.0/natural_earth.vector.mbtiles> are converted to pmtiles using <https://github.com/protomaps/PMTiles>.
 
+## Building for production
 
-
-# Building for production
-
-## Snap
+### Snap
 
 To build the snap run
 
@@ -311,6 +349,6 @@ sudo snap start --enable maas-site-manager
 Once the service is enabled, changing settings will automatically restart it
 with the new ones.
 
-## Charm
+### Charm
 
 TBD
