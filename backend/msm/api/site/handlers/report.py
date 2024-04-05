@@ -1,8 +1,9 @@
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import (
     APIRouter,
     Depends,
+    Response,
 )
 from pydantic import BaseModel
 
@@ -14,6 +15,7 @@ from msm.db.models import (
     SiteDetailsUpdate,
 )
 from msm.service import ServiceCollection
+from msm.settings import Settings
 
 v1_router = APIRouter(prefix="/v1")
 
@@ -36,12 +38,25 @@ class DetailsPostRequest(BaseModel):
     machines_by_status: MachineStatsByStatus | None = None
 
 
+class DetailsResponse(BaseModel):
+    """Content for a response returning the heartbeat interval"""
+
+    heartbeat_interval_seconds: int
+
+
+def details_response(*args: Any, heartbeat_interval_seconds: int) -> DetailsResponse:
+    return DetailsResponse(heartbeat_interval_seconds=heartbeat_interval_seconds)
+
+
+
+
 @v1_router.post("/details")
 async def details(
+    response: Response,
     services: Annotated[ServiceCollection, Depends(services)],
     site: Annotated[Site, Depends(authenticated_site)],
     post_request: DetailsPostRequest,
-) -> None:
+) -> DetailsResponse | None:
     """Update site details."""
     if post_request.name or post_request.url:
         await services.sites.update(
@@ -59,3 +74,5 @@ async def details(
                     }
                 ),
             )
+    interval = await services.sites.get_heartbeat_interval()
+    return details_response(heartbeat_interval_seconds=interval)

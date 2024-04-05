@@ -40,3 +40,8 @@ class TestSettings:
             str(settings.db_dsn(async_engine=async_engine))
             == f"{engine}://myuser@localhost:5432/mydb"
         )
+
+    def test_heartbeat_setting(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("MSM_HEARTBEAT_INTERVAL_SEC", "600")
+        settings = Settings()
+        assert settings.heartbeat_interval_seconds == 600

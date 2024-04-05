@@ -66,6 +66,9 @@ class Settings(BaseSettings):
     api_socket: str = Field(
         default="api.socket", validation_alias="MSM_API_SOCKET"
     )
+    heartbeat_interval_seconds: int = Field(
+        default=300, validation_alias="MSM_HEARTBEAT_INTERVAL_SEC"
+    )
 
     @property
     def static_dir(self) -> str:

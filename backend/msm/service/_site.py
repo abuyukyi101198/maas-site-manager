@@ -29,6 +29,7 @@ from msm.db.tables import (
 )
 from msm.schema import SortParam
 from msm.service._base import Service
+from msm.settings import Settings
 from msm.time import now_utc
 
 LOST_CONNECTION_THRESHOLD = timedelta(seconds=60)
@@ -248,6 +249,10 @@ class SiteService(Service):
         if row := result.one_or_none():
             return models.EnrollingSite(**row._asdict())
         return None
+
+    async def get_heartbeat_interval(self) -> int:
+        """The heartbeat interval, for sites to report to site manager"""
+        return Settings().heartbeat_interval_seconds
 
     def _select_statement(self) -> Select[Any]:
         connection_lost_limit = now_utc() - LOST_CONNECTION_THRESHOLD

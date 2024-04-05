@@ -79,7 +79,7 @@ def token_response(
     audience: TokenAudience,
     purpose: TokenPurpose | None = None,
 ) -> AccessTokenResponse:
-    """Retrun an AccessTokenResponse, generating a token."""
+    """Return an AccessTokenResponse, generating a token."""
     token = JWT.create(
         issuer=config.service_identifier,
         subject=str(auth_id),

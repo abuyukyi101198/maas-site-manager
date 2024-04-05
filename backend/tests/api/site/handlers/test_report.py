@@ -1,6 +1,7 @@
 import pytest
 
 from msm.db.models import Site
+from msm.settings import Settings
 from tests.fixtures.client import Client
 from tests.fixtures.factory import Factory
 
@@ -78,3 +79,21 @@ class TestDetailsPostHandler:
         assert site_data["machines_ready"] == 0
         assert site_data["machines_error"] == 0
         assert site_data["machines_other"] == 0
+
+    async def test_heartbeat_in_response(
+        self, factory: Factory, api_site: Site, site_client: Client
+    ) -> None:
+        machine_counts = {
+            "allocated": 10,
+            "deployed": 20,
+            "ready": 30,
+            "error": 40,
+            "other": 50,
+        }
+        await factory.make_SiteData(api_site.id)
+        response = await site_client.post(
+            "/details", json={"machines_by_status": machine_counts}
+        )
+        heartbeat = Settings().heartbeat_interval_seconds
+        response_heartbeat = response.json()["heartbeat_interval_seconds"]
+        assert heartbeat == response_heartbeat
