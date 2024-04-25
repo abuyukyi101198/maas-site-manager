@@ -151,7 +151,7 @@ class SiteService(Service):
         self, details: models.PendingSiteCreate
     ) -> models.PendingSite:
         """Create a pending site."""
-        data = details.model_dump()
+        data = details.model_dump(exclude_none=True)
         stmt = insert(Site).returning(
             Site.c.id,
             Site.c.name,

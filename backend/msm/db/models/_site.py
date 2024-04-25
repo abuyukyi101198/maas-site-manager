@@ -113,3 +113,12 @@ class PendingSiteCreate(BaseModel):
     name: str
     url: str
     auth_id: UUID
+    city: str | None = None
+    country: str | None = Field(default=None, min_length=2, max_length=2)
+    coordinates: tuple[float, float] | None = None  # latitude, longitude
+    note: str | None = None
+    state: str | None = None
+    address: str | None = None
+    postal_code: str | None = None
+    # XXX: mypy can't grok that this is an str/enum with lots of members
+    timezone: TimeZone | None = None  # type: ignore[valid-type]

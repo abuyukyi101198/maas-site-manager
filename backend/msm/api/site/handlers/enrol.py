@@ -7,7 +7,7 @@ from fastapi import (
     Response,
     status,
 )
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from msm.api._auth import (
     AccessTokenResponse,
@@ -28,6 +28,7 @@ from msm.jwt import (
     TokenAudience,
     TokenPurpose,
 )
+from msm.schema import TimeZone
 from msm.service import ServiceCollection
 
 v1_router = APIRouter(prefix="/v1")
@@ -38,6 +39,16 @@ class EnrolPostRequest(BaseModel):
 
     name: str
     url: str
+    city: str | None = None
+    country: str | None = Field(default=None, min_length=2, max_length=2)
+    latitude: float | None = None
+    longitude: float | None = None
+    note: str | None = None
+    state: str | None = None
+    address: str | None = None
+    postal_code: str | None = None
+    # XXX: mypy can't grok that this is an str/enum with lots of members
+    timezone: TimeZone | None = None  # type: ignore[valid-type]
 
 
 @v1_router.post("/enrol")
@@ -60,10 +71,25 @@ async def post(
     db_token = await services.tokens.get_by_auth_id(auth_id)
     if db_token is None or db_token.is_expired():
         raise INVALID_TOKEN_ERROR
-
+    coordinates = None
+    if (
+        post_request.latitude is not None
+        and post_request.longitude is not None
+    ):
+        coordinates = (post_request.latitude, post_request.longitude)
     await services.sites.create_pending(
         PendingSiteCreate(
-            name=post_request.name, url=post_request.url, auth_id=auth_id
+            name=post_request.name,
+            url=post_request.url,
+            auth_id=auth_id,
+            city=post_request.city,
+            country=post_request.country,
+            coordinates=coordinates,
+            note=post_request.note,
+            state=post_request.state,
+            address=post_request.address,
+            postal_code=post_request.postal_code,
+            timezone=post_request.timezone,
         )
     )
     await services.tokens.delete(db_token.id)
