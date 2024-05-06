@@ -34,11 +34,9 @@ from msm.service import ServiceCollection
 v1_router = APIRouter(prefix="/v1")
 
 
-class EnrolPostRequest(BaseModel):
-    """Request to enrol a site."""
+class SiteMetadata(BaseModel):
+    """Metadata given by a site when enroling"""
 
-    name: str
-    url: str
     city: str | None = None
     country: str | None = Field(default=None, min_length=2, max_length=2)
     latitude: float | None = None
@@ -49,6 +47,14 @@ class EnrolPostRequest(BaseModel):
     postal_code: str | None = None
     # XXX: mypy can't grok that this is an str/enum with lots of members
     timezone: TimeZone | None = None  # type: ignore[valid-type]
+
+
+class EnrolPostRequest(BaseModel):
+    """Request to enrol a site."""
+
+    name: str
+    url: str
+    metadata: SiteMetadata | None = None
 
 
 @v1_router.post("/enrol")
@@ -71,25 +77,31 @@ async def post(
     db_token = await services.tokens.get_by_auth_id(auth_id)
     if db_token is None or db_token.is_expired():
         raise INVALID_TOKEN_ERROR
-    coordinates = None
-    if (
-        post_request.latitude is not None
-        and post_request.longitude is not None
-    ):
-        coordinates = (post_request.latitude, post_request.longitude)
+    metadata = (
+        post_request.metadata.model_dump(
+            exclude=(set(["longitude", "latitude"]))
+        )
+        if post_request.metadata is not None
+        else {}
+    )
+    if post_request.metadata is not None:
+        metadata["coordinates"] = (
+            (
+                post_request.metadata.latitude,
+                post_request.metadata.longitude,
+            )
+            if (
+                post_request.metadata.latitude is not None
+                and post_request.metadata.longitude is not None
+            )
+            else None
+        )
     await services.sites.create_pending(
         PendingSiteCreate(
             name=post_request.name,
             url=post_request.url,
             auth_id=auth_id,
-            city=post_request.city,
-            country=post_request.country,
-            coordinates=coordinates,
-            note=post_request.note,
-            state=post_request.state,
-            address=post_request.address,
-            postal_code=post_request.postal_code,
-            timezone=post_request.timezone,
+            **metadata,
         )
     )
     await services.tokens.delete(db_token.id)

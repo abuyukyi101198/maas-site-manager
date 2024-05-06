@@ -26,15 +26,17 @@ class TestEnrolPostHandler:
         body = {
             "name": "new-site",
             "url": "https://site.example.com",
-            "city": "Los Angeles",
-            "country": "US",
-            "longitude": 40.05275079137782,
-            "latitude": -107.17401328725524,
-            "note": "this is a test site",
-            "state": "CA",
-            "address": "4242 Way St.",
-            "postal_code": "80210",
-            "timezone": "US/Pacific",
+            "metadata": {
+                "city": "Los Angeles",
+                "country": "US",
+                "longitude": 40.05275079137782,
+                "latitude": -107.17401328725524,
+                "note": "this is a test site",
+                "state": "CA",
+                "address": "4242 Way St.",
+                "postal_code": "80210",
+                "timezone": "US/Pacific",
+            },
         }
         response = await app_client.post(
             "/site/v1/enrol",
@@ -46,14 +48,58 @@ class TestEnrolPostHandler:
         # a pending site is created
         [pending_site] = await factory.get("site")
         assert pending_site["auth_id"] == auth_id
-        for k, v in body.items():
+        assert pending_site["name"] == body["name"]
+        assert pending_site["url"] == body["url"]
+        for k, v in body["metadata"].items():  # type: ignore[attr-defined]
             if k in ["latitude", "longitude"]:
                 continue
             assert pending_site[k] == v
         assert pending_site["coordinates"] == (
-            body["latitude"],
-            body["longitude"],
+            body["metadata"]["latitude"],  # type: ignore[index]
+            body["metadata"]["longitude"],  # type: ignore[index]
         )
+        assert not pending_site["accepted"]
+
+    async def test_post_partial_config(
+        self,
+        factory: Factory,
+        app_client: Client,
+    ) -> None:
+        auth_id = uuid4()
+        await factory.make_Token(auth_id=auth_id)
+        app_client.authenticate(
+            auth_id,
+            token_audience=TokenAudience.SITE,
+            token_purpose=TokenPurpose.ENROLMENT,
+        )
+        body = {
+            "name": "new-site",
+            "url": "https://site.example.com",
+            "metadata": {
+                "note": "this is a test site",
+                "state": "CA",
+                "address": "4242 Way St.",
+                "postal_code": "80210",
+                "timezone": "US/Pacific",
+            },
+        }
+        response = await app_client.post(
+            "/site/v1/enrol",
+            json=body,
+        )
+        assert response.status_code == 202
+        # the token is removed
+        assert await factory.get("token") == []
+        # a pending site is created
+        [pending_site] = await factory.get("site")
+        assert pending_site["auth_id"] == auth_id
+        assert pending_site["name"] == body["name"]
+        assert pending_site["url"] == body["url"]
+        for k, v in body["metadata"].items():  # type: ignore[attr-defined]
+            assert pending_site[k] == v
+        assert pending_site["coordinates"] == None
+        assert pending_site["country"] == ""
+        assert pending_site["city"] == ""
         assert not pending_site["accepted"]
 
     async def test_post_no_config(
