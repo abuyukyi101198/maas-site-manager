@@ -101,6 +101,11 @@ class TokenService(Service):
         stmt = delete(Token).where(Token.c.id == id)
         await self.conn.execute(stmt)
 
+    async def delete_many(self, ids: list[int]) -> set[int]:
+        stmt = delete(Token).where(Token.c.id.in_(ids)).returning(Token.c.id)
+        result = await self.conn.execute(stmt)
+        return set([x[0] for x in result.all()])
+
     def _select_statement(self) -> Select[Any]:
         return select(
             Token.c.id,

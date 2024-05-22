@@ -88,3 +88,38 @@ class TestTokenService:
         assert await service.get_by_auth_id(uuid1) is not None
         assert await service.get_by_auth_id(uuid2) is not None
         assert await service.get_by_auth_id(uuid3) is None
+
+    async def test_delete(
+        self, factory: Factory, db_connection: AsyncConnection
+    ) -> None:
+        duration = timedelta(minutes=10)
+        service = TokenService(db_connection)
+        tokens = list(
+            await service.create(
+                issuer="issuer",
+                duration=duration,
+                count=10,
+            )
+        )
+        await service.delete(tokens[0].id)
+        db_tokens = await factory.get("token")
+        assert len(db_tokens) == 9
+        assert tokens[0].value not in {token["value"] for token in db_tokens}
+
+    async def test_delete_many(
+        self, factory: Factory, db_connection: AsyncConnection
+    ) -> None:
+        duration = timedelta(minutes=10)
+        service = TokenService(db_connection)
+        tokens = list(
+            await service.create(
+                issuer="issuer",
+                duration=duration,
+                count=10,
+            )
+        )
+        await service.delete_many([tokens[0].id, tokens[1].id])
+        db_tokens = await factory.get("token")
+        assert len(db_tokens) == 8
+        assert tokens[0].value not in {token["value"] for token in db_tokens}
+        assert tokens[1].value not in {token["value"] for token in db_tokens}

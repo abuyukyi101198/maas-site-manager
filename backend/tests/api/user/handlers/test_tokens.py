@@ -73,3 +73,47 @@ async def test_delete(user_client: Client, factory: Factory) -> None:
     assert response.status_code == 204
     get_response = await user_client.get("/tokens")
     assert get_response.json()["total"] == 0
+
+
+@pytest.mark.asyncio
+async def test_delete_many(user_client: Client, factory: Factory) -> None:
+    token1 = await factory.make_Token()
+    token2 = await factory.make_Token()
+    token3 = await factory.make_Token()
+    response = await user_client.delete(
+        f"/tokens?ids={token1.id}&ids={token2.id}"
+    )
+    assert response.status_code == 204
+    get_response = await user_client.get("/tokens")
+    assert get_response.json()["total"] == 1
+    assert get_response.json()["items"][0]["id"] == token3.id
+
+
+async def test_delete_many_no_ids(
+    user_client: Client, factory: Factory
+) -> None:
+    await factory.make_Token()
+    response = await user_client.delete("/tokens")
+    assert response.status_code == 400
+    assert "No ID's provided" in response.text
+
+
+async def test_delete_many_not_found(
+    user_client: Client, factory: Factory
+) -> None:
+    token1 = await factory.make_Token()
+    token2 = await factory.make_Token()
+    fake_id = 9
+    response = await user_client.delete(
+        f"/tokens?ids={token2.id}&ids={fake_id}"
+    )
+    assert response.status_code == 404
+    assert (
+        f"The following ID's were not found: {set([fake_id])}" in response.text
+    )
+    assert (
+        f"The following ID's were deleted: {set([token2.id])}" in response.text
+    )
+    get_response = await user_client.get("/tokens")
+    assert get_response.json()["total"] == 1
+    assert get_response.json()["items"][0]["id"] == token1.id

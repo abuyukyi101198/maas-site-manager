@@ -29,6 +29,7 @@ AUTHENTICATED_ROUTES = (
     ("DELETE", "/api/v1/sites"),
     ("GET", "/api/v1/tokens"),
     ("POST", "/api/v1/tokens"),
+    ("DELETE", "/api/v1/tokens"),
     ("GET", "/api/v1/tokens/export"),
     ("DELETE", "/api/v1/tokens/{id}"),
     ("GET", "/api/v1/users"),
