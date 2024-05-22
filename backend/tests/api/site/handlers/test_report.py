@@ -109,5 +109,7 @@ class TestDetailsPostHandler:
             "/details", json={"machines_by_status": machine_counts}
         )
         heartbeat = Settings().heartbeat_interval_seconds
-        response_heartbeat = response.json()["heartbeat_interval_seconds"]
+        response_heartbeat = int(
+            response.headers["MSM-Heartbeat-Interval-Seconds"]
+        )
         assert heartbeat == response_heartbeat

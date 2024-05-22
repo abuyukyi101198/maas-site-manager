@@ -39,27 +39,13 @@ class DetailsPostRequest(BaseModel):
     machines_by_status: MachineStatsByStatus | None = None
 
 
-class DetailsResponse(BaseModel):
-    """Content for a response returning the heartbeat interval"""
-
-    heartbeat_interval_seconds: int
-
-
-def details_response(
-    *args: Any, heartbeat_interval_seconds: int
-) -> DetailsResponse:
-    return DetailsResponse(
-        heartbeat_interval_seconds=heartbeat_interval_seconds
-    )
-
-
 @v1_router.post("/details")
 async def details(
     response: Response,
     services: Annotated[ServiceCollection, Depends(services)],
     site: Annotated[Site, Depends(authenticated_site)],
     post_request: DetailsPostRequest,
-) -> DetailsResponse | None:
+) -> None:
     """Update site details."""
     if post_request.name or post_request.url:
         await services.sites.update(
@@ -79,4 +65,4 @@ async def details(
             )
     await services.sites.update_last_seen(site.id, now_utc())
     interval = await services.sites.get_heartbeat_interval()
-    return details_response(heartbeat_interval_seconds=interval)
+    response.headers["MSM-Heartbeat-Interval-Seconds"] = str(interval)
