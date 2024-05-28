@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import (
     APIRouter,
@@ -15,7 +15,6 @@ from msm.db.models import (
     SiteDetailsUpdate,
 )
 from msm.service import ServiceCollection
-from msm.settings import Settings
 from msm.time import now_utc
 
 v1_router = APIRouter(prefix="/v1")

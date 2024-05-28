@@ -107,6 +107,7 @@ select = [
   "I",   # isort
   "RUF", # ruff
   "UP",  # pyupgrade
+  "F401", # unused imports
 ]
 
 [tool.ruff.lint.isort]

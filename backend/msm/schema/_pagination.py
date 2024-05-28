@@ -1,7 +1,6 @@
 from collections.abc import Sequence
 from typing import (
     Annotated,
-    NamedTuple,
 )
 
 from fastapi import Query
