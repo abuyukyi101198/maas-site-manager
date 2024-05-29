@@ -23,7 +23,7 @@ from msm.time import (
 
 TOKEN_ALGORITHM = "HS256"
 TOKEN_SECRET_KEY_BYTES = 32
-TOKEN_DURATION = timedelta(minutes=30)
+DEFAULT_TOKEN_DURATION = timedelta(days=7)
 
 
 class InvalidToken(Exception):
@@ -100,7 +100,7 @@ class JWT:
         enrolment_url: str | None = None,
         purpose: TokenPurpose | None = None,
         data: dict[str, Any] | None = None,
-        duration: timedelta = TOKEN_DURATION,
+        duration: timedelta = DEFAULT_TOKEN_DURATION,
         key: str = "",
     ) -> "JWT":
         """Create a JWT."""

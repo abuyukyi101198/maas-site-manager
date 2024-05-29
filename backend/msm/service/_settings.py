@@ -6,6 +6,7 @@ from typing import (
 
 from msm.db import models
 from msm.db.tables import Setting
+from msm.jwt import DEFAULT_TOKEN_DURATION
 from msm.service._base import DBBackedModelService
 from msm.settings import Settings
 
@@ -21,5 +22,7 @@ class SettingsService(DBBackedModelService[models.Settings]):
         values = {
             "service_url": f"http://{gethostname()}:{settings.api_port}",
             "enrolment_url": f"http://{gethostname()}:{settings.api_port}/site/v1/enrol",
+            "token_lifetime_minutes": DEFAULT_TOKEN_DURATION.total_seconds()
+            // 60,
         }
         return [{"name": key, "value": values[key]} for key in keys]

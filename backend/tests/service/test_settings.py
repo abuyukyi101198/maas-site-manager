@@ -3,6 +3,7 @@ from pytest_mock import MockerFixture
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from msm.db.models import Settings
+from msm.jwt import DEFAULT_TOKEN_DURATION
 from msm.service import _settings
 from msm.service._settings import SettingsService
 from tests.fixtures.factory import Factory
@@ -21,11 +22,16 @@ class TestSettingsService:
             "enrolment_url",
             value="https://sitemanager.example.com/site/v1/enrol",
         )
+        await factory.make_Setting(
+            "token_lifetime_minutes",
+            value=10,
+        )
         service = SettingsService(db_connection)
         settings = await service.get()
         assert settings == Settings(
             service_url="https://sitemanager.example.com",
             enrolment_url="https://sitemanager.example.com/site/v1/enrol",
+            token_lifetime_minutes=10,
         )
 
     async def test_get_no_extra_entries(
@@ -64,6 +70,10 @@ class TestSettingsService:
                 "value": "http://sitemanager:8000/site/v1/enrol",
             },
             {"name": "service_url", "value": "http://sitemanager:8000"},
+            {
+                "name": "token_lifetime_minutes",
+                "value": DEFAULT_TOKEN_DURATION.total_seconds() // 60,
+            },
         ]
 
     async def test_ensure_keep_existing(
@@ -75,6 +85,7 @@ class TestSettingsService:
         await factory.make_Setting(
             "enrolment_url", value="http://sitemanager:8000/site/v1/enrol"
         )
+        await factory.make_Setting("token_lifetime_minutes", value=10)
         service = SettingsService(db_connection)
         await service.ensure()
         settings = await factory.get("setting")
@@ -84,6 +95,7 @@ class TestSettingsService:
                 "value": "http://sitemanager:8000/site/v1/enrol",
             },
             {"name": "service_url", "value": "http://sitemanager:8000"},
+            {"name": "token_lifetime_minutes", "value": 10},
         ]
 
     async def test_ensure_remove_extra(

@@ -1,4 +1,5 @@
 from collections.abc import Awaitable, Callable
+from datetime import timedelta
 from typing import (
     Annotated,
 )
@@ -17,6 +18,7 @@ from msm.api._dependencies import config
 from msm.api._utils import INVALID_TOKEN_ERROR
 from msm.db.models import Config
 from msm.jwt import (
+    DEFAULT_TOKEN_DURATION,
     JWT,
     InvalidToken,
     TokenAudience,
@@ -78,6 +80,7 @@ def token_response(
     auth_id: UUID,
     audience: TokenAudience,
     purpose: TokenPurpose | None = None,
+    duration: timedelta = DEFAULT_TOKEN_DURATION,
 ) -> AccessTokenResponse:
     """Return an AccessTokenResponse, generating a token."""
     token = JWT.create(
@@ -86,5 +89,6 @@ def token_response(
         audience=audience,
         purpose=purpose,
         key=config.token_secret_key,
+        duration=duration,
     )
     return AccessTokenResponse(token_type="Bearer", access_token=token.encoded)

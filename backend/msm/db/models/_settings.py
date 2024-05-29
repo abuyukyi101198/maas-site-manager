@@ -6,3 +6,4 @@ class Settings(BaseModel):
 
     service_url: str = ""
     enrolment_url: str = ""
+    token_lifetime_minutes: int = 0

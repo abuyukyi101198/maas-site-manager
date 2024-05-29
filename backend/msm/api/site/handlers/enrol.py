@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import Annotated
 from uuid import UUID
 
@@ -138,6 +139,11 @@ async def get(
     if not site.accepted:
         response.status_code = status.HTTP_204_NO_CONTENT
         return None
+    settings = await services.settings.get()
     return token_response(
-        config, auth_id, TokenAudience.SITE, purpose=TokenPurpose.ACCESS
+        config,
+        auth_id,
+        TokenAudience.SITE,
+        purpose=TokenPurpose.ACCESS,
+        duration=timedelta(minutes=settings.token_lifetime_minutes),
     )

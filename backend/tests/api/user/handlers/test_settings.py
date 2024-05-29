@@ -25,6 +25,7 @@ async def test_settings_get(
         {
             "service_url": "https://sitemanager.example.com/",
             "enrolment_url": "https://sitemanager.example.com/site/v1/enrol",
+            "token_lifetime_minutes": 10,
         }
     )
     response = await admin_client.get("/settings")
@@ -32,6 +33,7 @@ async def test_settings_get(
     assert response.json() == {
         "service_url": "https://sitemanager.example.com/",
         "enrolment_url": "https://sitemanager.example.com/site/v1/enrol",
+        "token_lifetime_minutes": 10,
     }
 
 
@@ -44,6 +46,7 @@ async def test_settings_patch(
         json={
             "service_url": "https://sitemanager.example.com",
             "enrolment_url": "https://sitemanager.example.com/site/v1/enrol",
+            "token_lifetime_minutes": 10,
         },
     )
     assert response.status_code == 200
@@ -53,4 +56,5 @@ async def test_settings_patch(
     assert response.json() == {
         "service_url": "https://sitemanager.example.com",
         "enrolment_url": "https://sitemanager.example.com/site/v1/enrol",
+        "token_lifetime_minutes": 10,
     }

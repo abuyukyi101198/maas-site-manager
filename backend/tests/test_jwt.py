@@ -5,8 +5,8 @@ from jose import jwt
 import pytest
 
 from msm.jwt import (
+    DEFAULT_TOKEN_DURATION,
     JWT,
-    TOKEN_DURATION,
     InvalidToken,
     TokenAudience,
     TokenPurpose,
@@ -35,7 +35,10 @@ class TestJWT:
         )
         assert payload["sub"] == subject
         assert payload["iss"] == issuer
-        assert utc_from_timestamp(payload["exp"]) < now_utc() + TOKEN_DURATION
+        assert (
+            utc_from_timestamp(payload["exp"])
+            < now_utc() + DEFAULT_TOKEN_DURATION
+        )
         assert utc_from_timestamp(payload["iat"]) < now_utc()
         assert payload["aud"] == ["api"]
 

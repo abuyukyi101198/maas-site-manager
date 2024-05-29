@@ -31,6 +31,7 @@ class SettingsPatchRequest(BaseModel):
 
     service_url: str | None = None
     enrolment_url: str | None = None
+    token_lifetime_minutes: int | None = None
 
 
 @v1_router.patch("/settings")
