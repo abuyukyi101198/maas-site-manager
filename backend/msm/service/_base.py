@@ -1,21 +1,10 @@
 from collections.abc import Iterable
 from functools import cached_property
-from typing import (
-    Any,
-    Generic,
-    TypeVar,
-    cast,
-)
+from typing import Any, Generic, TypeVar, cast
 
+from prometheus_client import CollectorRegistry
 from pydantic import BaseModel
-from sqlalchemy import (
-    CursorResult,
-    Table,
-    delete,
-    insert,
-    select,
-    update,
-)
+from sqlalchemy import CursorResult, Table, delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncConnection
 from sqlalchemy.sql.expression import bindparam
 
@@ -25,6 +14,8 @@ Model = TypeVar("Model", bound=BaseModel)
 class Service:
     """Base class for services."""
 
+    _registry = CollectorRegistry(auto_describe=True)
+
     def __init__(self, connection: AsyncConnection):
         self.conn = connection
 
@@ -33,6 +24,14 @@ class Service:
     ) -> Iterable[Model]:
         """Return an iterable of model instances from a query result."""
         return (model(**row._asdict()) for row in result.all())
+
+    @classmethod
+    def register_metrics(cls, registry: CollectorRegistry) -> None:
+        """Register metrics for this service."""
+        registry.register(cls._registry)
+
+    async def collect_metrics(self) -> None:
+        """Collect metrics for this service."""
 
 
 class DBBackedModelService(Service, Generic[Model]):

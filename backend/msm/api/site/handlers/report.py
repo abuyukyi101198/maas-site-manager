@@ -62,6 +62,8 @@ async def details(
                     }
                 ),
             )
-    await services.sites.update_last_seen(site.id, now_utc())
+    await services.sites.update_last_seen(
+        site.id, now_utc(), update_metrics=True
+    )
     interval = await services.sites.get_heartbeat_interval()
     response.headers["MSM-Heartbeat-Interval-Seconds"] = str(interval)

@@ -104,9 +104,9 @@ line-length = 79
 
 [tool.ruff.lint]
 select = [
-  "I",   # isort
-  "RUF", # ruff
-  "UP",  # pyupgrade
+  "I",    # isort
+  "RUF",  # ruff
+  "UP",   # pyupgrade
   "F401", # unused imports
 ]
 

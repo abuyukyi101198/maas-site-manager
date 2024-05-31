@@ -1,8 +1,5 @@
 from collections.abc import AsyncGenerator
-from contextlib import (
-    aclosing,
-    asynccontextmanager,
-)
+from contextlib import aclosing, asynccontextmanager
 from logging import Logger
 from mimetypes import guess_type
 import os
@@ -11,6 +8,7 @@ import re
 from typing import Any
 import urllib.parse
 
+import anyio
 from baize.asgi.responses import FileResponse as BaizeFileResponse
 from bs4 import BeautifulSoup as bs
 from fastapi import FastAPI, Request
@@ -20,10 +18,7 @@ from fastapi.responses import (
     RedirectResponse,
     Response as FastApiResponse,
 )
-from prometheus_client import (
-    REGISTRY,
-    CollectorRegistry,
-)
+from prometheus_client import REGISTRY, CollectorRegistry
 from sqlalchemy.ext.asyncio import AsyncConnection
 import uvicorn
 from uvicorn.server import logger
@@ -34,18 +29,10 @@ from msm.api._prometheus import instrument_prometheus
 from msm.api._utils import create_subapp
 from msm.api.site.handlers import ROUTERS as SITE_API_ROUTERS
 from msm.api.user.handlers import ROUTERS as USER_API_ROUTERS
-from msm.db import (
-    Database,
-    check_server_version,
-)
-from msm.middleware import (
-    DatabaseMetricsMiddleware,
-    TransactionMiddleware,
-)
-from msm.service import (
-    ConfigService,
-    SettingsService,
-)
+from msm.db import Database, check_server_version
+from msm.metrics import collect_stats
+from msm.middleware import DatabaseMetricsMiddleware, TransactionMiddleware
+from msm.service import ConfigService, ServiceCollection, SettingsService
 from msm.settings import Settings
 
 
@@ -88,7 +75,13 @@ def create_app(
             await db.execute_in_transaction(check_server_version)
             await db.ensure_schema()
             await db.execute_in_transaction(ensure_db_entries)
-            yield
+
+            # start background tasks
+            async with anyio.create_task_group() as tg:
+                tg.start_soon(collect_stats, db, logger)
+                yield
+                # stop all tasks
+                tg.cancel_scope.cancel()
 
     app = FastAPI(
         title="MAAS Site Manager",
@@ -135,6 +128,7 @@ def create_app(
     app.mount("/site", create_subapp("Site API", "site", SITE_API_ROUTERS))
 
     instrument_prometheus(app, prometheus_registry)
+    ServiceCollection.register_metrics(prometheus_registry)
 
     return app
 

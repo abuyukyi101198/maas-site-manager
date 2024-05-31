@@ -3,9 +3,11 @@ from msm.db.queries._search import (
     filters_from_arguments,
     order_by_from_arguments,
 )
+from msm.db.queries._sum import sum_or_zero
 
 __all__ = [
     "filters_from_arguments",
     "order_by_from_arguments",
     "row_count",
+    "sum_or_zero",
 ]

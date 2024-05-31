@@ -1,18 +1,21 @@
+from collections import defaultdict
 from collections.abc import Iterable
 from datetime import (
     datetime,
     timedelta,
 )
-from typing import (
-    Any,
-)
+from typing import Any
 from uuid import UUID
 
+from prometheus_client import Gauge, Histogram
 from sqlalchemy import (
+    Integer,
     Select,
     case,
+    cast,
     exists,
     func,
+    literal,
     select,
     update,
 )
@@ -41,6 +44,24 @@ class InvalidPendingSites(Exception):
 
 
 class SiteService(Service):
+    sites_status = Gauge(
+        "sites_total",
+        "Total number of sites connected",
+        labelnames=("status",),
+        registry=Service._registry,
+    )
+    machine_status = Gauge(
+        "site_machine_status_total",
+        "Total number of machines in each status",
+        labelnames=("status",),
+        registry=Service._registry,
+    )
+    heartbeat_skew = Histogram(
+        "site_heartbeat_skew",
+        "Site heartbeat skew, in seconds",
+        registry=Service._registry,
+    )
+
     async def get(
         self,
         sort_params: list[SortParam],
@@ -118,8 +139,21 @@ class SiteService(Service):
         )
         await self.conn.execute(stmt)
 
-    async def update_last_seen(self, id: int, last_seen: datetime) -> None:
+    async def update_last_seen(
+        self, id: int, last_seen: datetime, update_metrics: bool = False
+    ) -> None:
         """Update when a site has been last seen."""
+        if update_metrics:
+            stmt_metrics = select(SiteData.c.last_seen).where(
+                SiteData.c.id == id
+            )
+            result = await self.conn.execute(stmt_metrics)
+            if previous := result.scalar():
+                intval = await self.get_heartbeat_interval()
+                deadline: datetime = previous + timedelta(seconds=intval)
+                skew = (last_seen - deadline).total_seconds()
+                self.heartbeat_skew.observe(max(0.0, skew))
+
         stmt = (
             insert(SiteData)
             .values(site_id=id, last_seen=last_seen)
@@ -225,7 +259,7 @@ class SiteService(Service):
         )
         filters.append(Site.c.accepted == True)
         stmt = self._select_statement(Site.c.id, Site.c.coordinates).where(
-            *filters # type: ignore[arg-type]
+            *filters  # type: ignore[arg-type]
         )
         result = await self.conn.execute(stmt)
         return self.objects_from_result(models.SiteCoordinates, result)
@@ -274,6 +308,83 @@ class SiteService(Service):
     async def get_heartbeat_interval(self) -> int:
         """The heartbeat interval, for sites to report to site manager"""
         return Settings().heartbeat_interval_seconds
+
+    async def get_site_count(self) -> tuple[int, int, int]:
+        """Get the number of sites connected to this manager.
+
+        Returns:
+            tuple[int, int, int]: total number of sites, number of enroled sites
+            and the number of *stable* connections.
+        """
+        conn_lost_threshold = Settings().conn_lost_threshold_seconds
+        conn_lost_limit = now_utc() - timedelta(seconds=conn_lost_threshold)
+        stmt = (
+            select(
+                func.count(Site.c.id).label("n_total"),
+                func.coalesce(
+                    func.sum(cast(Site.c.accepted, Integer)), literal(0)
+                ).label("n_accepted"),
+                func.coalesce(
+                    func.sum(
+                        case(
+                            (
+                                SiteData.c.last_seen > conn_lost_limit,
+                                1,
+                            ),
+                            else_=0,
+                        )
+                    ),
+                    literal(0),
+                ).label("n_connected"),
+            )
+            .select_from(
+                Site.join(
+                    SiteData, SiteData.c.site_id == Site.c.id, isouter=True
+                )
+            )
+            .where(Site.c.deleted == None)
+        )
+        result = await self.conn.execute(stmt)
+        if row := result.one_or_none():
+            return row.n_total, row.n_accepted, row.n_connected
+        else:
+            return 0, 0, 0
+
+    async def get_machine_count(self) -> dict[str, int]:
+        """Get the number of machines enrolled to connected sites.
+
+        Only *stable* connections are counted."""
+        conn_lost_threshold = Settings().conn_lost_threshold_seconds
+        conn_lost_limit = now_utc() - timedelta(seconds=conn_lost_threshold)
+        stmt = (
+            select(
+                queries.sum_or_zero(SiteData, "machines_allocated"),
+                queries.sum_or_zero(SiteData, "machines_deployed"),
+                queries.sum_or_zero(SiteData, "machines_ready"),
+                queries.sum_or_zero(SiteData, "machines_error"),
+                queries.sum_or_zero(SiteData, "machines_other"),
+            )
+            .select_from(SiteData.join(Site, SiteData.c.site_id == Site.c.id))
+            .where(
+                SiteData.c.last_seen > conn_lost_limit, Site.c.deleted == None
+            )
+        )
+        result = await self.conn.execute(stmt)
+        ret = defaultdict(int)
+        if row := result.one_or_none():
+            ret["allocated"] = row.n_machines_allocated
+            ret["deployed"] = row.n_machines_deployed
+            ret["ready"] = row.n_machines_ready
+            ret["error"] = row.n_machines_error
+            ret["other"] = row.n_machines_other
+            ret["total"] = (
+                row.n_machines_allocated
+                + row.n_machines_deployed
+                + row.n_machines_ready
+                + row.n_machines_error
+                + row.n_machines_other
+            )
+        return ret
 
     def _select_statement(self, *columns: Any) -> Select[Any]:
         return select(*columns).select_from(Site).where(Site.c.deleted == None)
@@ -349,3 +460,20 @@ class SiteService(Service):
             )
             .where(Site.c.deleted == None)
         )
+
+    async def collect_metrics(self) -> None:
+        n_total, n_enrol, n_connected = await self.get_site_count()
+        self.sites_status.labels(status="all").set(n_total)
+        self.sites_status.labels(status="pending").set(n_total - n_enrol)
+        self.sites_status.labels(status="connected").set(n_connected)
+
+        machines = await self.get_machine_count()
+        for status in [
+            "allocated",
+            "deployed",
+            "ready",
+            "error",
+            "other",
+            "total",
+        ]:
+            self.machine_status.labels(status=status).set(machines[status])

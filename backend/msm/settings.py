@@ -1,7 +1,4 @@
-from typing import (
-    Any,
-    cast,
-)
+from typing import Any, cast
 
 from pydantic import Field, SecretStr, validator
 from pydantic.fields import FieldInfo
@@ -10,12 +7,7 @@ from pydantic_settings import (
     PydanticBaseSettingsSource,
     SettingsConfigDict,
 )
-from snaphelpers import (
-    Snap,
-    SnapConfigOptions,
-    SnapEnviron,
-    is_snap,
-)
+from snaphelpers import Snap, SnapConfigOptions, SnapEnviron, is_snap
 from sqlalchemy import URL
 
 
@@ -67,6 +59,9 @@ class Settings(BaseSettings):
     )
     conn_lost_threshold_seconds: int = Field(
         default=600, validation_alias="MSM_CONN_LOST_THRESHOLD_SEC"
+    )
+    metrics_refresh_interval_seconds: int = Field(
+        default=300, validation_alias="MSM_METRICS_REFRESH_INTVAL_SEC"
     )
 
     @property

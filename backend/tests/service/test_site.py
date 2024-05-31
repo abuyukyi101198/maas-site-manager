@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import cast
 from uuid import uuid4
 
@@ -13,6 +14,8 @@ from msm.db.models import (
     SiteUpdate,
 )
 from msm.service._site import SiteService
+from msm.settings import Settings
+from msm.time import now_utc
 from tests.fixtures.factory import Factory
 
 
@@ -186,3 +189,114 @@ class TestSiteService:
         assert db_sites[0]["deleted"] is not None
         assert db_sites[1]["deleted"] is not None
         assert db_sites[2]["deleted"] is None
+
+    async def test_get_site_count(
+        self,
+        factory: Factory,
+        db_connection: AsyncConnection,
+    ) -> None:
+        service = SiteService(db_connection)
+        sites = [await factory.make_Site() for _ in range(5)]
+        _ = [await factory.make_PendingSite() for _ in range(3)]
+        await factory.make_SiteData(site_id=sites[0].id)
+        await factory.make_SiteData(site_id=sites[1].id)
+        await factory.make_SiteData(
+            site_id=sites[2].id, last_seen=now_utc() - timedelta(days=1)
+        )
+        n_total, n_enrol, n_connected = await service.get_site_count()
+        assert n_total == 8
+        assert n_enrol == 5
+        assert n_connected == 2
+
+    async def test_get_site_count_empty(
+        self,
+        db_connection: AsyncConnection,
+    ) -> None:
+        service = SiteService(db_connection)
+        n_total, n_enrol, n_connected = await service.get_site_count()
+        assert n_total == 0
+        assert n_enrol == 0
+        assert n_connected == 0
+
+    async def test_get_machine_count(
+        self,
+        factory: Factory,
+        db_connection: AsyncConnection,
+    ) -> None:
+        service = SiteService(db_connection)
+        sites = [await factory.make_Site() for _ in range(2)]
+        await factory.make_SiteData(site_id=sites[0].id, machines_allocated=3)
+        await factory.make_SiteData(
+            site_id=sites[1].id, machines_allocated=3, machines_ready=1
+        )
+        stats = await service.get_machine_count()
+        assert stats["allocated"] == 6
+        assert stats["deployed"] == 0
+        assert stats["ready"] == 1
+        assert stats["error"] == 0
+        assert stats["other"] == 0
+        assert stats["total"] == 7
+
+    async def test_get_machine_count_empty(
+        self,
+        db_connection: AsyncConnection,
+    ) -> None:
+        service = SiteService(db_connection)
+        stats = await service.get_machine_count()
+        assert stats["allocated"] == 0
+        assert stats["deployed"] == 0
+        assert stats["ready"] == 0
+        assert stats["error"] == 0
+        assert stats["other"] == 0
+        assert stats["total"] == 0
+
+    async def test_get_machine_count_stale(
+        self,
+        factory: Factory,
+        db_connection: AsyncConnection,
+    ) -> None:
+        service = SiteService(db_connection)
+        sites = [await factory.make_Site() for _ in range(2)]
+        await factory.make_SiteData(site_id=sites[0].id, machines_allocated=3)
+        await factory.make_SiteData(
+            site_id=sites[1].id,
+            machines_allocated=3,
+            machines_ready=1,
+            last_seen=now_utc() - timedelta(days=1),
+        )
+        stats = await service.get_machine_count()
+        assert stats["allocated"] == 3
+        assert stats["deployed"] == 0
+        assert stats["ready"] == 0
+        assert stats["error"] == 0
+        assert stats["other"] == 0
+        assert stats["total"] == 3
+
+    async def test_metric_heartbeat_skew(
+        self,
+        factory: Factory,
+        db_connection: AsyncConnection,
+    ) -> None:
+        last = timedelta(seconds=Settings().heartbeat_interval_seconds)
+        now = now_utc()
+        service = SiteService(db_connection)
+        site = await factory.make_Site()
+        await factory.make_SiteData(site_id=site.id, last_seen=now - last)
+        await service.update_last_seen(site.id, now, update_metrics=True)
+        skew = service._registry.get_sample_value("site_heartbeat_skew_sum")
+        assert skew == 0.0
+
+    async def test_metric_heartbeat_skew_delayed(
+        self,
+        factory: Factory,
+        db_connection: AsyncConnection,
+    ) -> None:
+        intval = Settings().heartbeat_interval_seconds
+        last = timedelta(seconds=intval * 2)
+        now = now_utc()
+        service = SiteService(db_connection)
+        site = await factory.make_Site()
+        await factory.make_SiteData(site_id=site.id, last_seen=now - last)
+        await service.update_last_seen(site.id, now, update_metrics=True)
+        skew = service._registry.get_sample_value("site_heartbeat_skew_sum")
+        assert skew == intval

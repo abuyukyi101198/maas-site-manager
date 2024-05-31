@@ -5,6 +5,7 @@ from typing import (
 )
 import uuid
 
+from prometheus_client import Counter
 from sqlalchemy import (
     Select,
     delete,
@@ -26,6 +27,16 @@ from msm.time import now_utc
 
 
 class TokenService(Service):
+    token_issued = Counter(
+        "token_issued",
+        "Total tokens issued",
+        labelnames=(
+            "audience",
+            "purpose",
+        ),
+        registry=Service._registry,
+    )
+
     async def create(
         self,
         issuer: str,
@@ -64,6 +75,9 @@ class TokenService(Service):
             ),
             data,
         )
+        self.token_issued.labels(
+            audience=TokenAudience.SITE, purpose=TokenPurpose.ENROLMENT
+        ).inc(count)
         return self.objects_from_result(models.Token, result)
 
     async def get(
