@@ -392,7 +392,14 @@ class TestPendingSitesPostHandler:
             json={"ids": [site.id], "accept": False},
         )
         assert response.status_code == 204
-        assert await factory.get("site") == []
+
+        get_response = await user_client.get("/sites/pending")
+        assert get_response.json() == {
+            "page": 1,
+            "size": 20,
+            "total": 0,
+            "items": [],
+        }
 
     async def test_invalid_ids(
         self, user_client: Client, factory: Factory

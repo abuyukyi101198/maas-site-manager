@@ -169,8 +169,8 @@ class TestSiteService:
         site2 = await factory.make_Site()
         await service.delete(site1.id)
         db_sites = await factory.get("site")
-        assert len(db_sites) == 1
-        assert db_sites[0]["id"] == site2.id
+        assert db_sites[0]["deleted"] is not None
+        assert db_sites[1]["deleted"] is None
 
     async def test_delete_many(
         self,
@@ -183,5 +183,6 @@ class TestSiteService:
         site3 = await factory.make_Site()
         await service.delete_many([site1.id, site2.id])
         db_sites = await factory.get("site")
-        assert len(db_sites) == 1
-        assert db_sites[0]["id"] == site3.id
+        assert db_sites[0]["deleted"] is not None
+        assert db_sites[1]["deleted"] is not None
+        assert db_sites[2]["deleted"] is None

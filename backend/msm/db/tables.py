@@ -57,6 +57,7 @@ Site = Table(
     Column(
         "created", DateTime(timezone=True), nullable=False, default=now_utc
     ),
+    Column("deleted", DateTime(timezone=True), nullable=True, default=None),
     Column(
         "auth_id",
         UUID(as_uuid=True),

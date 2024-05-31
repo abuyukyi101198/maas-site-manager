@@ -11,7 +11,6 @@ from uuid import UUID
 from sqlalchemy import (
     Select,
     case,
-    delete,
     exists,
     func,
     select,
@@ -74,7 +73,7 @@ class SiteService(Service):
         order_by = queries.order_by_from_arguments(sort_params=sort_params)
         count = await queries.row_count(self.conn, Site, *filters)
         stmt = (
-            self._select_statement()
+            self._select_statement_join_data()
             .where(*filters)  # type: ignore[arg-type]
             .order_by(*order_by)
             .offset(offset)
@@ -86,7 +85,7 @@ class SiteService(Service):
 
     async def get_by_id(self, id: int) -> models.Site | None:
         """Get a site by id."""
-        stmt = self._select_statement().where(Site.c.id == id)
+        stmt = self._select_statement_join_data().where(Site.c.id == id)
         result = await self.conn.execute(stmt)
         if row := result.one_or_none():
             return models.Site(**row._asdict())
@@ -94,7 +93,9 @@ class SiteService(Service):
 
     async def get_by_auth_id(self, auth_id: UUID) -> models.Site | None:
         """Get a site by authentication ID."""
-        stmt = self._select_statement().where(Site.c.auth_id == auth_id)
+        stmt = self._select_statement_join_data().where(
+            Site.c.auth_id == auth_id
+        )
         result = await self.conn.execute(stmt)
         if row := result.one_or_none():
             return models.Site(**row._asdict())
@@ -102,7 +103,7 @@ class SiteService(Service):
 
     async def id_exists(self, id: int) -> bool:
         """Check if the given site exists"""
-        stmt = select(exists(Site).where(Site.c.id == id))
+        stmt = self._select_statement(exists(Site)).where(Site.c.id == id)
         result = await self.conn.execute(stmt)
         return result.scalar() is True
 
@@ -142,11 +143,18 @@ class SiteService(Service):
 
     async def delete(self, id: int) -> None:
         """Deletes a site by ID."""
-        stmt = delete(Site).where(Site.c.id == id)
+        stmt = (
+            update(Site).where(Site.c.id == id).values({"deleted": now_utc()})
+        )
         await self.conn.execute(stmt)
 
     async def delete_many(self, ids: list[int]) -> set[int]:
-        stmt = delete(Site).where(Site.c.id.in_(ids)).returning(Site.c.id)
+        stmt = (
+            update(Site)
+            .where(Site.c.id.in_(ids))
+            .values({"deleted": now_utc()})
+            .returning(Site.c.id)
+        )
         result = await self.conn.execute(stmt)
         return set([x[0] for x in result.all()])
 
@@ -172,17 +180,16 @@ class SiteService(Service):
         limit: int | None = None,
     ) -> tuple[int, Iterable[models.PendingSite]]:
         """Return pending sites."""
-        filters = [Site.c.accepted == False]
+        filters = [Site.c.accepted == False, Site.c.deleted == None]
         count = await queries.row_count(self.conn, Site, *filters)
         stmt = (
-            select(
+            self._select_statement(
                 Site.c.id,
                 Site.c.name,
                 Site.c.url,
                 Site.c.created,
             )
-            .select_from(Site)
-            .where(*filters)
+            .where(Site.c.accepted == False)
             .order_by(Site.c.id)
             .offset(offset)
         )
@@ -217,13 +224,8 @@ class SiteService(Service):
             url=url,
         )
         filters.append(Site.c.accepted == True)
-        stmt = (
-            select(
-                Site.c.id,
-                Site.c.coordinates,
-            )
-            .select_from(Site)
-            .where(*filters)  # type: ignore[arg-type]
+        stmt = self._select_statement(Site.c.id, Site.c.coordinates).where(
+            *filters # type: ignore[arg-type]
         )
         result = await self.conn.execute(stmt)
         return self.objects_from_result(models.SiteCoordinates, result)
@@ -235,13 +237,9 @@ class SiteService(Service):
     ) -> None:
         """Accept or reject pending sites."""
         site_ids = set(ids)
-        stmt = (
-            select(Site.c.id)
-            .select_from(Site)
-            .where(
-                Site.c.id.in_(site_ids),
-                Site.c.accepted == False,
-            )
+        stmt = self._select_statement(Site.c.id).where(
+            Site.c.id.in_(site_ids),
+            Site.c.accepted == False,
         )
         result = await self.conn.execute(stmt)
         pending_ids = set(row[0] for row in result.all())
@@ -256,20 +254,18 @@ class SiteService(Service):
             )
         else:
             await self.conn.execute(
-                delete(Site).where(Site.c.id.in_(site_ids))
+                update(Site)
+                .where(Site.c.id.in_(site_ids))
+                .values({"deleted": now_utc()})
             )
         return None
 
     async def get_enroling(self, auth_id: UUID) -> models.EnrolingSite | None:
         """Return details for a site in enrolment process, if found."""
-        stmt = (
-            select(
-                Site.c.id,
-                Site.c.accepted,
-            )
-            .select_from(Site)
-            .where(Site.c.auth_id == auth_id)
-        )
+        stmt = self._select_statement(
+            Site.c.id,
+            Site.c.accepted,
+        ).where(Site.c.auth_id == auth_id)
         result = await self.conn.execute(stmt)
         if row := result.one_or_none():
             return models.EnrolingSite(**row._asdict())
@@ -279,68 +275,77 @@ class SiteService(Service):
         """The heartbeat interval, for sites to report to site manager"""
         return Settings().heartbeat_interval_seconds
 
-    def _select_statement(self) -> Select[Any]:
+    def _select_statement(self, *columns: Any) -> Select[Any]:
+        return select(*columns).select_from(Site).where(Site.c.deleted == None)
+
+    def _select_statement_join_data(self) -> Select[Any]:
         connection_lost_threshold = Settings().conn_lost_threshold_seconds
         connection_lost_limit = now_utc() - timedelta(
             seconds=connection_lost_threshold
         )
-        return select(
-            Site.c.id,
-            Site.c.address,
-            Site.c.city,
-            Site.c.country,
-            Site.c.coordinates,
-            Site.c.name,
-            Site.c.name.notin_(
-                select(Site.c.name)
-                .select_from(Site)
-                .group_by(Site.c.name)
-                .having(func.count(Site.c.name) > 1)
-            ).label("name_unique"),
-            Site.c.note,
-            Site.c.postal_code,
-            Site.c.state,
-            Site.c.timezone,
-            Site.c.url,
-            case(
-                (
-                    SiteData.c.site_id == None,
-                    models.ConnectionStatus.UNKNOWN,
-                ),
-                (
-                    SiteData.c.last_seen > connection_lost_limit,
-                    models.ConnectionStatus.STABLE,
-                ),
-                else_=models.ConnectionStatus.LOST,
-            ).label("connection_status"),
-            case(
-                (
-                    SiteData.c.site_id != None,
-                    func.json_build_object(
-                        "machines_total",
-                        (
-                            SiteData.c.machines_allocated
-                            + SiteData.c.machines_deployed
-                            + SiteData.c.machines_ready
-                            + SiteData.c.machines_error
-                            + SiteData.c.machines_other
-                        ).label("machines_total"),
-                        "machines_allocated",
-                        SiteData.c.machines_allocated,
-                        "machines_deployed",
-                        SiteData.c.machines_deployed,
-                        "machines_ready",
-                        SiteData.c.machines_ready,
-                        "machines_error",
-                        SiteData.c.machines_error,
-                        "machines_other",
-                        SiteData.c.machines_other,
-                        "last_seen",
-                        SiteData.c.last_seen,
+        return (
+            select(
+                Site.c.id,
+                Site.c.address,
+                Site.c.city,
+                Site.c.country,
+                Site.c.coordinates,
+                Site.c.name,
+                Site.c.name.notin_(
+                    select(Site.c.name)
+                    .select_from(Site)
+                    .group_by(Site.c.name)
+                    .having(func.count(Site.c.name) > 1)
+                ).label("name_unique"),
+                Site.c.note,
+                Site.c.postal_code,
+                Site.c.state,
+                Site.c.timezone,
+                Site.c.url,
+                case(
+                    (
+                        SiteData.c.site_id == None,
+                        models.ConnectionStatus.UNKNOWN,
                     ),
-                ),
-                else_=None,
-            ).label("stats"),
-        ).select_from(
-            Site.join(SiteData, SiteData.c.site_id == Site.c.id, isouter=True)
+                    (
+                        SiteData.c.last_seen > connection_lost_limit,
+                        models.ConnectionStatus.STABLE,
+                    ),
+                    else_=models.ConnectionStatus.LOST,
+                ).label("connection_status"),
+                case(
+                    (
+                        SiteData.c.site_id != None,
+                        func.json_build_object(
+                            "machines_total",
+                            (
+                                SiteData.c.machines_allocated
+                                + SiteData.c.machines_deployed
+                                + SiteData.c.machines_ready
+                                + SiteData.c.machines_error
+                                + SiteData.c.machines_other
+                            ).label("machines_total"),
+                            "machines_allocated",
+                            SiteData.c.machines_allocated,
+                            "machines_deployed",
+                            SiteData.c.machines_deployed,
+                            "machines_ready",
+                            SiteData.c.machines_ready,
+                            "machines_error",
+                            SiteData.c.machines_error,
+                            "machines_other",
+                            SiteData.c.machines_other,
+                            "last_seen",
+                            SiteData.c.last_seen,
+                        ),
+                    ),
+                    else_=None,
+                ).label("stats"),
+            )
+            .select_from(
+                Site.join(
+                    SiteData, SiteData.c.site_id == Site.c.id, isouter=True
+                )
+            )
+            .where(Site.c.deleted == None)
         )

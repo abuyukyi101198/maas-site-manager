@@ -25,6 +25,7 @@ async def make_fixture_sites(conn: AsyncConnection) -> list[SampleDataModel]:
         url="https://london.canonical.example.com",
         accepted=True,
         auth_id=uuid4(),
+        deleted=None,
     )
     collection.add(
         city="Austin",
@@ -39,6 +40,7 @@ async def make_fixture_sites(conn: AsyncConnection) -> list[SampleDataModel]:
         url="https://austin.canonical.example.com",
         accepted=True,
         auth_id=uuid4(),
+        deleted=None,
     )
     collection.add(
         city="Boston",
@@ -53,6 +55,7 @@ async def make_fixture_sites(conn: AsyncConnection) -> list[SampleDataModel]:
         url="https://boston.canonical.example.com",
         accepted=True,
         auth_id=uuid4(),
+        deleted=None,
     )
     collection.add(
         city="Shanghai",
@@ -67,6 +70,7 @@ async def make_fixture_sites(conn: AsyncConnection) -> list[SampleDataModel]:
         url="https://shanghai.canonical.example.com",
         accepted=False,
         auth_id=uuid4(),
+        deleted=None,
     )
     collection.add(
         city="Beijing",
@@ -81,6 +85,7 @@ async def make_fixture_sites(conn: AsyncConnection) -> list[SampleDataModel]:
         url="https://shanghai.canonical.example.com",
         accepted=True,
         auth_id=uuid4(),
+        deleted=None,
     )
     collection.add(
         city="Taipei City",
@@ -95,6 +100,7 @@ async def make_fixture_sites(conn: AsyncConnection) -> list[SampleDataModel]:
         url="https://taiwan.canonical.example.com",
         accepted=True,
         auth_id=uuid4(),
+        deleted=None,
     )
     collection.add(
         city="Douglas",
@@ -109,6 +115,7 @@ async def make_fixture_sites(conn: AsyncConnection) -> list[SampleDataModel]:
         url="https://canonical.example.com",
         accepted=False,
         auth_id=uuid4(),
+        deleted=None,
     )
     collection.add(
         city="Tokyo",
@@ -123,6 +130,7 @@ async def make_fixture_sites(conn: AsyncConnection) -> list[SampleDataModel]:
         url="https://japan.canonical.example.com",
         accepted=True,
         auth_id=uuid4(),
+        deleted=None,
     )
     collection.add(
         city="Tokyo",
@@ -137,6 +145,7 @@ async def make_fixture_sites(conn: AsyncConnection) -> list[SampleDataModel]:
         url="https://japan.canonical.example.com",
         accepted=True,
         auth_id=uuid4(),
+        deleted=None,
     )
     sites = await collection.create(conn)
 
