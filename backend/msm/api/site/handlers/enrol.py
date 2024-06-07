@@ -55,6 +55,7 @@ class EnrolPostRequest(BaseModel):
 
     name: str
     url: str
+    cluster_uuid: str
     metadata: SiteMetadata | None = None
 
 
@@ -101,6 +102,7 @@ async def post(
         PendingSiteCreate(
             name=post_request.name,
             url=post_request.url,
+            cluster_uuid=post_request.cluster_uuid,
             auth_id=auth_id,
             **metadata,
         )

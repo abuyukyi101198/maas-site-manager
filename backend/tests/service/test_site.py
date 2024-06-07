@@ -92,10 +92,12 @@ class TestSiteService:
                 name="site",
                 url="https://site.example.com",
                 auth_id=uuid4(),
+                cluster_uuid="test",
             )
         )
         assert pending_site.name == "site"
         assert pending_site.url == "https://site.example.com"
+        assert pending_site.cluster_uuid == "test"
 
     async def test_get_enroling_accepted(
         self,

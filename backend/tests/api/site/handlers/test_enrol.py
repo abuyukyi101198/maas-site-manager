@@ -26,6 +26,7 @@ class TestEnrolPostHandler:
         body = {
             "name": "new-site",
             "url": "https://site.example.com",
+            "cluster_uuid": "test",
             "metadata": {
                 "city": "Los Angeles",
                 "country": "US",
@@ -50,6 +51,7 @@ class TestEnrolPostHandler:
         assert pending_site["auth_id"] == auth_id
         assert pending_site["name"] == body["name"]
         assert pending_site["url"] == body["url"]
+        assert pending_site["cluster_uuid"] == body["cluster_uuid"]
         for k, v in body["metadata"].items():  # type: ignore[attr-defined]
             if k in ["latitude", "longitude"]:
                 continue
@@ -75,6 +77,7 @@ class TestEnrolPostHandler:
         body = {
             "name": "new-site",
             "url": "https://site.example.com",
+            "cluster_uuid": "test",
             "metadata": {
                 "note": "this is a test site",
                 "state": "CA",
@@ -95,6 +98,7 @@ class TestEnrolPostHandler:
         assert pending_site["auth_id"] == auth_id
         assert pending_site["name"] == body["name"]
         assert pending_site["url"] == body["url"]
+        assert pending_site["cluster_uuid"] == body["cluster_uuid"]
         for k, v in body["metadata"].items():  # type: ignore[attr-defined]
             assert pending_site[k] == v
         assert pending_site["coordinates"] == None
@@ -115,6 +119,7 @@ class TestEnrolPostHandler:
         body = {
             "name": "new-site",
             "url": "https://site.example.com",
+            "cluster_uuid": "test",
         }
         response = await app_client.post(
             "/site/v1/enrol",
@@ -126,6 +131,7 @@ class TestEnrolPostHandler:
         # a pending site is created
         [pending_site] = await factory.get("site")
         assert pending_site["auth_id"] == auth_id
+        assert pending_site["cluster_uuid"] == body["cluster_uuid"]
         assert not pending_site["accepted"]
 
     async def test_no_token_match(
@@ -138,7 +144,11 @@ class TestEnrolPostHandler:
         )
         response = await app_client.post(
             "/site/v1/enrol",
-            json={"name": "new-site", "url": "https://site.example.com"},
+            json={
+                "name": "new-site",
+                "url": "https://site.example.com",
+                "cluster_uuid": "test",
+            },
         )
         assert response.status_code == 401
 
@@ -154,7 +164,11 @@ class TestEnrolPostHandler:
         )
         response = await app_client.post(
             "/site/v1/enrol",
-            json={"name": "new-site", "url": "https://site.example.com"},
+            json={
+                "name": "new-site",
+                "url": "https://site.example.com",
+                "cluster_uuid": "test",
+            },
         )
         assert response.status_code == 401
 
@@ -169,9 +183,33 @@ class TestEnrolPostHandler:
         )
         response = await app_client.post(
             "/site/v1/enrol",
-            json={"name": "new-site", "url": "https://site.example.com"},
+            json={
+                "name": "new-site",
+                "url": "https://site.example.com",
+                "cluster_uuid": "test",
+            },
         )
         assert response.status_code == 401
+
+    async def test_enrol_no_cluster_uuid(
+        self, factory: Factory, app_client: Client
+    ) -> None:
+        auth_id = uuid4()
+        await factory.make_Token(auth_id=auth_id)
+        app_client.authenticate(
+            auth_id,
+            token_audience=TokenAudience.SITE,
+            token_purpose=TokenPurpose.ENROLMENT,
+        )
+        body = {
+            "name": "new-site",
+            "url": "https://site.example.com",
+        }
+        response = await app_client.post(
+            "/site/v1/enrol",
+            json=body,
+        )
+        assert response.status_code == 422
 
 
 @pytest.mark.asyncio

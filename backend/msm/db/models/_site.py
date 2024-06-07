@@ -57,6 +57,7 @@ class PendingSite(BaseModel):
     id: int
     name: str
     url: str
+    cluster_uuid: str
     created: AwareDatetime
 
 
@@ -112,6 +113,7 @@ class PendingSiteCreate(BaseModel):
 
     name: str
     url: str
+    cluster_uuid: str
     auth_id: UUID
     city: str | None = None
     country: str | None = Field(default=None, min_length=2, max_length=2)

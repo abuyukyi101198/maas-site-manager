@@ -65,6 +65,7 @@ Site = Table(
         unique=True,
         index=True,
     ),
+    Column("cluster_uuid", Text, nullable=False, default=""),
 )
 
 

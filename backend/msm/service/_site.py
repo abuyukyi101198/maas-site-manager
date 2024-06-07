@@ -203,6 +203,7 @@ class SiteService(Service):
             Site.c.url,
             Site.c.created,
             Site.c.auth_id,
+            Site.c.cluster_uuid,
         )
         result = await self.conn.execute(stmt, [data])
         pending_site = result.one()
@@ -222,6 +223,7 @@ class SiteService(Service):
                 Site.c.name,
                 Site.c.url,
                 Site.c.created,
+                Site.c.cluster_uuid,
             )
             .where(Site.c.accepted == False)
             .order_by(Site.c.id)
