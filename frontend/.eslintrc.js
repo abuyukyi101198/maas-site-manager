@@ -2,7 +2,7 @@ const path = require("path");
 
 module.exports = {
   root: true,
-  plugins: ["unused-imports", "no-relative-import-paths", "prettier"],
+  plugins: ["unused-imports", "no-relative-import-paths", "complexity", "prettier"],
   extends: [
     "./.eslintrc-auto-import.json",
     "react-app", // Use the recommended rules from CRA.
@@ -21,6 +21,7 @@ module.exports = {
   },
   rules: {
     "prettier/prettier": "error",
+    complexity: "error",
     "no-relative-import-paths/no-relative-import-paths": [
       "warn",
       { allowSameFolder: true, rootDir: "frontend/src", prefix: "@" },

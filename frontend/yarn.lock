@@ -3704,6 +3704,13 @@ eslint-module-utils@^2.7.4:
   dependencies:
     debug "^3.2.7"
 
+eslint-plugin-complexity@1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-complexity/-/eslint-plugin-complexity-1.0.2.tgz#32772ed363989a9032f8336b3c856c57989f5dd8"
+  integrity sha512-6SwGZ2Kz3pNBfKDpT38bh6XTsrPCkPVgYYsXhtWVa88IrlQ8HnHbvfKqjL826jYEU0AQiiljNRJ5BQNJe45qNw==
+  dependencies:
+    eslint-utils "^3.0.0"
+
 eslint-plugin-flowtype@^8.0.3:
   version "8.0.3"
   resolved "https://registry.yarnpkg.com/eslint-plugin-flowtype/-/eslint-plugin-flowtype-8.0.3.tgz#e1557e37118f24734aa3122e7536a038d34a4912"
