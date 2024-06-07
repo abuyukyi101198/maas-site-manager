@@ -67,13 +67,13 @@ If you need the Site Manager API to provide a self-signed TLS certificate, follo
 You will need this if you are planning on issuing an enrolment request from a MAAS instance.
 
 1. To start the `nginx` service when the backend container starts, set `USE_NGINX_TLS_PROXY=1` in `docker-compose.env`.
-2. Start the container with `docker-compose up`. You will need to include the `--build` option if you haven't done so since pulling the change to create the certificate and set up `nginx` within `backend/Dockerfile`.
+2. Start the container with `docker compose up`. You will need to include the `--build` option if you haven't done so since pulling the change to create the certificate and set up `nginx` within `backend/Dockerfile`.
 3. Once the container has started, copy the certificate onto your machine: `docker cp maas-site-manager_backend_1:/root/certs/msm.crt ~/`. This will copy the certificate to your home directory (change the second path if you would like to copy it elsewhere).
-4. On the MAAS side--the lxd container needs to know that this is a trusted certificate. If using `setup-dev-env.sh` from the `maas-dev-setup` repository, you can enable this by providing the `-c` or `--ca-crt` option and the location of the `msm.crt` file on your machine.
+4. On the MAAS side, the LXD container needs to know that this is a trusted certificate. If using `setup-dev-env.sh` from the [`maas-dev-setup` repository](https://github.com/canonical/maas-dev-setup), you can enable this by providing the `-c` or `--ca-crt` option and the location of the `msm.crt` file on your machine.
 
 If you are not using the script in step 4 above, follow these steps to tell MAAS that this is a trusted certificate:
-1. `scp` the `msm.crt` file to the lxd container running MAAS: `scp /path/on/your/machine.crt ubuntu@$container_ip:/home/ubuntu/`.
-2. `ssh` to the lxd container and place the file in the correct location. Note this cannot be handled above as we cannot `scp` as root: `sudo cp /home/ubuntu/msm.crt /usr/local/share/ca-certificates`
+1. `scp` the `msm.crt` file to the LXD container running MAAS: `scp /path/on/your/machine.crt ubuntu@$container_ip:/home/ubuntu/`.
+2. `ssh` to the LXD container and place the file in the correct location. Note this cannot be handled above as we cannot `scp` as root: `sudo cp /home/ubuntu/msm.crt /usr/local/share/ca-certificates`
 3. Update the trusted CA's: `sudo update-ca-certificates`
 4. Add the cert's CN as a hostname with the following commands:
 ```bash
@@ -84,7 +84,7 @@ echo $MAAS_MANAGEMENT_IP_RANGE $hn | sudo tee --append /etc/hosts
 
 #### Starting containers manually
 
-Note: you can stop here if you're using `docker-compose`.
+Note: you can stop here if you're using `docker compose`.
 
 It is simple to launch a PostgreSQL instance via Docker,
 
@@ -194,6 +194,26 @@ The `--autogenerate` parameter can be omitted to create an empty migration which
 
 **NB** the database should be at the correct state previous to the modifications that the path should contain. This should be done by calling the env with `upgrade head` before generating new revisions.
 
+#### Other settings
+
+There are other settings, configurable by setting environment variables, to control behaviours of the app.
+
+- heartbeat interval: the time interval at which MSM expects its connected sites to send heartbeat. This is configurable as,
+```bash
+export MSM_HEARTBEAT_INTERVAL_SEC=<value>
+```
+in seconds. The default value is 300s.
+- connection lost threshold: threshold value for which a site gets marked as 'connection lost' in MSM. This is configurable as,
+```bash
+export MSM_CONN_LOST_THRESHOLD_SEC=<value>
+```
+in seconds. The default value is 600s. Note that the connection lost threshold has to be greater than the heartbeat interval.
+- metrics refresh interval: the time interval at which MSM metrics are refreshed. This is configurable as,
+```bash
+export MSM_METRICS_REFRESH_INTVAL_SEC=<value>
+```
+in seconds. The default value is 300s.
+
 #### Linting and testing
 
 The project uses `tox` for running Python-related workflows.
@@ -274,7 +294,7 @@ yarn dev
 
 #### Updating API Client
 
-You can update TypeScript API Client from the OpenAPI schema by running the following command. Make sure that the back-end is running beforehand.
+You can update TypeScript API Client from the OpenAPI schema by running the following command. Make sure that the backend is running beforehand.
 
 ```bash
 yarn generate-api-client
@@ -348,7 +368,7 @@ The resulting snap can be installed via
 sudo snap install --dangerous ./maas-site-manager.snap
 ```
 
-After installation, the service won't be enabled automatically and need to be
+After installation, the service won't be enabled automatically and needs to be
 configured.
 
 The snap provides a few settings.
