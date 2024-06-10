@@ -81,6 +81,49 @@ class TestSiteService:
             SiteCoordinates(id=site2.id, coordinates=[20, -2]),
         ]
 
+    async def test_create_or_update_pending_does_exist(
+        self,
+        factory: Factory,
+        db_connection: AsyncConnection,
+    ) -> None:
+        cluster_uuid = str(uuid4())
+        await factory.make_Site(cluster_uuid=cluster_uuid)
+        service = SiteService(db_connection)
+        pending_site = PendingSiteCreate(
+            name="test_name",
+            url="http://msm.example",
+            cluster_uuid=cluster_uuid,
+            auth_id=uuid4(),
+        )
+        await service.create_or_update_pending(pending_site)
+        db_sites = await factory.get("site")
+        assert len(db_sites) == 1
+        assert db_sites[0]["accepted"] == False
+        pending_count, pending_sites = await service.get_pending()
+        assert pending_count == 1
+        for site in pending_sites:
+            assert site.cluster_uuid == cluster_uuid
+            assert site.url == pending_site.url
+            assert site.name == pending_site.name
+
+    async def test_create_or_update_pending_doesnt_exist(
+        self,
+        factory: Factory,
+        db_connection: AsyncConnection,
+    ) -> None:
+        cluster_uuid = str(uuid4())
+        service = SiteService(db_connection)
+        pending_site = PendingSiteCreate(
+            name="test_name",
+            url="http://msm.example",
+            cluster_uuid=cluster_uuid,
+            auth_id=uuid4(),
+        )
+        site = await service.create_or_update_pending(pending_site)
+        assert site.cluster_uuid == cluster_uuid
+        assert site.url == pending_site.url
+        assert site.name == pending_site.name
+
     async def test_create_pending(
         self,
         factory: Factory,

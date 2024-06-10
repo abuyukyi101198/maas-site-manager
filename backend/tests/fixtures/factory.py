@@ -159,6 +159,7 @@ class Factory:
         state: str = "",
         connection_status: ConnectionStatus = ConnectionStatus.UNKNOWN,
         auth_id: UUID | None = None,
+        cluster_uuid: str | None = None,
     ) -> Site:
         """Create a Site."""
         id = await self.next_id("site")
@@ -168,6 +169,8 @@ class Factory:
             url = f"https://{name}.example.com/"
         if auth_id is None:
             auth_id = uuid4()
+        if cluster_uuid is None:
+            cluster_uuid = str(uuid4())
         [row] = await self.create(
             "site",
             [
@@ -188,6 +191,7 @@ class Factory:
                     "accepted": True,
                     "created": now_utc(),
                     "auth_id": auth_id,
+                    "cluster_uuid": cluster_uuid,
                 }
             ],
         )
@@ -206,6 +210,7 @@ class Factory:
         name: str | None = None,
         url: str | None = None,
         auth_id: UUID | None = None,
+        cluster_uuid: str | None = None,
     ) -> PendingSite:
         """Create a PendingSite."""
         id = await self.next_id("site")
@@ -215,6 +220,8 @@ class Factory:
             url = f"https://{name}.example.com/"
         if auth_id is None:
             auth_id = uuid4()
+        if cluster_uuid is None:
+            cluster_uuid = str(uuid4())
         [row] = await self.create(
             "site",
             {
@@ -224,6 +231,7 @@ class Factory:
                 "accepted": False,
                 "created": now_utc(),
                 "auth_id": auth_id,
+                "cluster_uuid": cluster_uuid,
             },
         )
         return PendingSite(**row)

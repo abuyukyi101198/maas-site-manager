@@ -211,6 +211,44 @@ class TestEnrolPostHandler:
         )
         assert response.status_code == 422
 
+    async def test_enrol_site_exists(
+        self,
+        factory: Factory,
+        api_config: Config,
+        app_client: Client,
+    ) -> None:
+        auth_id = uuid4()
+        cluster_uuid = str(uuid4())
+        await factory.make_Site(
+            name="test1",
+            auth_id=auth_id,
+            cluster_uuid=cluster_uuid,
+            url="https://fake.url.com",
+        )
+        await factory.make_Token(auth_id=auth_id)
+        app_client.authenticate(
+            auth_id,
+            token_audience=TokenAudience.SITE,
+            token_purpose=TokenPurpose.ENROLMENT,
+        )
+        body = {
+            "name": "test2",
+            "cluster_uuid": cluster_uuid,
+            "url": "https://site.example.com",
+        }
+        response = await app_client.post(
+            "/site/v1/enrol",
+            json=body,
+        )
+        assert response.status_code == 202
+        sites = await factory.get("site")
+        assert len(sites) == 1
+        assert sites[0]["cluster_uuid"] == cluster_uuid
+        assert sites[0]["name"] == body["name"]
+        assert sites[0]["auth_id"] == auth_id
+        assert sites[0]["url"] == body["url"]
+        assert sites[0]["accepted"] == False
+
 
 @pytest.mark.asyncio
 class TestEnrolGetHandler:

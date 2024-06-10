@@ -98,7 +98,7 @@ async def post(
             )
             else None
         )
-    await services.sites.create_pending(
+    await services.sites.create_or_update_pending(
         PendingSiteCreate(
             name=post_request.name,
             url=post_request.url,

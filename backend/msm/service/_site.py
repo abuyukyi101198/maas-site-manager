@@ -192,6 +192,41 @@ class SiteService(Service):
         result = await self.conn.execute(stmt)
         return set([x[0] for x in result.all()])
 
+    async def create_or_update_pending(
+        self, details: models.PendingSiteCreate
+    ) -> models.PendingSite:
+        """Either mark a site as pending and update its details or create a
+        new one if it does not exist."""
+        stmt = self._select_statement(Site.c.id).where(
+            Site.c.cluster_uuid == details.cluster_uuid
+        )
+        result = await self.conn.execute(stmt)
+        if result.first() is not None:
+            return await self.update_pending(details)
+        return await self.create_pending(details)
+
+    async def update_pending(
+        self, details: models.PendingSiteCreate
+    ) -> models.PendingSite:
+        """Update the site details and mark it as pending."""
+        values = details.model_dump(exclude_none=True)
+        values["accepted"] = False
+        stmt = (
+            update(Site)
+            .where(Site.c.cluster_uuid == details.cluster_uuid)
+            .values(values)
+            .returning(
+                Site.c.id,
+                Site.c.name,
+                Site.c.url,
+                Site.c.cluster_uuid,
+                Site.c.created,
+            )
+        )
+        result = await self.conn.execute(stmt)
+        site = result.one()
+        return models.PendingSite(**site._asdict())
+
     async def create_pending(
         self, details: models.PendingSiteCreate
     ) -> models.PendingSite:
