@@ -18,7 +18,15 @@ from sqlalchemy.types import DateTime
 from msm.db.types import Point
 from msm.time import now_utc
 
-METADATA = MetaData()
+METADATA = MetaData(
+    naming_convention={
+        "ix": "ix_%(column_0_label)s",
+        "uq": "uq_%(table_name)s_%(column_0_name)s",
+        "ck": "ck_%(table_name)s_`%(constraint_name)s`",
+        "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+        "pk": "pk_%(table_name)s",
+    }
+)
 
 
 # Internal configuration options that are shared by units of the service
@@ -65,7 +73,7 @@ Site = Table(
         unique=True,
         index=True,
     ),
-    Column("cluster_uuid", Text, nullable=False, default=""),
+    Column("cluster_uuid", Text, nullable=False, unique=True, default=""),
 )
 
 

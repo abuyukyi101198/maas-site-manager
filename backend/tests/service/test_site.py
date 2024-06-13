@@ -129,18 +129,19 @@ class TestSiteService:
         factory: Factory,
         db_connection: AsyncConnection,
     ) -> None:
+        cluster_uuid = str(uuid4())
         service = SiteService(db_connection)
         pending_site = await service.create_pending(
             PendingSiteCreate(
                 name="site",
                 url="https://site.example.com",
                 auth_id=uuid4(),
-                cluster_uuid="test",
+                cluster_uuid=cluster_uuid,
             )
         )
         assert pending_site.name == "site"
         assert pending_site.url == "https://site.example.com"
-        assert pending_site.cluster_uuid == "test"
+        assert pending_site.cluster_uuid == cluster_uuid
 
     async def test_get_enroling_accepted(
         self,

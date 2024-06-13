@@ -35,10 +35,11 @@ class TestEnrolPostHandler:
             token_audience=TokenAudience.SITE,
             token_purpose=TokenPurpose.ENROLMENT,
         )
+        cluster_uuid = str(uuid4())
         body = {
             "name": "new-site",
             "url": "https://site.example.com",
-            "cluster_uuid": "test",
+            "cluster_uuid": cluster_uuid,
             "metadata": {
                 "city": "Los Angeles",
                 "country": "US",
@@ -80,6 +81,7 @@ class TestEnrolPostHandler:
         app_client: Client,
     ) -> None:
         auth_id = uuid4()
+        cluster_uuid = str(uuid4())
         await factory.make_Token(auth_id=auth_id)
         app_client.authenticate(
             auth_id,
@@ -89,7 +91,7 @@ class TestEnrolPostHandler:
         body = {
             "name": "new-site",
             "url": "https://site.example.com",
-            "cluster_uuid": "test",
+            "cluster_uuid": cluster_uuid,
             "metadata": {
                 "note": "this is a test site",
                 "state": "CA",
@@ -122,6 +124,7 @@ class TestEnrolPostHandler:
         self, factory: Factory, app_client: Client
     ) -> None:
         auth_id = uuid4()
+        cluster_uuid = str(uuid4())
         await factory.make_Token(auth_id=auth_id)
         app_client.authenticate(
             auth_id,
@@ -131,7 +134,7 @@ class TestEnrolPostHandler:
         body = {
             "name": "new-site",
             "url": "https://site.example.com",
-            "cluster_uuid": "test",
+            "cluster_uuid": cluster_uuid,
         }
         response = await app_client.post(
             "/site/v1/enrol",
@@ -159,7 +162,7 @@ class TestEnrolPostHandler:
             json={
                 "name": "new-site",
                 "url": "https://site.example.com",
-                "cluster_uuid": "test",
+                "cluster_uuid": str(uuid4()),
             },
         )
         assert response.status_code == 401
@@ -179,7 +182,7 @@ class TestEnrolPostHandler:
             json={
                 "name": "new-site",
                 "url": "https://site.example.com",
-                "cluster_uuid": "test",
+                "cluster_uuid": str(uuid4()),
             },
         )
         assert response.status_code == 401
@@ -198,7 +201,7 @@ class TestEnrolPostHandler:
             json={
                 "name": "new-site",
                 "url": "https://site.example.com",
-                "cluster_uuid": "test",
+                "cluster_uuid": str(uuid4()),
             },
         )
         assert response.status_code == 401
