@@ -1,5 +1,5 @@
 import { ContentSection } from "@canonical/maas-react-components";
-import { ActionButton, Button, CheckboxInput, Input, Label, Notification, Spinner } from "@canonical/react-components";
+import { ActionButton, Button, Input, Label, Notification, Spinner } from "@canonical/react-components";
 import { useQueryClient } from "@tanstack/react-query";
 import { Field, Form, Formik } from "formik";
 import isEqual from "lodash/isEqual";
@@ -187,7 +187,7 @@ const UserForm = ({ type }: { type: "add" | "edit" }) => {
                   type="email"
                 />
                 <Field
-                  as={CheckboxInput}
+                  as={Input}
                   error={touched.is_admin && errors.is_admin}
                   label="MAAS Site Manager administrator"
                   name="is_admin"
