@@ -7,7 +7,6 @@ import type {
   SitesGetResponse,
   Body_post_v1_login_post,
   PendingSitesPostRequest,
-  Site,
   TokensPostRequest,
 } from "@/api/client";
 import { apiUrls } from "@/utils/test-urls";
@@ -78,18 +77,8 @@ export const getSite = async ({ id }: Parameters<typeof apiClient.default.getIdV
 export const updateSite = ({ id, requestBody }: Parameters<typeof apiClient.default.patchV1SitesIdPatch>[0]) =>
   apiClient.default.patchV1SitesIdPatch({ id, requestBody });
 
-export const deleteSites = async (data: Site["id"][]) => {
-  if (data.length === 0) {
-    throw Error("No sites selected");
-  }
-  try {
-    const responses = data.map((id) => {
-      return apiClient.default.deleteV1SitesIdDelete({ id });
-    });
-    return await Promise.allSettled(responses);
-  } catch (error) {
-    throw error;
-  }
+export const deleteSites = async ({ ids }: Parameters<typeof apiClient.default.deleteManyV1SitesDelete>[0]) => {
+  return apiClient.default.deleteManyV1SitesDelete({ ids });
 };
 
 export const postTokens = async (data: TokensPostRequest) => {
@@ -133,19 +122,7 @@ export const getUser = async ({ id }: Parameters<typeof apiClient.default.getIdV
   return response;
 };
 
-export const deleteTokens = async (data: Token["id"][]) => {
-  if (data.length === 0) {
-    throw Error("No tokens selected");
-  }
-  try {
-    const responses = data.map((id) => {
-      return apiClient.default.deleteV1TokensIdDelete({ id });
-    });
-    return await Promise.allSettled(responses);
-  } catch (error) {
-    throw error;
-  }
-};
+export const deleteTokens = async (data: Token["id"][]) => apiClient.default.deleteManyV1TokensDelete({ ids: data });
 
 export const getEnrollmentRequests = async ({
   page,

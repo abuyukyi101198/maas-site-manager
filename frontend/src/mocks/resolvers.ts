@@ -14,6 +14,7 @@ import {
 } from "./factories";
 
 import type { UpstreamImageSource, Site, SitesGetResponse } from "@/api";
+import type api from "@/api";
 import type { TokensPostResponse, User } from "@/api/client";
 import type {
   GetSitesQueryParams,
@@ -99,14 +100,8 @@ export const createMockSiteResolver =
   };
 
 type DeleteSitesResponseResolver = ResponseResolver<RestRequest, typeof restContext>;
-export const createMockDeleteSitesResolver = (): DeleteSitesResponseResolver => async (req, res, ctx) => {
-  const ids = req.json();
-
-  if (Array.isArray(ids) && ids.length > 0) {
-    return res(ctx.status(204));
-  } else {
-    return res(ctx.status(400));
-  }
+export const createMockDeleteSitesResolver = (): DeleteSitesResponseResolver => async (_req, res, ctx) => {
+  return res(ctx.status(204));
 };
 
 type DeleteSiteResponseResolver = ResponseResolver<RestRequest, typeof restContext>;
@@ -151,14 +146,13 @@ export const createMockGetTokensResolver =
     return res(ctx.json(response));
   };
 
-type DeleteTokensResponseResolver = ResponseResolver<RestRequest, typeof restContext>;
-export const createMockDeleteTokensResolver = (): DeleteTokensResponseResolver => async (req, res, ctx) => {
-  const ids = req.json();
-
-  if (Array.isArray(ids) && ids.length > 0) {
-    return res(ctx.status(204));
-  }
-  return res(ctx.status(400));
+type DeleteTokensResponseResolver = ResponseResolver<
+  RestRequest,
+  typeof restContext,
+  ReturnType<typeof api.default.deleteManyV1TokensDelete>
+>;
+export const createMockDeleteTokensResolver = (): DeleteTokensResponseResolver => async (_req, res, ctx) => {
+  return res(ctx.status(204));
 };
 
 type DeleteTokenResponseResolver = ResponseResolver<RestRequest, typeof restContext>;

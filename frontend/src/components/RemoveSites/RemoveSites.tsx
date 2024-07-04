@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useId } from "react";
 
-import { Button, Icon, Input, useId } from "@canonical/react-components";
+import { Button, Icon, Input } from "@canonical/react-components";
 import type { FormikHelpers } from "formik";
 import { Field, Form, Formik } from "formik";
 import pluralize from "pluralize";
@@ -47,13 +47,16 @@ const RemoveSites = () => {
   const expectedConfirmTextValue = `remove ${sitesCountText}`;
   const handleSubmit = (_values: RemoveSitesFormValues, { setSubmitting }: FormikHelpers<RemoveSitesFormValues>) => {
     const selectedIds = Object.keys(rowSelection).map((id) => Number(id));
-    deleteSitesMutation.mutate(selectedIds, {
-      onSuccess() {
-        setSubmitting(false);
-        setSidebar(null);
-        clearRowSelection();
+    deleteSitesMutation.mutate(
+      { ids: selectedIds },
+      {
+        onSuccess() {
+          setSubmitting(false);
+          setSidebar(null);
+          clearRowSelection();
+        },
       },
-    });
+    );
   };
 
   // close the sidebar when there are no sites selected

@@ -81,7 +81,9 @@ export const useSiteQueryData = (id: Site["id"]): Site | null => {
   return site || null;
 };
 
-export const useDeleteSitesMutation = (options?: UseMutationOptions<unknown, unknown, Site["id"][], unknown>) => {
+export const useDeleteSitesMutation = (
+  options?: UseMutationOptions<unknown, unknown, Parameters<typeof deleteSites>[0], unknown>,
+) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deleteSites,
