@@ -15,6 +15,7 @@ class SiteFilterParams(NamedTuple):
     state: list[str] | None
     timezone: list[str] | None
     url: list[str] | None
+    query: str | None
 
 
 class UserFilterParams(NamedTuple):
@@ -46,6 +47,9 @@ async def site_filter_parameters(
         default=None, title="Filter for timezones"
     ),
     url: list[str] | None = Query(default=None, title="Filter for urls"),
+    q: str | None = Query(
+        default=None, title="Search for query in string fields"
+    ),
 ) -> SiteFilterParams:
     """Return parameters for site filtering."""
     return SiteFilterParams(
@@ -58,6 +62,7 @@ async def site_filter_parameters(
         state=state,
         timezone=timezone,
         url=url,
+        query=q,
     )
 
 

@@ -52,7 +52,7 @@ class UserService(Service):
         if search_text:
             filters.append(
                 or_(
-                    *queries.filters_from_arguments(  # type: ignore[arg-type]
+                    *queries.filters_from_arguments(
                         User,
                         email=search_text,
                         username=search_text,
@@ -63,7 +63,7 @@ class UserService(Service):
         count = await queries.row_count(self.conn, User, *filters)
         stmt = (
             self._select_statement()
-            .where(*filters)  # type: ignore[arg-type]
+            .where(*filters)
             .order_by(*order_by)
             .offset(offset)
         )

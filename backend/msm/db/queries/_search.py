@@ -1,24 +1,37 @@
-from functools import reduce
-from operator import or_
 from typing import Any
 
 from sqlalchemy import (
-    ColumnOperators,
+    ColumnElement,
     String,
     Table,
     Text,
     UnaryExpression,
     asc,
     desc,
+    or_,
 )
 
 from msm.schema import SortParam
 
 
+def compare_expr(
+    table: Table, column_name: str, value: Any
+) -> ColumnElement[bool]:
+    """
+    Create an "column_name ILIKE %value%" WHERE clause for string columns
+    and an "column_name == value" clause otherwise
+    """
+    column = table.c[column_name]
+    if isinstance(column.type, Text | String):
+        return column.icontains(value, autoescape=True)
+    else:
+        return column.__eq__(value)
+
+
 def filters_from_arguments(
     table: Table,
     **filter_args: list[Any] | None,
-) -> list[ColumnOperators]:
+) -> list[ColumnElement[bool]]:
     """Return clauses to join with AND and all entries for a single arg by OR.
     This enables to convert query params such as
 
@@ -36,24 +49,29 @@ def filters_from_arguments(
 
     Matching is performed using `ilike` for text-based fields, exact match
     otherwise.
-
     """
-
-    def compare_expr(name: str, value: Any) -> ColumnOperators:
-        column = table.c[name]
-        if isinstance(column.type, Text | String):
-            return column.icontains(value, autoescape=True)
-        else:
-            return column.__eq__(value)
-
     return [
-        reduce(
-            or_,
-            (compare_expr(name, value) for value in values),
-        )
+        or_(*(compare_expr(table, name, value) for value in values))
         for name, values in filter_args.items()
         if values
     ]
+
+
+def query_all_columns(
+    table: Table, query: str | None, column_names: list[str]
+) -> list[ColumnElement[bool]]:
+    """
+    Creates a where clause that queries all column_names in table for
+    the given query string.
+
+    As `filters_from_arguments` it uses `ILIKE` for text-based fields and
+    exact match otherwise
+    """
+    return (
+        [or_(*(compare_expr(table, column, query) for column in column_names))]
+        if query
+        else []
+    )
 
 
 def order_by_from_arguments(

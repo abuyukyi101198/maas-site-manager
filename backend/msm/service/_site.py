@@ -4,7 +4,7 @@ from datetime import (
     datetime,
     timedelta,
 )
-from typing import Any
+from typing import Any, ClassVar
 from uuid import UUID
 
 from prometheus_client import Gauge, Histogram
@@ -69,6 +69,18 @@ class SiteService(Service):
         "Site heartbeat skew, in seconds",
         registry=Service._registry,
     )
+    # these columns are searched by the query filter
+    # see msm.db.queries._search.query_all_columns
+    site_query_filter_columns: ClassVar[list[str]] = [
+        "city",
+        "country",
+        "name",
+        "note",
+        "state",
+        "postal_code",
+        "address",
+        "url",
+    ]
 
     async def get(
         self,
@@ -85,6 +97,7 @@ class SiteService(Service):
         timezone: list[str] | None = None,
         url: list[str] | None = None,
         missing_coordinates: bool = False,
+        query: str | None = None,
     ) -> tuple[int, Iterable[models.Site]]:
         """Return accepted sites, with optional filtering."""
         filters = queries.filters_from_arguments(
@@ -99,6 +112,13 @@ class SiteService(Service):
             timezone=timezone,
             url=url,
         )
+        filters.extend(
+            queries.query_all_columns(
+                Site,
+                query,
+                self.site_query_filter_columns,
+            )
+        )
         filters.append(Site.c.accepted == True)
         if missing_coordinates:
             filters.append(Site.c.coordinates == None)
@@ -106,7 +126,7 @@ class SiteService(Service):
         count = await queries.row_count(self.conn, Site, *filters)
         stmt = (
             self._select_statement_join_data()
-            .where(*filters)  # type: ignore[arg-type]
+            .where(*filters)
             .order_by(*order_by)
             .offset(offset)
         )
@@ -317,6 +337,7 @@ class SiteService(Service):
         address: list[str] | None = None,
         timezone: list[str] | None = None,
         url: list[str] | None = None,
+        query: str | None = None,
     ) -> Iterable[models.SiteCoordinates]:
         """Return coordinates for all sites, with optional filtering."""
         filters = queries.filters_from_arguments(
@@ -331,9 +352,16 @@ class SiteService(Service):
             timezone=timezone,
             url=url,
         )
+        filters.extend(
+            queries.query_all_columns(
+                Site,
+                query,
+                self.site_query_filter_columns,
+            )
+        )
         filters.append(Site.c.accepted == True)
         stmt = self._select_statement(Site.c.id, Site.c.coordinates).where(
-            *filters  # type: ignore[arg-type]
+            *filters
         )
         result = await self.conn.execute(stmt)
         return self.objects_from_result(models.SiteCoordinates, result)
