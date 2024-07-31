@@ -2,7 +2,6 @@ import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import AutoImport from "unplugin-auto-import/vite";
 import stylelint from "vite-plugin-stylelint";
-import autoprefixer from "autoprefixer";
 import * as path from "path";
 
 const commitHash = require("child_process").execSync("git rev-parse --short HEAD").toString();
@@ -10,6 +9,7 @@ const commitHash = require("child_process").execSync("git rev-parse --short HEAD
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, "./");
+
   return {
     base: env.VITE_BASE_URL,
     envDir: "./",
@@ -28,11 +28,6 @@ export default defineConfig(({ mode }) => {
       }),
       stylelint(),
     ],
-    css: {
-      postcss: {
-        plugins: [autoprefixer()],
-      },
-    },
     server: { port: Number(env.VITE_UI_PORT), host: Boolean(env.VITE_HOST_MODE) },
     resolve: {
       alias: { "@": path.resolve(__dirname, "src") },
@@ -41,6 +36,7 @@ export default defineConfig(({ mode }) => {
       chunkSizeWarningLimit: 1600,
       rollupOptions: {
         output: {
+          sanitizeFileName: false,
           manualChunks: {
             react: ["react", "react-dom"],
             canonicalComponents: ["@canonical/react-components", "@canonical/maas-react-components"],
