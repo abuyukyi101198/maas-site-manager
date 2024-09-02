@@ -139,7 +139,7 @@ export class DefaultService {
      * @throws ApiError
      */
     public getV1SitesGet({
-        missingCoordinates = false,
+        coordinates,
         page = 1,
         size = 20,
         city,
@@ -154,7 +154,7 @@ export class DefaultService {
         q,
         sortBy,
     }: {
-        missingCoordinates?: boolean,
+        coordinates?: (boolean | null),
         page?: number,
         size?: number,
         city?: (Array<string> | null),
@@ -173,7 +173,7 @@ export class DefaultService {
             method: 'GET',
             url: '/v1/sites',
             query: {
-                'missing_coordinates': missingCoordinates,
+                'coordinates': coordinates,
                 'page': page,
                 'size': size,
                 'city': city,

@@ -60,7 +60,7 @@ export type GetSitesQueryParams = Parameters<typeof apiClient.default.getV1Sites
 // TODO: integrate supported API params https://warthogs.atlassian.net/browse/MAASENG-2081
 export const getSites = (params: Parameters<typeof apiClient.default.getV1SitesGet>[0]) =>
   apiClient.default.getV1SitesGet({
-    missingCoordinates: params.missingCoordinates,
+    coordinates: params.coordinates,
     page: Number(params.page),
     size: Number(params.size),
     sortBy: params.sortBy || null,

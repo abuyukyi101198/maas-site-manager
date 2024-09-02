@@ -91,7 +91,7 @@ const SitesMissingData = () => {
     updateSites.mutate(toSubmit);
   };
 
-  const { data, error, isPending } = useSitesQuery({ missingCoordinates: true, page: 1, size: 20 });
+  const { data, error, isPending } = useSitesQuery({ coordinates: false, page: 1, size: 20 });
 
   const sites = data?.items;
 
