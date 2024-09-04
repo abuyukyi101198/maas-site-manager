@@ -1,8 +1,12 @@
 import { ContentSection } from "@canonical/maas-react-components";
-import { Button, Input, Label } from "@canonical/react-components";
+import { Notification, Button, Input, Label } from "@canonical/react-components";
 import type { FormikHelpers } from "formik";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
+
+import ErrorMessage from "../ErrorMessage";
+
+import { useUpdateCurrentUserPasswordMutation } from "@/hooks/react-query";
 const initialValues = {
   currentPassword: "",
   newPassword: "",
@@ -12,7 +16,10 @@ const initialValues = {
 type PasswordUpdateFormValues = typeof initialValues;
 const PasswordUpdateSchema = Yup.object().shape({
   currentPassword: Yup.string().required("Current password is required"),
-  newPassword: Yup.string().required("New password is required"),
+  newPassword: Yup.string()
+    .required("New password is required")
+    .min(8, "Password must be at least 8 characters.")
+    .max(150, "Password must be 150 characters or less."),
   confirmNewPassword: Yup.string()
     .oneOf([Yup.ref("newPassword")], "New passwords must match")
     .required("New password (again) is required"),
@@ -23,15 +30,38 @@ const PasswordUpdate = () => {
   const currentPasswordId = useId();
   const newPasswordId = useId();
   const newPasswordConfirmId = useId();
+  const updatePassword = useUpdateCurrentUserPasswordMutation();
 
-  const handleSubmit = async (
-    { currentPassword: _current_password, newPassword: _password }: PasswordUpdateFormValues,
-    { setSubmitting: _ }: FormikHelpers<PasswordUpdateFormValues>,
-  ) => {};
+  const handleSubmit = async (values: PasswordUpdateFormValues, helpers: FormikHelpers<PasswordUpdateFormValues>) => {
+    updatePassword.mutate(
+      {
+        requestBody: {
+          current_password: values.currentPassword,
+          new_password: values.newPassword,
+          confirm_password: values.confirmNewPassword,
+        },
+      },
+      {
+        onSuccess: () => {
+          helpers.resetForm();
+        },
+      },
+    );
+  };
 
   return (
     <ContentSection variant="narrow">
       <ContentSection.Title>Password</ContentSection.Title>
+      {updatePassword.isSuccess && (
+        <Notification severity="positive" title="Password Updated">
+          Your password has been updated
+        </Notification>
+      )}
+      {updatePassword.isError && (
+        <Notification severity="negative" title="Error while updating password:">
+          <ErrorMessage error={updatePassword.error} />
+        </Notification>
+      )}
       <Formik
         initialValues={initialValues}
         onSubmit={handleSubmit}

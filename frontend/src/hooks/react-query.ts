@@ -40,6 +40,7 @@ import {
   deleteImages,
   uploadImage,
   updateSitesCoordinates,
+  updateCurrentUserPassword,
 } from "@/api/handlers";
 import { saveToFile } from "@/utils";
 
@@ -277,6 +278,13 @@ export const useUpdateUserMutation = (
     },
   });
 };
+
+export const useUpdateCurrentUserPasswordMutation = (
+  options?: Omit<
+    UseMutationOptions<any, unknown, Parameters<typeof updateCurrentUserPassword>[0], unknown>,
+    "mutationFn"
+  >,
+) => useMutation({ mutationFn: updateCurrentUserPassword, ...options });
 
 export const useAddUserMutation = (
   options?: Omit<

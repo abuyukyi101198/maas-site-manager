@@ -187,6 +187,11 @@ export const addUser = ({ requestBody }: Parameters<typeof apiClient.default.pos
 export const deleteUser = ({ id }: Parameters<typeof apiClient.default.deleteV1UsersIdDelete>[0]) =>
   apiClient.default.deleteV1UsersIdDelete({ id });
 
+export const updateCurrentUserPassword = ({
+  requestBody,
+}: Parameters<typeof apiClient.default.patchMePasswordV1UsersMePasswordPatch>[0]) =>
+  apiClient.default.patchMePasswordV1UsersMePasswordPatch({ requestBody });
+
 // TODO: replace with api client once API supports it https://warthogs.atlassian.net/browse/MAASENG-2570
 export const getImages = async (params: Record<string, number | string | null>) => {
   let stringParams: Record<string, string> = {};

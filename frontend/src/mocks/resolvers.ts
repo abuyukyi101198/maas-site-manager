@@ -15,7 +15,7 @@ import {
 
 import type { UpstreamImageSource, Site, SitesGetResponse } from "@/api";
 import type api from "@/api";
-import type { TokensPostResponse, User } from "@/api/client";
+import type { TokensPostResponse, User, UsersPasswordPatchRequest } from "@/api/client";
 import type {
   GetSitesQueryParams,
   SortDirection,
@@ -256,6 +256,17 @@ export const createMockUpdateUserResolver = (): UpdateUserResponseResolver => as
   return res(ctx.status(200), ctx.json(user));
 };
 
+type UpdateCurrentUserPasswordResolver = ResponseResolver<RestRequest<UsersPasswordPatchRequest>, typeof restContext>;
+export const createMockUpdateCurrentUserPasswordResolver =
+  (): UpdateCurrentUserPasswordResolver => async (req, res, ctx) => {
+    const { current_password, new_password, confirm_password } = req.body;
+    if (current_password && new_password === confirm_password) {
+      return res(ctx.status(200));
+    } else {
+      return res(ctx.status(400));
+    }
+  };
+
 type AddUserResponseResolver = ResponseResolver<RestRequest<User>, typeof restContext>;
 export const createMockAddUserResolver = (): AddUserResponseResolver => async (req, res, ctx) => {
   const { username, full_name, email, is_admin } = req.body;
@@ -289,6 +300,10 @@ export const getEnrollmentRequests = rest.get(apiUrls.enrollmentRequests, create
 export const postEnrollmentRequests = rest.post(apiUrls.enrollmentRequests, createMockPostEnrollmentRequestsResolver());
 export const getCurrentUser = rest.get(apiUrls.currentUser, createMockCurrentUserResolver());
 export const updateUser = rest.patch(`${apiUrls.users}/:id`, createMockUpdateUserResolver());
+export const updateCurrentUserPassword = rest.patch(
+  `${apiUrls.currentUser}/password`,
+  createMockUpdateCurrentUserPasswordResolver(),
+);
 export const addUser = rest.post(apiUrls.users, createMockAddUserResolver());
 export const deleteUser = rest.delete(`${apiUrls.users}/:id`, createMockDeleteUserResolver());
 export const tileHandler = rest.get(/.*\.(?:png|jpg|jpeg|bmp)$/, async (req, res, ctx) => {
@@ -474,6 +489,7 @@ export const allResolvers = [
   postEnrollmentRequests,
   getCurrentUser,
   updateUser,
+  updateCurrentUserPassword,
   getUsers,
   addUser,
   getUser,

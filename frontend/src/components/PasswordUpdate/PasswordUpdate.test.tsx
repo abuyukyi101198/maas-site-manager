@@ -1,6 +1,26 @@
+import { rest } from "msw";
+
 import PasswordUpdate from "./PasswordUpdate";
 
-import { render, screen, userEvent } from "@/utils/test-utils";
+import { createMockUpdateCurrentUserPasswordResolver } from "@/mocks/resolvers";
+import { apiUrls } from "@/utils/test-urls";
+import { render, screen, setupServer, userEvent, waitFor } from "@/utils/test-utils";
+
+const mockServer = setupServer(
+  rest.patch(`${apiUrls.currentUser}/password`, createMockUpdateCurrentUserPasswordResolver()),
+);
+
+beforeAll(() => {
+  mockServer.listen();
+});
+
+afterEach(() => {
+  mockServer.resetHandlers();
+});
+
+afterAll(() => {
+  mockServer.close();
+});
 
 it("should render password update form", () => {
   render(<PasswordUpdate />);
@@ -73,4 +93,52 @@ it("enables submit button only when all fields are filled correctly", async () =
   await userEvent.clear(confirmPasswordField);
   await userEvent.type(confirmPasswordField, "newPassword");
   expect(submitBtn).not.toBeAriaDisabled();
+});
+
+it("shows a success message when password is updated", async () => {
+  render(<PasswordUpdate />);
+
+  await userEvent.type(screen.getByLabelText("Current password"), "currentPassword");
+  await userEvent.type(screen.getByLabelText("New password"), "newPassword");
+  await userEvent.type(screen.getByLabelText("New password (again)"), "newPassword");
+
+  await userEvent.click(screen.getByRole("button", { name: /Save/i }));
+
+  expect(screen.getByText(/Your password has been updated/i)).toBeInTheDocument();
+});
+
+it("shows an error message when password update fails", async () => {
+  mockServer.use(
+    rest.patch(`${apiUrls.currentUser}/password`, (_req, res, ctx) => {
+      return res(ctx.status(400));
+    }),
+  );
+
+  render(<PasswordUpdate />);
+
+  await userEvent.type(screen.getByLabelText("Current password"), "currentPassword");
+  await userEvent.type(screen.getByLabelText("New password"), "newPassword");
+  await userEvent.type(screen.getByLabelText("New password (again)"), "newPassword");
+
+  await userEvent.click(screen.getByRole("button", { name: /Save/i }));
+
+  expect(screen.getByText(/Error while updating password/i)).toBeInTheDocument();
+});
+
+it("clears form fields after successful password update", async () => {
+  render(<PasswordUpdate />);
+
+  await userEvent.type(screen.getByLabelText("Current password"), "currentPassword");
+  await userEvent.type(screen.getByLabelText("New password"), "newPassword");
+  await userEvent.type(screen.getByLabelText("New password (again)"), "newPassword");
+
+  await userEvent.click(screen.getByRole("button", { name: /Save/i }));
+
+  await waitFor(() => {
+    expect(screen.getByText(/Your password has been updated/i)).toBeInTheDocument();
+  });
+
+  expect(screen.getByLabelText("Current password")).toHaveValue("");
+  expect(screen.getByLabelText("New password")).toHaveValue("");
+  expect(screen.getByLabelText("New password (again)")).toHaveValue("");
 });
