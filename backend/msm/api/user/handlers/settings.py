@@ -30,7 +30,6 @@ class SettingsPatchRequest(BaseModel):
     """Change application settings."""
 
     service_url: str | None = None
-    enrolment_url: str | None = None
     token_lifetime_minutes: int | None = None
     token_rotation_interval_minutes: int | None = None
 

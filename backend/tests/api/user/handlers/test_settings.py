@@ -24,7 +24,6 @@ async def test_settings_get(
     await service.update(
         {
             "service_url": "https://sitemanager.example.com/",
-            "enrolment_url": "https://sitemanager.example.com/site/v1/enrol",
             "token_lifetime_minutes": 10,
             "token_rotation_interval_minutes": 100,
         }
@@ -33,7 +32,6 @@ async def test_settings_get(
     assert response.status_code == 200
     assert response.json() == {
         "service_url": "https://sitemanager.example.com/",
-        "enrolment_url": "https://sitemanager.example.com/site/v1/enrol",
         "token_lifetime_minutes": 10,
         "token_rotation_interval_minutes": 100,
     }
@@ -47,7 +45,6 @@ async def test_settings_patch(
         "/settings",
         json={
             "service_url": "https://sitemanager.example.com",
-            "enrolment_url": "https://sitemanager.example.com/site/v1/enrol",
             "token_lifetime_minutes": 10,
             "token_rotation_interval_minutes": 100,
         },
@@ -58,7 +55,6 @@ async def test_settings_patch(
     assert response.status_code == 200
     assert response.json() == {
         "service_url": "https://sitemanager.example.com",
-        "enrolment_url": "https://sitemanager.example.com/site/v1/enrol",
         "token_lifetime_minutes": 10,
         "token_rotation_interval_minutes": 100,
     }

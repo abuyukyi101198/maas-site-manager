@@ -78,13 +78,13 @@ async def post(
 
     Token duration (TTL) is expressed as an ISO-8601 duration string.
     """
-    settings = await services.settings.get()
+    service_url = await services.settings.get_service_url()
     tokens = await services.tokens.create(
         issuer=config.service_identifier,
         duration=post_request.duration,
         count=post_request.count,
         secret_key=config.token_secret_key,
-        enrolment_url=settings.enrolment_url,
+        service_url=service_url,
     )
     return TokensPostResponse(items=tokens)
 

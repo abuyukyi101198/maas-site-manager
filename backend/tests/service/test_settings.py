@@ -19,10 +19,6 @@ class TestSettingsService:
             value="https://sitemanager.example.com",
         )
         await factory.make_Setting(
-            "enrolment_url",
-            value="https://sitemanager.example.com/site/v1/enrol",
-        )
-        await factory.make_Setting(
             "token_lifetime_minutes",
             value=10,
         )
@@ -30,7 +26,6 @@ class TestSettingsService:
         settings = await service.get()
         assert settings == Settings(
             service_url="https://sitemanager.example.com",
-            enrolment_url="https://sitemanager.example.com/site/v1/enrol",
             token_lifetime_minutes=10,
         )
 
@@ -65,11 +60,7 @@ class TestSettingsService:
         await service.ensure()
         settings = await factory.get("setting")
         assert settings == [
-            {
-                "name": "enrolment_url",
-                "value": "http://sitemanager:8000/site/v1/enrol",
-            },
-            {"name": "service_url", "value": "http://sitemanager:8000"},
+            {"name": "service_url", "value": ""},
             {
                 "name": "token_lifetime_minutes",
                 "value": DEFAULT_TOKEN_DURATION.total_seconds() // 60,
@@ -86,9 +77,6 @@ class TestSettingsService:
         await factory.make_Setting(
             "service_url", value="http://sitemanager:8000"
         )
-        await factory.make_Setting(
-            "enrolment_url", value="http://sitemanager:8000/site/v1/enrol"
-        )
         await factory.make_Setting("token_lifetime_minutes", value=10)
         await factory.make_Setting(
             "token_rotation_interval_minutes", value=100
@@ -97,10 +85,6 @@ class TestSettingsService:
         await service.ensure()
         settings = await factory.get("setting")
         assert settings == [
-            {
-                "name": "enrolment_url",
-                "value": "http://sitemanager:8000/site/v1/enrol",
-            },
             {"name": "service_url", "value": "http://sitemanager:8000"},
             {"name": "token_lifetime_minutes", "value": 10},
             {"name": "token_rotation_interval_minutes", "value": 100},
@@ -117,3 +101,49 @@ class TestSettingsService:
         assert {setting["name"] for setting in settings} == set(
             Settings.model_fields
         )
+
+    async def test_get_service_url_from_default(
+        self,
+        factory: Factory,
+        db_connection: AsyncConnection,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.setattr(
+            "msm.service._settings.gethostname", lambda: "msm-host"
+        )
+        monkeypatch.delenv("MSM_BASE_PATH", raising=False)
+        await factory.make_Setting("service_url", value="")
+        service = SettingsService(db_connection)
+        service_url = await service.get_service_url()
+        assert service_url == "http://msm-host:8000"
+
+    async def test_get_service_url_from_env(
+        self,
+        factory: Factory,
+        db_connection: AsyncConnection,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.setenv(
+            "MSM_BASE_PATH", "https://sitemanager.example.com/juju-model/"
+        )
+        await factory.make_Setting("service_url", value="")
+        service = SettingsService(db_connection)
+        service_url = await service.get_service_url()
+        assert service_url == "https://sitemanager.example.com/juju-model/"
+
+    async def test_get_service_url_from_db(
+        self,
+        factory: Factory,
+        db_connection: AsyncConnection,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.setenv(
+            "MSM_BASE_PATH", "https://sitemanager.example.com/juju-model/"
+        )
+        await factory.make_Setting(
+            "service_url",
+            value="https://sitemanager.example.com",
+        )
+        service = SettingsService(db_connection)
+        service_url = await service.get_service_url()
+        assert service_url == "https://sitemanager.example.com"
