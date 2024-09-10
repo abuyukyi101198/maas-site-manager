@@ -18,6 +18,17 @@ class SiteFilterParams(NamedTuple):
     query: str | None
 
 
+class TokenFilterParams(NamedTuple):
+    """Token filtering parameters."""
+
+    # note that there is no filter for `created` yet
+    # we did not design filtering for anything but equality yet
+
+    id: list[int] | None
+    value: list[str] | None
+    site_id: list[int] | None
+
+
 class UserFilterParams(NamedTuple):
     """User filtering parameters."""
 
@@ -63,6 +74,21 @@ async def site_filter_parameters(
         timezone=timezone,
         url=url,
         query=q,
+    )
+
+
+async def token_filter_parameters(
+    id: list[int] | None = Query(default=None, title="Filter for token IDs"),
+    value: list[str] | None = Query(default=None, title="Filter for tokens"),
+    site_id: list[int] | None = Query(
+        default=None, title="Filter for site IDs the token authenticated"
+    ),
+) -> TokenFilterParams:
+    """Return parameters for token filtering."""
+    return TokenFilterParams(
+        id=id,
+        value=value,
+        site_id=site_id,
     )
 
 

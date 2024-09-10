@@ -1,3 +1,4 @@
+import asyncio
 from datetime import (
     datetime,
     timedelta,
@@ -60,6 +61,20 @@ async def test_tokens_get(user_client: Client, factory: Factory) -> None:
     assert response.status_code == 200
     assert response.json()["total"] == len(expected)
     assert response.json()["items"] == expected
+
+
+@pytest.mark.asyncio
+async def test_tokens_export_by_id(
+    user_client: Client, factory: Factory
+) -> None:
+    tokens = await asyncio.gather(*(factory.make_Token() for _ in range(5)))
+
+    response = await user_client.get(
+        "/tokens/export", params={"id": [tokens[0].id, tokens[2].id]}
+    )
+
+    assert response.status_code == 200
+    assert response.text.count("\r\n") == 2 + 1  # 2 times content + 1 header
 
 
 @pytest.mark.asyncio

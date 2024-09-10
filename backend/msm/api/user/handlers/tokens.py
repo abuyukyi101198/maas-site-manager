@@ -16,6 +16,10 @@ from msm.api._dependencies import (
     services,
 )
 from msm.api.user._auth import authenticated_user
+from msm.api.user._forms import (
+    TokenFilterParams,
+    token_filter_parameters,
+)
 from msm.db.models import (
     Config,
     Token,
@@ -41,16 +45,20 @@ async def get(
     services: Annotated[ServiceCollection, Depends(services)],
     authenticated_user: Annotated[User, Depends(authenticated_user)],
     pagination_params: Annotated[PaginationParams, Depends()],
+    filter_params: Annotated[
+        TokenFilterParams, Depends(token_filter_parameters)
+    ],
 ) -> TokensGetResponse:
     """Return all tokens."""
     total, results = await services.tokens.get(
-        pagination_params.offset, pagination_params.size
+        pagination_params.offset, pagination_params.size, *filter_params
     )
     return TokensGetResponse(
         total=total,
         page=pagination_params.page,
         size=pagination_params.size,
-        items=results,
+        **filter_params._asdict(),
+        items=list(results),
     )
 
 
@@ -86,16 +94,22 @@ async def post(
         secret_key=config.token_secret_key,
         service_url=service_url,
     )
-    return TokensPostResponse(items=tokens)
+    return TokensPostResponse(items=list(tokens))
 
 
 @v1_router.get("/tokens/export")
 async def get_export(
     services: Annotated[ServiceCollection, Depends(services)],
     authenticated_user: Annotated[User, Depends(authenticated_user)],
+    pagination_params: Annotated[PaginationParams, Depends()],
+    filter_params: Annotated[
+        TokenFilterParams, Depends(token_filter_parameters)
+    ],
 ) -> CSVResponse:
     """Return the list of active tokens in CSV format."""
-    _, tokens = await services.tokens.get()
+    _, tokens = await services.tokens.get(
+        pagination_params.offset, pagination_params.size, *filter_params
+    )
     return CSVResponse(content=tokens)
 
 

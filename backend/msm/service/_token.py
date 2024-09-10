@@ -91,18 +91,29 @@ class TokenService(Service):
         self,
         offset: int = 0,
         limit: int | None = None,
+        id: list[int] | None = None,
+        value: list[str] | None = None,
+        site_id: list[int] | None = None,
     ) -> tuple[int, Iterable[models.Token]]:
         """Return active tokens."""
-        filter = [
-            Token.c.site_id == None,
-            Token.c.expired > now_utc(),
-            Token.c.audience == TokenAudience.SITE,
-            Token.c.purpose == TokenPurpose.ENROLMENT,
-        ]
-        count = await queries.row_count(self.conn, Token, *filter)
+        filters = queries.filters_from_arguments(
+            Token,
+            id=id,
+            value=value,
+            site_id=site_id,
+        )
+        filters.extend(
+            [
+                Token.c.site_id == None,
+                Token.c.expired > now_utc(),
+                Token.c.audience == TokenAudience.SITE,
+                Token.c.purpose == TokenPurpose.ENROLMENT,
+            ]
+        )
+        count = await queries.row_count(self.conn, Token, *filters)
         stmt = (
             self._select_statement()
-            .where(*filter)
+            .where(*filters)
             .order_by(Token.c.id)
             .offset(offset)
         )

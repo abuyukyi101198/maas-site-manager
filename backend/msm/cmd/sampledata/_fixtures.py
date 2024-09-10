@@ -34,7 +34,7 @@ class FixturesAction(DatabaseAction):
                     "Cannot create sampledata. Your database seems to contain data."
                 )
                 print(
-                    "Try running with 'purge-sampledata' to empty relevant tables."
+                    "Try running with 'purge-fixtures' to empty relevant tables."
                 )
                 return 1
 
