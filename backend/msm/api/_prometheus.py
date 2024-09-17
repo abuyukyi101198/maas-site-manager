@@ -50,15 +50,17 @@ def query_metrics(
 
 
 def instrument_prometheus(
-    app: FastAPI, registry: CollectorRegistry
+    registry: CollectorRegistry,
+    app: FastAPI,
+    *sub_apps: FastAPI,
 ) -> Instrumentator:
     """Instrument and expose Prometheus endpoint on the specified app."""
-    return (
-        Instrumentator(registry=registry, excluded_handlers=["/metrics"])
-        .add(
-            metrics.default(registry=registry),
-            query_metrics(registry=registry),
-        )
-        .instrument(app)
-        .expose(app)
+    i = Instrumentator(registry=registry, excluded_handlers=["/metrics"])
+    i.add(
+        metrics.default(registry=registry),
+        query_metrics(registry=registry),
     )
+    for a in sub_apps:
+        i.instrument(a)
+
+    return i.expose(app)

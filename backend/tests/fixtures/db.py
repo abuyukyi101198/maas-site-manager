@@ -79,8 +79,7 @@ async def db(
 @pytest.fixture
 async def db_connection(db: Database) -> AsyncIterator[AsyncConnection]:
     """The database connection."""
-    async with db.engine.connect() as conn:
-        conn.begin()
+    async with db.engine.begin() as conn:
         yield conn
         await conn.rollback()
 

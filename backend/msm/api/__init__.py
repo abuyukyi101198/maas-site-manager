@@ -124,13 +124,22 @@ def create_app(
             allow_methods=["*"],
             allow_headers=["*"],
         )
-    app.add_middleware(DatabaseMetricsMiddleware, db=db)
-    app.add_middleware(transaction_middleware_class, db=db)
 
-    app.mount("/api", create_subapp("User API", "api", USER_API_ROUTERS))
-    app.mount("/site", create_subapp("Site API", "site", SITE_API_ROUTERS))
+    user_app = create_subapp("User API", "api", USER_API_ROUTERS)
+    site_app = create_subapp("Site API", "site", SITE_API_ROUTERS)
 
-    instrument_prometheus(app, prometheus_registry)
+    instrument_prometheus(prometheus_registry, app, user_app, site_app)
+
+    for a in (user_app, site_app):
+        # subapp exceptions do not reach the main app, so we must install the
+        # handlers here to allow middlewares to react to errors,
+        # e.g. rollback a DB transaction
+        a.add_middleware(DatabaseMetricsMiddleware, db=db)
+        a.add_middleware(transaction_middleware_class, db=db)
+
+    app.mount("/api", user_app)
+    app.mount("/site", site_app)
+
     ServiceCollection.register_metrics(prometheus_registry)
 
     return app

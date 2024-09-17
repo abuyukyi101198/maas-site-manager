@@ -30,9 +30,8 @@ class TransactionMiddleware(BaseHTTPMiddleware):
     @asynccontextmanager
     async def get_connection(self) -> AsyncIterator[AsyncConnection]:
         """Return the connection in a transaction context manager."""
-        async with self.db.engine.connect() as conn:
-            async with conn.begin():
-                yield conn
+        async with self.db.engine.begin() as conn:
+            yield conn
 
     async def dispatch(
         self,
