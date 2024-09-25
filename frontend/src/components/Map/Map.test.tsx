@@ -3,14 +3,21 @@ import { rest } from "msw";
 import Map from "./Map";
 import { getClusterSize } from "./SiteMarker";
 
-import { markerFactory, siteFactory, statsFactory } from "@/mocks/factories";
-import { createMockSiteResolver, tileHandler } from "@/mocks/resolvers";
+import { markerFactory, siteFactory, statsFactory, userFactory } from "@/mocks/factories";
+import { createMockCurrentUserResolver, createMockSiteResolver, tileHandler } from "@/mocks/resolvers";
 import { apiUrls } from "@/utils/test-urls";
 import { render, renderWithMemoryRouter, screen, setupServer, userEvent, waitFor } from "@/utils/test-utils";
 
 const stats = statsFactory.build();
 const site = siteFactory.build({ name: "site-name", url: "https://example.com", stats });
-const mockServer = setupServer(rest.get(`${apiUrls.sites}/:id`, createMockSiteResolver([site])), tileHandler);
+const currentUser = userFactory.build({ username: "admin" });
+
+const siteHandler = rest.get(`${apiUrls.sites}/:id`, createMockSiteResolver([site]));
+const currentUserHandler = rest.get(apiUrls.currentUser, createMockCurrentUserResolver(currentUser));
+
+const handlers = [siteHandler, currentUserHandler, tileHandler];
+
+const mockServer = setupServer(...handlers);
 
 vi.mock("./styleSpecs", async () => {
   const actual = await vi.importActual("./styleSpecs");
@@ -21,7 +28,7 @@ beforeAll(() => {
   mockServer.listen();
 });
 beforeEach(() => {
-  localStorage.setItem("hasAcceptedOsmTos", "false");
+  localStorage.setItem("hasAcceptedOsmTos", JSON.stringify({ [currentUser.username]: false }));
 });
 afterEach(() => {
   mockServer.resetHandlers();
@@ -33,26 +40,33 @@ afterAll(() => {
 
 it("renders the map with controls", async () => {
   render(<Map markers={null} />);
-  expect(screen.getByRole("button", { name: /Zoom in/ })).toBeInTheDocument();
+
+  await waitFor(() => {
+    expect(screen.getByRole("button", { name: /Zoom in/ })).toBeInTheDocument();
+  });
+
   expect(screen.getByRole("button", { name: /Zoom out/ })).toBeInTheDocument();
 });
 
 it("displays open street map attribution", async () => {
-  localStorage.setItem("hasAcceptedOsmTos", "true");
+  localStorage.setItem("hasAcceptedOsmTos", JSON.stringify({ admin: true }));
   const { unmount } = render(<Map markers={null} />);
 
-  expect(
-    screen.getByRole("link", {
-      name: /openstreetmap/i,
-    }),
-  ).toBeInTheDocument();
+  await waitFor(() => {
+    expect(
+      screen.getByRole("link", {
+        name: /openstreetmap/i,
+      }),
+    ).toBeInTheDocument();
+  });
+
   expect(
     screen.getByRole("link", {
       name: /openstreetmap/i,
     }),
   ).toHaveAttribute("href", "https://www.openstreetmap.org/copyright");
 
-  localStorage.setItem("hasAcceptedOsmTos", "false");
+  localStorage.setItem("hasAcceptedOsmTos", JSON.stringify({ admin: false }));
 
   await unmount();
 

@@ -1,4 +1,7 @@
+import { Spinner } from "@canonical/react-components";
 import useLocalStorageState from "use-local-storage-state";
+
+import type { MapSettingsStorageState } from "../MapSettings/MapSettings";
 
 import MarkersLayer from "./MarkersLayer";
 import { naturalEarth, osm } from "./styleSpecs";
@@ -6,10 +9,27 @@ import type { MapProps } from "./types";
 import { getGeoJson } from "./utils";
 
 import MapContainer from "@/components/Map/MapContainer";
+import { useCurrentUserQuery } from "@/hooks/react-query";
 
 const Map: React.FC<MapProps> = ({ markers }) => {
-  const [hasAcceptedOsmTos] = useLocalStorageState("hasAcceptedOsmTos", { storageSync: true });
-  const [style] = useState<maplibregl.StyleSpecification>(hasAcceptedOsmTos ? osm : naturalEarth);
+  const [hasAcceptedOsmTos] = useLocalStorageState<MapSettingsStorageState>("hasAcceptedOsmTos", {
+    storageSync: true,
+    defaultValue: {},
+  });
+
+  const { data: currentUser, isPending, isSuccess } = useCurrentUserQuery();
+  const geojson = useMemo(() => (markers ? getGeoJson(markers) : null), [markers]);
+
+  if (isPending) {
+    return <Spinner text="Loading..." />;
+  }
+
+  if (!isSuccess || !currentUser) {
+    return null;
+  }
+
+  const style = hasAcceptedOsmTos[currentUser.username] ? osm : naturalEarth;
+
   const customAttribution =
     style === osm ? `<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>` : undefined;
   const initialOptions: maplibregl.MapOptions = {
@@ -22,7 +42,6 @@ const Map: React.FC<MapProps> = ({ markers }) => {
     zoom: 3,
     maxZoom: 17,
   };
-  const geojson = useMemo(() => (markers ? getGeoJson(markers) : null), [markers]);
 
   return (
     <MapContainer className="map" initialOptions={initialOptions}>

@@ -1,12 +1,18 @@
 import { ContentSection } from "@canonical/maas-react-components";
-import { ActionButton, Input } from "@canonical/react-components";
+import { ActionButton, Input, Spinner } from "@canonical/react-components";
 import type { FormikHelpers } from "formik";
 import { Field, Form, Formik } from "formik";
 import useLocalStorageState from "use-local-storage-state";
 import * as Yup from "yup";
 
+import { useCurrentUserQuery } from "@/hooks/react-query";
+
 type MapSettingsFormValues = {
   acceptedOsmTos: boolean;
+};
+
+export type MapSettingsStorageState = {
+  [username: string]: boolean;
 };
 
 const MapSettingsSchema = Yup.object().shape({
@@ -14,16 +20,28 @@ const MapSettingsSchema = Yup.object().shape({
 });
 
 const MapSettings = () => {
-  const [accepted, setAccepted] = useLocalStorageState("hasAcceptedOsmTos", { defaultValue: false });
+  const [accepted, setAccepted] = useLocalStorageState<MapSettingsStorageState>("hasAcceptedOsmTos", {
+    defaultValue: {},
+  });
   const [success, setSuccess] = useState(false);
-  const initialValues: MapSettingsFormValues = { acceptedOsmTos: accepted };
+  const { data: currentUser, isPending, isSuccess } = useCurrentUserQuery();
+
+  if (isPending) {
+    return <Spinner text="Loading..." />;
+  }
+
+  if (!isSuccess || !currentUser) {
+    return null;
+  }
+
+  const initialValues: MapSettingsFormValues = { acceptedOsmTos: accepted[currentUser.username] };
 
   const handleSubmit = async (
     values: MapSettingsFormValues,
     { setSubmitting, resetForm }: FormikHelpers<MapSettingsFormValues>,
   ) => {
     setSuccess(false);
-    setAccepted(values.acceptedOsmTos);
+    setAccepted({ ...accepted, [currentUser.username]: values.acceptedOsmTos });
     setSubmitting(false);
     setSuccess(true);
     resetForm({ values: { acceptedOsmTos: values.acceptedOsmTos } });
