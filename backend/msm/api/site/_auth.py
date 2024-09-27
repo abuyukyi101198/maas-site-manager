@@ -8,7 +8,7 @@ from msm.api._auth import (
     bearer_token,
 )
 from msm.api._dependencies import services
-from msm.api._utils import INVALID_TOKEN_ERROR
+from msm.api._exceptions import INVALID_TOKEN_ERROR
 from msm.db.models import Site
 from msm.jwt import (
     TokenAudience,

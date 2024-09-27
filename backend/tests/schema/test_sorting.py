@@ -1,4 +1,4 @@
-from fastapi import HTTPException
+from fastapi.exceptions import RequestValidationError
 import pytest
 
 from msm.schema._sorting import SortParamParser
@@ -56,13 +56,14 @@ class TestSortParamParser:
         expected_invalid_fields: list[str],
     ) -> None:
         parser = SortParamParser(sortable_params)
-        with pytest.raises(HTTPException) as execution_exception:
+        with pytest.raises(RequestValidationError) as execution_exception:
             parser(sort_by_query_param)
 
-        assert (
-            execution_exception.value.detail["fields"]  # type: ignore
-            == expected_invalid_fields
-        )
+        invalid_fields = []
+        for err in execution_exception.value.errors():
+            invalid_fields.append(err["loc"][1])
+
+        assert invalid_fields == expected_invalid_fields
 
     @pytest.mark.parametrize(
         "sortable_params, sort_by_query_param",
@@ -75,9 +76,9 @@ class TestSortParamParser:
         self, sortable_params: list[str], sort_by_query_param: str
     ) -> None:
         parser = SortParamParser(sortable_params)
-        with pytest.raises(HTTPException) as execution_exception:
+        with pytest.raises(RequestValidationError) as execution_exception:
             parser(sort_by_query_param)
 
-        assert (
-            "Duplicate" in execution_exception.value.detail["message"]  # type: ignore
-        )
+        errs = execution_exception.value.errors()
+
+        assert "Duplicate" in errs[0]["msg"]

@@ -1,6 +1,6 @@
 from typing import (
     Annotated,
-    Any,
+    Self,
 )
 
 from fastapi import (
@@ -15,9 +15,10 @@ from pydantic import (
     Field,
     model_validator,
 )
+from pydantic_core import PydanticCustomError
 
 from msm.api._dependencies import services
-from msm.api._utils import raise_on_empty_request
+from msm.api._exceptions import raise_on_empty_request
 from msm.api.user._auth import (
     authenticate_user,
     authenticated_admin,
@@ -69,6 +70,20 @@ class UsersGetResponse(PaginatedResults):
     """List of existing users."""
 
     items: list[User]
+
+
+def passwords_match(
+    model: BaseModel, field: str, confirmation_field: str
+) -> None:
+    if getattr(model, field) != getattr(model, confirmation_field):
+        raise PydanticCustomError(
+            "Password Mismatch",
+            "'{ref}' and '{loc}' do not match.",
+            {
+                "ref": field,
+                "loc": confirmation_field,
+            },
+        )
 
 
 @v1_router.get("/users")
@@ -130,7 +145,7 @@ async def patch_me(
     ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"message": "Email or Username already in use."},
+            detail="Email or Username already in use.",
         )
 
     user = await services.users.update(
@@ -146,31 +161,33 @@ class UsersPasswordPatchRequest(BaseModel):
     new_password: str = Field(min_length=8, max_length=100)
     confirm_password: str = Field(min_length=8, max_length=100)
 
-    @model_validator(mode="before")
-    def passwords_match(cls, values: Any) -> Any:
-        if values.get("new_password") != values.get("confirm_password"):
-            raise ValueError("Provided passwords do not match.")
-        return values
+    @model_validator(mode="after")
+    def passwords_match_check(self) -> Self:
+        passwords_match(self, "new_password", "confirm_password")
+        return self
 
 
 @v1_router.patch("/users/me/password")
 async def patch_me_password(
     services: Annotated[ServiceCollection, Depends(services)],
     authenticated_user: Annotated[models.User, Depends(authenticated_user)],
-    post_request: UsersPasswordPatchRequest,
+    patch_request: UsersPasswordPatchRequest,
 ) -> None:
     """Modify the users password."""
+    raise_on_empty_request(patch_request)
     if await authenticate_user(
-        services.users, authenticated_user.email, post_request.current_password
+        services.users,
+        authenticated_user.email,
+        patch_request.current_password,
     ):
         await services.users.update_password(
             authenticated_user.id,
-            post_request.new_password,
+            patch_request.new_password,
         )
         return None
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
-        detail={"message": "Incorrect password for user."},
+        detail="Incorrect password for user.",
     )
 
 
@@ -186,7 +203,7 @@ async def get_id(
         return User.from_model(user)
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
-        detail={"message": "User does not exist."},
+        detail="User does not exist.",
     )
 
 
@@ -200,11 +217,10 @@ class UsersPostRequest(BaseModel):
     confirm_password: str = Field(min_length=8, max_length=100)
     is_admin: bool = False
 
-    @model_validator(mode="before")
-    def passwords_match(cls, values: Any) -> Any:
-        if values.get("password") != values.get("confirm_password"):
-            raise ValueError("Provided passwords do not match.")
-        return values
+    @model_validator(mode="after")
+    def passwords_match_check(self) -> Self:
+        passwords_match(self, "password", "confirm_password")
+        return self
 
 
 @v1_router.post("/users")
@@ -219,7 +235,7 @@ async def post(
     ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"message": "Email or Username already in use."},
+            detail="Email or Username already in use.",
         )
     user = await services.users.create(
         models.UserCreate(**post_request.model_dump())
@@ -239,11 +255,10 @@ class UsersPatchRequest(BaseModel):
     )
     is_admin: bool | None = None
 
-    @model_validator(mode="before")
-    def passwords_match(cls, values: Any) -> Any:
-        if values.get("password") != values.get("confirm_password"):
-            raise ValueError("Provided passwords do not match.")
-        return values
+    @model_validator(mode="after")
+    def passwords_match_check(self) -> Self:
+        passwords_match(self, "password", "confirm_password")
+        return self
 
 
 @v1_router.patch("/users/{id}")
@@ -255,22 +270,18 @@ async def patch(
 ) -> User:
     """Admin action to update the details for a user."""
 
+    raise_on_empty_request(patch_request)
+
     if id == authenticated_admin.id and patch_request.is_admin is False:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail={"message": "Admin users cannot demote themselves."},
-        )
-
-    if all(v is None for v in patch_request.model_dump().values()):
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail={"message": "Request body empty."},
+            detail="Admin users cannot demote themselves.",
         )
 
     if not await services.users.id_exists(id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail={"message": "User does not exist."},
+            detail="User does not exist.",
         )
 
     if await services.users.exists(
@@ -280,7 +291,7 @@ async def patch(
     ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"message": "Email or Username already in use."},
+            detail="Email or Username already in use.",
         )
 
     user = await services.users.update(
@@ -299,7 +310,7 @@ async def delete(
     if authenticated_admin.id == id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"message": "Cannot delete the current user."},
+            detail="Cannot delete the current user.",
         )
     await services.users.delete(id)
     return None

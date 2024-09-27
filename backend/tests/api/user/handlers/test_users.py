@@ -117,7 +117,7 @@ class TestUsersGetHandler:
         response = await admin_client.get(
             "/users", params={"sort_by": sort_by}
         )
-        assert response.status_code == 400
+        assert response.status_code == 422
 
     async def test_pagination(
         self, admin_client: Client, factory: Factory
@@ -142,7 +142,7 @@ class TestUsersGetHandler:
 
         response = await admin_client.get(f"/users/{user.id + 100}")
         assert response.status_code == 404
-        assert response.json()["detail"]["message"] == "User does not exist."
+        assert response.json()["error"]["message"] == "User does not exist."
 
         response = await admin_client.get(f"/users/{user.id}")
         assert response.status_code == 200
@@ -175,9 +175,10 @@ class TestUsersPostHandler:
         )
         assert response.status_code == 422
         missing_fields = set()
-        for entry in response.json()["detail"]:
-            missing_fields.add(entry["loc"][1])  # name of missing field
-            assert entry["type"] == "missing"
+
+        for entry in response.json()["error"]["details"]:
+            missing_fields.add(entry["field"])
+            assert entry["reason"] == "Missing"
 
         assert missing_fields == {
             "full_name",
@@ -216,7 +217,7 @@ class TestUsersPostHandler:
         )
         assert response.status_code == 400
         assert (
-            response.json()["detail"]["message"]
+            response.json()["error"]["message"]
             == "Email or Username already in use."
         )
 
@@ -234,7 +235,7 @@ class TestUsersPostHandler:
         )
         assert response.status_code == 400
         assert (
-            response.json()["detail"]["message"]
+            response.json()["error"]["message"]
             == "Email or Username already in use."
         )
 
@@ -268,7 +269,7 @@ class TestUsersMePasswordPostHandler:
         )
         assert response.status_code == 400
         assert (
-            response.json()["detail"]["message"]
+            response.json()["error"]["message"]
             == "Incorrect password for user."
         )
 
@@ -282,9 +283,9 @@ class TestUsersMePasswordPostHandler:
         )
         assert response.status_code == 422
         missing_fields = set()
-        for entry in response.json()["detail"]:
-            missing_fields.add(entry["loc"][1])  # name of missing field
-            assert entry["type"] == "missing"
+        for entry in response.json()["error"]["details"]:
+            missing_fields.add(entry["field"])
+            assert entry["reason"] == "Missing"
 
         assert missing_fields == {
             "current_password",
@@ -332,7 +333,7 @@ class TestUsersPatchHandler:
         )
         assert response.status_code == 403
         assert (
-            response.json()["detail"]["message"]
+            response.json()["error"]["message"]
             == "Admin users cannot demote themselves."
         )
 
@@ -341,14 +342,17 @@ class TestUsersPatchHandler:
     ) -> None:
         response = await admin_client.patch(f"/users/{api_admin.id}", json={})
         assert response.status_code == 422
-        assert response.json()["detail"]["message"] == "Request body empty."
+        assert (
+            response.json()["error"]["message"]
+            == "Expected UsersPatchRequest instance."
+        )
 
     async def test_nonexistent_user(self, admin_client: Client) -> None:
         response = await admin_client.patch(
             "/users/10000000", json={"full_name": "ghost_in_the_test"}
         )
         assert response.status_code == 404
-        assert response.json()["detail"]["message"] == "User does not exist."
+        assert response.json()["error"]["message"] == "User does not exist."
 
     @pytest.mark.parametrize(
         "new_details",
@@ -367,9 +371,47 @@ class TestUsersPatchHandler:
         )
         assert response.status_code == 400
         assert (
-            response.json()["detail"]["message"]
+            response.json()["error"]["message"]
             == "Email or Username already in use."
         )
+
+    async def test_password_validation(
+        self, api_admin: models.User, admin_client: Client
+    ) -> None:
+        response = await admin_client.patch(
+            f"/users/{api_admin.id}",
+            json={"password": "goodpasswd", "confirm_password": "badpasswd"},
+        )
+        assert response.status_code == 422
+        assert (
+            response.json()["error"]["details"][0]["reason"]
+            == "PasswordMismatch"
+        )
+
+    async def test_field_validation(
+        self, api_admin: models.User, admin_client: Client
+    ) -> None:
+        response = await admin_client.patch(
+            f"/users/{api_admin.id}",
+            json={"password": "short", "confirm_password": "no"},
+        )
+        assert response.status_code == 422
+        resp = response.json()["error"]["details"]
+        assert len(resp) == 2
+        assert resp[0]["reason"] == "StringTooShort"
+        assert resp[1]["reason"] == "StringTooShort"
+
+    async def test_query_validation(self, admin_client: Client) -> None:
+        response = await admin_client.patch(
+            f"/users/adsf",
+            json={"password": "short", "confirm_password": "no"},
+        )
+        assert response.status_code == 422
+        resp = response.json()["error"]["details"]
+        assert len(resp) == 3
+        assert resp[0]["reason"] == "IntParsing"
+        assert resp[1]["reason"] == "StringTooShort"
+        assert resp[2]["reason"] == "StringTooShort"
 
 
 @pytest.mark.asyncio
@@ -389,7 +431,7 @@ class TestUsersDeleteHandler:
         response = await admin_client.delete(f"/users/{api_admin.id}")
         assert response.status_code == 400
         assert (
-            response.json()["detail"]["message"]
+            response.json()["error"]["message"]
             == "Cannot delete the current user."
         )
 
@@ -410,7 +452,10 @@ class TestUsersMePatchHandler:
         response = await user_client.patch("/users/me", json={})
 
         assert response.status_code == 422
-        assert response.json()["detail"]["message"] == "Request body empty."
+        assert (
+            response.json()["error"]["message"]
+            == "Expected UsersPatchMeRequest instance."
+        )
 
     @pytest.mark.parametrize(
         "new_details",
@@ -426,6 +471,6 @@ class TestUsersMePatchHandler:
         response = await admin_client.patch("/users/me", json=new_details)
         assert response.status_code == 400
         assert (
-            response.json()["detail"]["message"]
+            response.json()["error"]["message"]
             == "Email or Username already in use."
         )

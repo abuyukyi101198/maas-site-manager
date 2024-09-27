@@ -204,7 +204,7 @@ class TestSitesGetHandler:
         query_params: str,
     ) -> None:
         response = await user_client.get("/sites", params=query_params)
-        assert response.status_code == 400
+        assert response.status_code == 422
 
     @pytest.mark.parametrize(
         "query_params, expected_result",
@@ -286,7 +286,7 @@ class TestSitesGetByIDHandler:
         site_id = -1
         response = await user_client.get(f"/sites/{site_id}")
         assert response.status_code == 404
-        assert response.json()["detail"]["message"] == "Site does not exist."
+        assert response.json()["error"]["message"] == "Site does not exist."
 
         site_id = 2
         response = await user_client.get(f"/sites/{site.id}")
@@ -437,6 +437,7 @@ class TestPendingSitesPostHandler:
             json={"ids": ids, "accept": True},
         )
         assert response.status_code == 400
-        assert response.json() == {
-            "detail": {"message": "Unknown pending sites", "ids": ids}
-        }
+        assert (
+            response.json()["error"]["message"]
+            == f"Unknown pending sites, ids: {ids}"
+        )

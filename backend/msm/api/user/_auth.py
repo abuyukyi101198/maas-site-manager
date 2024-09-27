@@ -10,7 +10,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 from msm.api._auth import auth_id_from_token
 from msm.api._dependencies import services
-from msm.api._utils import INVALID_TOKEN_ERROR
+from msm.api._exceptions import INVALID_TOKEN_ERROR
 from msm.db.models import User
 from msm.jwt import TokenAudience
 from msm.service import (

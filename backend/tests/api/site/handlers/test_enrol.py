@@ -390,7 +390,7 @@ class TestEnrolRefreshGetHandler:
         await factory.make_Site(auth_id=auth_id)
         response = await app_client.get("site/v1/enrol/refresh")
         assert response.status_code == 401
-        assert response.json() == {"detail": "Not authenticated"}
+        assert response.json()["error"]["message"] == "Not authenticated"
 
     async def test_refresh_invalid_token_purpose(
         self,
@@ -406,7 +406,7 @@ class TestEnrolRefreshGetHandler:
         )
         response = await app_client.get("/site/v1/enrol/refresh")
         assert response.status_code == 401
-        assert response.json() == {"detail": "Invalid token"}
+        assert response.json()["error"]["message"] == "Invalid token"
 
     async def test_refresh_verify(
         self,

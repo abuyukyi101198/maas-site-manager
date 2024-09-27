@@ -12,6 +12,7 @@ import anyio
 from baize.asgi.responses import FileResponse as BaizeFileResponse
 from bs4 import BeautifulSoup as bs
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import (
     HTMLResponse,
@@ -20,11 +21,16 @@ from fastapi.responses import (
 )
 from prometheus_client import REGISTRY, CollectorRegistry
 from sqlalchemy.ext.asyncio import AsyncConnection
+from starlette.exceptions import HTTPException as StarletteHTTPException
 import uvicorn
 from uvicorn.server import logger
 
 import msm
 from msm import __version__
+from msm.api._exceptions import (
+    http_exception_handler,
+    request_validation_error_handler,
+)
 from msm.api._prometheus import instrument_prometheus
 from msm.api._utils import create_subapp
 from msm.api.site.handlers import ROUTERS as SITE_API_ROUTERS
@@ -94,6 +100,9 @@ def create_app(
         root_path=root_path,
     )
 
+    # override default exception handler
+    app.add_exception_handler(StarletteHTTPException, http_exception_handler)
+
     @app.get("/")
     @app.get("/ui", response_class=RedirectResponse, status_code=301)
     async def redirect(request: Request) -> RedirectResponse:
@@ -132,10 +141,14 @@ def create_app(
 
     for a in (user_app, site_app):
         # subapp exceptions do not reach the main app, so we must install the
-        # handlers here to allow middlewares to react to errors,
+        # handlers here also to allow middlewares to react to errors,
         # e.g. rollback a DB transaction
         a.add_middleware(DatabaseMetricsMiddleware, db=db)
         a.add_middleware(transaction_middleware_class, db=db)
+        a.add_exception_handler(
+            RequestValidationError, request_validation_error_handler
+        )
+        a.add_exception_handler(StarletteHTTPException, http_exception_handler)
 
     app.mount("/api", user_app)
     app.mount("/site", site_app)

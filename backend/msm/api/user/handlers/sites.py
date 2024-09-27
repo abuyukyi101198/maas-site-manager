@@ -17,7 +17,7 @@ from pydantic import (
 )
 
 from msm.api._dependencies import services
-from msm.api._utils import (
+from msm.api._exceptions import (
     not_found,
     raise_on_empty_request,
 )
@@ -101,7 +101,7 @@ async def post_pending(
     except InvalidPendingSites as error:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"message": str(error), "ids": error.ids},
+            detail=f"{error!s}, ids: {error.ids}",
         )
 
     return None
@@ -223,22 +223,20 @@ async def delete_many(
     if not ids:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"message": "No ID's provided"},
+            detail="No ID's provided",
         )
     requested_ids = set(ids)
     deleted_ids = await services.sites.delete_many(ids)
     if deleted_ids != requested_ids:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail={
-                "message": (
-                    f"The following ID's were not found: {requested_ids - deleted_ids}."
-                    + (
-                        f" The following ID's were deleted: {deleted_ids}"
-                        if deleted_ids
-                        else ""
-                    )
+            detail=(
+                f"The following ID's were not found: {requested_ids - deleted_ids}."
+                + (
+                    f" The following ID's were deleted: {deleted_ids}"
+                    if deleted_ids
+                    else ""
                 )
-            },
+            ),
         )
     return None

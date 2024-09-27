@@ -7,6 +7,7 @@ from fastapi import (
 from pydantic import BaseModel
 
 from msm.api._dependencies import services
+from msm.api._exceptions import raise_on_empty_request
 from msm.api.user._auth import authenticated_admin
 from msm.db.models import (
     Settings,
@@ -40,4 +41,5 @@ async def patch(
     authenticated_admin: Annotated[User, Depends(authenticated_admin)],
     request: SettingsPatchRequest,
 ) -> None:
+    raise_on_empty_request(request)
     await services.settings.update(request.model_dump(exclude_none=True))

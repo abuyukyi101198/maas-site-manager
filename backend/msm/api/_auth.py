@@ -15,7 +15,7 @@ from fastapi.security.utils import get_authorization_scheme_param
 from pydantic import BaseModel
 
 from msm.api._dependencies import config
-from msm.api._utils import INVALID_TOKEN_ERROR
+from msm.api._exceptions import INVALID_TOKEN_ERROR
 from msm.db.models import Config, Token
 from msm.jwt import (
     DEFAULT_TOKEN_DURATION,

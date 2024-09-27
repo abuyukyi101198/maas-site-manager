@@ -20,7 +20,7 @@ from msm.api._dependencies import (
     config,
     services,
 )
-from msm.api._utils import INVALID_TOKEN_ERROR
+from msm.api._exceptions import INVALID_TOKEN_ERROR
 from msm.api.site._auth import authenticated_site
 from msm.db.models import (
     Config,
