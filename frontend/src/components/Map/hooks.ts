@@ -86,7 +86,8 @@ export const useMarkers = ({ eventHandlers }: UseMarkers) => {
 
   const createNewMarker = useCallback(
     ({ coords, properties }: Pick<MarkerProps, "coords" | "properties">) => {
-      const element = getSiteMarker("base");
+      const element = getSiteMarker("base", properties["id"]);
+
       const marker = new maplibregl.Marker({
         element,
         anchor: "bottom",

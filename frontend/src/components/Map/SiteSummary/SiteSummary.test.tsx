@@ -1,11 +1,13 @@
 import { rest } from "msw";
 
+import { SiteMarkerSvg } from "../SiteMarker/SiteMarker";
+
 import SiteSummary from "./SiteSummary";
 
 import { siteFactory, statsFactory } from "@/mocks/factories";
 import { createMockSiteResolver } from "@/mocks/resolvers";
 import { apiUrls } from "@/utils/test-urls";
-import { renderWithMemoryRouter, waitFor, screen, setupServer, userEvent } from "@/utils/test-utils";
+import { renderWithMemoryRouter, waitFor, screen, setupServer, userEvent, fireEvent } from "@/utils/test-utils";
 
 const stats = statsFactory.build();
 const site = siteFactory.build({ url: "https://example.com", stats });
@@ -80,4 +82,39 @@ it("opens the edit site sidebar when the edit button is clicked", async () => {
   expect(setSidebar).toHaveBeenCalledWith("editSite");
 
   vi.restoreAllMocks();
+});
+
+it("keeps the increased marker size when hovering over the site summary", async () => {
+  renderWithMemoryRouter(
+    <>
+      <SiteSummary id={site.id} />
+      <SiteMarkerSvg id={site.id} />
+    </>,
+  );
+
+  // fireEvent is needed here since userEvent.hover does not trigger onMouseOver
+  // eslint-disable-next-line testing-library/prefer-user-event
+  fireEvent.mouseOver(screen.getByRole("group", { name: "Site details" }));
+  await waitFor(() => {
+    expect(screen.getByLabelText("site location marker")).toHaveClass("site-marker--active");
+  });
+});
+
+it("restores the original marker style on unmount", async () => {
+  renderWithMemoryRouter(<SiteMarkerSvg id={site.id} />);
+
+  const { unmount } = renderWithMemoryRouter(<SiteSummary id={site.id} />);
+
+  // fireEvent is needed here since userEvent.hover does not trigger onMouseOver
+  // eslint-disable-next-line testing-library/prefer-user-event
+  fireEvent.mouseOver(screen.getByRole("group", { name: "Site details" }));
+  await waitFor(() => {
+    expect(screen.getByLabelText("site location marker")).toHaveClass("site-marker--active");
+  });
+
+  unmount();
+
+  await waitFor(() => {
+    expect(screen.getByLabelText("site location marker")).not.toHaveClass("site-marker--active");
+  });
 });

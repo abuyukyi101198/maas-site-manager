@@ -26,8 +26,26 @@ const SiteSummary = ({ id, ...props }: SiteSummaryProps) => {
   const { setSelected: setSiteId } = useSiteDetailsContext();
   const { stats } = site || {};
 
+  const handleMouseOver = () => {
+    // keep marker hover style when hovering over site summary
+    const marker = document.getElementById(`site-marker-${id}`);
+    if (marker) {
+      marker.classList.add("site-marker--active");
+    }
+  };
+
+  useEffect(() => {
+    // remove marker hover style on unmount
+    return () => {
+      const marker = document.getElementById(`site-marker-${id}`);
+      if (marker) {
+        marker.classList.remove("site-marker--active");
+      }
+    };
+  });
+
   return (
-    <Card className="site-summary" title="Site details" {...props}>
+    <Card className="site-summary" onMouseOver={handleMouseOver} title="Site details" {...props}>
       {error ? (
         <Notification severity="negative" title="Error while fetching site">
           <ErrorMessage error={error} />
@@ -37,6 +55,7 @@ const SiteSummary = ({ id, ...props }: SiteSummaryProps) => {
           <div>
             <span className="site-summary__header">
               <h4 className="site-summary__name u-truncate">{site.name}</h4>
+              <span>Site ID: {id}</span>
               <Button
                 appearance="base"
                 className="site-summary__button--edit"

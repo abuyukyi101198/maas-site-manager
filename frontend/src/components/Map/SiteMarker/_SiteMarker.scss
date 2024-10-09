@@ -19,13 +19,13 @@
     transition-delay: 750ms;
   }
 
-    &:hover {
-      transform: scale(1.1);
-  
-      .site-marker__body {
-        fill: adjust-color($color-brand, $lightness: -$hover-background-opacity-percentage);
-      }
+  &:hover, &--active {
+    transform: scale(1.1);
+
+    .site-marker__body {
+      fill: adjust-color($color-brand, $lightness: -$hover-background-opacity-percentage);
     }
+  }
 
   .site-marker__circle {
     fill: $color-light;

@@ -1,16 +1,18 @@
 import classNames from "classnames";
 
+import type { Site } from "@/api";
 import { createElementFromHTML, renderToHtmlString } from "@/components/Map/utils";
 
-export type MarkerApprearance = "base" | "selected";
+export type MarkerAppearance = "base" | "selected";
 
-export const SiteMarkerSvg = ({ appearance = "base" }: { appearance?: MarkerApprearance }) => {
+export const SiteMarkerSvg = ({ appearance = "base", id }: { appearance?: MarkerAppearance; id: Site["id"] }) => {
   return (
     <svg
       aria-label="site location marker"
       className={classNames("site-marker", { "is-selected": appearance === "selected" })}
       fill="none"
       height="47"
+      id={`site-marker-${id}`}
       role="button"
       tabIndex={0}
       viewBox="0 0 29 47"
@@ -29,22 +31,14 @@ export const SiteMarkerSvg = ({ appearance = "base" }: { appearance?: MarkerAppr
   );
 };
 
-const getMarkerHtml = (appearance: MarkerApprearance): string =>
-  renderToHtmlString(<SiteMarkerSvg appearance={appearance} />);
+const getMarkerHtml = (appearance: MarkerAppearance, id: Site["id"]): string =>
+  renderToHtmlString(<SiteMarkerSvg appearance={appearance} id={id} />);
 
-const markerHtml = {
-  base: getMarkerHtml("base"),
-  selected: getMarkerHtml("selected"),
-} as const;
-
-export const baseMarker = markerHtml.base;
-export const selectedMarker = markerHtml.selected;
-
-export const getSiteMarker = (appearance: keyof typeof markerHtml) => {
-  return createElementFromHTML(markerHtml[appearance]);
+export const getSiteMarker = (appearance: MarkerAppearance, id: Site["id"]) => {
+  return createElementFromHTML(getMarkerHtml(appearance, id));
 };
 
-export const getClusterSvg = (appearance: MarkerApprearance, count: number) =>
+export const getClusterSvg = (appearance: MarkerAppearance, count: number) =>
   `<svg tabindex="0" fill="none" role="button" aria-label="${count} sites cluster" viewBox="0 0 32 32" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
     <rect
       class=${classNames("site-marker-cluster__body", { "has-selected": appearance === "selected" })}
@@ -69,7 +63,7 @@ export const getClusterSize = (count: number, maxCount: number) => {
   return size;
 };
 
-export const createCustomClusterIcon = function (appearance: MarkerApprearance, count: number, maxCount = 100) {
+export const createCustomClusterIcon = function (appearance: MarkerAppearance, count: number, maxCount = 100) {
   const iconSize = getClusterSize(count, maxCount);
   const svg = getClusterSvg(appearance, count);
 
