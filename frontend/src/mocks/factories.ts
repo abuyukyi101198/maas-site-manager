@@ -83,6 +83,7 @@ export const siteFactory = Factory.define<NonNullable<Site>>(({ sequence }) => {
     timezone: chance.pickone(Object.values(TimeZone)),
     connection_status: connectionFactory.build(),
     stats: statsFactory.build() as SiteData,
+    cluster_uuid: chance.guid(),
   } as const;
   return site;
 });

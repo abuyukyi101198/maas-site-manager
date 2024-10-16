@@ -151,6 +151,7 @@ export class DefaultService {
         postalCode,
         timezone,
         url,
+        clusterUuid,
         q,
         sortBy,
     }: {
@@ -166,6 +167,7 @@ export class DefaultService {
         postalCode?: (Array<string> | null),
         timezone?: (Array<string> | null),
         url?: (Array<string> | null),
+        clusterUuid?: (Array<string> | null),
         q?: (string | null),
         sortBy?: (string | null),
     }): CancelablePromise<SitesGetResponse> {
@@ -185,6 +187,7 @@ export class DefaultService {
                 'postal_code': postalCode,
                 'timezone': timezone,
                 'url': url,
+                'cluster_uuid': clusterUuid,
                 'q': q,
                 'sort_by': sortBy,
             },
@@ -233,6 +236,7 @@ export class DefaultService {
         postalCode,
         timezone,
         url,
+        clusterUuid,
         q,
     }: {
         city?: (Array<string> | null),
@@ -244,6 +248,7 @@ export class DefaultService {
         postalCode?: (Array<string> | null),
         timezone?: (Array<string> | null),
         url?: (Array<string> | null),
+        clusterUuid?: (Array<string> | null),
         q?: (string | null),
     }): CancelablePromise<Array<SiteCoordinates>> {
         return this.httpRequest.request({
@@ -259,6 +264,7 @@ export class DefaultService {
                 'postal_code': postalCode,
                 'timezone': timezone,
                 'url': url,
+                'cluster_uuid': clusterUuid,
                 'q': q,
             },
             errors: {
@@ -349,9 +355,15 @@ export class DefaultService {
     public getV1TokensGet({
         page = 1,
         size = 20,
+        id,
+        value,
+        siteId,
     }: {
         page?: number,
         size?: number,
+        id?: (Array<number> | null),
+        value?: (Array<string> | null),
+        siteId?: (Array<number> | null),
     }): CancelablePromise<TokensGetResponse> {
         return this.httpRequest.request({
             method: 'GET',
@@ -359,6 +371,9 @@ export class DefaultService {
             query: {
                 'page': page,
                 'size': size,
+                'id': id,
+                'value': value,
+                'site_id': siteId,
             },
             errors: {
                 422: `Validation Error`,
@@ -419,10 +434,32 @@ export class DefaultService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public getExportV1TokensExportGet(): CancelablePromise<any> {
+    public getExportV1TokensExportGet({
+        page = 1,
+        size = 20,
+        id,
+        value,
+        siteId,
+    }: {
+        page?: number,
+        size?: number,
+        id?: (Array<number> | null),
+        value?: (Array<string> | null),
+        siteId?: (Array<number> | null),
+    }): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/v1/tokens/export',
+            query: {
+                'page': page,
+                'size': size,
+                'id': id,
+                'value': value,
+                'site_id': siteId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
         });
     }
 

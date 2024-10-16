@@ -53,6 +53,10 @@ export const $Site = {
         url: {
             type: 'string',
         },
+        cluster_uuid: {
+            type: 'string',
+            isRequired: true,
+        },
         name_unique: {
             type: 'boolean',
             isRequired: true,

@@ -177,10 +177,10 @@ export const useExportTokensToFileQuery = () => {
   const [isPending, setisPending] = useState(false);
   const [error, setError] = useState(null);
 
-  const exportTokens = async () => {
+  const exportTokens = async (parameters: Parameters<typeof getTokensExport>[0]) => {
     setError(null);
     setisPending(true);
-    getTokensExport()
+    getTokensExport(parameters)
       .then((data) => {
         if (data) {
           saveToFile(data, "site-manager-tokens.csv", "text/csv");

@@ -22,6 +22,7 @@ export type Site = {
     postal_code?: string;
     timezone?: (TimeZone | '');
     url?: string;
+    cluster_uuid: string;
     name_unique: boolean;
     connection_status: ConnectionStatus;
     stats?: (SiteData | null);

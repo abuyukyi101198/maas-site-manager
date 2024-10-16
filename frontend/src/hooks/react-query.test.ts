@@ -73,7 +73,7 @@ it("should finish loading when exporting tokens", async () => {
   expect(result.current.isPending).toBe(false);
 
   act(() => {
-    result.current.exportTokens();
+    result.current.exportTokens({});
   });
   expect(result.current.isPending).toBe(true);
   await waitFor(() => expect(result.current.isPending).toBe(false));

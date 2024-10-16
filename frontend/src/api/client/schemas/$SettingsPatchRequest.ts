@@ -13,14 +13,6 @@ export const $SettingsPatchRequest = {
                 type: 'null',
             }],
         },
-        enrolment_url: {
-            type: 'any-of',
-            contains: [{
-                type: 'string',
-            }, {
-                type: 'null',
-            }],
-        },
         token_lifetime_minutes: {
             type: 'any-of',
             contains: [{

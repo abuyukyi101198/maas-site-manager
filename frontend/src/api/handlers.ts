@@ -109,9 +109,11 @@ export const postTokens = async (data: TokensPostRequest) => {
   }
 };
 
-export const getTokensExport = async () => {
+export const getTokensExport = async (
+  parameters: Parameters<typeof apiClient.default.getExportV1TokensExportGet>[0],
+) => {
   try {
-    const response = await apiClient.default.getExportV1TokensExportGet();
+    const response = await apiClient.default.getExportV1TokensExportGet(parameters);
     return response;
   } catch (error) {
     throw error;
