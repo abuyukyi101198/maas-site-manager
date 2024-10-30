@@ -10,6 +10,7 @@ import type {
   TokensPostRequest,
   Site,
 } from "@/api/client";
+import { maxPageSize, minPageSize } from "@/components/base/PaginationBar";
 import { apiUrls } from "@/utils/test-urls";
 
 export const postLogin = async (data: Body_post_v1_login_post) => {
@@ -113,16 +114,38 @@ export const getTokensExport = async (
   parameters: Parameters<typeof apiClient.default.getExportV1TokensExportGet>[0],
 ) => {
   try {
-    const response = await apiClient.default.getExportV1TokensExportGet(parameters);
-    return response;
+    const id = parameters.id;
+    if (id?.length) {
+      // we have id filters, thus the user selected from a page and we do not need to return more than maxPageSize
+      const response = await apiClient.default.getExportV1TokensExportGet({ page: 1, size: maxPageSize, id: id });
+      return response;
+    } else {
+      // we are exporting all tokens. We might need to return the results from multiple pages
+      const totalTokens: number = (await apiClient.default.getV1TokensGet({ page: 1, size: minPageSize })).total;
+      const pagesToLoad: number = totalTokens / maxPageSize;
+      const requests = [];
+      for (let page: number = 1; page <= pagesToLoad + 1; page++) {
+        requests.push(apiClient.default.getExportV1TokensExportGet({ page: page, size: maxPageSize }));
+      }
+      const responses = await Promise.all(requests);
+      const newLines = /\r\n|\r|\n/g; // catch newlines of type \r, \n and \r\n
+      const header: string = responses[0].split(newLines)[0];
+      const pages: string = responses
+        .map((response) => {
+          const lines = response.split(newLines);
+          lines.shift();
+          return lines.join("\n");
+        })
+        .join("");
+      return [header, pages].join("\n");
+    }
   } catch (error) {
     throw error;
   }
 };
 
-export type GetTokensQueryParams = PaginationParams & {};
-export const getTokens = ({ page, size }: Parameters<typeof apiClient.default.getV1TokensGet>[0]) =>
-  apiClient.default.getV1TokensGet({ page, size });
+export type GetTokensQueryParams = Parameters<typeof apiClient.default.getV1TokensGet>[0];
+export const getTokens = ({ page, size }: GetTokensQueryParams) => apiClient.default.getV1TokensGet({ page, size });
 
 export const getUsers = async (params: Parameters<typeof apiClient.default.getV1UsersGet>[0]) => {
   try {

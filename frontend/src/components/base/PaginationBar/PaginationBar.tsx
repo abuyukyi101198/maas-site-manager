@@ -15,6 +15,9 @@ export type PaginationBarProps = {
   setCurrentPage: (page: number) => void;
   isPending: boolean;
 };
+export const pageSizes: Array<number> = [20, 30, 50];
+export const maxPageSize: number = Math.max(...pageSizes);
+export const minPageSize: number = Math.min(...pageSizes);
 
 const PaginationBar = ({
   currentPage,
@@ -25,7 +28,7 @@ const PaginationBar = ({
   setCurrentPage,
   isPending,
 }: PaginationBarProps) => {
-  const pageCounts = useMemo(() => [20, 30, 50], []);
+  const pageCounts = useMemo(() => pageSizes, []);
   const pageOptions = useMemo(
     () => pageCounts.map((pageCount) => ({ label: `${pageCount}/page`, value: pageCount })),
     [pageCounts],

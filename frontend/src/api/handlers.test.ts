@@ -1,15 +1,24 @@
 import { setupServer } from "msw/node";
 
-import { postEnrollmentRequests, postTokens, getCurrentUser } from "./handlers";
+import { apiClient } from "./api";
+import { postEnrollmentRequests, postTokens, getCurrentUser, getTokensExport } from "./handlers";
 
 import { durationFactory } from "@/mocks/factories";
 import {
   postTokens as postTokensResolver,
   postEnrollmentRequests as postEnrollmentRequestsResolver,
   getCurrentUser as getCurrentUserResolver,
+  getTokensExport as getTokensExportResolver,
+  getTokens as getTokensResolver,
 } from "@/mocks/resolvers";
 
-const mockServer = setupServer(postTokensResolver, postEnrollmentRequestsResolver, getCurrentUserResolver);
+const mockServer = setupServer(
+  postTokensResolver,
+  postEnrollmentRequestsResolver,
+  getCurrentUserResolver,
+  getTokensExportResolver,
+  getTokensResolver,
+);
 
 beforeAll(() => {
   mockServer.listen();
@@ -43,4 +52,15 @@ it("returns the user object", async () => {
       full_name: expect.any(String),
     }),
   );
+});
+
+it("paginates the tokens export if called without explicit IDs", async () => {
+  const getTokenCount = vi.spyOn(apiClient.default, "getV1TokensGet");
+  // should not call getTokenCount with ID. Can export from first page using only "getExportV1TokensExportGet"
+  await getTokensExport({ id: [1] });
+  expect(getTokenCount).not.toHaveBeenCalled();
+
+  // should call getTokenCount as it needs to calculate the pages
+  await getTokensExport({ id: [] });
+  expect(getTokenCount).toHaveBeenCalledTimes(1);
 });

@@ -173,14 +173,14 @@ export const useTokensCreateMutation = () => {
   });
 };
 
-export const useExportTokensToFileQuery = () => {
+export const useExportTokensToFileQuery = ({ id }: Parameters<typeof apiClient.default.getV1TokensGet>[0]) => {
   const [isPending, setisPending] = useState(false);
   const [error, setError] = useState(null);
 
   const exportTokens = async (parameters: Parameters<typeof getTokensExport>[0]) => {
     setError(null);
     setisPending(true);
-    getTokensExport(parameters)
+    getTokensExport({ ...parameters, id: id })
       .then((data) => {
         if (data) {
           saveToFile(data, "site-manager-tokens.csv", "text/csv");

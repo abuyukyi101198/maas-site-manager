@@ -15,7 +15,7 @@ import { apiUrls } from "@/utils/test-urls";
 import { act, renderHook, waitFor, Providers } from "@/utils/test-utils";
 
 const sitesData = siteFactory.buildList(2);
-const tokensData = tokenFactory.buildList(2);
+const tokensData = tokenFactory.buildList(10);
 const usersData = userFactory.buildList(2);
 const mockServer = setupServer(
   rest.get(apiUrls.sites, createMockSitesResolver(sitesData)),
@@ -49,7 +49,7 @@ it("should return tokens", async () => {
 
   await waitFor(() => expect(result.current.isFetchedAfterMount).toBe(true));
 
-  expect(result.current.data!.items).toEqual(tokensData);
+  expect(result.current.data!.items).toEqual([tokensData[0], tokensData[1]]);
 });
 
 it("should return users", async () => {
@@ -68,7 +68,7 @@ it("should finish loading when exporting tokens", async () => {
       saveToFile: vi.fn(),
     };
   });
-  const { result } = renderHook(() => useExportTokensToFileQuery(), { wrapper: Providers });
+  const { result } = renderHook(() => useExportTokensToFileQuery({ id: [] }), { wrapper: Providers });
 
   expect(result.current.isPending).toBe(false);
 

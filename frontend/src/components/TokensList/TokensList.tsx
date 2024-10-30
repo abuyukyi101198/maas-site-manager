@@ -25,7 +25,11 @@ const TokensList = () => {
     size,
   });
 
-  const { error: exportTokensError, isPending: isExportTokensLoading, exportTokens } = useExportTokensToFileQuery();
+  const {
+    error: exportTokensError,
+    isPending: isExportTokensLoading,
+    exportTokens,
+  } = useExportTokensToFileQuery({ id: Object.keys(rowSelection).map((id) => Number(id)) });
 
   const tokensDeleteMutation = useDeleteTokensMutation({
     onSuccess: clearRowSelection,
