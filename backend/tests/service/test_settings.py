@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncConnection
 
 from msm.db.models import Settings
 from msm.jwt import DEFAULT_TOKEN_DURATION
-from msm.service import _settings
-from msm.service._settings import SettingsService
+from msm.service import settings as settings_module
+from msm.service.settings import SettingsService
 from tests.fixtures.factory import Factory
 
 
@@ -54,7 +54,7 @@ class TestSettingsService:
         db_connection: AsyncConnection,
     ) -> None:
         mocker.patch.object(
-            _settings, "gethostname"
+            settings_module, "gethostname"
         ).return_value = "sitemanager"
         service = SettingsService(db_connection)
         await service.ensure()
@@ -109,7 +109,7 @@ class TestSettingsService:
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         monkeypatch.setattr(
-            "msm.service._settings.gethostname", lambda: "msm-host"
+            "msm.service.settings.gethostname", lambda: "msm-host"
         )
         monkeypatch.delenv("MSM_BASE_PATH", raising=False)
         await factory.make_Setting("service_url", value="")

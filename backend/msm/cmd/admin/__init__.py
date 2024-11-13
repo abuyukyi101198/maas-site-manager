@@ -1,6 +1,6 @@
-from msm.cmd._script import Script
-from msm.cmd.admin._create_user import CreateUserAction
-from msm.cmd.admin._update_settings import UpdateSettingsAction
+from msm.cmd.admin.create_user import CreateUserAction
+from msm.cmd.admin.update_settings import UpdateSettingsAction
+from msm.cmd.script import Script
 
 
 class AdminScript(Script):

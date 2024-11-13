@@ -3,7 +3,7 @@ from uuid import uuid4
 from httpx import Request
 import pytest
 
-from msm.api._auth import (
+from msm.api.auth import (
     auth_id_from_token,
     bearer_token,
     token_response,

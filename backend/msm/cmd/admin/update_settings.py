@@ -6,7 +6,7 @@ from argparse import (
 from msm.cmd import (
     DatabaseAction,
 )
-from msm.db.models._settings import SettingsUpdate
+from msm.db.models.settings import SettingsUpdate
 from msm.service import SettingsService
 
 

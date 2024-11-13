@@ -1,7 +1,7 @@
 from fastapi.exceptions import RequestValidationError
 import pytest
 
-from msm.schema._sorting import SortParamParser
+from msm.schema.sorting import SortParamParser
 
 
 @pytest.mark.asyncio

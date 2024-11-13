@@ -4,7 +4,7 @@ from datetime import (
 )
 import uuid
 
-from msm.api._csv import CSVResponse
+from msm.api.csv import CSVResponse
 from msm.db.models import Token
 from msm.jwt import TokenAudience, TokenPurpose
 from msm.time import now_utc

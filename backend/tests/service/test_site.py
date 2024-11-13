@@ -16,7 +16,7 @@ from msm.db.models import (
 )
 from msm.db.tables import Token
 from msm.jwt import TokenPurpose
-from msm.service._site import SiteService
+from msm.service.site import SiteService
 from msm.settings import Settings
 from msm.time import now_utc
 from tests.fixtures.factory import Factory

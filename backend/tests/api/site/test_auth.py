@@ -6,7 +6,7 @@ import pytest
 
 from msm.api.exceptions.catalog import UnauthorizedException
 from msm.api.exceptions.constants import ExceptionCode
-from msm.api.site._auth import authenticated_site
+from msm.api.site.auth import authenticated_site
 from msm.db.models import Site
 from msm.service import ServiceCollection
 from tests.fixtures.app import get_api_routes

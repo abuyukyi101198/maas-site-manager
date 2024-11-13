@@ -9,7 +9,7 @@ from msm.jwt import (
     TokenAudience,
     TokenPurpose,
 )
-from msm.service._token import TokenService
+from msm.service.token import TokenService
 from tests.fixtures.factory import Factory
 
 

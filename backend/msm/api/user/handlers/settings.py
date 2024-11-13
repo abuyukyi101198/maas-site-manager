@@ -5,13 +5,13 @@ from fastapi import (
     Depends,
 )
 
-from msm.api._dependencies import services
-from msm.api.user._auth import authenticated_admin
+from msm.api.dependencies import services
+from msm.api.user.auth import authenticated_admin
 from msm.db.models import (
     Settings,
     User,
 )
-from msm.db.models._settings import SettingsUpdate
+from msm.db.models.settings import SettingsUpdate
 from msm.service import ServiceCollection
 
 v1_router = APIRouter(prefix="/v1")

@@ -26,7 +26,7 @@ from msm.password import (
     verify_password,
 )
 from msm.schema import SortParam
-from msm.service._base import Service
+from msm.service.base import Service
 
 
 class UserService(Service):

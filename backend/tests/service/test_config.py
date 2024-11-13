@@ -3,8 +3,8 @@ from pytest_mock import MockerFixture
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from msm.db.models import Config
-from msm.service import _config
-from msm.service._config import ConfigService
+from msm.service import config
+from msm.service.config import ConfigService
 from tests.fixtures.factory import Factory
 
 
@@ -46,8 +46,8 @@ class TestConfigService:
         factory: Factory,
         db_connection: AsyncConnection,
     ) -> None:
-        mocker.patch.object(_config, "uuid4").return_value = "a-b-c"
-        mocker.patch.object(_config, "generate_key").return_value = "abcde"
+        mocker.patch.object(config, "uuid4").return_value = "a-b-c"
+        mocker.patch.object(config, "generate_key").return_value = "abcde"
         service = ConfigService(db_connection)
         await service.ensure()
         configs = await factory.get("config")

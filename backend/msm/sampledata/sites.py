@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from msm.sampledata._db import (
+from msm.sampledata.db import (
     ModelCollection,
     SampleDataModel,
 )

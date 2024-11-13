@@ -12,7 +12,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from msm.db.tables import METADATA
-from msm.service._base import DBBackedModelService
+from msm.service.base import DBBackedModelService
 from tests.fixtures.factory import Factory
 
 SampleTable = Table(

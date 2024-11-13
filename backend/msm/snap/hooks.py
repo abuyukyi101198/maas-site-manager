@@ -8,7 +8,7 @@ from msm.db import (
     check_server_version,
 )
 from msm.settings import Settings
-from msm.snap._config import NginxConfig
+from msm.snap.config import NginxConfig
 
 
 def configure_hook(snap: Snap) -> None:

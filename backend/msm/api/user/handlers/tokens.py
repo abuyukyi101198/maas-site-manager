@@ -8,15 +8,15 @@ from fastapi import (
 )
 from pydantic import BaseModel
 
-from msm.api._csv import CSVResponse
-from msm.api._dependencies import (
+from msm.api.csv import CSVResponse
+from msm.api.dependencies import (
     config,
     services,
 )
 from msm.api.exceptions.catalog import NotFoundException
 from msm.api.exceptions.constants import ExceptionCode
-from msm.api.user._auth import authenticated_user
-from msm.api.user._forms import (
+from msm.api.user.auth import authenticated_user
+from msm.api.user.forms import (
     TokenFilterParams,
     token_filter_parameters,
 )

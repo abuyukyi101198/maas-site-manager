@@ -7,8 +7,8 @@ from fastapi import (
 )
 from pydantic import BaseModel
 
-from msm.api._dependencies import services
-from msm.api.site._auth import authenticated_site
+from msm.api.dependencies import services
+from msm.api.site.auth import authenticated_site
 from msm.db.models import (
     Site,
     SiteDataUpdate,

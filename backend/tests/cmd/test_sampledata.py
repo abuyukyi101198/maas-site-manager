@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncConnection
 
 from msm.cmd import AsyncAction
 from msm.cmd.sampledata import script
-from msm.cmd.sampledata._fixtures import DeleteFixturesAction, FixturesAction
+from msm.cmd.sampledata.fixtures import DeleteFixturesAction, FixturesAction
 from tests.fixtures.factory import Factory
 
 

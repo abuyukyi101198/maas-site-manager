@@ -9,7 +9,7 @@ from msm.api.exceptions.catalog import (
     UnauthorizedException,
 )
 from msm.api.exceptions.constants import ExceptionCode
-from msm.api.user._auth import (
+from msm.api.user.auth import (
     authenticated_admin,
     authenticated_user,
 )

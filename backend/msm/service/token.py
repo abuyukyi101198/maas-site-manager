@@ -22,7 +22,7 @@ from msm.jwt import (
     TokenAudience,
     TokenPurpose,
 )
-from msm.service._base import Service
+from msm.service.base import Service
 from msm.time import now_utc
 
 

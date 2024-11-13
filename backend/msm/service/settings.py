@@ -3,7 +3,7 @@ from socket import gethostname
 
 from msm.db import models
 from msm.db.tables import Setting
-from msm.service._base import DBBackedModelService
+from msm.service.base import DBBackedModelService
 from msm.settings import Settings
 
 

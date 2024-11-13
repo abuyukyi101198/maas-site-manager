@@ -10,19 +10,19 @@ from fastapi import (
 )
 from pydantic import BaseModel, Field
 
-from msm.api._auth import (
+from msm.api.auth import (
     AccessTokenResponse,
     auth_id_from_token,
     bearer_token,
     token_response_from_token,
 )
-from msm.api._dependencies import (
+from msm.api.dependencies import (
     config,
     services,
 )
 from msm.api.exceptions.catalog import UnauthorizedException
 from msm.api.exceptions.constants import ExceptionCode
-from msm.api.site._auth import authenticated_site
+from msm.api.site.auth import authenticated_site
 from msm.db.models import (
     Config,
     PendingSiteCreate,

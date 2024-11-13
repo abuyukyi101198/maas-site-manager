@@ -6,17 +6,17 @@ from fastapi import (
 )
 from fastapi.security import OAuth2PasswordRequestForm
 
-from msm.api._auth import (
+from msm.api.auth import (
     AccessTokenResponse,
     token_response,
 )
-from msm.api._dependencies import (
+from msm.api.dependencies import (
     config,
     services,
 )
 from msm.api.exceptions.catalog import UnauthorizedException
 from msm.api.exceptions.constants import ExceptionCode
-from msm.api.user._auth import authenticate_user
+from msm.api.user.auth import authenticate_user
 from msm.db.models import Config
 from msm.jwt import TokenAudience
 from msm.service import ServiceCollection

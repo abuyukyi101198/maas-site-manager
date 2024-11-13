@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from msm.snap._config import NginxConfig
+from msm.snap.config import NginxConfig
 
 
 @pytest.fixture

@@ -1,5 +1,5 @@
-from msm.cmd._script import Script
-from msm.cmd.sampledata._fixtures import DeleteFixturesAction, FixturesAction
+from msm.cmd.sampledata.fixtures import DeleteFixturesAction, FixturesAction
+from msm.cmd.script import Script
 
 
 class SampledataScript(Script):

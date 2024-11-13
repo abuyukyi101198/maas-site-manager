@@ -16,11 +16,11 @@ from pydantic import (
     model_validator,
 )
 
-from msm.api._dependencies import services
+from msm.api.dependencies import services
 from msm.api.exceptions.catalog import BadRequestException, NotFoundException
 from msm.api.exceptions.constants import ExceptionCode
-from msm.api.user._auth import authenticated_user
-from msm.api.user._forms import (
+from msm.api.user.auth import authenticated_user
+from msm.api.user.forms import (
     SiteFilterParams,
     site_filter_parameters,
 )

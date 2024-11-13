@@ -35,7 +35,7 @@ from msm.db.tables import (
 )
 from msm.jwt import TokenAudience, TokenPurpose
 from msm.schema import SortParam
-from msm.service._base import Service
+from msm.service.base import Service
 from msm.settings import Settings
 from msm.time import now_utc
 

@@ -3,11 +3,11 @@ from uuid import UUID
 
 from fastapi import Depends
 
-from msm.api._auth import (
+from msm.api.auth import (
     auth_id_from_token,
     bearer_token,
 )
-from msm.api._dependencies import services
+from msm.api.dependencies import services
 from msm.api.exceptions.catalog import UnauthorizedException
 from msm.api.exceptions.constants import ExceptionCode
 from msm.db.models import Site

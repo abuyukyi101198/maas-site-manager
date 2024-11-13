@@ -1,9 +1,9 @@
-from msm.cmd._action import (
+from msm.cmd.action import (
     Action,
     AsyncAction,
     DatabaseAction,
 )
-from msm.cmd._script import (
+from msm.cmd.script import (
     Script,
     do_exit,
 )

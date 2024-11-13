@@ -15,19 +15,19 @@ from pydantic import (
 )
 from pydantic_core import PydanticCustomError
 
-from msm.api._dependencies import services
+from msm.api.dependencies import services
 from msm.api.exceptions.catalog import (
     BadRequestException,
     ForbiddenException,
     NotFoundException,
 )
 from msm.api.exceptions.constants import ExceptionCode
-from msm.api.user._auth import (
+from msm.api.user.auth import (
     authenticate_user,
     authenticated_admin,
     authenticated_user,
 )
-from msm.api.user._forms import (
+from msm.api.user.forms import (
     UserFilterParams,
     user_filter_params,
 )

@@ -12,7 +12,7 @@ from fastapi import (
 from fastapi.security.utils import get_authorization_scheme_param
 from pydantic import BaseModel
 
-from msm.api._dependencies import config
+from msm.api.dependencies import config
 from msm.api.exceptions.catalog import UnauthorizedException
 from msm.api.exceptions.constants import ExceptionCode
 from msm.db.models import Config, Token

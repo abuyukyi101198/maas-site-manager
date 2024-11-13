@@ -4,8 +4,8 @@ from uuid import UUID
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 
-from msm.api._auth import auth_id_from_token
-from msm.api._dependencies import services
+from msm.api.auth import auth_id_from_token
+from msm.api.dependencies import services
 from msm.api.exceptions.catalog import (
     ForbiddenException,
     UnauthorizedException,

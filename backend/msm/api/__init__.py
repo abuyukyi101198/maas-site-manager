@@ -26,14 +26,14 @@ from uvicorn.server import logger
 
 import msm
 from msm import __version__
-from msm.api._prometheus import instrument_prometheus
-from msm.api._utils import create_subapp
 from msm.api.exceptions.middleware import (
     ExceptionMiddleware,
     request_validation_error_handler,
 )
+from msm.api.prometheus import instrument_prometheus
 from msm.api.site.handlers import ROUTERS as SITE_API_ROUTERS
 from msm.api.user.handlers import ROUTERS as USER_API_ROUTERS
+from msm.api.utils import create_subapp
 from msm.db import Database, check_server_version
 from msm.metrics import collect_stats
 from msm.middleware import DatabaseMetricsMiddleware, TransactionMiddleware

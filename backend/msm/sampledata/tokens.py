@@ -7,7 +7,7 @@ from msm.jwt import (
     TokenAudience,
     TokenPurpose,
 )
-from msm.sampledata._db import (
+from msm.sampledata.db import (
     ModelCollection,
     SampleDataModel,
 )
