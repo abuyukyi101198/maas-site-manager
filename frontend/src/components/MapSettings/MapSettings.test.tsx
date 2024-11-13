@@ -25,6 +25,20 @@ afterAll(() => {
   localStorage.removeItem("hasAcceptedOsmTos");
 });
 
+it("shows errors when fetching the current user fails", async () => {
+  mockServer.use(
+    rest.get(apiUrls.currentUser, (req, res, ctx) => {
+      return res(ctx.status(500));
+    }),
+  );
+
+  render(<MapSettings />);
+
+  await waitFor(() => {
+    expect(screen.getByText("Error while fetching user")).toBeInTheDocument();
+  });
+});
+
 it("sets the checkbox to checked if the terms have already been accepted", async () => {
   localStorage.setItem("hasAcceptedOsmTos", JSON.stringify({ admin: true }));
   render(<MapSettings />);

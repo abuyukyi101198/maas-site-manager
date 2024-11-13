@@ -1,9 +1,11 @@
 import { ContentSection } from "@canonical/maas-react-components";
-import { ActionButton, Input, Spinner } from "@canonical/react-components";
+import { ActionButton, Input, Notification, Spinner } from "@canonical/react-components";
 import type { FormikHelpers } from "formik";
 import { Field, Form, Formik } from "formik";
 import useLocalStorageState from "use-local-storage-state";
 import * as Yup from "yup";
+
+import ErrorMessage from "../ErrorMessage";
 
 import { useCurrentUserQuery } from "@/hooks/react-query";
 
@@ -24,14 +26,18 @@ const MapSettings = () => {
     defaultValue: {},
   });
   const [success, setSuccess] = useState(false);
-  const { data: currentUser, isPending, isSuccess } = useCurrentUserQuery();
+  const { data: currentUser, isPending, isError, error } = useCurrentUserQuery();
 
   if (isPending) {
     return <Spinner text="Loading..." />;
   }
 
-  if (!isSuccess || !currentUser) {
-    return null;
+  if (isError) {
+    return (
+      <Notification severity="negative" title="Error while fetching user">
+        <ErrorMessage error={error} />
+      </Notification>
+    );
   }
 
   const initialValues: MapSettingsFormValues = { acceptedOsmTos: accepted[currentUser.username] };

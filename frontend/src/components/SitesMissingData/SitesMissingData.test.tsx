@@ -5,7 +5,14 @@ import SitesMissingData from "./SitesMissingData";
 import { siteFactory } from "@/mocks/factories";
 import { createMockSitesResolver } from "@/mocks/resolvers";
 import { apiUrls } from "@/utils/test-urls";
-import { setupServer, waitForLoadingToFinish, screen, renderWithMemoryRouter, userEvent } from "@/utils/test-utils";
+import {
+  setupServer,
+  waitForLoadingToFinish,
+  screen,
+  renderWithMemoryRouter,
+  userEvent,
+  waitFor,
+} from "@/utils/test-utils";
 
 const sites = siteFactory.buildList(5, { coordinates: null });
 const mockServer = setupServer(rest.get(`${apiUrls.sites}`, createMockSitesResolver(sites)));
@@ -107,4 +114,37 @@ it("displays the 'invalid' message for coordinates with a decimal point but no d
       /Invalid latitude and longitude. Please make sure the coordinates provided are valid and separated by a comma \(,\)./i,
     ),
   ).toBeInTheDocument();
+});
+
+it("displays error messages if sites fail to fetch", async () => {
+  mockServer.use(rest.get(`${apiUrls.sites}`, (req, res, ctx) => res(ctx.status(500))));
+
+  renderWithMemoryRouter(<SitesMissingData />);
+
+  await waitForLoadingToFinish();
+
+  expect(screen.getByText(/Error while fetching sites/i)).toBeInTheDocument();
+});
+
+it("displays error messages after failed submission", async () => {
+  mockServer.use(
+    rest.patch(`${apiUrls.sites}/:id`, (req, res, ctx) => {
+      return res(ctx.status(400));
+    }),
+    rest.get(`${apiUrls.sites}`, createMockSitesResolver([siteFactory.build({ coordinates: null })])),
+  );
+
+  renderWithMemoryRouter(<SitesMissingData />);
+
+  await waitForLoadingToFinish();
+  await userEvent.click(screen.getAllByRole("tab")[0]);
+
+  const input = screen.getByRole("textbox");
+
+  await userEvent.type(input, "1, 1");
+  await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+  await waitFor(() => {
+    expect(screen.getByText(/Error while updating sites/i)).toBeInTheDocument();
+  });
 });

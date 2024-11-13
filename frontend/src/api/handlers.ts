@@ -92,7 +92,7 @@ export const updateSitesCoordinates = (data: Pick<Site, "id" | "coordinates">[])
     const responses = data.map(({ id, coordinates }) => {
       return apiClient.default.patchV1SitesIdPatch({ id, requestBody: { coordinates } });
     });
-    return Promise.allSettled(responses);
+    return Promise.all(responses);
   } catch (error) {
     throw error;
   }

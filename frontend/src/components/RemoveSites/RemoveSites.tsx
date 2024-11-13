@@ -1,10 +1,12 @@
 import { useEffect, useId } from "react";
 
-import { Button, Icon, Input } from "@canonical/react-components";
+import { Button, Icon, Input, Notification } from "@canonical/react-components";
 import type { FormikHelpers } from "formik";
 import { Field, Form, Formik } from "formik";
 import pluralize from "pluralize";
 import * as Yup from "yup";
+
+import ErrorMessage from "../ErrorMessage";
 
 import { useAppLayoutContext, useRowSelection } from "@/context";
 import { useDeleteSitesMutation, useSiteQuery } from "@/hooks/react-query";
@@ -74,6 +76,11 @@ const RemoveSites = () => {
     >
       {({ isSubmitting, errors, touched, dirty, submitCount }) => (
         <Form aria-labelledby={headingId} className="tokens-create" noValidate>
+          {deleteSitesMutation.isError && (
+            <Notification severity="negative" title="Error while deleting sites">
+              <ErrorMessage error={deleteSitesMutation.error} />
+            </Notification>
+          )}
           <div className="tokens-create">
             <h3 className="tokens-create__heading p-heading--4" id={headingId}>
               Remove <strong> {sitesCountText}</strong> from Site Manager

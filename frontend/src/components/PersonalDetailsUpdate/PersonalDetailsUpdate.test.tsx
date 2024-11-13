@@ -117,3 +117,21 @@ it("displays a success notification on successful update", async () => {
   ).toBeInTheDocument();
   expect(screen.getByText(/your details were updated successfully/i)).toBeInTheDocument();
 });
+
+it("displays an error notification on unsuccessful update", async () => {
+  mockServer.use(
+    rest.patch(`${apiUrls.users}/:id`, (req, res, ctx) => {
+      return res(ctx.status(400));
+    }),
+  );
+
+  render(<PersonalDetailsUpdate />);
+
+  const usernameInput = screen.getByRole("textbox", { name: "Username" });
+  await userEvent.clear(usernameInput);
+  await userEvent.type(usernameInput, "test");
+
+  await userEvent.click(screen.getByRole("button", { name: /save/i }));
+
+  expect(screen.getByText(/error while updating details/i)).toBeInTheDocument();
+});

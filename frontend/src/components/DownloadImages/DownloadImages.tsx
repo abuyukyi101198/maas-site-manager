@@ -1,7 +1,9 @@
 import type { MultiSelectItem } from "@canonical/maas-react-components";
 import { ContentSection, ExternalLink, MultiSelect } from "@canonical/maas-react-components";
-import { ActionButton, Button, Spinner } from "@canonical/react-components";
+import { ActionButton, Button, Spinner, Notification } from "@canonical/react-components";
 import { Field, Form, Formik } from "formik";
+
+import ErrorMessage from "../ErrorMessage";
 
 import type { UpstreamImage } from "@/api";
 import { useAppLayoutContext } from "@/context";
@@ -72,9 +74,14 @@ const getValueKey = (distro: string, release: string) => `${distro}-${release}`.
 
 const DownloadImages = () => {
   // TODO: replace with useInfiniteQuery https://warthogs.atlassian.net/browse/MAASENG-2601
-  const { data, isPending } = useUpstreamImagesQuery({ page: 1, size: 10 });
+  const { data, isPending, isError, error } = useUpstreamImagesQuery({ page: 1, size: 10 });
 
-  const { data: upstreamSourceData, isPending: isUpstreamSourcePending } = useUpstreamImageSourceQuery();
+  const {
+    data: upstreamSourceData,
+    isPending: isUpstreamSourcePending,
+    isError: isUpstreamImageSourceError,
+    error: upstreamImageSourceError,
+  } = useUpstreamImageSourceQuery();
 
   const [images, setImages] = useState<ImagesByName>({});
   const [groupedImages, setGroupedImages] = useState<GroupedImages>({});
@@ -117,6 +124,14 @@ const DownloadImages = () => {
     <ContentSection>
       {isUpstreamSourcePending ? (
         <Spinner text="Loading..." />
+      ) : isError ? (
+        <Notification severity="negative" title="Error">
+          <ErrorMessage error={error} />
+        </Notification>
+      ) : isUpstreamImageSourceError ? (
+        <Notification severity="negative" title="Error">
+          <ErrorMessage error={upstreamImageSourceError} />
+        </Notification>
       ) : upstreamSourceData ? (
         <>
           <ContentSection.Header>
@@ -141,6 +156,11 @@ const DownloadImages = () => {
               >
                 {({ isSubmitting, dirty, values, setFieldValue }) => (
                   <Form aria-labelledby={headingId}>
+                    {selectUpstreamImages.isError && (
+                      <Notification severity="negative" title="Error while selecting images">
+                        <ErrorMessage error={selectUpstreamImages.error} />
+                      </Notification>
+                    )}
                     {Object.keys(groupedImages).map((distro) => (
                       <span key={distro}>
                         <h2 className="p-heading--4">{distro} images</h2>

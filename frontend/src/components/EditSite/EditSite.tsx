@@ -123,6 +123,11 @@ const EditSiteContent = ({
             Edit <strong>{site.name}</strong>
           </h3>
           <p>Data not shown in this form is reported by the MAAS site and can't be edited in Site Manager.</p>
+          {updateSite.isError && (
+            <Notification severity="negative" title="Error while updating site">
+              {updateSite.error instanceof Error ? updateSite.error.message : "An unknown error occured."}
+            </Notification>
+          )}
           <Formik initialValues={initialValues} onSubmit={handleSubmit} validationSchema={EditSiteSchema}>
             {({ isSubmitting, errors, touched, isValid, dirty }) => (
               <Form aria-labelledby={headingId}>
@@ -185,7 +190,7 @@ const EditSiteContent = ({
           </Formik>
         </>
       ) : error ? (
-        <Notification severity="negative" title="Error">
+        <Notification severity="negative" title="Error while fetching site">
           <ErrorMessage error={error} />
         </Notification>
       ) : (

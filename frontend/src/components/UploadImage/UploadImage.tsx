@@ -1,9 +1,11 @@
 import { ContentSection, FileUpload } from "@canonical/maas-react-components";
 import type { SelectProps } from "@canonical/react-components";
-import { ActionButton, Button, Input, Label, Select } from "@canonical/react-components";
+import { ActionButton, Button, Input, Label, Notification, Select } from "@canonical/react-components";
 import classNames from "classnames";
 import { Field, Form, Formik } from "formik";
 import * as Yup from "yup";
+
+import ErrorMessage from "../ErrorMessage";
 
 import { ARCHITECTURES, OPERATING_SYSTEM_NAMES, VALID_IMAGE_FILE_TYPES } from "./constants";
 
@@ -94,6 +96,11 @@ const UploadImage = () => {
     <ContentSection>
       <ContentSection.Title>Upload image</ContentSection.Title>
       <ContentSection.Content>
+        {uploadImageMutation.isError && (
+          <Notification severity="negative" title="Error while uploading image">
+            <ErrorMessage error={uploadImageMutation.error} />
+          </Notification>
+        )}
         <Formik initialValues={initialValues} onSubmit={handleSubmit} validationSchema={UploadImageSchema}>
           {({
             isSubmitting,

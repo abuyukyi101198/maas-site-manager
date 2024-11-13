@@ -101,7 +101,7 @@ const SitesMissingData = () => {
 
   if (error) {
     return (
-      <Notification severity="negative" title="Error">
+      <Notification severity="negative" title="Error while fetching sites">
         <ErrorMessage error={error} />
       </Notification>
     );
@@ -117,6 +117,11 @@ const SitesMissingData = () => {
 
   return (
     <div className="sites-missing-data">
+      {!!updateSites.failureReason && (
+        <Notification severity="negative" title="Error while updating sites">
+          <ErrorMessage error={updateSites.failureReason} />
+        </Notification>
+      )}
       <h3 className="p-heading--4 u-no-margin" id={headingId}>
         Sites with missing data
       </h3>

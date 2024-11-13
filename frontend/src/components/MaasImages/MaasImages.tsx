@@ -1,7 +1,9 @@
 import { ContentSection, FormSection } from "@canonical/maas-react-components";
-import { Button, Input } from "@canonical/react-components";
+import { Button, Input, Notification } from "@canonical/react-components";
 import type { FormikHelpers } from "formik";
 import { Formik, Form, Field } from "formik";
+
+import ErrorMessage from "../ErrorMessage";
 
 import type { TSettingsPatchRequest } from "@/api";
 import { useAppLayoutContext } from "@/context";
@@ -16,7 +18,7 @@ const formKeys: Record<keyof FormValues, keyof FormValues> = {
 const MaasImages = () => {
   const titleId = useId();
   const { setSidebar } = useAppLayoutContext();
-  const { data, isPending } = useSettingsQuery();
+  const { data, isPending, isError, error } = useSettingsQuery();
   const settingsMutation = useUpdateSettingsMutation();
   const initialValues: FormValues = {
     [formKeys.images_connect_to_maas]: data ? data[formKeys.images_connect_to_maas] : false,
@@ -33,6 +35,16 @@ const MaasImages = () => {
   return (
     <ContentSection variant="narrow">
       <ContentSection.Title id={titleId}>maas.io</ContentSection.Title>
+      {isError && (
+        <Notification severity="negative" title="Error while fetching settings">
+          <ErrorMessage error={error} />
+        </Notification>
+      )}
+      {settingsMutation.isError && (
+        <Notification severity="negative" title="Error while updating settings">
+          <ErrorMessage error={settingsMutation.error} />
+        </Notification>
+      )}
       <Formik enableReinitialize initialValues={initialValues} onSubmit={handleSubmit}>
         {({ isSubmitting, errors, touched, isValid, dirty }) => (
           <Form aria-labelledby={titleId}>

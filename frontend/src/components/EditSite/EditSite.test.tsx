@@ -6,7 +6,7 @@ import { SiteDetailsContext } from "@/context/SiteDetailsContext";
 import { siteFactory } from "@/mocks/factories";
 import { createMockSiteResolver } from "@/mocks/resolvers";
 import { apiUrls } from "@/utils/test-urls";
-import { render, screen, userEvent, setupServer, waitForLoadingToFinish } from "@/utils/test-utils";
+import { render, screen, userEvent, setupServer, waitForLoadingToFinish, waitFor } from "@/utils/test-utils";
 
 const site = siteFactory.build();
 const mockServer = setupServer(rest.get(`${apiUrls.sites}/:id`, createMockSiteResolver([site])));
@@ -49,12 +49,38 @@ it("prefills form data", async () => {
   );
 });
 
+it("shows errors when fetching the site", async () => {
+  mockServer.use(rest.get(`${apiUrls.sites}/:id`, (req, res, ctx) => res(ctx.status(500))));
+
+  await renderForm();
+
+  expect(screen.getByText(/Error while fetching site/i)).toBeInTheDocument();
+});
+
 it("enables the submit button only when values have been changed while editing", async () => {
   await renderForm();
 
   await userEvent.clear(screen.getByRole("textbox", { name: "City" }));
 
   expect(screen.getByRole("button", { name: "Save" })).toBeEnabled();
+});
+
+it("shows errors after submission", async () => {
+  mockServer.use(
+    rest.patch(`${apiUrls.sites}/:id`, (req, res, ctx) => {
+      return res(ctx.status(400));
+    }),
+  );
+
+  await renderForm();
+
+  await userEvent.type(screen.getByRole("textbox", { name: "City" }), "Dundee");
+
+  await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+  await waitFor(() => {
+    expect(screen.getByText(/Error while updating site/i)).toBeInTheDocument();
+  });
 });
 
 it("displays an error if non-coordinate text is entered into the coordinates field", async () => {

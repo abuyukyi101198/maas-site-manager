@@ -5,6 +5,8 @@ import type { FormikHelpers } from "formik";
 import { Field, Form, Formik } from "formik";
 import * as Yup from "yup";
 
+import ErrorMessage from "../ErrorMessage";
+
 import type { User } from "@/api/client";
 import { useCurrentUserQuery, useUpdateCurrentUserMutation } from "@/hooks/react-query";
 
@@ -56,6 +58,11 @@ const PersonalDetailsUpdate = () => {
       {updateUser.isSuccess && (
         <Notification severity="positive" title="Details Updated">
           Your details were updated successfully
+        </Notification>
+      )}
+      {updateUser.isError && (
+        <Notification severity="negative" title="Error while updating details">
+          <ErrorMessage error={updateUser.error} />
         </Notification>
       )}
       <Formik

@@ -92,17 +92,17 @@ it("enables the submit button once the form has been edited", async () => {
   let images: UpstreamImage[] = [];
   const arches = ["amd64", "arm64", "i386"];
 
-  for (const architecture in arches) {
+  arches.forEach((architecture) => {
     images.push(upstreamImageFactory.build({ name: "Ubuntu", release: "22.04 LTS", architecture }));
-  }
+  });
 
-  const handlers = [
+  const localHandlers = [
     rest.get(apiUrls.upstreamImages, createMockUpstreamImagesResolver(images)),
     upstreamImageSourceHandler,
     selectUpstreamImagesHandler,
   ];
 
-  mockServer.resetHandlers(...handlers);
+  mockServer.resetHandlers(...localHandlers);
 
   renderWithMemoryRouter(<DownloadImages />);
 
@@ -116,9 +116,79 @@ it("enables the submit button once the form has been edited", async () => {
 
   await userEvent.click(screen.getByRole("combobox", { name: "Select architectures" }));
 
-  for (const arch in arches) {
+  arches.forEach(async (arch) => {
     await userEvent.click(screen.getByRole("checkbox", { name: arch }));
-  }
+  });
 
-  expect(screen.getByRole("button", { name: "Save" })).toBeEnabled();
+  await waitFor(() => {
+    expect(screen.getByRole("button", { name: "Save" })).toBeEnabled();
+  });
+});
+
+it("displays errors that ocurred while fetching images", async () => {
+  mockServer.resetHandlers(
+    rest.get(apiUrls.upstreamImages, (req, res, ctx) => {
+      return res(ctx.status(400, "error"));
+    }),
+    upstreamImageSourceHandler,
+  );
+
+  renderWithMemoryRouter(<DownloadImages />);
+
+  await waitFor(() => {
+    expect(screen.getByText("Error")).toBeInTheDocument();
+  });
+});
+
+it("displays errors that ocurred while fetching the upstream image source", async () => {
+  mockServer.resetHandlers(
+    rest.get(apiUrls.upstreamImageSource, (req, res, ctx) => {
+      return res(ctx.status(400, "error"));
+    }),
+    upstreamImagesHandler,
+  );
+
+  renderWithMemoryRouter(<DownloadImages />);
+
+  await waitFor(() => {
+    expect(screen.getByText("Error")).toBeInTheDocument();
+  });
+});
+
+it("displays errors that ocurred after submitting image selection", async () => {
+  let images: UpstreamImage[] = [];
+  const arches = ["amd64", "arm64", "i386"];
+
+  arches.forEach((architecture) => {
+    images.push(upstreamImageFactory.build({ name: "Ubuntu", release: "22.04 LTS", architecture }));
+  });
+
+  const localHandlers = [
+    rest.get(apiUrls.upstreamImages, createMockUpstreamImagesResolver(images)),
+    upstreamImageSourceHandler,
+    rest.post(apiUrls.upstreamImages, (req, res, ctx) => {
+      throw res(ctx.status(400, "error"));
+    }),
+  ];
+
+  mockServer.resetHandlers(...localHandlers);
+
+  renderWithMemoryRouter(<DownloadImages />);
+
+  await waitFor(() => {
+    expect(screen.getByRole("form", { name: /Download images/i })).toBeInTheDocument();
+  });
+  expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+
+  await waitFor(() => expect(screen.getByRole("combobox", { name: "Select architectures" })).toBeInTheDocument());
+
+  await userEvent.click(screen.getByRole("combobox", { name: "Select architectures" }));
+
+  await userEvent.click(screen.getByRole("checkbox", { name: "amd64" }));
+
+  await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+  await waitFor(() => {
+    expect(screen.getByText(/Error/i)).toBeInTheDocument();
+  });
 });

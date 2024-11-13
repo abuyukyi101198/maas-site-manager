@@ -12,17 +12,7 @@ const site = siteFactory.build({ stats });
 
 const mockServer = setupServer(rest.get(`${apiUrls.sites}/:id`, createMockSiteResolver([site])));
 
-beforeAll(() => {
-  mockServer.listen();
-});
-
-afterEach(() => {
-  mockServer.resetHandlers();
-});
-
-afterAll(() => {
-  mockServer.close();
-});
+const errorMessage = /Confirmation string is not correct/i;
 
 beforeAll(() => {
   mockServer.listen();
@@ -48,39 +38,65 @@ vi.mock("@/context", async () => {
   };
 });
 
-it("submit button should not be disabled when something has been typed", async () => {
+it("enables the submit button when something has been typed", async () => {
   render(<RemoveSites />);
-  const errorMessage = /Confirmation string is not correct/i;
+
   expect(screen.getByRole("button", { name: /Remove/i })).toBeAriaDisabled();
+
   await userEvent.type(screen.getByRole("textbox"), "invalid text");
+
   expect(screen.queryByText(errorMessage)).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: /Remove/i })).not.toBeAriaDisabled();
 });
 
-it("validation error is shown after user attempts submission", async () => {
+it("shows validation errors after user attempts submission", async () => {
   render(<RemoveSites />);
-  const errorMessage = /Confirmation string is not correct/i;
+
   await userEvent.type(screen.getByRole("textbox"), "incorrect string{tab}");
+
   expect(screen.queryByText(errorMessage)).not.toBeInTheDocument();
+
   await userEvent.click(screen.getByRole("button", { name: /Remove/i }));
+
   expect(screen.getByText(errorMessage)).toBeInTheDocument();
 });
 
 it("does not display error message on blur if the value has not chagned", async () => {
   render(<RemoveSites />);
+
   expect(screen.getByRole("button", { name: /Remove/i })).toBeAriaDisabled();
+
   await userEvent.type(screen.getByRole("textbox"), "{tab}");
-  expect(screen.queryByText(/Confirmation string is not correct/i)).not.toBeInTheDocument();
+
+  expect(screen.queryByText(errorMessage)).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: /Remove/i })).toBeAriaDisabled();
 });
 
-it("validation error is hidden on change if the user already attempted submission", async () => {
+it("hides validation errors on change if the user already attempted submission", async () => {
   render(<RemoveSites />);
-  const errorMessage = /Confirmation string is not correct/i;
+
   await userEvent.type(screen.getByRole("textbox"), "incorrect string");
   await userEvent.click(screen.getByRole("button", { name: /Remove/i }));
+
   expect(screen.getByText(errorMessage)).toBeInTheDocument();
+
   await userEvent.clear(screen.getByRole("textbox"));
   await userEvent.type(screen.getByRole("textbox"), "remove 2 sites");
+
   expect(screen.queryByText(errorMessage)).not.toBeInTheDocument();
+});
+
+it("shows error messages from the backend after submission", async () => {
+  mockServer.use(
+    rest.delete(apiUrls.sites, (req, res, ctx) => {
+      return res(ctx.status(400));
+    }),
+  );
+
+  render(<RemoveSites />);
+
+  await userEvent.type(screen.getByRole("textbox"), "remove 2 sites");
+  await userEvent.click(screen.getByRole("button", { name: /Remove/i }));
+
+  expect(await screen.findByText(/Error while deleting sites/i)).toBeInTheDocument();
 });
