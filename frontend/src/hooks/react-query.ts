@@ -2,7 +2,7 @@ import type { MutateOptions, UseMutationOptions } from "@tanstack/react-query";
 import { useQueryClient, useMutation, useQuery, keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 
 import type apiClient from "@/api";
-import type { Image } from "@/api";
+import type { Image, MutationErrorResponse } from "@/api";
 import type {
   PendingSitesPostRequest,
   SitesGetResponse,
@@ -267,7 +267,10 @@ export const useLoginMutation = () => useMutation({ mutationFn: postLogin });
 export const useCurrentUserQuery = () => useQuery<User>({ queryKey: ["me"], queryFn: getCurrentUser });
 
 export const useUpdateUserMutation = (
-  options?: Omit<UseMutationOptions<any, unknown, Parameters<typeof updateUser>[0], unknown>, "mutationFn">,
+  options?: Omit<
+    UseMutationOptions<any, MutationErrorResponse, Parameters<typeof updateUser>[0], unknown>,
+    "mutationFn"
+  >,
 ) => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -303,7 +306,7 @@ export const useUpdateCurrentUserPasswordMutation = (
 
 export const useAddUserMutation = (
   options?: Omit<
-    UseMutationOptions<any, unknown, Parameters<typeof addUser>[0], Parameters<typeof addUser>[0]>,
+    UseMutationOptions<any, MutationErrorResponse, Parameters<typeof addUser>[0], Parameters<typeof addUser>[0]>,
     "mutationFn"
   >,
 ) => {

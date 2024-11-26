@@ -1,11 +1,12 @@
 import { ContentSection } from "@canonical/maas-react-components";
 import { ActionButton, Button, Input, Label, Notification, Spinner } from "@canonical/react-components";
 import { useQueryClient } from "@tanstack/react-query";
-import { Field, Form, Formik } from "formik";
+import { Field, Formik } from "formik";
 import isEqual from "lodash/isEqual";
 import * as Yup from "yup";
 
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
+import FormikFormContent from "@/components/base/FormikFormContent";
 import { useAppLayoutContext } from "@/context";
 import { useUserSelectionContext } from "@/context/UserSelectionContext";
 import { useAddUserMutation, useUpdateUserMutation, useUserQuery } from "@/hooks/react-query";
@@ -154,7 +155,7 @@ const UserForm = ({ type }: { type: "add" | "edit" }) => {
             validationSchema={type === "add" ? AddUserSchema : EditUserSchema}
           >
             {({ isSubmitting, errors, touched, isValid, dirty, values }) => (
-              <Form aria-labelledby={headingId}>
+              <FormikFormContent aria-labelledby={headingId} errors={[addUser.error, updateUser.error]}>
                 <h4 className="p-heading--5">Personal details</h4>
                 <Label className="is-required" htmlFor={usernameId}>
                   Username
@@ -233,7 +234,7 @@ const UserForm = ({ type }: { type: "add" | "edit" }) => {
                     {type === "add" ? "Add user" : "Save"}
                   </ActionButton>
                 </div>
-              </Form>
+              </FormikFormContent>
             )}
           </Formik>
         )}

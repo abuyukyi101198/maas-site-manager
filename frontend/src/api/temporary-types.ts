@@ -30,3 +30,18 @@ export type TSettings = Settings & { images_connect_to_maas: boolean };
 // once settings api is updated
 // https://warthogs.atlassian.net/browse/MAASENG-2594
 export type TSettingsPatchRequest = SettingsPatchRequest & { images_connect_to_maas: boolean };
+
+export type MutationErrorResponse = {
+  body: {
+    error: {
+      code: string;
+      message: string;
+      details?: {
+        reason: string;
+        messages: string[];
+        field?: string;
+        location?: string;
+      }[];
+    };
+  };
+};
