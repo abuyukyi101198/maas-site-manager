@@ -3,6 +3,7 @@ from uuid import uuid4
 
 from sqlalchemy.ext.asyncio import AsyncConnection
 
+from msm.db.models import Coordinates
 from msm.sampledata.db import (
     ModelCollection,
     SampleDataModel,
@@ -16,7 +17,9 @@ async def make_fixture_sites(conn: AsyncConnection) -> list[SampleDataModel]:
         city="London",
         postal_code="SE1 1JA",
         country="GB",
-        coordinates=(-0.092200, 51.501990),
+        coordinates=Coordinates(
+            longitude=-0.092200, latitude=51.501990
+        ).model_dump(),
         name="Canonical Group Limited",
         note="4th Floor",
         state="",
@@ -31,7 +34,9 @@ async def make_fixture_sites(conn: AsyncConnection) -> list[SampleDataModel]:
         city="Austin",
         postal_code="TX 78701",
         country="US",
-        coordinates=(-97.741057, 30.269612),
+        coordinates=Coordinates(
+            longitude=-97.741057, latitude=30.269612
+        ).model_dump(),
         name="Canonical USA Inc.",
         note="Perry Brooks Building - Suite 300",
         state="",
@@ -47,7 +52,9 @@ async def make_fixture_sites(conn: AsyncConnection) -> list[SampleDataModel]:
         city="Boston",
         postal_code="MA 024251",
         country="US",
-        coordinates=(-71.059615, 42.358859),
+        coordinates=Coordinates(
+            longitude=-71.059615, latitude=42.358859
+        ).model_dump(),
         name="Canonical USA Inc. 001",
         note="Suite 210",
         state="",
@@ -62,7 +69,9 @@ async def make_fixture_sites(conn: AsyncConnection) -> list[SampleDataModel]:
         city="Shanghai",
         postal_code="200030",
         country="CN",
-        coordinates=(121.436829, 31.187270),
+        coordinates=Coordinates(
+            longitude=121.436829, latitude=31.187270
+        ).model_dump(),
         name="Canonical China",
         note="上海市漕溪北路331号12楼1246室",
         state="",
@@ -77,7 +86,9 @@ async def make_fixture_sites(conn: AsyncConnection) -> list[SampleDataModel]:
         city="Beijing",
         postal_code="100004",
         country="CN",
-        coordinates=(116.448690, 39.908447),
+        coordinates=Coordinates(
+            longitude=116.448690, latitude=39.908447
+        ).model_dump(),
         name="Canonical China 001",
         note="China World Office 1; 北京市朝阳区建国门外大街1号国贸写字楼1座11层1118-19室",
         state="Chaoyang District",
@@ -92,7 +103,9 @@ async def make_fixture_sites(conn: AsyncConnection) -> list[SampleDataModel]:
         city="Taipei City",
         postal_code="號12 樓",
         country="TW",
-        coordinates=(121.543406, 25.058098),
+        coordinates=Coordinates(
+            longitude=121.543406, latitude=25.058098
+        ).model_dump(),
         name="Canonical Group Limited - Taiwan Branch",
         note="105402 台北市松山區民生東路三段100",
         state="Songshan Dist.",
@@ -107,7 +120,9 @@ async def make_fixture_sites(conn: AsyncConnection) -> list[SampleDataModel]:
         city="Douglas",
         postal_code="IM99 1TT",
         country="IM",
-        coordinates=(-4.481012, 54.153072),
+        coordinates=Coordinates(
+            longitude=-4.481012, latitude=54.153072
+        ).model_dump(),
         name="Canonical Limited",
         note="2nd Floor - Clarendon House",
         state="",
@@ -122,7 +137,9 @@ async def make_fixture_sites(conn: AsyncConnection) -> list[SampleDataModel]:
         city="Tokyo",
         postal_code="100-0014",
         country="JP",
-        coordinates=(139.740669, 35.673242),
+        coordinates=Coordinates(
+            longitude=139.740669, latitude=35.673242
+        ).model_dump(),
         name="Canonical Japan K.K",
         note="3rd Floor - Sanno Park Tower",
         state="",
@@ -137,7 +154,9 @@ async def make_fixture_sites(conn: AsyncConnection) -> list[SampleDataModel]:
         city="Tokyo",
         postal_code="100-0014",
         country="JP",
-        coordinates=(139.740669, 35.673242),
+        coordinates=Coordinates(
+            longitude=139.740669, latitude=35.673242
+        ).model_dump(),
         name="Canonical Japan K.K",
         note="Duplicate",
         state="",

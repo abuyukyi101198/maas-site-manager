@@ -3,6 +3,8 @@ from typing import Any
 
 from sqlalchemy.types import UserDefinedType
 
+from msm.db.models import Coordinates
+
 
 class Point(UserDefinedType):  # type: ignore
     """
@@ -16,17 +18,35 @@ class Point(UserDefinedType):  # type: ignore
         return "POINT"
 
     @property
-    def python_type(self) -> type[tuple[Any, ...]]:
-        return tuple
+    def python_type(self) -> type[Coordinates]:
+        return Coordinates
+
+    def bind_processor(
+        self, dialect: Any
+    ) -> Callable[[dict[str, float] | None], tuple[float, float] | None]:
+        def process(
+            value: dict[str, float] | None,
+        ) -> tuple[float, float] | None:
+            if value is not None:
+                try:
+                    return (value["latitude"], value["longitude"])
+                except KeyError:
+                    raise TypeError(
+                        "Cooridnates must have latitude and longitude"
+                    )
+            return value
+
+        return process
 
     def result_processor(
         self, dialect: Any, coltype: Any
-    ) -> Callable[[Any], tuple[Any, ...] | None]:
+    ) -> Callable[[Any], Coordinates | None]:
         # convert the result to a plain tuple
 
-        def convert(value: Any) -> tuple[Any, ...] | None:
+        def convert(value: Any) -> Coordinates | None:
             if value is None:
                 return None
-            return tuple(value)
+            coords = tuple(value)
+            return Coordinates(latitude=coords[0], longitude=coords[1])
 
         return convert

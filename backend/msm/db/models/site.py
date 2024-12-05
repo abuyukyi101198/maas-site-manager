@@ -29,6 +29,11 @@ class SiteData(BaseModel):
     last_seen: AwareDatetime
 
 
+class Coordinates(BaseModel):
+    latitude: float = Field(default=0.0, ge=-90.0, le=90.0)
+    longitude: float = Field(default=0.0, ge=-180.0, le=180.0)
+
+
 class Site(BaseModel):
     """A MAAS installation."""
 
@@ -36,9 +41,7 @@ class Site(BaseModel):
     name: str
     city: str = ""
     country: str = ""
-    coordinates: (
-        tuple[float, float] | None
-    )  # first item is the lon, second is the lat
+    coordinates: Coordinates | None
     note: str = ""
     state: str = ""
     address: str = ""
@@ -73,9 +76,7 @@ class SiteCoordinates(BaseModel):
     """Coordinates for a MAAS site."""
 
     id: int
-    coordinates: tuple[float, float] | None = (
-        None  # first item is the lon, second is the lat
-    )
+    coordinates: Coordinates | None = None
 
 
 class SiteUpdate(BaseModel):
@@ -83,7 +84,7 @@ class SiteUpdate(BaseModel):
 
     city: str | None = None
     country: str | None = Field(default=None, min_length=2, max_length=2)
-    coordinates: tuple[float, float] | None = None  # latitude, longitude
+    coordinates: Coordinates | None = None
     note: str | None = None
     state: str | None = None
     address: str | None = None
@@ -118,7 +119,7 @@ class PendingSiteCreate(BaseModel):
     auth_id: UUID
     city: str | None = None
     country: str | None = Field(default=None, min_length=2, max_length=2)
-    coordinates: tuple[float, float] | None = None  # latitude, longitude
+    coordinates: Coordinates | None = None
     note: str | None = None
     state: str | None = None
     address: str | None = None

@@ -31,6 +31,7 @@ from msm.api.exceptions.responses import (
 from msm.api.site.auth import authenticated_site
 from msm.db.models import (
     Config,
+    Coordinates,
     PendingSiteCreate,
     Site,
 )
@@ -49,8 +50,7 @@ class SiteMetadata(BaseModel):
 
     city: str | None = None
     country: str | None = Field(default=None, min_length=2, max_length=2)
-    latitude: float | None = None
-    longitude: float | None = None
+    coordinates: Coordinates | None = None
     note: str | None = None
     state: str | None = None
     address: str | None = None
@@ -112,24 +112,10 @@ async def post(
             ],
         )
     metadata = (
-        post_request.metadata.model_dump(
-            exclude=(set(["longitude", "latitude"]))
-        )
+        post_request.metadata.model_dump()
         if post_request.metadata is not None
         else {}
     )
-    if post_request.metadata is not None:
-        metadata["coordinates"] = (
-            (
-                post_request.metadata.latitude,
-                post_request.metadata.longitude,
-            )
-            if (
-                post_request.metadata.latitude is not None
-                and post_request.metadata.longitude is not None
-            )
-            else None
-        )
     await services.sites.create_or_update_pending(
         PendingSiteCreate(
             name=post_request.name,

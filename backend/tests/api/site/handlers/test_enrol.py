@@ -45,8 +45,10 @@ class TestEnrolPostHandler:
             "metadata": {
                 "city": "Los Angeles",
                 "country": "US",
-                "longitude": 40.05275079137782,
-                "latitude": -107.17401328725524,
+                "coordinates": {
+                    "longitude": 40.05275079137782,
+                    "latitude": -17.17401328725524,
+                },
                 "note": "this is a test site",
                 "state": "CA",
                 "address": "4242 Way St.",
@@ -65,13 +67,10 @@ class TestEnrolPostHandler:
         assert pending_site["url"] == body["url"]
         assert pending_site["cluster_uuid"] == body["cluster_uuid"]
         for k, v in body["metadata"].items():  # type: ignore[attr-defined]
-            if k in ["latitude", "longitude"]:
-                continue
-            assert pending_site[k] == v
-        assert pending_site["coordinates"] == (
-            body["metadata"]["latitude"],  # type: ignore[index]
-            body["metadata"]["longitude"],  # type: ignore[index]
-        )
+            if k == "coordinates":
+                assert pending_site[k].model_dump() == v
+            else:
+                assert pending_site[k] == v
         assert not pending_site["accepted"]
         # the token is claimed
         [token] = await factory.get("token")

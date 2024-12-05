@@ -23,6 +23,7 @@ from sqlalchemy.ext.asyncio import AsyncConnection
 
 from msm.db.models import (
     ConnectionStatus,
+    Coordinates,
     PendingSite,
     Site,
     SiteData,
@@ -170,7 +171,7 @@ class Factory:
         country: str = "",
         url: str | None = None,
         timezone: str | None = None,
-        coordinates: tuple[float, float] | None = None,
+        coordinates: Coordinates | None = None,
         address: str = "",
         note: str = "",
         postal_code: str = "",
@@ -190,6 +191,9 @@ class Factory:
             auth_id = uuid4()
         if cluster_uuid is None:
             cluster_uuid = str(uuid4())
+        coords_dict = None
+        if coordinates is not None:
+            coords_dict = coordinates.model_dump()
         [row] = await self.create(
             "site",
             [
@@ -206,7 +210,7 @@ class Factory:
                     "note": note,
                     "postal_code": postal_code,
                     "state": state,
-                    "coordinates": coordinates,
+                    "coordinates": coords_dict,
                     "accepted": accepted,
                     "created": now_utc(),
                     "cluster_uuid": cluster_uuid,
@@ -222,6 +226,14 @@ class Factory:
             .filter(site_table.c.name == name)
         )
         row["name_unique"] = result.one()[0]
+        # because self.create uses 'returning("*")', the custom Coordinates
+        # type is not properly translated and is instead a Point. We fix this here:
+        if row["coordinates"] is not None:
+            coords_tuple = tuple(row["coordinates"])
+            row["coordinates"] = {
+                "latitude": coords_tuple[0],
+                "longitude": coords_tuple[1],
+            }
         return Site(connection_status=connection_status, **row)
 
     async def make_PendingSite(

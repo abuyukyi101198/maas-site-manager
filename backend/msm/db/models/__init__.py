@@ -2,6 +2,7 @@ from msm.db.models.config import Config
 from msm.db.models.settings import Settings
 from msm.db.models.site import (
     ConnectionStatus,
+    Coordinates,
     EnrolingSite,
     PendingSite,
     PendingSiteCreate,
@@ -22,6 +23,7 @@ from msm.db.models.user import (
 __all__ = [
     "Config",
     "ConnectionStatus",
+    "Coordinates",
     "EnrolingSite",
     "PendingSite",
     "PendingSiteCreate",

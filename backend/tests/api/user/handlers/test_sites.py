@@ -8,6 +8,7 @@ from msm.api.exceptions.constants import ExceptionCode
 from msm.api.exceptions.responses import ErrorResponseModel
 from msm.db.models import (
     ConnectionStatus,
+    Coordinates,
     PendingSite,
     Site,
     SiteData,
@@ -241,7 +242,9 @@ class TestSitesGetHandler:
         expected_result: list[str],
     ) -> None:
         await factory.make_Site(city="London")
-        await factory.make_Site(city="Denver", coordinates=(1.0, 1.0))
+        await factory.make_Site(
+            city="Denver", coordinates=Coordinates(latitude=1.0, longitude=1.0)
+        )
         await factory.make_Site(city="Paris", accepted=False)
         response = await user_client.get("/sites", params=query_params)
         assert response.json()["total"] == len(expected_result)
@@ -256,13 +259,17 @@ class TestGetCoordinatesHandler:
         user_client: Client,
         factory: Factory,
     ) -> None:
-        site1 = await factory.make_Site(coordinates=(10, -1))
-        site2 = await factory.make_Site(coordinates=(20, -2))
+        site1 = await factory.make_Site(
+            coordinates=Coordinates(latitude=10, longitude=-1)
+        )
+        site2 = await factory.make_Site(
+            coordinates=Coordinates(latitude=20, longitude=-2)
+        )
         response = await user_client.get("/sites/coordinates")
         assert response.status_code == 200
         assert response.json() == [
-            {"id": site1.id, "coordinates": [10, -1]},
-            {"id": site2.id, "coordinates": [20, -2]},
+            {"id": site1.id, "coordinates": {"latitude": 10, "longitude": -1}},
+            {"id": site2.id, "coordinates": {"latitude": 20, "longitude": -2}},
         ]
 
     async def test_coordinates_filter(
@@ -283,17 +290,22 @@ class TestGetCoordinatesHandler:
         }
         site = await factory.make_Site(
             **site_filters,
-            coordinates=(10, -1),
+            coordinates=Coordinates(latitude=10, longitude=-1),
             connection_status=ConnectionStatus.UNKNOWN,
             auth_id=None,
             accepted=True,
         )
-        await factory.make_Site(coordinates=(20, -2))
+        await factory.make_Site(
+            coordinates=Coordinates(latitude=20, longitude=-2)
+        )
         for k, v in site_filters.items():
             response = await user_client.get(f"/sites/coordinates?{k}={v}")
             assert response.status_code == 200
             assert response.json() == [
-                {"id": site.id, "coordinates": [10, -1]},
+                {
+                    "id": site.id,
+                    "coordinates": {"latitude": 10, "longitude": -1},
+                },
             ]
 
 
@@ -316,10 +328,12 @@ class TestSitesGetByIDHandler:
 @pytest.mark.asyncio
 class TestSitesPatchHandler:
     async def test_patch(self, user_client: Client, factory: Factory) -> None:
-        site = await factory.make_Site(coordinates=(0, 0))
+        site = await factory.make_Site(
+            coordinates=Coordinates(latitude=0, longitude=0)
+        )
         update: dict[str, Any] = {
             "country": "ES",
-            "coordinates": [180, 90],
+            "coordinates": {"latitude": 90, "longitude": 180},
         }
 
         # update a site
@@ -337,7 +351,9 @@ class TestSitesPatchHandler:
     async def test_patch_empty_request(
         self, user_client: Client, factory: Factory
     ) -> None:
-        site = await factory.make_Site(coordinates=(0, 0))
+        site = await factory.make_Site(
+            coordinates=Coordinates(latitude=0, longitude=0)
+        )
         response = await user_client.patch(f"/sites/{site.id}", json={})
         assert response.status_code == 422
         assert (
