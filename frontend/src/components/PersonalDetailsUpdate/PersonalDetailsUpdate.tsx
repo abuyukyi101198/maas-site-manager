@@ -2,10 +2,11 @@ import { ContentSection } from "@canonical/maas-react-components";
 import { Button, Input, Label, Notification } from "@canonical/react-components";
 import { useQueryClient } from "@tanstack/react-query";
 import type { FormikHelpers } from "formik";
-import { Field, Form, Formik } from "formik";
+import { Field, Formik } from "formik";
 import * as Yup from "yup";
 
 import ErrorMessage from "../ErrorMessage";
+import FormikFormContent from "../base/FormikFormContent";
 
 import type { User } from "@/api/client";
 import { useCurrentUserQuery, useUpdateCurrentUserMutation } from "@/hooks/react-query";
@@ -49,7 +50,8 @@ const PersonalDetailsUpdate = () => {
     userData: PersonalDetailsUpdateFormValues,
     { setSubmitting: _ }: FormikHelpers<PersonalDetailsUpdateFormValues>,
   ) => {
-    updateUser.mutate({ requestBody: { ...userData } });
+    const { full_name, email, username } = userData;
+    updateUser.mutate({ requestBody: { full_name, username, email } });
   };
 
   return (
@@ -73,7 +75,12 @@ const PersonalDetailsUpdate = () => {
         validationSchema={PersonalDetailsUpdateSchema}
       >
         {({ isSubmitting, errors, touched, isValid, dirty }) => (
-          <Form aria-label="update personal details" aria-labelledby={headingId} noValidate>
+          <FormikFormContent
+            aria-label="update personal details"
+            aria-labelledby={headingId}
+            errors={[updateUser.error]}
+            noValidate
+          >
             <Label className="is-required" htmlFor={usernameId}>
               Username
             </Label>
@@ -98,7 +105,7 @@ const PersonalDetailsUpdate = () => {
                 Save
               </Button>
             </ContentSection.Footer>
-          </Form>
+          </FormikFormContent>
         )}
       </Formik>
     </ContentSection>

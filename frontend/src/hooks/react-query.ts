@@ -108,7 +108,10 @@ export const useDeleteSitesMutation = (
 };
 
 export const useUpdateSiteMutation = (
-  options?: Omit<UseMutationOptions<any, unknown, Parameters<typeof updateSite>[0], unknown>, "mutationFn">,
+  options?: Omit<
+    UseMutationOptions<any, MutationErrorResponse, Parameters<typeof updateSite>[0], unknown>,
+    "mutationFn"
+  >,
 ) => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -163,12 +166,19 @@ export const useTokensQuery = ({ page, size }: Parameters<typeof getTokens>[0]) 
     placeholderData: keepPreviousData,
   });
 
-export const useTokensCreateMutation = () => {
+export const useTokensCreateMutation = (
+  options?: Omit<
+    UseMutationOptions<any, MutationErrorResponse, Parameters<typeof postTokens>[0], unknown>,
+    "mutationFn"
+  >,
+) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: postTokens,
-    onSuccess: () => {
+    ...options,
+    onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ["tokens"] });
+      options?.onSuccess?.(...args);
     },
   });
 };
@@ -284,7 +294,10 @@ export const useUpdateUserMutation = (
 };
 
 export const useUpdateCurrentUserMutation = (
-  options?: Omit<UseMutationOptions<any, unknown, Parameters<typeof updateCurrentUser>[0], unknown>, "mutationFn">,
+  options?: Omit<
+    UseMutationOptions<any, MutationErrorResponse, Parameters<typeof updateCurrentUser>[0], unknown>,
+    "mutationFn"
+  >,
 ) => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -299,7 +312,7 @@ export const useUpdateCurrentUserMutation = (
 
 export const useUpdateCurrentUserPasswordMutation = (
   options?: Omit<
-    UseMutationOptions<any, unknown, Parameters<typeof updateCurrentUserPassword>[0], unknown>,
+    UseMutationOptions<any, MutationErrorResponse, Parameters<typeof updateCurrentUserPassword>[0], unknown>,
     "mutationFn"
   >,
 ) => useMutation({ mutationFn: updateCurrentUserPassword, ...options });

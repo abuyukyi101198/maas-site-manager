@@ -1,27 +1,28 @@
 import { ContentSection } from "@canonical/maas-react-components";
 import { Notification, Button, Input, Label } from "@canonical/react-components";
 import type { FormikHelpers } from "formik";
-import { Formik, Form, Field } from "formik";
+import { Formik, Field } from "formik";
 import * as Yup from "yup";
 
 import ErrorMessage from "../ErrorMessage";
+import FormikFormContent from "../base/FormikFormContent";
 
 import { useUpdateCurrentUserPasswordMutation } from "@/hooks/react-query";
 const initialValues = {
-  currentPassword: "",
-  newPassword: "",
-  confirmNewPassword: "",
+  current_password: "",
+  new_password: "",
+  confirm_password: "",
 };
 
 type PasswordUpdateFormValues = typeof initialValues;
 const PasswordUpdateSchema = Yup.object().shape({
-  currentPassword: Yup.string().required("Current password is required"),
-  newPassword: Yup.string()
+  current_password: Yup.string().required("Current password is required"),
+  new_password: Yup.string()
     .required("New password is required")
     .min(8, "Password must be at least 8 characters.")
     .max(150, "Password must be 150 characters or less."),
-  confirmNewPassword: Yup.string()
-    .oneOf([Yup.ref("newPassword")], "New passwords must match")
+  confirm_password: Yup.string()
+    .oneOf([Yup.ref("new_password")], "New passwords must match")
     .required("New password (again) is required"),
 });
 
@@ -33,12 +34,13 @@ const PasswordUpdate = () => {
   const updatePassword = useUpdateCurrentUserPasswordMutation();
 
   const handleSubmit = async (values: PasswordUpdateFormValues, helpers: FormikHelpers<PasswordUpdateFormValues>) => {
+    const { current_password, new_password, confirm_password } = values;
     updatePassword.mutate(
       {
         requestBody: {
-          current_password: values.currentPassword,
-          new_password: values.newPassword,
-          confirm_password: values.confirmNewPassword,
+          current_password,
+          new_password,
+          confirm_password,
         },
       },
       {
@@ -69,17 +71,22 @@ const PasswordUpdate = () => {
         validationSchema={PasswordUpdateSchema}
       >
         {({ isSubmitting, errors, touched, isValid, dirty }) => (
-          <Form aria-label="update password" aria-labelledby={headingId} noValidate>
+          <FormikFormContent
+            aria-label="update password"
+            aria-labelledby={headingId}
+            errors={[updatePassword.error]}
+            noValidate
+          >
             <Label htmlFor={currentPasswordId} required>
               Current password
             </Label>
             <Field
               as={Input}
-              error={touched.currentPassword && errors.currentPassword}
+              error={touched.current_password && errors.current_password}
               help="If you can't remember your current password, ask an admin to change your password."
               helpClassName="input-help"
               id={currentPasswordId}
-              name="currentPassword"
+              name="current_password"
               required
               type="password"
             />
@@ -88,9 +95,9 @@ const PasswordUpdate = () => {
             </Label>
             <Field
               as={Input}
-              error={touched.newPassword && errors.newPassword}
+              error={touched.new_password && errors.new_password}
               id={newPasswordId}
-              name="newPassword"
+              name="new_password"
               required
               type="password"
             />
@@ -99,11 +106,11 @@ const PasswordUpdate = () => {
             </Label>
             <Field
               as={Input}
-              error={touched.confirmNewPassword && errors.confirmNewPassword}
+              error={touched.confirm_password && errors.confirm_password}
               help="Enter the same password as before, for verification"
               helpClassName="input-help"
               id={newPasswordConfirmId}
-              name="confirmNewPassword"
+              name="confirm_password"
               required
               type="password"
             />
@@ -112,7 +119,7 @@ const PasswordUpdate = () => {
                 Save
               </Button>
             </ContentSection.Footer>
-          </Form>
+          </FormikFormContent>
         )}
       </Formik>
     </ContentSection>

@@ -1,7 +1,9 @@
 import { ActionButton, Button, Input, Label, Notification, Spinner, Select } from "@canonical/react-components";
-import { Field, Form, Formik } from "formik";
+import { Field, Formik } from "formik";
 import en from "i18n-iso-countries/langs/en.json";
 import * as Yup from "yup";
+
+import FormikFormContent from "../base/FormikFormContent";
 
 import { coordinateSchema } from "./constants";
 
@@ -130,7 +132,7 @@ const EditSiteContent = ({
           )}
           <Formik initialValues={initialValues} onSubmit={handleSubmit} validationSchema={EditSiteSchema}>
             {({ isSubmitting, errors, touched, isValid, dirty }) => (
-              <Form aria-labelledby={headingId}>
+              <FormikFormContent aria-labelledby={headingId} errors={[updateSite.error]}>
                 <h4 className="p-heading--5">Geolocation data</h4>
                 <Label htmlFor={countryId}>Country/Region</Label>
                 <Field
@@ -185,7 +187,7 @@ const EditSiteContent = ({
                     Save
                   </ActionButton>
                 </div>
-              </Form>
+              </FormikFormContent>
             )}
           </Formik>
         </>

@@ -2,8 +2,10 @@ import { useId } from "react";
 
 import { Button, Input, Label, Notification } from "@canonical/react-components";
 import type { FormikHelpers } from "formik";
-import { Field, Formik, Form } from "formik";
+import { Field, Formik } from "formik";
 import * as Yup from "yup";
+
+import FormikFormContent from "../base/FormikFormContent";
 
 import { humanIntervalToISODuration } from "./utils";
 
@@ -11,15 +13,15 @@ import { useAppLayoutContext } from "@/context";
 import { useTokensCreateMutation } from "@/hooks/react-query";
 
 const initialValues = {
-  amount: "",
-  expires: "",
+  count: "",
+  duration: "",
 };
 
 type TokensCreateFormValues = typeof initialValues;
 
 const TokensCreateSchema = Yup.object().shape({
-  amount: Yup.number().positive().required("Please enter a valid number"),
-  expires: Yup.string()
+  count: Yup.number().positive().required("Please enter a valid number"),
+  duration: Yup.string()
     .matches(
       /^((\d)+ ?(minute|hour|day|week|month|year)(s)? ?(and)? ?)+$/,
       "Time unit must be a `string` type with a value of weeks, days, hours, and/or minutes.",
@@ -39,17 +41,17 @@ const TokensCreateSchema = Yup.object().shape({
 
 const TokensCreate = () => {
   const headingId = useId();
-  const expiresId = useId();
-  const amountId = useId();
+  const durationId = useId();
+  const countId = useId();
   const tokensCreateMutation = useTokensCreateMutation();
   const { setSidebar } = useAppLayoutContext();
   const handleSubmit = async (
-    { amount, expires }: TokensCreateFormValues,
+    { count, duration }: TokensCreateFormValues,
     { setSubmitting }: FormikHelpers<TokensCreateFormValues>,
   ) => {
     await tokensCreateMutation.mutateAsync({
-      count: Number(amount),
-      duration: humanIntervalToISODuration(expires) as string,
+      count: Number(count),
+      duration: humanIntervalToISODuration(duration) as string,
     });
     setSubmitting(false);
     setSidebar(null);
@@ -70,23 +72,28 @@ const TokensCreate = () => {
         validationSchema={TokensCreateSchema}
       >
         {({ isSubmitting, errors, touched, isValid, dirty }) => (
-          <Form aria-labelledby={headingId} className="tokens-create" noValidate>
-            <Label htmlFor={amountId}>Amount of tokens to generate</Label>
+          <FormikFormContent
+            aria-labelledby={headingId}
+            className="tokens-create"
+            errors={[tokensCreateMutation.error]}
+            noValidate
+          >
+            <Label htmlFor={countId}>Amount of tokens to generate</Label>
             <Field
               as={Input}
-              error={touched.amount && errors.amount}
-              id={amountId}
-              name="amount"
+              error={touched.count && errors.count}
+              id={countId}
+              name="count"
               placeholder="1"
               required
               type="text"
             />
-            <Label htmlFor={expiresId}>Expiration time</Label>
+            <Label htmlFor={durationId}>Expiration time</Label>
             <Field
               as={Input}
-              error={touched.expires && errors.expires}
-              id={expiresId}
-              name="expires"
+              error={touched.duration && errors.duration}
+              id={durationId}
+              name="duration"
               placeholder="12 hours"
               required
               type="text"
@@ -108,7 +115,7 @@ const TokensCreate = () => {
                 Generate tokens
               </Button>
             </div>
-          </Form>
+          </FormikFormContent>
         )}
       </Formik>
     </div>
