@@ -40,10 +40,7 @@ export const isMutationErrorResponse = (error: unknown): error is MutationErrorR
   if (typeof error === "object" && !!error && "body" in error) {
     const { body } = error;
     if (typeof body === "object" && !!body && "error" in body) {
-      const { error } = body;
-      if (typeof error === "object" && !!error && "details" in error) {
-        return true;
-      }
+      return true;
     }
   }
   return false;

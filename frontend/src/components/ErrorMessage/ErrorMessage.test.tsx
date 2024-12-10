@@ -2,6 +2,12 @@ import ErrorMessage from "./ErrorMessage";
 
 import { render, screen } from "@/utils/test-utils";
 
+it("renders the error message if error is a MutationErrorResponse", () => {
+  const testError = { body: { error: { message: "Test error message" } } };
+  render(<ErrorMessage error={testError} />);
+  expect(screen.getByText("Test error message")).toBeInTheDocument();
+});
+
 it("renders the error message if error is an instance of Error", () => {
   const testError = new Error("Test error message");
   render(<ErrorMessage error={testError} />);
