@@ -42,3 +42,9 @@ services:
     override: replace
     command: /usr/bin/msm-api
     startup: enabled
+
+checks:
+  http-test:
+    override: replace
+    http:
+      url: http://localhost:8000/version
