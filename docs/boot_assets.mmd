@@ -1,0 +1,62 @@
+---
+MAAS Site Manager Image Service
+---
+
+erDiagram
+    BootSource ||--o| BootSourceSelection: selects
+    BootSource ||--o| BootAsset: has
+    BootAsset ||--|{ BootAssetVersion: aggregates
+    BootAssetVersion ||--|{ BootAssetItem: "set of" 
+
+    BootSource {
+        int id PK
+        int priority  "source priority"
+        string url "simplestream URL"
+        string keyring "ASCII-armored GPG public key"
+        int sync_interval "Periodic synchronization interval, 0=disabled"
+    }
+
+    BootAsset {
+        int id PK
+        int bootsource_id FK
+        int kind "0 = OS, 1 = Bootloader"
+        string label "stable or candidate"
+        string os_name "OS name: ubuntu, centos"
+        string os_release "OS release name: oracular, 8"
+        string codename "Ubuntu codename: Noble Numbat"
+        string title "User-friendly name"
+        string architecture "HW architecture: amd64"
+        string subarch "HW sub-architecture: generic, hwe"
+        ARRAY[string] compatibility "list of compatible subarch"
+        string flavor "flavor: generic, lowlatency"
+        string base_image "base os/release for custom images"
+        datetime eol "Regular support EOL"
+        datetime esm_eol "Expanded Security Maintenance support EOL"
+    }
+
+    BootAssetVersion {
+        int id PK
+        int bootasset_id FK
+        string version "Asset version, YYYYMMDD(.REV)"
+    }
+
+    BootAssetItem {
+        int id PK
+        int bootassetversion_id FK
+        string ftype "file type, e.g. kernel, initrd, tarxz, squashfs"
+        string sha256 "file hash"
+        string path "file path relative to source URL"
+        int size "file size, in bytes"
+        string source_package "Ubuntu package name"
+        string source_version "package version"
+        string source_release "Ubuntu release name"
+    }
+    
+    BootSourceSelection {
+        int id PK
+        int bootsource_id FK
+        string label "stable or candidate"
+        string os_name "OS name"
+        string os_release "OS release name"
+        ARRAY[string] architectures "list of architectures to match"
+    }

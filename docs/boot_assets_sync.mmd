@@ -1,0 +1,36 @@
+sequenceDiagram
+    participant T as Sync Trigger
+    participant sm as Site Manager
+
+    create participant SyncW  as Sync Assets
+    T->>SyncW: start workflow
+    SyncW->>+sm: get sources
+    sm-->>-SyncW: sources[]
+    par for each source
+        create participant SS as Sync Source
+        SyncW->>SS: start child workflow
+        note over SS: fetch index
+        note over SS: fetch products
+        note over SS: check signatures<br>if needed
+        note over SS: filter select assets
+        destroy SS
+        SS-->>SyncW: assets[]
+    end
+
+    SyncW->>+sm: get current assets
+    sm->>-SyncW: assets[]
+    note over SyncW: compute new index
+    
+    par for each new asset
+        create participant Down as Download
+        SyncW->>Down: create child workflow
+        note over Down: donwload the file
+        note over Down: check SHA
+        destroy Down
+        Down-->>SyncW: done
+    end
+    
+    note over SyncW: write new index<br>to the storage
+    note over SyncW: remove unreferenced<br>assets from storage
+    destroy SyncW
+    SyncW-->>T: done
