@@ -11,10 +11,10 @@ const ErrorMessage = ({
     {isMutationErrorResponse(error)
       ? error.body.error.message
       : error instanceof Error
-      ? error.message
-      : typeof error === "string"
-      ? error
-      : defaultMessage}
+        ? error.message
+        : typeof error === "string"
+          ? error
+          : defaultMessage}
   </>
 );
 

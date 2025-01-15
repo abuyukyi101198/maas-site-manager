@@ -23,11 +23,12 @@ const countryOptions = [
   })),
 ] as const;
 
-type Coordinates = NonNullable<Site["coordinates"]> extends (infer T)[]
-  ? T extends number
-    ? `${NonNullable<T>},${NonNullable<T>}`
-    : ""
-  : "";
+type Coordinates =
+  NonNullable<Site["coordinates"]> extends (infer T)[]
+    ? T extends number
+      ? `${NonNullable<T>},${NonNullable<T>}`
+      : ""
+    : "";
 
 const baseInitialValues: Record<keyof Pick<Site, "country" | "state" | "address" | "city" | "postal_code">, string> &
   Record<"coordinates", Coordinates> = {

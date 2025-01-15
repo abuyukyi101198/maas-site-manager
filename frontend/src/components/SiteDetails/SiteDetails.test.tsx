@@ -46,8 +46,10 @@ it("renders the correct details for a site", async () => {
   });
   expect(screen.getByRole("link", { name: site.url })).toHaveAttribute("href", site.url);
 
+  const country = getCountryName(site.country!) as string;
+
   expect(screen.getByText(new RegExp(site.connection_status, "i"))).toBeInTheDocument();
-  expect(screen.getByText(getCountryName(site.country!))).toBeInTheDocument();
+  expect(screen.getByText(country)).toBeInTheDocument();
   expect(screen.getByText(site.state!)).toBeInTheDocument();
   expect(screen.getByText(site.address!)).toBeInTheDocument();
   expect(screen.getByText(site.city!)).toBeInTheDocument();

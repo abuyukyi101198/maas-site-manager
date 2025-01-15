@@ -380,11 +380,13 @@ export const useImagesInfiniteQuery = ({
     items: query.data?.pages ? query.data.pages.reduce((acc, page) => acc.concat(page.items), [] as Image[]) : [],
   };
 
+  const { hasNextPage, isFetchingNextPage, fetchNextPage } = query;
+
   useEffect(() => {
-    if (query.hasNextPage && !query.isFetchingNextPage) {
-      query.fetchNextPage();
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
     }
-  }, [query]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return { ...query, data };
 };
