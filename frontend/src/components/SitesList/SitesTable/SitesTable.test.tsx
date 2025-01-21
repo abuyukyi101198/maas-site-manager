@@ -15,12 +15,12 @@ const mockServer = createMockGetServer(
 const paginationProps = {
   currentPage: 1,
   dataContext: "MAAS Sites",
-  handlePageSizeChange: vi.fn,
+  handlePageSizeChange: vi.fn(),
   isPending: false,
   itemsPerPage: 1,
-  onNextClick: vi.fn,
-  onPreviousClick: vi.fn,
-  setCurrentPage: vi.fn,
+  onNextClick: vi.fn(),
+  onPreviousClick: vi.fn(),
+  setCurrentPage: vi.fn(),
   totalItems: 1,
 };
 const commonProps = {

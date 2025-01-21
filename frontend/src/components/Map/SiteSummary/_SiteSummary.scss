@@ -5,6 +5,7 @@
 
   .p-card__title {
     @extend %table-header-label;
+
     line-height: normal;
     padding: 0;
     margin: 0;
@@ -67,6 +68,7 @@
     .connection__text {
       overflow: hidden;
       -webkit-line-clamp: 2;
+      line-clamp: 2;
       text-overflow: ellipsis;
       display: -webkit-box;
       -webkit-box-orient: vertical;

@@ -1,3 +1,4 @@
+@use "sass:color";
 @import "@/styles/mixins";
 
 .maplibregl-marker {
@@ -19,11 +20,11 @@
     transition-delay: 750ms;
   }
 
-  &:hover, &--active {
+  &--active, &:hover{
     transform: scale(1.1);
 
     .site-marker__body {
-      fill: adjust-color($color-brand, $lightness: -$hover-background-opacity-percentage);
+      fill: color.adjust($color-brand, $lightness: - $hover-background-opacity-percentage);
     }
   }
 
