@@ -28,7 +28,7 @@ async def service(
 
 
 @pytest.mark.asyncio
-class TestEnrolPostHandler:
+class TestEnrollPostHandler:
     async def test_post(self, factory: Factory, app_client: Client) -> None:
         auth_id = uuid4()
         await factory.make_Token(auth_id=auth_id)
@@ -57,7 +57,7 @@ class TestEnrolPostHandler:
             },
         }
         response = await app_client.post(
-            "/site/v1/enrol",
+            "/site/v1/enroll",
             json=body,
         )
         assert response.status_code == 202
@@ -102,7 +102,7 @@ class TestEnrolPostHandler:
             },
         }
         response = await app_client.post(
-            "/site/v1/enrol",
+            "/site/v1/enroll",
             json=body,
         )
         assert response.status_code == 202
@@ -138,7 +138,7 @@ class TestEnrolPostHandler:
             "cluster_uuid": cluster_uuid,
         }
         response = await app_client.post(
-            "/site/v1/enrol",
+            "/site/v1/enroll",
             json=body,
         )
         assert response.status_code == 202
@@ -166,7 +166,7 @@ class TestEnrolPostHandler:
             "cluster_uuid": str(uuid4()),
         }
         response = await app_client.post(
-            "/site/v1/enrol",
+            "/site/v1/enroll",
             json=body,
         )
         assert response.status_code == 202
@@ -177,7 +177,7 @@ class TestEnrolPostHandler:
             "cluster_uuid": str(uuid4()),
         }
         response = await app_client.post(
-            "/site/v1/enrol",
+            "/site/v1/enroll",
             json=body,
         )
         assert response.status_code == 401
@@ -191,7 +191,7 @@ class TestEnrolPostHandler:
             token_purpose=TokenPurpose.ENROLMENT,
         )
         response = await app_client.post(
-            "/site/v1/enrol",
+            "/site/v1/enroll",
             json={
                 "name": "new-site",
                 "url": "https://site.example.com",
@@ -211,7 +211,7 @@ class TestEnrolPostHandler:
             token_purpose=TokenPurpose.ENROLMENT,
         )
         response = await app_client.post(
-            "/site/v1/enrol",
+            "/site/v1/enroll",
             json={
                 "name": "new-site",
                 "url": "https://site.example.com",
@@ -220,7 +220,7 @@ class TestEnrolPostHandler:
         )
         assert response.status_code == 401
 
-    async def test_token_missing_enrolment_purpose(
+    async def test_token_missing_enrollment_purpose(
         self, factory: Factory, app_client: Client
     ) -> None:
         auth_id = uuid4()
@@ -230,7 +230,7 @@ class TestEnrolPostHandler:
             token_audience=TokenAudience.SITE,
         )
         response = await app_client.post(
-            "/site/v1/enrol",
+            "/site/v1/enroll",
             json={
                 "name": "new-site",
                 "url": "https://site.example.com",
@@ -239,7 +239,7 @@ class TestEnrolPostHandler:
         )
         assert response.status_code == 401
 
-    async def test_enrol_no_cluster_uuid(
+    async def test_enroll_no_cluster_uuid(
         self, factory: Factory, app_client: Client
     ) -> None:
         auth_id = uuid4()
@@ -254,12 +254,12 @@ class TestEnrolPostHandler:
             "url": "https://site.example.com",
         }
         response = await app_client.post(
-            "/site/v1/enrol",
+            "/site/v1/enroll",
             json=body,
         )
         assert response.status_code == 422
 
-    async def test_enrol_site_exists(
+    async def test_enroll_site_exists(
         self,
         factory: Factory,
         api_config: Config,
@@ -285,7 +285,7 @@ class TestEnrolPostHandler:
             "url": "https://site.example.com",
         }
         response = await app_client.post(
-            "/site/v1/enrol",
+            "/site/v1/enroll",
             json=body,
         )
         assert response.status_code == 202
@@ -298,7 +298,7 @@ class TestEnrolPostHandler:
 
 
 @pytest.mark.asyncio
-class TestEnrolGetHandler:
+class TestEnrollGetHandler:
     async def test_pending(
         self,
         factory: Factory,
@@ -312,7 +312,7 @@ class TestEnrolGetHandler:
             token_purpose=TokenPurpose.ENROLMENT,
         )
 
-        response = await app_client.get("/site/v1/enrol")
+        response = await app_client.get("/site/v1/enroll")
         assert response.status_code == 204
 
     async def test_accepted(
@@ -329,7 +329,7 @@ class TestEnrolGetHandler:
             token_purpose=TokenPurpose.ENROLMENT,
         )
 
-        response = await app_client.get("/site/v1/enrol")
+        response = await app_client.get("/site/v1/enroll")
         assert response.status_code == 200
         payload = response.json()
         assert payload["token_type"] == "Bearer"
@@ -344,7 +344,7 @@ class TestEnrolGetHandler:
 
 
 @pytest.mark.asyncio
-class TestEnrolRefreshGetHandler:
+class TestEnrollRefreshGetHandler:
     async def test_refresh(
         self,
         factory: Factory,
@@ -359,7 +359,7 @@ class TestEnrolRefreshGetHandler:
             token_audience=TokenAudience.SITE,
             token_purpose=TokenPurpose.ACCESS,
         )
-        response = await app_client.get("/site/v1/enrol/refresh")
+        response = await app_client.get("/site/v1/enroll/refresh")
         assert response.status_code == 200
         payload = response.json()
         assert payload["token_type"] == "Bearer"
@@ -389,7 +389,7 @@ class TestEnrolRefreshGetHandler:
     ) -> None:
         auth_id = uuid4()
         await factory.make_Site(auth_id=auth_id)
-        response = await app_client.get("site/v1/enrol/refresh")
+        response = await app_client.get("site/v1/enroll/refresh")
         assert response.status_code == 401
         err = UnauthorizedErrorResponseModel(**response.json())
         assert err.error.code == ExceptionCode.NOT_AUTHENTICATED
@@ -407,7 +407,7 @@ class TestEnrolRefreshGetHandler:
             token_audience=TokenAudience.SITE,
             token_purpose=TokenPurpose.ENROLMENT,
         )
-        response = await app_client.get("/site/v1/enrol/refresh")
+        response = await app_client.get("/site/v1/enroll/refresh")
         assert response.status_code == 401
         err = UnauthorizedErrorResponseModel(**response.json())
         assert err.error.code == ExceptionCode.INVALID_TOKEN
@@ -430,7 +430,7 @@ class TestEnrolRefreshGetHandler:
             token_audience=TokenAudience.SITE,
             token_purpose=TokenPurpose.ACCESS,
         )
-        response = await app_client.get("/site/v1/enrol/verify")
+        response = await app_client.get("/site/v1/enroll/verify")
         assert response.status_code == 200
 
         # try new token, should work

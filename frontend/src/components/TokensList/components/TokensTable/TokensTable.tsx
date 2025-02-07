@@ -140,7 +140,7 @@ const TokensTable = ({ data, error, isPending }: Pick<useTokensQueryResult, "dat
         <TableCaption>
           <TableCaption.Title>No tokens available</TableCaption.Title>
           <TableCaption.Description>
-            Generate new tokens and follow the instructions above to enrol MAAS sites.
+            Generate new tokens and follow the instructions above to enroll MAAS sites.
           </TableCaption.Description>
         </TableCaption>
       ) : (

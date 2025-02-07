@@ -33,13 +33,13 @@ afterAll(() => {
 
 it("should display 'no enrolled sites' text", () => {
   renderComponent();
-  expect(screen.getByText(/no enroled maas sites/i)).toBeInTheDocument();
+  expect(screen.getByText(/no enrolled maas sites/i)).toBeInTheDocument();
 });
 it("should display link to enrollment docs", () => {
   renderComponent();
 
   expect(
-    screen.getByRole("link", { name: /learn more about the enrolment process in the documentation\./i }),
+    screen.getByRole("link", { name: /learn more about the enrollment process in the documentation\./i }),
   ).toBeInTheDocument();
 });
 
@@ -58,7 +58,7 @@ it("should display the amount of open enrollment requests", async () => {
   renderComponent();
   await waitFor(() =>
     expect(
-      getByTextContent(new RegExp("You have 2 open enrolment requests, inspect them in the Requests page.", "i")),
+      getByTextContent(new RegExp("You have 2 open enrollment requests, inspect them in the Requests page.", "i")),
     ).toBeInTheDocument(),
   );
 });

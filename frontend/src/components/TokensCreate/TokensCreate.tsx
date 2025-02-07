@@ -60,7 +60,7 @@ const TokensCreate = () => {
   return (
     <div className="tokens-create">
       <h3 className="tokens-create__heading p-heading--4" id={headingId}>
-        Generate new enrolment tokens
+        Generate new enrollment tokens
       </h3>
       {tokensCreateMutation.isError && (
         <Notification severity="negative">There was an error generating the token(s).</Notification>
@@ -99,7 +99,7 @@ const TokensCreate = () => {
               type="text"
             />
             <p className="u-text--muted">
-              Use this token once to request an enrolment in the specified timeframe. Allowed time units are seconds,
+              Use this token once to request an enrollment in the specified timeframe. Allowed time units are seconds,
               minutes, hours, days and weeks.
             </p>
             <hr className="tokens-create__separator" />

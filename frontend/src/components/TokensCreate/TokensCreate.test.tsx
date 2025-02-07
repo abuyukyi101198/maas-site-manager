@@ -31,7 +31,7 @@ afterAll(() => {
 
 it("renders the form", async () => {
   renderWithMemoryRouter(<TokensCreate />);
-  expect(screen.getByRole("form", { name: /Generate new enrolment tokens/i })).toBeInTheDocument();
+  expect(screen.getByRole("form", { name: /Generate new enrollment tokens/i })).toBeInTheDocument();
 });
 
 it("if not all required fields have been entered the submit button is disabled", async () => {
@@ -54,7 +54,7 @@ it("displays an error for invalid expiration value", async () => {
   );
 });
 
-it("can generate enrolment tokens", async () => {
+it("can generate enrollment tokens", async () => {
   renderWithMemoryRouter(<TokensCreate />);
   const amount = screen.getByLabelText(/Amount of tokens to generate/i);
   const expires = screen.getByLabelText(/Expiration time/i);

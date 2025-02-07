@@ -47,7 +47,7 @@ v1_router = APIRouter(prefix="/v1")
 
 
 class SiteMetadata(BaseModel):
-    """Metadata given by a site when enroling"""
+    """Metadata given by a site when enrolling"""
 
     city: str | None = None
     country: str | None = Field(default=None, min_length=2, max_length=2)
@@ -60,8 +60,8 @@ class SiteMetadata(BaseModel):
     timezone: TimeZone | None = None  # type: ignore[valid-type]
 
 
-class EnrolPostRequest(BaseModel):
-    """Request to enrol a site."""
+class EnrollPostRequest(BaseModel):
+    """Request to enroll a site."""
 
     name: str
     url: str
@@ -70,7 +70,7 @@ class EnrolPostRequest(BaseModel):
 
 
 @v1_router.post(
-    "/enrol",
+    "/enroll",
     responses={
         401: {"model": UnauthorizedErrorResponseModel},
         422: {"model": ValidationErrorResponseModel},
@@ -89,9 +89,9 @@ async def post(
             )
         ),
     ],
-    post_request: EnrolPostRequest,
+    post_request: EnrollPostRequest,
 ) -> None:
-    """Request to enrol a new site."""
+    """Request to enroll a new site."""
     db_token = await services.tokens.get_by_auth_id(auth_id)
     if (
         db_token is None
@@ -130,7 +130,7 @@ async def post(
 
 
 @v1_router.get(
-    "/enrol",
+    "/enroll",
     responses={
         401: {"model": UnauthorizedErrorResponseModel},
     },
@@ -150,7 +150,7 @@ async def get(
         ),
     ],
 ) -> AccessTokenResponse | None:
-    """Check the site enrolment status.
+    """Check the site enrollment status.
 
     If the site is pending, a `204 No Content` response is returned.
 
@@ -158,7 +158,7 @@ async def get(
     used for turther interaction with the API.
 
     """
-    site = await services.sites.get_enroling(auth_id)
+    site = await services.sites.get_enrolling(auth_id)
     if not site:
         raise UnauthorizedException(
             code=ExceptionCode.INVALID_TOKEN,
@@ -167,7 +167,7 @@ async def get(
                 BaseExceptionDetail(
                     reason=ExceptionCode.INVALID_TOKEN,
                     messages=[
-                        "The token does not represent an enrolling site."
+                        "The token does not represent an enrollling site."
                     ],
                     field="Authorization",
                     location="header",
@@ -194,7 +194,7 @@ async def get(
 
 
 @v1_router.get(
-    "/enrol/refresh",
+    "/enroll/refresh",
     responses={
         401: {"model": UnauthorizedErrorResponseModel},
     },
@@ -232,7 +232,7 @@ async def refresh(
 
 
 @v1_router.get(
-    "/enrol/verify",
+    "/enroll/verify",
     responses={
         401: {"model": UnauthorizedErrorResponseModel},
     },

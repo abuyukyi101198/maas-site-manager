@@ -429,8 +429,10 @@ class SiteService(Service):
             )
         return None
 
-    async def get_enroling(self, auth_id: UUID) -> models.EnrolingSite | None:
-        """Return details for a site in enrolment process, if found."""
+    async def get_enrolling(
+        self, auth_id: UUID
+    ) -> models.EnrollingSite | None:
+        """Return details for a site in enrollment process, if found."""
         stmt = (
             self._select_statement(
                 Site.c.id,
@@ -441,7 +443,7 @@ class SiteService(Service):
         )
         result = await self.conn.execute(stmt)
         if row := result.one_or_none():
-            return models.EnrolingSite(**row._asdict())
+            return models.EnrollingSite(**row._asdict())
         return None
 
     async def get_heartbeat_interval(self) -> int:
@@ -452,7 +454,7 @@ class SiteService(Service):
         """Get the number of sites connected to this manager.
 
         Returns:
-            tuple[int, int, int]: total number of sites, number of enroled sites
+            tuple[int, int, int]: total number of sites, number of enrolled sites
             and the number of *stable* connections.
         """
         conn_lost_threshold = Settings().conn_lost_threshold_seconds
@@ -490,7 +492,7 @@ class SiteService(Service):
             return 0, 0, 0
 
     async def get_machine_count(self) -> dict[str, int]:
-        """Get the number of machines enrolled to connected sites.
+        """Get the number of machines enrollled to connected sites.
 
         Only *stable* connections are counted."""
         conn_lost_threshold = Settings().conn_lost_threshold_seconds
@@ -606,9 +608,9 @@ class SiteService(Service):
         )
 
     async def collect_metrics(self) -> None:
-        n_total, n_enrol, n_connected = await self.get_site_count()
+        n_total, n_enroll, n_connected = await self.get_site_count()
         self.sites_status.labels(status="all").set(n_total)
-        self.sites_status.labels(status="pending").set(n_total - n_enrol)
+        self.sites_status.labels(status="pending").set(n_total - n_enroll)
         self.sites_status.labels(status="connected").set(n_connected)
 
         machines = await self.get_machine_count()

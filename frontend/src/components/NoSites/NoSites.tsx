@@ -10,14 +10,14 @@ const NoSites = () => {
 
   return (
     <TableCaption>
-      <TableCaption.Title>No enroled MAAS sites</TableCaption.Title>
+      <TableCaption.Title>No enrolled MAAS sites</TableCaption.Title>
       {isSuccess && data.total > 0 ? (
         <>
           <TableCaption.Description>
-            You have <strong>{data?.total} open enrolment requests, </strong>inspect them in the Requests page.
+            You have <strong>{data?.total} open enrollment requests, </strong>inspect them in the Requests page.
             <br />
             <ExternalLink to={docsUrls.enrollmentRequest}>
-              Learn more about the enrolment process in the documentation.
+              Learn more about the enrollment process in the documentation.
             </ExternalLink>
           </TableCaption.Description>
           <TableCaption.Description>
@@ -29,10 +29,10 @@ const NoSites = () => {
       ) : (
         <>
           <TableCaption.Description>
-            To enrol follow the steps in the Tokens page.
+            To enroll follow the steps in the Tokens page.
             <br />
             <ExternalLink to={docsUrls.enrollmentRequest}>
-              Learn more about the enrolment process in the documentation.
+              Learn more about the enrollment process in the documentation.
             </ExternalLink>
           </TableCaption.Description>
           <TableCaption.Description>

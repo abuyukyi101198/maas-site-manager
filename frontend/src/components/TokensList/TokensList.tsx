@@ -67,11 +67,11 @@ const TokensList = () => {
       ) : null}
       <ContentSection.Header className="tokens-list-header">
         <p className="tokens-list-instructions">
-          Follow the enrolment steps outlined in the{" "}
+          Follow the enrollment steps outlined in the{" "}
           {/* TODO: Update link once documentation is live https://warthogs.atlassian.net/browse/MAASENG-1585 */}
-          <ExternalLink to={docsUrls.enrollmentRequest}>documentation</ExternalLink> to enrol new sites. Once an
-          enrolment request was made use the following certificate data to compare against the certificate shown in the
-          enrolment request:
+          <ExternalLink to={docsUrls.enrollmentRequest}>documentation</ExternalLink> to enroll new sites. Once an
+          enrollment request was made use the following certificate data to compare against the certificate shown in the
+          enrollment request:
         </p>
         {/* TODO: Add actual certificate here once endpoint is ready https://warthogs.atlassian.net/browse/MAASENG-1584 */}
         <code className="tokens-list-certificate">

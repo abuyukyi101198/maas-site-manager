@@ -48,7 +48,7 @@ class TokenAudience(StrEnum):
 class TokenPurpose(StrEnum):
     """Valid values for the token purpose."""
 
-    ENROLMENT = "enrolment"
+    ENROLMENT = "enrollment"
     ACCESS = "access"
 
 

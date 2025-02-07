@@ -15,10 +15,10 @@ from tests.fixtures.factory import Factory
 
 AUTHENTICATED_ROUTES = (
     ("POST", "/site/v1/details"),
-    ("GET", "/site/v1/enrol"),
-    ("POST", "/site/v1/enrol"),
-    ("GET", "/site/v1/enrol/refresh"),
-    ("GET", "/site/v1/enrol/verify"),
+    ("GET", "/site/v1/enroll"),
+    ("POST", "/site/v1/enroll"),
+    ("GET", "/site/v1/enroll/refresh"),
+    ("GET", "/site/v1/enroll/verify"),
 )
 
 

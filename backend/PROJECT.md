@@ -255,7 +255,7 @@ a few extra fields:
   `TokenAudience`. Each sub-application validates that the token is indeed
   intended for its API.
 - `"purpose"`, a custom field that's used by the site API to distinguish
-  enrolment tokens from regular access tokens.
+  enrollment tokens from regular access tokens.
 
 Validation and authentication logic can be found in `msm.api._auth`, as well as
 `msm.api.<api-name>._auth` for service-specific bits.

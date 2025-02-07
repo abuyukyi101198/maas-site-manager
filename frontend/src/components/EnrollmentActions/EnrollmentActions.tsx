@@ -31,7 +31,7 @@ const EnrollmentActions: React.FC = () => {
         ) : null}
         {enrollmentRequestsMutation.isError ? (
           <Notification role="alert" severity="negative">
-            There was an error processing enrolment request(s).
+            There was an error processing enrollment request(s).
           </Notification>
         ) : null}
         <MainToolbar>

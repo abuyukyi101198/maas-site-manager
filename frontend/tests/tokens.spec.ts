@@ -11,9 +11,9 @@ test.beforeEach(async ({ page }) => {
 
 test("can open and close token generate form", async ({ page }) => {
   await page.getByRole("button", { name: /Generate tokens/i }).click();
-  await expect(page.getByRole("form", { name: /Generate new enrolment tokens/i })).toBeVisible();
+  await expect(page.getByRole("form", { name: /Generate new enrollment tokens/i })).toBeVisible();
   await page.getByRole("button", { name: /Cancel/i }).click();
-  await expect(page.getByRole("form", { name: /Generate new enrolment tokens/i })).toBeHidden();
+  await expect(page.getByRole("form", { name: /Generate new enrollment tokens/i })).toBeHidden();
 });
 
 test("can close token generate dialog using Escape key", async ({ page }) => {
@@ -26,7 +26,7 @@ test("can close token generate dialog using Escape key", async ({ page }) => {
 
 test("token create form is closed when navigating away", async ({ page }) => {
   await page.getByRole("button", { name: /Generate tokens/i }).click();
-  await expect(page.getByRole("form", { name: /Generate new enrolment tokens/i })).toBeVisible();
+  await expect(page.getByRole("form", { name: /Generate new enrollment tokens/i })).toBeVisible();
 
   const mobileBanner = await page
     .getByRole("banner", { name: "navigation" })
@@ -41,7 +41,7 @@ test("token create form is closed when navigating away", async ({ page }) => {
   await page.getByRole("banner", { name: /main/i }).getByRole("link", { name: /Sites/ }).click();
 
   await page.goBack();
-  await expect(page.getByRole("form", { name: /Generate new enrolment tokens/i })).toBeHidden();
+  await expect(page.getByRole("form", { name: /Generate new enrollment tokens/i })).toBeHidden();
 });
 
 test("closes and clears the form after creating the token", async ({ page }) => {
@@ -49,16 +49,16 @@ test("closes and clears the form after creating the token", async ({ page }) => 
   await page.getByRole("textbox", { name: /Amount of tokens to generate/i }).type("1");
   await page.getByRole("textbox", { name: /Expiration time/i }).type("1 week");
   await page
-    .getByRole("form", { name: /Generate new enrolment tokens/i })
+    .getByRole("form", { name: /Generate new enrollment tokens/i })
     .getByRole("button", { name: /Generate tokens/i })
     .click();
   await page.waitForResponse((resp) => resp.url().includes("/tokens") && resp.status() === 200);
-  await expect(page.getByRole("form", { name: /Generate new enrolment tokens/i })).toBeHidden();
+  await expect(page.getByRole("form", { name: /Generate new enrollment tokens/i })).toBeHidden();
   // check that the form has been reset
   await page.getByRole("button", { name: /Generate tokens/i }).click();
   await expect(
     page
-      .getByRole("form", { name: /Generate new enrolment tokens/i })
+      .getByRole("form", { name: /Generate new enrollment tokens/i })
       .getByRole("button", { name: /Generate tokens/i }),
   ).toBeDisabled();
 });

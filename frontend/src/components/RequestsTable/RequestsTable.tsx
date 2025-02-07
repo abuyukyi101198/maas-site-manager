@@ -122,7 +122,7 @@ const RequestsTable = ({
         <TableCaption>
           <TableCaption.Title>No outstanding requests</TableCaption.Title>
           <TableCaption.Description>
-            You have to request an enrolment in the site-manager-agent.
+            You have to request an enrollment in the site-manager-agent.
             <br />
             <ExternalLink to={docsUrls.enrollmentRequest}>Read more about it in the documentation.</ExternalLink>
           </TableCaption.Description>

@@ -14,7 +14,7 @@ const EnrollmentNotification = ({ accept, ids }: Partial<PendingSitesPostRequest
       severity="information"
       title={accept ? "Accepted" : "Denied"}
     >
-      {accept ? "Accepted" : "Denied"} enrolment request for {pluralize("MAAS sites", ids?.length, true)}.{" "}
+      {accept ? "Accepted" : "Denied"} enrollment request for {pluralize("MAAS sites", ids?.length, true)}.{" "}
       {accept ? "See more data of this site in the Sites page." : null}
     </Notification>
   );

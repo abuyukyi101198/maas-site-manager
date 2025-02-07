@@ -86,8 +86,8 @@ const RemoveSites = () => {
               Remove <strong> {sitesCountText}</strong> from Site Manager
             </h3>
             <p>
-              The deletion of data is irreversible. You can re-enrol the MAAS {pluralize("sites", sitesCount)} again
-              through the enrolment process.
+              The deletion of data is irreversible. You can re-enroll the MAAS {pluralize("sites", sitesCount)} again
+              through the enrollment process.
             </p>
             <p id={confirmTextId}>
               Type <strong>remove {sitesCountText}</strong> to confirm.

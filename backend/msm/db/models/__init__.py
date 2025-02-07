@@ -14,7 +14,7 @@ from msm.db.models.settings import Settings
 from msm.db.models.site import (
     ConnectionStatus,
     Coordinates,
-    EnrolingSite,
+    EnrollingSite,
     PendingSite,
     PendingSiteCreate,
     Site,
@@ -44,7 +44,7 @@ __all__ = [
     "Config",
     "ConnectionStatus",
     "Coordinates",
-    "EnrolingSite",
+    "EnrollingSite",
     "PendingSite",
     "PendingSiteCreate",
     "Settings",

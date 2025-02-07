@@ -20,7 +20,7 @@ const Requests: React.FC = () => {
         <EnrollmentActions />
         <PaginationBar
           currentPage={page}
-          dataContext="open enrolment requests"
+          dataContext="open enrollment requests"
           handlePageSizeChange={handlePageSizeChange}
           isPending={isPending}
           itemsPerPage={size}

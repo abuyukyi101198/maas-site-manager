@@ -65,8 +65,8 @@ class PendingSite(BaseModel):
     created: AwareDatetime
 
 
-class EnrolingSite(BaseModel):
-    """Details for a site that's in the enrolment process."""
+class EnrollingSite(BaseModel):
+    """Details for a site that's in the enrollment process."""
 
     id: int
     accepted: bool

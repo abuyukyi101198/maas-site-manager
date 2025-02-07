@@ -23,6 +23,6 @@ it("can display an error message on request error", () => {
   render(<EnrollmentActions />);
 
   expect(
-    within(screen.getByRole("alert")).getByText(/There was an error processing enrolment request/i),
+    within(screen.getByRole("alert")).getByText(/There was an error processing enrollment request/i),
   ).toBeInTheDocument();
 });

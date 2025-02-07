@@ -99,7 +99,7 @@ async def post(
     authenticated_user: Annotated[User, Depends(authenticated_user)],
     post_request: TokensPostRequest,
 ) -> TokensPostResponse:
-    """Create enrolment tokens for sites.
+    """Create enrollment tokens for sites.
 
     Token duration (TTL) is expressed as an ISO-8601 duration string.
     """

@@ -32,7 +32,7 @@ it("displays a loading text", () => {
   expect(within(table).queryByText(/Loading/i)).not.toBeInTheDocument();
 });
 
-it("should show a message if there are no open enrolment requests", () => {
+it("should show a message if there are no open enrollment requests", () => {
   renderWithMemoryRouter(
     <RequestsTable
       currentPage={1}

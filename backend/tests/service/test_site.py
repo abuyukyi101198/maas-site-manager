@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncConnection
 
 from msm.db.models import (
     Coordinates,
-    EnrolingSite,
+    EnrollingSite,
     PendingSiteCreate,
     Site,
     SiteCoordinates,
@@ -231,7 +231,7 @@ class TestSiteService:
                 )
             )
 
-    async def test_get_enroling_accepted(
+    async def test_get_enrolling_accepted(
         self,
         factory: Factory,
         db_connection: AsyncConnection,
@@ -240,11 +240,13 @@ class TestSiteService:
         site = await factory.make_Site(auth_id=auth_id)
 
         service = SiteService(db_connection)
-        enroling_site = cast(EnrolingSite, await service.get_enroling(auth_id))
-        assert enroling_site.id == site.id
-        assert enroling_site.accepted
+        enrolling_site = cast(
+            EnrollingSite, await service.get_enrolling(auth_id)
+        )
+        assert enrolling_site.id == site.id
+        assert enrolling_site.accepted
 
-    async def test_get_enroling_pending(
+    async def test_get_enrolling_pending(
         self,
         factory: Factory,
         db_connection: AsyncConnection,
@@ -253,17 +255,19 @@ class TestSiteService:
         pending_site = await factory.make_PendingSite(auth_id=auth_id)
 
         service = SiteService(db_connection)
-        enroling_site = cast(EnrolingSite, await service.get_enroling(auth_id))
-        assert enroling_site.id == pending_site.id
-        assert not enroling_site.accepted
+        enrolling_site = cast(
+            EnrollingSite, await service.get_enrolling(auth_id)
+        )
+        assert enrolling_site.id == pending_site.id
+        assert not enrolling_site.accepted
 
-    async def test_get_enroling_not_found(
+    async def test_get_enrolling_not_found(
         self,
         factory: Factory,
         db_connection: AsyncConnection,
     ) -> None:
         service = SiteService(db_connection)
-        assert await service.get_enroling(uuid4()) is None
+        assert await service.get_enrolling(uuid4()) is None
 
     async def test_update_details(
         self,
@@ -337,9 +341,9 @@ class TestSiteService:
         await factory.make_SiteData(
             site_id=sites[2].id, last_seen=now_utc() - timedelta(days=1)
         )
-        n_total, n_enrol, n_connected = await service.get_site_count()
+        n_total, n_enroll, n_connected = await service.get_site_count()
         assert n_total == 8
-        assert n_enrol == 5
+        assert n_enroll == 5
         assert n_connected == 2
 
     async def test_get_site_count_empty(
@@ -347,9 +351,9 @@ class TestSiteService:
         db_connection: AsyncConnection,
     ) -> None:
         service = SiteService(db_connection)
-        n_total, n_enrol, n_connected = await service.get_site_count()
+        n_total, n_enroll, n_connected = await service.get_site_count()
         assert n_total == 0
-        assert n_enrol == 0
+        assert n_enroll == 0
         assert n_connected == 0
 
     async def test_get_machine_count(

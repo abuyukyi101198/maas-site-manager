@@ -27,7 +27,7 @@ import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 
 export class DefaultService {
 
-    constructor(public readonly httpRequest: BaseHttpRequest) {}
+    constructor(public readonly httpRequest: BaseHttpRequest) { }
 
     /**
      * Post
@@ -401,7 +401,7 @@ export class DefaultService {
 
     /**
      * Post
-     * Create enrolment tokens for sites.
+     * Create enrollment tokens for sites.
      *
      * Token duration (TTL) is expressed as an ISO-8601 duration string.
      * @returns TokensPostResponse Successful Response
