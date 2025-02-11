@@ -68,3 +68,6 @@ junit*.xml
 
 # Rock files
 /*.rock
+
+# TiCS code coverage directory
+/.cover
