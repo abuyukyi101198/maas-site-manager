@@ -105,3 +105,15 @@
   padding-left: $sph--small;
   padding-right: $sph--small;
 }
+
+.u-textarea-no-resize {
+  resize: none !important;
+}
+
+.u-textarea-no-resize--horizontal {
+  resize: vertical !important;
+}
+
+.u-textarea-no-resize--vertical {
+  resize: horizontal !important;
+}

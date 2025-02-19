@@ -17,6 +17,9 @@ export type Sidebar =
   | "deleteOrKeepImages"
   | "sitesMissingData"
   | "deleteBootSource"
+  | "addBootSource"
+  | "editBootSource"
+  | "editCustomImagesSource"
   | null;
 
 export const AppLayoutContext = createContext<{

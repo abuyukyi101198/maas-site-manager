@@ -4,6 +4,8 @@ import { Button } from "@canonical/react-components";
 import ImageSourceListTable from "./ImageSourceListTable";
 import type { BootSource } from "./types";
 
+import { useAppLayoutContext } from "@/context";
+
 export const fakeBootSources: { items: BootSource[] } = {
   items: [
     {
@@ -17,28 +19,28 @@ export const fakeBootSources: { items: BootSource[] } = {
     },
     {
       id: 1,
-      url: "images.maas.io",
+      url: "https://images.maas.io",
       keyring: "abcdefghijklmnopqrstuvwxyz",
       sync_interval: 300,
-      priority: 1,
+      priority: 2,
       status: "connected",
       total_images: 100,
     },
     {
       id: 2,
-      url: "somewhere-else.long-domain-name.abc.xyz",
+      url: "https://somewhere-else.long-domain-name.abc.xyz",
       keyring: "abcdefghijklmnopqrstuvwxyz",
       sync_interval: 150,
-      priority: 1,
+      priority: 3,
       status: "unreachable",
       total_images: 100,
     },
     {
       id: 3,
-      url: "another-really-long-name.a-domain-somewhere.abc.xyz",
+      url: "http://another-really-long-name.a-domain-somewhere.abc.xyz",
       keyring: "abcdefghijklmnopqrstuvwxyz",
       sync_interval: 0,
-      priority: 1,
+      priority: 4,
       status: "gpg_error",
       total_images: 100,
     },
@@ -46,13 +48,17 @@ export const fakeBootSources: { items: BootSource[] } = {
 };
 
 const ImageSourceList = () => {
+  const { setSidebar } = useAppLayoutContext();
+
   return (
     <ContentSection>
       <ContentSection.Header>
         <MainToolbar>
           <MainToolbar.Title>Source</MainToolbar.Title>
           <MainToolbar.Controls>
-            <Button appearance="positive">Add image source</Button>
+            <Button appearance="positive" onClick={() => setSidebar("addBootSource")}>
+              Add image source
+            </Button>
           </MainToolbar.Controls>
         </MainToolbar>
       </ContentSection.Header>

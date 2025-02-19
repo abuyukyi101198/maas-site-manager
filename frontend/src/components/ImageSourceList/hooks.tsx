@@ -154,7 +154,11 @@ export const useImageSourceTableColumns = () => {
                 // TODO: enable this once side panel is available https://warthogs.atlassian.net/browse/MAASENG-4381
                 onClick={() => {
                   setSelected(id);
-                  setSidebar(null);
+                  if (url === "custom") {
+                    setSidebar("editCustomImagesSource");
+                  } else {
+                    setSidebar("editBootSource");
+                  }
                 }}
               >
                 <Icon name="edit" />
