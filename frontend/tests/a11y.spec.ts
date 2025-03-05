@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import AxeBuilder from "@axe-core/playwright"; // 1
+import { AxeBuilder } from "@axe-core/playwright"; // 1
 import { protectedPages, publicPages, routesConfig } from "@/config/routes";
 import { adminAuthFile } from "./constants";
 
