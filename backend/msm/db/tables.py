@@ -213,4 +213,5 @@ BootAssetItem = Table(
     Column("source_package", Text, nullable=True),
     Column("source_version", Text, nullable=True),
     Column("source_release", Text, nullable=True),
+    Column("bytes_synced", BigInteger, nullable=False, default=0),
 )

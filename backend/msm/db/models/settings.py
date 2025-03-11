@@ -8,6 +8,7 @@ from msm.jwt import DEFAULT_TOKEN_DURATION
 class Settings(BaseModel):
     """Application settings that can be changed via the API."""
 
+    max_image_upload_size_gb: int = 100
     service_url: str = ""
     token_lifetime_minutes: int = int(
         DEFAULT_TOKEN_DURATION.total_seconds() // 60
@@ -20,6 +21,7 @@ class Settings(BaseModel):
 class SettingsUpdate(BaseModel):
     """Change application settings."""
 
+    max_image_upload_size_gb: int | None = None
     service_url: str | None = None
     token_lifetime_minutes: int | None = None
     token_rotation_interval_minutes: int | None = None

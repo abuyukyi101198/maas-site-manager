@@ -27,6 +27,7 @@ dependencies = [
   "baize",
   "bcrypt==4.0.1",
   "beautifulsoup4",
+  "boto3",
   "fastapi==0.115.9",                                  # manually pinning because of https://github.com/encode/starlette/issues/2893 -- introduced by Starlette version 46.0, which is pinned by FastAPI>=0.115.10
   "jinja2",
   "passlib[bcrypt]",                                   # manually pinning because of https://foss.heptapod.net/python-libs/passlib/-/issues/190 FIXME: can be removed once passlib is updated to 1.7.5
@@ -37,6 +38,7 @@ dependencies = [
   "python-multipart",
   "pytz",
   "sqlalchemy[postgresql-asyncpg,postgresql-psycopg]",
+  "streaming-form-data",
   "strenum",                                           # emulate enum.StrEnum, which is available in Python3.11
   "temporal-lib-py>=1.8",
   "ujson",                                             # faster JSON encoding/decoding (for fastapi)
@@ -100,6 +102,7 @@ skip_covered = true
 [tool.coverage.run]
 source = [
   "msm",
+  "temporal",
 ]
 omit = [
   "msm/db/alembic/env.py",
