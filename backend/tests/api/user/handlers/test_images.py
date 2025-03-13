@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 import json
 
 import pytest
+from pytest_mock import MockerFixture
 
 from msm.db.models import (
     BootAssetKind,
@@ -605,3 +606,49 @@ class TestBootAssetItemsPatchHandler:
         stored = await factory.get("boot_asset_item")
         assert len(stored) == 1
         assert stored[0] == item.model_dump()
+
+
+@pytest.mark.asyncio
+class TestBootAssetItemsDeleteHandler:
+    async def test_delete(
+        self,
+        user_client: Client,
+        factory: Factory,
+        mocker: MockerFixture,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        mock_resource = mocker.patch(
+            "msm.api.user.handlers.images.boto3.resource"
+        )
+        mock_delete = mocker.patch(
+            "msm.api.user.handlers.images.run_in_threadpool"
+        )
+        monkeypatch.setenv("MSM_S3_BUCKET", "test-bucket")
+        monkeypatch.setenv("MSM_S3_ENDPOINT", "test-endpoint")
+        monkeypatch.setenv("MSM_S3_ACCESS_KEY", "test-access-key")
+        monkeypatch.setenv("MSM_S3_SECRET_KEY", "test-secret-key")
+        bs = await factory.make_BootSource()
+        ba = await factory.make_BootAsset(bs.id)
+        bv = await factory.make_BootAssetVersion(ba.id)
+        bi = await factory.make_BootAssetItem(bv.id)
+        resp = await user_client.delete(f"/bootasset-items/{bi.id}")
+        assert resp.status_code == 200
+        stored = await factory.get("boot_asset_item")
+        assert len(stored) == 0
+        mock_resource.assert_called_with(
+            "s3",
+            use_ssl=False,
+            verify=False,
+            endpoint_url="test-endpoint",
+            aws_access_key_id="test-access-key",
+            aws_secret_access_key="test-secret-key",
+        )
+        mock_delete.assert_called_with(
+            mocker.ANY, Bucket="test-bucket", Key=str(bi.id)
+        )
+
+    async def test_delete_doesnt_exist(
+        self, user_client: Client, factory: Factory
+    ) -> None:
+        resp = await user_client.delete(f"/bootasset-items/999")
+        assert resp.status_code == 404

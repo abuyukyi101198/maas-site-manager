@@ -401,6 +401,47 @@ async def get_boot_asset_items(
     )
 
 
+@v1_router.delete(
+    "/bootasset-items/{id}",
+    responses={
+        401: {"model": UnauthorizedErrorResponseModel},
+        422: {"model": ValidationErrorResponseModel},
+    },
+)
+async def delete_images(
+    services: Annotated[ServiceCollection, Depends(services)],
+    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
+    id: int,
+) -> None:
+    boot_asset_version = await services.boot_asset_items.get_by_id(id)
+    if not boot_asset_version:
+        raise NotFoundException(
+            code=ExceptionCode.MISSING_RESOURCE,
+            message="Boot Asset Item does not exist.",
+            details=[
+                BaseExceptionDetail(
+                    reason=ExceptionCode.MISSING_RESOURCE,
+                    messages=[f"BootAssetItem ID {id} does not exist"],
+                    field="id",
+                    location="path",
+                )
+            ],
+        )
+    settings = Settings()
+    s3 = boto3.resource(
+        "s3",
+        use_ssl=False,
+        verify=False,
+        endpoint_url=settings.s3_endpoint,
+        aws_access_key_id=settings.s3_access_key,
+        aws_secret_access_key=settings.s3_secret_key,
+    )
+    await run_in_threadpool(
+        s3.meta.client.delete_object, Bucket=settings.s3_bucket, Key=str(id)
+    )
+    await services.boot_asset_items.delete(id)
+
+
 class S3MultipartUploadTarget(BaseTarget):  # type: ignore
     MIN_PART_SIZE = 5 * 1024**2  # 5MiB
 
