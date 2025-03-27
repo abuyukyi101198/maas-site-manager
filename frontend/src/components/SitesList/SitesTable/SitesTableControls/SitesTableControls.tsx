@@ -17,13 +17,11 @@ const SitesTableControls = ({
   setSearchText,
   searchText,
 }: {
-  setSearchText: (text: string) => void;
   totalSites: number | null;
-  searchText: string;
+  isPending: boolean;
+  setSearchText?: (text: string) => void;
+  searchText?: string;
 } & Pick<UseSitesQueryResult, "isPending">) => {
-  const handleSearchInput = (inputValue: string) => {
-    setSearchText(inputValue);
-  };
   const { pathname } = useLocation();
   const { setSidebar } = useAppLayoutContext();
   const { rowSelection } = useRowSelection("sites");
@@ -37,14 +35,16 @@ const SitesTableControls = ({
           <SitesCount isPending={isPending} totalSites={totalSites} />
         </MainToolbar.Title>
         <MainToolbar.Controls>
-          <SearchBox
-            aria-label="Search and filter"
-            className="sites-table-controls__search"
-            externallyControlled
-            onChange={handleSearchInput}
-            placeholder="Search and filter"
-            value={searchText}
-          />
+          {setSearchText && (
+            <SearchBox
+              aria-label="Search and filter"
+              className="sites-table-controls__search"
+              externallyControlled
+              onChange={setSearchText}
+              placeholder="Search and filter"
+              value={searchText}
+            />
+          )}
           <span className="remove-button__wrapper">
             <RemoveButton
               disabled={isRemoveDisabled}

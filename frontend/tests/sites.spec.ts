@@ -83,7 +83,6 @@ test("hides columns dropdown in the map view", async ({ page }) => {
 
   await page.goto(routesConfig.sitesMap.path);
 
-  await expect(searchAndFilter).toBeVisible({ timeout: LONG_EXPECTATION_TIMEOUT });
   await expect(controlsHeading).toBeVisible();
   await expect(columnsDropdown).toBeHidden();
 });
@@ -97,8 +96,9 @@ test("search text persists when switching pages", async ({ page }) => {
   await page.getByRole("tab", { name: /map/i }).click();
   await page.waitForURL(`${routesConfig.sitesMap.path}?q=${searchText}`);
   await expect(page).toHaveURL(`${routesConfig.sitesMap.path}?q=${searchText}`);
+  await expect(page.getByRole("tab", { name: /table/i })).toHaveAttribute("href", `/sites/list?q=${searchText}`);
+  await page.getByRole("tab", { name: /table/i }).click();
   await expect(page.getByRole("searchbox", { name: /Search and filter/i })).toHaveValue(searchText, {
     timeout: LONG_EXPECTATION_TIMEOUT,
   });
-  await expect(page.getByRole("tab", { name: /table/i })).toHaveAttribute("href", `/sites/list?q=${searchText}`);
 });

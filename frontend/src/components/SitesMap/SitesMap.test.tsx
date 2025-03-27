@@ -25,5 +25,4 @@ it("renders map with controls", () => {
   renderWithMemoryRouter(<SitesMap />);
 
   expect(screen.getByRole("region", { name: /sites map/i })).toBeInTheDocument();
-  expect(screen.getByRole("searchbox")).toBeInTheDocument();
 });

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 import { ContentSection } from "@canonical/maas-react-components";
 
@@ -6,44 +6,20 @@ import Map from "@/components/Map";
 import SitesHiddenButton from "@/components/Map/SitesHiddenButton/SitesHiddenButton";
 import SitesTableControls from "@/components/SitesList/SitesTable/SitesTableControls/SitesTableControls";
 import { useSitesCoordinatesQuery } from "@/hooks/react-query";
-import useDebounce from "@/hooks/useDebouncedValue";
-import { formatSiteMarker, parseSearchTextToQueryParams } from "@/utils";
-import { useNavigate, useSearchParams } from "@/utils/router";
+import { formatSiteMarker } from "@/utils";
 
 const SitesMap = () => {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [isFirstVisit, setIsFirstVisit] = useState(true);
-  const [searchText, setSearchText] = useState(searchParams.get("q") || "");
-  const debounceSearchText = useDebounce(searchText);
+  const { data, isPending } = useSitesCoordinatesQuery();
 
-  const { data, isPending } = useSitesCoordinatesQuery(parseSearchTextToQueryParams(debounceSearchText));
-
-  useEffect(() => {
-    if (isFirstVisit) {
-      setIsFirstVisit(false);
-      return;
-    }
-
-    if (!debounceSearchText) {
-      navigate("/sites/map");
-      return;
-    }
-    const params = { q: debounceSearchText };
-    const urlParams = new URLSearchParams(params);
-    navigate({ pathname: "/sites/map", search: urlParams.toString() });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debounceSearchText, navigate]);
+  if (isFirstVisit) {
+    setIsFirstVisit(false);
+  }
 
   return (
     <ContentSection className="sites-map">
       <ContentSection.Header className="sites-map__controls-wrapper">
-        <SitesTableControls
-          isPending={isPending}
-          searchText={searchText}
-          setSearchText={setSearchText}
-          totalSites={data?.length ?? null}
-        />
+        <SitesTableControls isPending={isPending} totalSites={data?.length ?? null} />
       </ContentSection.Header>
       <section aria-label="sites map">
         {/* Make sure to  filter out sites without coordinates, otherwise they get rendered at 0,0 */}
