@@ -1,6 +1,5 @@
-from typing import Any
 
-from pydantic import Field, SecretStr, validator
+from pydantic import Field, SecretStr, ValidationInfo, field_validator
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
@@ -118,17 +117,17 @@ class Settings(BaseSettings):
             password=password,
         )
 
-    @validator("conn_lost_threshold_seconds")
+    @field_validator("conn_lost_threshold_seconds")
     def conn_lost_threshold_validator(
-        cls, threshold: int, values: dict[str, Any]
+        cls, threshold: int, info: ValidationInfo
     ) -> int:
         if (
-            "heartbeat_interval_seconds" in values
-            and threshold <= values["heartbeat_interval_seconds"]
+            "heartbeat_interval_seconds" in info.data
+            and threshold <= info.data["heartbeat_interval_seconds"]
         ):
             raise ValueError(
                 f"connection lost threshold ({threshold}s) should be greater "
                 "than heartbeat interval "
-                f"({values['heartbeat_interval_seconds']}s)"
+                f"({info.data['heartbeat_interval_seconds']}s)"
             )
         return threshold
