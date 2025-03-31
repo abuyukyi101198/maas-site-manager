@@ -24,6 +24,8 @@ from msm.api.exceptions.catalog import (
 )
 from msm.api.exceptions.constants import ExceptionCode
 from msm.api.exceptions.responses import (
+    BadRequestErrorResponseModel,
+    NotFoundErrorResponseModel,
     UnauthorizedErrorResponseModel,
     ValidationErrorResponseModel,
 )
@@ -147,6 +149,7 @@ class BootAssetsPostResponse(BaseModel):
     "/bootassets",
     responses={
         401: {"model": UnauthorizedErrorResponseModel},
+        404: {"model": NotFoundErrorResponseModel},
         422: {"model": ValidationErrorResponseModel},
     },
 )
@@ -277,6 +280,7 @@ class BootAssetVersionPostResponse(BaseModel):
     "/bootassets/{id}/versions",
     responses={
         401: {"model": UnauthorizedErrorResponseModel},
+        404: {"model": NotFoundErrorResponseModel},
         422: {"model": ValidationErrorResponseModel},
     },
 )
@@ -325,6 +329,7 @@ class BootAssetItemPostResponse(BaseModel):
     "/bootasset-versions/{id}/items",
     responses={
         401: {"model": UnauthorizedErrorResponseModel},
+        404: {"model": NotFoundErrorResponseModel},
         422: {"model": ValidationErrorResponseModel},
     },
 )
@@ -405,6 +410,7 @@ async def get_boot_asset_items(
     "/bootasset-items/{id}",
     responses={
         401: {"model": UnauthorizedErrorResponseModel},
+        404: {"model": NotFoundErrorResponseModel},
         422: {"model": ValidationErrorResponseModel},
     },
 )
@@ -537,7 +543,9 @@ class BootAssetItemValueValidator:
 @v1_router.post(
     "/bootasset-items/{boot_asset_version_id}",
     responses={
+        400: {"model": BadRequestErrorResponseModel},
         401: {"model": UnauthorizedErrorResponseModel},
+        404: {"model": NotFoundErrorResponseModel},
         422: {"model": ValidationErrorResponseModel},
     },
 )
@@ -704,6 +712,7 @@ class BootAssetItemPatchRequest(BaseModel):
     "/bootasset-items/{id}",
     responses={
         401: {"model": UnauthorizedErrorResponseModel},
+        404: {"model": NotFoundErrorResponseModel},
         422: {"model": ValidationErrorResponseModel},
     },
 )
