@@ -122,12 +122,19 @@ class TokenService(Service):
         result = await self.conn.execute(stmt)
         return count, self.objects_from_result(models.Token, result)
 
-    async def get_by_auth_id(self, auth_id: uuid.UUID) -> models.Token | None:
+    async def get_by_auth_id(
+        self,
+        auth_id: uuid.UUID,
+        audience: TokenAudience = TokenAudience.SITE,
+        purpose: TokenPurpose = TokenPurpose.ENROLMENT,
+    ) -> models.Token | None:
         """Get a token by authentication ID.
 
         The token is returned even if it's expired.
         """
-        stmt = self._select_statement().where(Token.c.auth_id == auth_id)
+        stmt = self._select_statement(
+            audience=audience, purpose=purpose
+        ).where(Token.c.auth_id == auth_id)
         result = await self.conn.execute(stmt)
         if row := result.one_or_none():
             return models.Token(**row._asdict())
@@ -143,7 +150,11 @@ class TokenService(Service):
         result = await self.conn.execute(stmt)
         return set([x[0] for x in result.all()])
 
-    def _select_statement(self) -> Select[Any]:
+    def _select_statement(
+        self,
+        audience: TokenAudience = TokenAudience.SITE,
+        purpose: TokenPurpose = TokenPurpose.ENROLMENT,
+    ) -> Select[Any]:
         return (
             select(
                 Token.c.id,
@@ -156,7 +167,7 @@ class TokenService(Service):
             )
             .select_from(Token)
             .where(
-                Token.c.audience == TokenAudience.SITE,
-                Token.c.purpose == TokenPurpose.ENROLMENT,
+                Token.c.audience == audience,
+                Token.c.purpose == purpose,
             )
         )

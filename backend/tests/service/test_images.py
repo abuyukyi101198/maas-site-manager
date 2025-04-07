@@ -601,6 +601,7 @@ class TestBootAssetItemService:
             source_package="kern",
             source_version="34.3",
             source_release="Jammy",
+            bytes_synced=23425322,
         )
         await service.update(boot_asset_item.id, updates)
         items = await factory.get("boot_asset_item")
@@ -609,7 +610,6 @@ class TestBootAssetItemService:
             id=boot_asset_item.id,
             boot_asset_version_id=boot_asset_version.id,
             **updates.model_dump(),
-            bytes_synced=23425323,
         )
         assert items[0] == expected_item.model_dump()
 

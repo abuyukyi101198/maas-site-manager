@@ -89,6 +89,46 @@ def auth_id_from_token(
     return auth_id_dep
 
 
+def auth_id_from_token_multi_aud(
+    bearer_token: BearerToken,
+    token_audiences: list[TokenAudience],
+    token_purpose: TokenPurpose | None = None,
+) -> Callable[[Config, str], tuple[UUID, TokenAudience]]:
+    """Return a dependency callable to get the auth ID from the token,
+    allowing for one of many possible audiences."""
+
+    def auth_id_dep(
+        config: Annotated[Config, Depends(config)],
+        token: Annotated[str, Depends(bearer_token)],
+    ) -> tuple[UUID, TokenAudience]:
+        for token_audience in token_audiences:
+            try:
+                decoded_token = JWT.decode(
+                    token,
+                    key=config.token_secret_key,
+                    issuer=config.service_identifier,
+                    audience=token_audience,
+                    purpose=token_purpose,
+                )
+            except (ValueError, InvalidToken):
+                continue
+            return (UUID(decoded_token.subject), token_audience)
+        raise UnauthorizedException(
+            code=ExceptionCode.INVALID_TOKEN,
+            message="The token is not valid.",
+            details=[
+                BaseExceptionDetail(
+                    reason=ExceptionCode.INVALID_TOKEN,
+                    messages=["The token is not valid."],
+                    field="Authorization",
+                    location="header",
+                )
+            ],
+        )
+
+    return auth_id_dep
+
+
 class AccessTokenResponse(BaseModel):
     """Content for a response returning a JWT."""
 

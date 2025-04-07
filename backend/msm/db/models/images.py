@@ -49,6 +49,7 @@ class BootAssetItemUpdate(BaseModel):
     source_package: str | None = None
     source_version: str | None = None
     source_release: str | None = None
+    bytes_synced: int | None = None
 
 
 class BootAssetVersion(BaseModel):

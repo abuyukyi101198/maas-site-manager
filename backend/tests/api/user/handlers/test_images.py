@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import json
 import os
+from uuid import uuid4
 
 import pytest
 from pytest_mock import MockerFixture
@@ -9,6 +10,7 @@ from msm.db.models import (
     BootAssetKind,
     BootAssetLabel,
 )
+from msm.jwt import TokenAudience, TokenPurpose
 from msm.time import now_utc
 from tests.fixtures.client import Client
 from tests.fixtures.factory import Factory
@@ -846,6 +848,78 @@ class TestBootAssetItemsPatchHandler:
         stored = await factory.get("boot_asset_item")
         assert len(stored) == 1
         assert stored[0] == item.model_dump()
+
+    async def test_users_cannot_change_bytes_synced(
+        self, user_client: Client, factory: Factory
+    ) -> None:
+        bs = await factory.make_BootSource()
+        ba = await factory.make_BootAsset(bs.id)
+        bv = await factory.make_BootAssetVersion(ba.id)
+        item = await factory.make_BootAssetItem(
+            bv.id,
+            ftype="testtype1",
+            sha256="testsha1",
+            path="testpath1",
+            size=1,
+            bytes_synced=1,
+            source_package="testpackage1",
+            source_version="testversion1",
+            source_release="testrelease1",
+        )
+        data = {"bytes_synced": 2}
+        resp = await user_client.patch(
+            f"/bootasset-items/{item.id}", json=data
+        )
+        assert resp.status_code == 403
+        stored = await factory.get("boot_asset_item")
+        assert stored[0]["bytes_synced"] == 1
+
+    async def test_workers_can_change_bytes_synced(
+        self, app_client: Client, factory: Factory
+    ) -> None:
+        bs = await factory.make_BootSource()
+        ba = await factory.make_BootAsset(bs.id)
+        bv = await factory.make_BootAssetVersion(ba.id)
+        item = await factory.make_BootAssetItem(
+            bv.id,
+            ftype="testtype1",
+            sha256="testsha1",
+            path="testpath1",
+            size=1,
+            bytes_synced=0,
+            source_package="testpackage1",
+            source_version="testversion1",
+            source_release="testrelease1",
+        )
+        auth_id = uuid4()
+        await factory.make_Token(
+            auth_id=auth_id,
+            audience=TokenAudience.WORKER,
+            purpose=TokenPurpose.ACCESS,
+        )
+        app_client.authenticate(
+            auth_id,
+            token_audience=TokenAudience.WORKER,
+            token_purpose=TokenPurpose.ACCESS,
+        )
+        data = {"bytes_synced": 1}
+        resp = await app_client.patch(
+            f"/api/v1/bootasset-items/{item.id}", json=data
+        )
+        assert resp.status_code == 200
+        stored = await factory.get("boot_asset_item")
+        assert len(stored) == 1
+        assert stored[0] == data | {
+            "id": item.id,
+            "boot_asset_version_id": bv.id,
+            "ftype": "testtype1",
+            "sha256": "testsha1",
+            "path": "testpath1",
+            "size": 1,
+            "source_package": "testpackage1",
+            "source_version": "testversion1",
+            "source_release": "testrelease1",
+        }
 
 
 @pytest.mark.asyncio

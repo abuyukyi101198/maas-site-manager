@@ -21,16 +21,21 @@ from msm.api.exceptions.catalog import (
     BadRequestException,
     BaseExceptionDetail,
     FileTooLargeException,
+    ForbiddenException,
     NotFoundException,
 )
 from msm.api.exceptions.constants import ExceptionCode
 from msm.api.exceptions.responses import (
     BadRequestErrorResponseModel,
+    ForbiddenErrorResponseModel,
     NotFoundErrorResponseModel,
     UnauthorizedErrorResponseModel,
     ValidationErrorResponseModel,
 )
-from msm.api.user.auth import authenticated_user
+from msm.api.user.auth import (
+    authenticated_user,
+    verify_authenticated_user_or_worker,
+)
 from msm.db import models
 from msm.schema import (
     PaginatedResults,
@@ -708,6 +713,7 @@ class BootAssetItemPatchRequest(BaseModel):
     source_package: str | None = None
     source_version: str | None = None
     source_release: str | None = None
+    bytes_synced: int | None = None  # can only be changed by workers
 
     model_config = {"extra": "forbid"}
 
@@ -722,16 +728,37 @@ class BootAssetItemPatchRequest(BaseModel):
     "/bootasset-items/{id}",
     responses={
         401: {"model": UnauthorizedErrorResponseModel},
+        403: {"model": ForbiddenErrorResponseModel},
         404: {"model": NotFoundErrorResponseModel},
         422: {"model": ValidationErrorResponseModel},
     },
 )
 async def patch_boot_asset_items(
     services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
+    authenticated_user: Annotated[
+        models.User | None, Depends(verify_authenticated_user_or_worker)
+    ],
     id: int,
     patch_request: BootAssetItemPatchRequest,
 ) -> models.BootAssetItem:
+    if (
+        patch_request.bytes_synced is not None
+        and authenticated_user is not None
+    ):
+        raise ForbiddenException(
+            code=ExceptionCode.MISSING_PERMISSIONS,
+            message="Insufficient permissions.",
+            details=[
+                BaseExceptionDetail(
+                    reason=ExceptionCode.MISSING_PERMISSIONS,
+                    messages=[
+                        "Users cannot change a Boot Asset Item's bytes_synced field."
+                    ],
+                    field="Authorization",
+                    location="header",
+                )
+            ],
+        )
     boot_asset_item = await services.boot_asset_items.get_by_id(id)
     if not boot_asset_item:
         raise NotFoundException(

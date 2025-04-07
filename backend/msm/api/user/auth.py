@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 
-from msm.api.auth import auth_id_from_token
+from msm.api.auth import auth_id_from_token, auth_id_from_token_multi_aud
 from msm.api.dependencies import services
 from msm.api.exceptions.catalog import (
     BaseExceptionDetail,
@@ -13,7 +13,7 @@ from msm.api.exceptions.catalog import (
 )
 from msm.api.exceptions.constants import ExceptionCode
 from msm.db.models import User
-from msm.jwt import TokenAudience
+from msm.jwt import TokenAudience, TokenPurpose
 from msm.service import (
     ServiceCollection,
     UserService,
@@ -74,3 +74,50 @@ def authenticated_admin(
             ],
         )
     return user
+
+
+async def verify_authenticated_user_or_worker(
+    services: Annotated[ServiceCollection, Depends(services)],
+    auth_id_and_aud: Annotated[
+        tuple[UUID, TokenAudience],
+        Depends(
+            auth_id_from_token_multi_aud(
+                OAUTH2_SCHEME, [TokenAudience.API, TokenAudience.WORKER]
+            )
+        ),
+    ],
+) -> User | None:
+    if auth_id_and_aud[1] == TokenAudience.WORKER:
+        db_token = await services.tokens.get_by_auth_id(
+            auth_id_and_aud[0],
+            audience=TokenAudience.WORKER,
+            purpose=TokenPurpose.ACCESS,
+        )
+        if db_token is None or db_token.is_expired():
+            raise UnauthorizedException(
+                code=ExceptionCode.INVALID_TOKEN,
+                message=f"The token is not valid. {auth_id_and_aud[0]}",
+                details=[
+                    BaseExceptionDetail(
+                        reason=ExceptionCode.INVALID_TOKEN,
+                        messages=["The token is not valid."],
+                        field="Authorization",
+                        location="header",
+                    )
+                ],
+            )
+        return None
+    if user := await services.users.get_by_auth_id(auth_id_and_aud[0]):
+        return user
+    raise UnauthorizedException(
+        code=ExceptionCode.INVALID_TOKEN,
+        message="The token is not valid.",
+        details=[
+            BaseExceptionDetail(
+                reason=ExceptionCode.INVALID_TOKEN,
+                messages=["The token is not valid."],
+                field="Authorization",
+                location="header",
+            )
+        ],
+    )

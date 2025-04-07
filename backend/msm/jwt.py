@@ -43,6 +43,7 @@ class TokenAudience(StrEnum):
 
     API = "api"
     SITE = "site"
+    WORKER = "worker"
 
 
 class TokenPurpose(StrEnum):
