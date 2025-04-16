@@ -321,7 +321,7 @@ class BootAssetItemPostRequest(BaseModel):
     ftype: str
     sha256: str
     path: str
-    size: int
+    file_size: int
     source_package: str | None = None
     source_version: str | None = None
     source_release: str | None = None
@@ -371,7 +371,7 @@ boot_asset_items_sort_parameters = SortParamParser(
         "ftype",
         "sha256",
         "path",
-        "size",
+        "file_size",
         "source_package",
         "source_version",
         "source_release",
@@ -594,8 +594,10 @@ async def post_images(
     parser.register("sha256", sha256)
     path = ValueTarget(validator=BootAssetItemValueValidator(str, "path"))
     parser.register("path", path)
-    size = ValueTarget(validator=BootAssetItemValueValidator(int, "size"))
-    parser.register("size", size)
+    file_size = ValueTarget(
+        validator=BootAssetItemValueValidator(int, "file_size")
+    )
+    parser.register("file_size", file_size)
     # don't need to pass type as str | None, since validator won't be called if it isn't passed
     source_package = ValueTarget(
         validator=BootAssetItemValueValidator(str, "source_package")
@@ -651,7 +653,7 @@ async def post_images(
                 ftype=ftype.value.decode(),
                 sha256=sha256.value.decode(),
                 path=path.value.decode(),
-                size=int(size.value),
+                file_size=int(file_size.value),
                 source_package=source_package.value.decode()
                 if source_package.value
                 else None,
@@ -686,11 +688,11 @@ async def post_images(
     # the last upload has no minimum upload size requirement.
     if s3_upload_target.current_chunk:
         await run_in_threadpool(s3_upload_target.upload_current_chunk)
-    if boot_asset_item.size != s3_upload_target.bytes_sent:
+    if boot_asset_item.file_size != s3_upload_target.bytes_sent:
         await services.boot_asset_items.delete(tmp_item.id)
         await run_in_threadpool(s3_upload_target.abort_upload)
         raise BadRequestException(
-            message="The size of the uploaded file does not match the 'size' parameter in the request",
+            message="The size of the uploaded file does not match the 'file_size' parameter in the request",
             code=ExceptionCode.INVALID_PARAMS,
             details=[
                 BaseExceptionDetail(

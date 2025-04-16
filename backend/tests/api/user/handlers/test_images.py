@@ -427,7 +427,7 @@ class TestBootAssetItemsPostHandler:
             "ftype": "kernel",
             "sha256": "testblaksjdflkj",
             "path": "/item",
-            "size": 2321345623,
+            "file_size": 2321345623,
             "source_package": "ubukernel",
             "source_version": "23.4.1",
             "source_release": "noble",
@@ -454,7 +454,7 @@ class TestBootAssetItemsPostHandler:
         data = {
             "sha256": "testblaksjdflkj",
             "path": "/item",
-            "size": 2321345623,
+            "file_size": 2321345623,
             "source_package": "ubukernel",
             "source_version": "23.4.1",
             "source_release": "noble",
@@ -471,7 +471,7 @@ class TestBootAssetItemsPostHandler:
             "ftype": "kernel",
             "sha256": "testblaksjdflkj",
             "path": "/item",
-            "size": 2321345623,
+            "file_size": 2321345623,
             "source_package": "ubukernel",
             "source_version": "23.4.1",
             "source_release": "noble",
@@ -514,7 +514,7 @@ class TestCustomImageUploadHandler:
             "ftype": "kernel",
             "sha256": "testblaksjdflkj",
             "path": "/item",
-            "size": len(test_file_content),
+            "file_size": len(test_file_content),
             "source_package": "ubukernel",
             "source_version": "23.4.1",
             "source_release": "noble",
@@ -575,7 +575,7 @@ class TestCustomImageUploadHandler:
             "ftype": "kernel",
             "sha256": "testblaksjdflkj",
             "path": "/item",
-            "size": len(test_file_content),
+            "file_size": len(test_file_content),
             "source_package": "ubukernel",
             "source_version": "23.4.1",
             "source_release": "noble",
@@ -627,7 +627,7 @@ class TestCustomImageUploadHandler:
             "ftype": "kernel",
             "sha256": "testblaksjdflkj",
             "path": "/item",
-            "size": len(test_file_content) + 1,
+            "file_size": len(test_file_content) + 1,
             "source_package": "ubukernel",
             "source_version": "23.4.1",
             "source_release": "noble",
@@ -646,7 +646,7 @@ class TestCustomImageUploadHandler:
                 assert resp.status_code == 400
                 assert (
                     json.loads(resp.text)["error"]["message"]
-                    == "The size of the uploaded file does not match the 'size' parameter in the request"
+                    == "The size of the uploaded file does not match the 'file_size' parameter in the request"
                 )
                 stored = await factory.get("boot_asset_item")
                 assert len(stored) == 0
@@ -683,7 +683,7 @@ class TestCustomImageUploadHandler:
             "ftype": "kernel",
             "sha256": "testblaksjdflkj",
             "path": "/item",
-            "size": "this should have been an integer",
+            "file_size": "this should have been an integer",
             "source_package": "ubukernel",
             "source_version": "23.4.1",
             "source_release": "noble",
@@ -702,7 +702,7 @@ class TestCustomImageUploadHandler:
                 assert resp.status_code == 400
                 assert (
                     json.loads(resp.text)["error"]["message"]
-                    == "Invalid type for size, expected <class 'int'>"
+                    == "Invalid type for file_size, expected <class 'int'>"
                 )
                 stored = await factory.get("boot_asset_item")
                 assert len(stored) == 0
@@ -732,7 +732,7 @@ class TestBootAssetItemsPatchHandler:
             ftype="testtype1",
             sha256="testsha1",
             path="testpath1",
-            size=1,
+            file_size=1,
             bytes_synced=1,
             source_package="testpackage1",
             source_version="testversion1",
@@ -753,7 +753,7 @@ class TestBootAssetItemsPatchHandler:
         assert stored[0] == data | {
             "id": item.id,
             "boot_asset_version_id": bv.id,
-            "size": 1,
+            "file_size": 1,
             "bytes_synced": 1,
             "sha256": "testsha1",
             "path": "testpath1",
@@ -770,7 +770,7 @@ class TestBootAssetItemsPatchHandler:
             ftype="testtype1",
             sha256="testsha1",
             path="testpath1",
-            size=1,
+            file_size=1,
             bytes_synced=1,
             source_package="testpackage1",
             source_version="testversion1",
@@ -795,7 +795,7 @@ class TestBootAssetItemsPatchHandler:
             ftype="testtype1",
             sha256="testsha1",
             path="testpath1",
-            size=1,
+            file_size=1,
             bytes_synced=1,
             source_package="testpackage1",
             source_version="testversion1",
@@ -805,7 +805,7 @@ class TestBootAssetItemsPatchHandler:
             "ftype": "testtype2",
             "sha256": "testsha2",
             "path": "testpath2",
-            "size": 2,
+            "file_size": 2,
             "source_package": "testpackage2",
             "source_version": "testversion2",
             "source_release": "testrelease2",
@@ -829,7 +829,7 @@ class TestBootAssetItemsPatchHandler:
             ftype="testtype1",
             sha256="testsha1",
             path="testpath1",
-            size=1,
+            file_size=1,
             bytes_synced=1,
             source_package="testpackage1",
             source_version="testversion1",
@@ -860,7 +860,7 @@ class TestBootAssetItemsPatchHandler:
             ftype="testtype1",
             sha256="testsha1",
             path="testpath1",
-            size=1,
+            file_size=1,
             bytes_synced=1,
             source_package="testpackage1",
             source_version="testversion1",
@@ -885,7 +885,7 @@ class TestBootAssetItemsPatchHandler:
             ftype="testtype1",
             sha256="testsha1",
             path="testpath1",
-            size=1,
+            file_size=1,
             bytes_synced=0,
             source_package="testpackage1",
             source_version="testversion1",
@@ -915,7 +915,7 @@ class TestBootAssetItemsPatchHandler:
             "ftype": "testtype1",
             "sha256": "testsha1",
             "path": "testpath1",
-            "size": 1,
+            "file_size": 1,
             "source_package": "testpackage1",
             "source_version": "testversion1",
             "source_release": "testrelease1",

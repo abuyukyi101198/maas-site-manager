@@ -23,7 +23,7 @@ class BootAssetItem(BaseModel):
     ftype: str
     sha256: str
     path: str
-    size: int
+    file_size: int
     source_package: str | None = None
     source_version: str | None = None
     source_release: str | None = None
@@ -35,7 +35,7 @@ class BootAssetItemCreate(BaseModel):
     ftype: str
     sha256: str
     path: str
-    size: int
+    file_size: int
     source_package: str | None = None
     source_version: str | None = None
     source_release: str | None = None
@@ -45,7 +45,7 @@ class BootAssetItemUpdate(BaseModel):
     ftype: str | None = None
     sha256: str | None = None
     path: str | None = None
-    size: int | None = None
+    file_size: int | None = None
     source_package: str | None = None
     source_version: str | None = None
     source_release: str | None = None
