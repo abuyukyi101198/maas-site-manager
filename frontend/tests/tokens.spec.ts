@@ -41,8 +41,7 @@ test("token create form is closed when navigating away", async ({ page }) => {
   await page.getByRole("banner", { name: /main/i }).getByRole("link", { name: /Sites/ }).click();
 
   await page.goBack();
-  // eslint-disable-next-line playwright/no-wait-for-selector
-  await page.waitForSelector('form[aria-label="Generate tokens"]', { state: "detached" });
+  await expect(page.getByRole("form", { name: /Generate new enrollment tokens/i })).toBeHidden();
 });
 
 test("closes and clears the form after creating the token", async ({ page }) => {
@@ -54,8 +53,7 @@ test("closes and clears the form after creating the token", async ({ page }) => 
     .getByRole("button", { name: /Generate tokens/i })
     .click();
   await page.waitForResponse((resp) => resp.url().includes("/tokens") && resp.status() === 200);
-  // eslint-disable-next-line playwright/no-wait-for-selector
-  await page.waitForSelector('form[aria-label="Generate tokens"]', { state: "detached" });
+  await expect(page.getByRole("form", { name: /Generate new enrollment tokens/i })).toBeHidden();
   // check that the form has been reset
   await page.getByRole("button", { name: /Generate tokens/i }).click();
   await expect(

@@ -1,4 +1,4 @@
-import type { ReactElement, ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import type { ButtonProps, IconProps, SubComponentProps, TooltipProps } from "@canonical/react-components";
 import { Button, Icon, Tooltip } from "@canonical/react-components";
@@ -19,7 +19,7 @@ const TooltipButton = ({
   iconProps,
   message,
   ...tooltipProps
-}: Props): ReactElement => {
+}: Props): JSX.Element => {
   return (
     <Tooltip message={message} {...tooltipProps}>
       <Button

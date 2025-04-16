@@ -1,4 +1,3 @@
-import type { ReactElement } from "react";
 import { useId } from "react";
 
 import { ExternalLink, Navigation } from "@canonical/maas-react-components";
@@ -21,7 +20,7 @@ const LinkContent = ({ navLink }: { navLink: NavLink }) => (
   </>
 );
 
-const NavigationItem = ({ navLink, path, onClick }: Props): ReactElement => {
+const NavigationItem = ({ navLink, path, onClick }: Props): JSX.Element => {
   const id = useId();
   const linkProps = {
     id: `${navLink.label}-${id}`,

@@ -1,11 +1,9 @@
-import type { ReactElement } from "react";
-
 import { Navigation } from "@canonical/maas-react-components";
 
 import { isSelected } from "@/components/Navigation/utils";
 import { Link, useLocation } from "@/utils/router";
 
-const NavigationBanner = ({ children }: { children?: React.ReactNode }): ReactElement => {
+const NavigationBanner = ({ children }: { children?: React.ReactNode }): JSX.Element => {
   const location = useLocation();
   const homepageLink = { url: "/", label: "Homepage" } as const;
   return (
