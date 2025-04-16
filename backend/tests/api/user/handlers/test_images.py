@@ -418,6 +418,171 @@ class TestBootAssetVersionsPostHandler:
 
 
 @pytest.mark.asyncio
+class TestBootAssetItemsGetHandler:
+    async def test_get(self, user_client: Client, factory: Factory) -> None:
+        bs = await factory.make_BootSource()
+        ba = await factory.make_BootAsset(bs.id)
+        bv = await factory.make_BootAssetVersion(ba.id)
+        bi = await factory.make_BootAssetItem(
+            bv.id,
+            ftype="ftype",
+            sha256="sha256",
+            path="test/path",
+            file_size=1,
+            bytes_synced=1,
+            source_package="source_package",
+            source_version="source_version",
+            source_release="source_release",
+        )
+        resp = await user_client.get("/bootasset-items")
+        assert resp.status_code == 200
+        resp_data = resp.json()
+        assert len(resp_data["items"]) == 1
+        assert resp_data["items"] == [bi.model_dump()]
+
+    @pytest.mark.parametrize(
+        "filter_param",
+        [
+            ("boot_asset_version_id"),
+            ("ftype"),
+            ("sha256"),
+            ("path"),
+            ("file_size"),
+        ],
+    )
+    async def test_get_with_filters(
+        self, user_client: Client, factory: Factory, filter_param: str
+    ) -> None:
+        bs = await factory.make_BootSource()
+        ba = await factory.make_BootAsset(bs.id)
+        bv = await factory.make_BootAssetVersion(ba.id)
+        bv2 = await factory.make_BootAssetVersion(ba.id)
+        bi = await factory.make_BootAssetItem(
+            bv.id,
+            ftype="ftype",
+            sha256="sha256",
+            path="test/path",
+            file_size=1,
+            bytes_synced=1,
+            source_package="source_package",
+            source_version="source_version",
+            source_release="source_release",
+        )
+        await factory.make_BootAssetItem(
+            bv2.id,
+            ftype="2",
+            sha256="3",
+            path="somethingelse",
+            file_size=2,
+            bytes_synced=2,
+            source_package="ee",
+            source_version="aa",
+            source_release="oo",
+        )
+        resp = await user_client.get(
+            "/bootasset-items",
+            params=f"{filter_param}={bi.model_dump()[filter_param]}",
+        )
+
+        assert resp.status_code == 200
+        resp_data = resp.json()
+        assert len(resp_data["items"]) == 1
+        assert resp_data["items"] == [bi.model_dump()]
+
+    @pytest.mark.parametrize(
+        "sort_param",
+        [
+            ("ftype"),
+            ("sha256"),
+            ("path"),
+            ("file_size"),
+            ("source_package"),
+            ("source_version"),
+            ("source_release"),
+            ("bytes_synced"),
+        ],
+    )
+    async def test_get_with_sorting(
+        self, user_client: Client, factory: Factory, sort_param: str
+    ) -> None:
+        bs = await factory.make_BootSource()
+        ba = await factory.make_BootAsset(bs.id)
+        bv = await factory.make_BootAssetVersion(ba.id)
+        bi1 = await factory.make_BootAssetItem(
+            bv.id,
+            ftype="a",
+            sha256="a",
+            path="a",
+            file_size=1,
+            bytes_synced=1,
+            source_package="a",
+            source_version="a",
+            source_release="a",
+        )
+        bi2 = await factory.make_BootAssetItem(
+            bv.id,
+            ftype="b",
+            sha256="b",
+            path="b",
+            file_size=2,
+            bytes_synced=2,
+            source_package="b",
+            source_version="b",
+            source_release="b",
+        )
+
+        resp = await user_client.get(f"/bootasset-items?sort_by={sort_param}")
+
+        assert resp.status_code == 200
+        resp_body = resp.json()
+        assert resp_body["items"] == [
+            json.loads(bi1.model_dump_json()),
+            json.loads(bi2.model_dump_json()),
+        ]
+
+    async def test_get_with_page_and_size(
+        self, user_client: Client, factory: Factory
+    ) -> None:
+        bs = await factory.make_BootSource()
+        ba = await factory.make_BootAsset(bs.id)
+        bv = await factory.make_BootAssetVersion(ba.id)
+        for i in range(4):
+            await factory.make_BootAssetItem(bv.id, ftype=f"{i+1}")
+
+        resp = await user_client.get(
+            "/bootasset-items?page=2&size=2&sort_by=ftype"
+        )
+        assert resp.status_code == 200
+        resp_body = resp.json()
+        assert resp_body["page"] == 2
+        assert resp_body["size"] == 2
+        assert len(resp_body["items"]) == 2
+        assert resp_body["items"][0]["ftype"] == "3"
+        assert resp_body["items"][1]["ftype"] == "4"
+
+    @pytest.mark.parametrize("sort_by", ["id", "kind,kind", "not_a_field"])
+    async def test_invalid_sort_params(
+        self, user_client: Client, factory: Factory, sort_by: str
+    ) -> None:
+        resp = await user_client.get(f"/bootasset-items?sort_by={sort_by}")
+        assert resp.status_code == 422
+
+    @pytest.mark.parametrize("page", [-1, 0])
+    async def test_invalid_page_params(
+        self, user_client: Client, factory: Factory, page: int
+    ) -> None:
+        resp = await user_client.get(f"/bootasset-items?page={page}")
+        assert resp.status_code == 422
+
+    @pytest.mark.parametrize("size", [0, -1, 101])
+    async def test_invalid_size_params(
+        self, user_client: Client, factory: Factory, size: int
+    ) -> None:
+        resp = await user_client.get(f"/bootasset-items?size={size}")
+        assert resp.status_code == 422
+
+
+@pytest.mark.asyncio
 class TestBootAssetItemsPostHandler:
     async def test_post(self, user_client: Client, factory: Factory) -> None:
         bs = await factory.make_BootSource()

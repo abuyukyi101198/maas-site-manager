@@ -36,6 +36,10 @@ from msm.api.user.auth import (
     authenticated_user,
     verify_authenticated_user_or_worker,
 )
+from msm.api.user.forms import (
+    BootAssetItemFilterParams,
+    boot_asset_item_filter_params,
+)
 from msm.db import models
 from msm.schema import (
     PaginatedResults,
@@ -398,11 +402,15 @@ async def get_boot_asset_items(
         list[SortParam], Depends(boot_asset_items_sort_parameters)
     ],
     pagination_params: Annotated[PaginationParams, Depends()],
+    filter_params: Annotated[
+        BootAssetItemFilterParams, Depends(boot_asset_item_filter_params)
+    ],
 ) -> BootAssetItemsGetResponse:
     total, results = await services.boot_asset_items.get(
         sort_params,
         offset=pagination_params.offset,
         limit=pagination_params.size,
+        **filter_params._asdict(),
     )
     return BootAssetItemsGetResponse(
         total=total,

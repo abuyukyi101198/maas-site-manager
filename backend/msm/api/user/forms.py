@@ -39,6 +39,16 @@ class UserFilterParams(NamedTuple):
     is_admin: list[bool] | None
 
 
+class BootAssetItemFilterParams(NamedTuple):
+    """BootAssetItem filtering parameters."""
+
+    boot_asset_version_id: list[int] | None
+    ftype: list[str] | None
+    sha256: list[str] | None
+    path: list[str] | None
+    file_size: list[int] | None
+
+
 async def site_filter_parameters(
     city: list[str] | None = Query(default=None, title="Filter for cities"),
     country: list[str] | None = Query(
@@ -117,4 +127,22 @@ async def user_filter_params(
         username=username,
         full_name=full_name,
         is_admin=is_admin,
+    )
+
+
+async def boot_asset_item_filter_params(
+    boot_asset_version_id: list[int] | None = Query(
+        default=None, title="Filter for boot asset version ID"
+    ),
+    ftype: list[str] | None = Query(default=None, title="Filter for ftype"),
+    sha256: list[str] | None = Query(default=None, title="Filter for sha256"),
+    path: list[str] | None = Query(default=None, title="Filter for path"),
+    file_size: list[int] | None = Query(default=None, title="Filter for size"),
+) -> BootAssetItemFilterParams:
+    return BootAssetItemFilterParams(
+        boot_asset_version_id=boot_asset_version_id,
+        ftype=ftype,
+        sha256=sha256,
+        path=path,
+        file_size=file_size,
     )

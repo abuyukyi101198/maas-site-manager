@@ -501,6 +501,70 @@ class TestBootAssetItemService:
             assert rbai == expected_boot_asset_item
 
     @pytest.mark.parametrize(
+        "filter_param",
+        [
+            ("boot_asset_version_id"),
+            ("ftype"),
+            ("sha256"),
+            ("path"),
+            ("file_size"),
+        ],
+    )
+    async def test_get_with_filters(
+        self,
+        factory: Factory,
+        db_connection: AsyncConnection,
+        filter_param: str,
+    ) -> None:
+        boot_source = await factory.make_BootSource()
+        boot_asset = await factory.make_BootAsset(boot_source.id)
+        boot_asset_version = await factory.make_BootAssetVersion(boot_asset.id)
+        boot_asset_version2 = await factory.make_BootAssetVersion(
+            boot_asset.id
+        )
+        expected_boot_asset_item = BootAssetItem(
+            id=0,
+            boot_asset_version_id=boot_asset_version.id,
+            ftype="kernel",
+            sha256="2349asldkfj2309854jhs",
+            path="/test",
+            file_size=23425323,
+            source_package="ubukernel",
+            source_version="23.2",
+            source_release="Noble",
+            bytes_synced=23425323,
+        )
+        boot_asset_item = await factory.make_BootAssetItem(
+            boot_asset_version.id,
+            ftype="kernel",
+            sha256="2349asldkfj2309854jhs",
+            path="/test",
+            file_size=23425323,
+            source_package="ubukernel",
+            source_version="23.2",
+            source_release="Noble",
+            bytes_synced=23425323,
+        )
+        await factory.make_BootAssetItem(
+            boot_asset_version2.id,
+            ftype="2",
+            sha256="22222",
+            path="/path",
+            file_size=234253232,
+            source_package="k2",
+            source_version="4",
+            source_release="Jammy",
+            bytes_synced=234253232,
+        )
+        expected_boot_asset_item.id = boot_asset_item.id
+        service = BootAssetItemService(db_connection)
+        filters = {filter_param: [boot_asset_item.model_dump()[filter_param]]}
+        count, retrieved_boot_asset_items = await service.get([], **filters)  # type: ignore
+        assert count == 1
+        for rbai in retrieved_boot_asset_items:
+            assert rbai == expected_boot_asset_item
+
+    @pytest.mark.parametrize(
         "id,exists",
         [
             (1, True),

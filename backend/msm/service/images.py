@@ -346,8 +346,22 @@ class BootAssetItemService(Service):
         sort_params: list[SortParam],
         offset: int = 0,
         limit: int | None = None,
+        boot_asset_version_id: list[int] | None = None,
+        ftype: list[str] | None = None,
+        sha256: list[str] | None = None,
+        path: list[str] | None = None,
+        file_size: list[int] | None = None,
     ) -> tuple[int, Iterable[models.BootAssetItem]]:
+        filters = queries.filters_from_arguments(
+            BootAssetItem,
+            boot_asset_version_id=boot_asset_version_id,
+            ftype=ftype,
+            sha256=sha256,
+            path=path,
+            file_size=file_size,
+        )
         order_by = queries.order_by_from_arguments(sort_params=sort_params)
+        count = await queries.row_count(self.conn, BootAssetItem, *filters)
         stmt = (
             self._select_statement(
                 BootAssetItem.c.id,
@@ -361,15 +375,14 @@ class BootAssetItemService(Service):
                 BootAssetItem.c.source_release,
                 BootAssetItem.c.bytes_synced,
             )
+            .where(*filters)
             .order_by(*order_by)
             .offset(offset)
         )
         if limit is not None:
             stmt = stmt.limit(limit)
         result = await self.conn.execute(stmt)
-        return result.rowcount, self.objects_from_result(
-            models.BootAssetItem, result
-        )
+        return count, self.objects_from_result(models.BootAssetItem, result)
 
     async def get_by_id(self, id: int) -> models.BootAssetItem | None:
         stmt = self._select_statement(
