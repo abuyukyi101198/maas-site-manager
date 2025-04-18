@@ -2,6 +2,8 @@ from typing import NamedTuple
 
 from fastapi import Query
 
+from msm.db.models import BootAssetKind, BootAssetLabel
+
 
 class SiteFilterParams(NamedTuple):
     """Site filtering parameters."""
@@ -47,6 +49,24 @@ class BootAssetItemFilterParams(NamedTuple):
     sha256: list[str] | None
     path: list[str] | None
     file_size: list[int] | None
+
+
+class BootAssetFilterParams(NamedTuple):
+    """BootAsset filtering parameters."""
+
+    boot_source_id: list[int] | None
+    kind: list[BootAssetKind] | None
+    label: list[BootAssetLabel] | None
+    os: list[str] | None
+    arch: list[str] | None
+    release: list[str] | None
+
+
+class BootAssetVersionFilterParams(NamedTuple):
+    """BootAssetVersion filter parameters."""
+
+    boot_asset_id: list[int] | None
+    version: list[str] | None
 
 
 async def site_filter_parameters(
@@ -145,4 +165,46 @@ async def boot_asset_item_filter_params(
         sha256=sha256,
         path=path,
         file_size=file_size,
+    )
+
+
+async def boot_asset_filter_params(
+    boot_source_id: list[int] | None = Query(
+        default=None, title="Filter for boot source ID"
+    ),
+    kind: list[BootAssetKind] | None = Query(
+        default=None, title="Filter for kind (0=OS, 1=BOOTLOADER)"
+    ),
+    label: list[BootAssetLabel] | None = Query(
+        default=None, tilte="Filter for label ('stable' or 'candidate')"
+    ),
+    os: list[str] | None = Query(default=None, title="Filter for OS"),
+    arch: list[str] | None = Query(
+        default=None, title="Filter for architecture"
+    ),
+    release: list[str] | None = Query(
+        default=None, title="Filter for release"
+    ),
+) -> BootAssetFilterParams:
+    return BootAssetFilterParams(
+        boot_source_id=boot_source_id,
+        kind=kind,
+        label=label,
+        os=os,
+        arch=arch,
+        release=release,
+    )
+
+
+async def boot_asset_version_filter_params(
+    boot_asset_id: list[int] | None = Query(
+        default=None, title="Filter for boot asset ID"
+    ),
+    version: list[str] | None = Query(
+        default=None, title="Filter for version"
+    ),
+) -> BootAssetVersionFilterParams:
+    return BootAssetVersionFilterParams(
+        boot_asset_id=boot_asset_id,
+        version=version,
     )

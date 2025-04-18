@@ -37,8 +37,12 @@ from msm.api.user.auth import (
     verify_authenticated_user_or_worker,
 )
 from msm.api.user.forms import (
+    BootAssetFilterParams,
     BootAssetItemFilterParams,
+    BootAssetVersionFilterParams,
+    boot_asset_filter_params,
     boot_asset_item_filter_params,
+    boot_asset_version_filter_params,
 )
 from msm.db import models
 from msm.schema import (
@@ -119,12 +123,16 @@ async def get_boot_assets(
         list[SortParam], Depends(boot_asset_sort_parameters)
     ],
     pagination_params: Annotated[PaginationParams, Depends()],
+    filter_params: Annotated[
+        BootAssetFilterParams, Depends(boot_asset_filter_params)
+    ],
 ) -> BootAssetsGetResponse:
     """Return boot assets."""
     total, results = await services.boot_assets.get(
         sort_params,
         offset=pagination_params.offset,
         limit=pagination_params.size,
+        **filter_params._asdict(),
     )
     return BootAssetsGetResponse(
         total=total,
@@ -319,6 +327,50 @@ async def post_boot_asset_version(
         )
     )
     return BootAssetVersionPostResponse(id=boot_asset_version.id)
+
+
+boot_asset_version_sort_parameters = SortParamParser(
+    fields=[
+        "version",
+    ]
+)
+
+
+class BootAssetVersionsGetResponse(PaginatedResults):
+    items: list[models.BootAssetVersion]
+
+
+@v1_router.get(
+    "/bootasset-versions",
+    responses={
+        401: {"model": UnauthorizedErrorResponseModel},
+        422: {"model": ValidationErrorResponseModel},
+    },
+)
+async def get_boot_asset_versions(
+    services: Annotated[ServiceCollection, Depends(services)],
+    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
+    sort_params: Annotated[
+        list[SortParam], Depends(boot_asset_version_sort_parameters)
+    ],
+    pagination_params: Annotated[PaginationParams, Depends()],
+    filter_params: Annotated[
+        BootAssetVersionFilterParams, Depends(boot_asset_version_filter_params)
+    ],
+) -> BootAssetVersionsGetResponse:
+    """Return Boot Asset Versions"""
+    total, results = await services.boot_asset_versions.get(
+        sort_params,
+        offset=pagination_params.offset,
+        limit=pagination_params.size,
+        **filter_params._asdict(),
+    )
+    return BootAssetVersionsGetResponse(
+        total=total,
+        page=pagination_params.page,
+        size=pagination_params.size,
+        items=list(results),
+    )
 
 
 class BootAssetItemPostRequest(BaseModel):

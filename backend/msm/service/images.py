@@ -196,8 +196,24 @@ class BootAssetService(Service):
         sort_params: list[SortParam],
         offset: int = 0,
         limit: int | None = None,
+        boot_source_id: list[int] | None = None,
+        kind: list[models.BootAssetKind] | None = None,
+        label: list[models.BootAssetLabel] | None = None,
+        os: list[str] | None = None,
+        arch: list[str] | None = None,
+        release: list[str] | None = None,
     ) -> tuple[int, Iterable[models.BootAsset]]:
+        filters = queries.filters_from_arguments(
+            BootAsset,
+            boot_source_id=boot_source_id,
+            kind=kind,
+            label=label,
+            os=os,
+            arch=arch,
+            release=release,
+        )
         order_by = queries.order_by_from_arguments(sort_params=sort_params)
+        count = await queries.row_count(self.conn, BootAsset, *filters)
         stmt = (
             self._select_statement(
                 BootAsset.c.id,
@@ -216,15 +232,14 @@ class BootAssetService(Service):
                 BootAsset.c.eol,
                 BootAsset.c.esm_eol,
             )
+            .where(*filters)
             .order_by(*order_by)
             .offset(offset)
         )
         if limit is not None:
             stmt = stmt.limit(limit)
         result = await self.conn.execute(stmt)
-        return result.rowcount, self.objects_from_result(
-            models.BootAsset, result
-        )
+        return count, self.objects_from_result(models.BootAsset, result)
 
     async def get_by_id(self, id: int) -> models.BootAsset | None:
         stmt = self._select_statement(
@@ -288,23 +303,30 @@ class BootAssetVersionService(Service):
         sort_params: list[SortParam],
         offset: int = 0,
         limit: int | None = None,
+        boot_asset_id: list[int] | None = None,
+        version: list[str] | None = None,
     ) -> tuple[int, Iterable[models.BootAssetVersion]]:
+        filters = queries.filters_from_arguments(
+            BootAssetVersion,
+            boot_asset_id=boot_asset_id,
+            version=version,
+        )
         order_by = queries.order_by_from_arguments(sort_params=sort_params)
+        count = await queries.row_count(self.conn, BootAssetVersion, *filters)
         stmt = (
             self._select_statement(
                 BootAssetVersion.c.id,
                 BootAssetVersion.c.boot_asset_id,
                 BootAssetVersion.c.version,
             )
+            .where(*filters)
             .order_by(*order_by)
             .offset(offset)
         )
         if limit is not None:
             stmt = stmt.limit(limit)
         result = await self.conn.execute(stmt)
-        return result.rowcount, self.objects_from_result(
-            models.BootAssetVersion, result
-        )
+        return count, self.objects_from_result(models.BootAssetVersion, result)
 
     async def get_by_id(self, id: int) -> models.BootAssetVersion | None:
         stmt = self._select_statement(

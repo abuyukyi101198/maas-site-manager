@@ -80,6 +80,49 @@ class TestBootAssetService:
             assert rba == expected_boot_asset
 
     @pytest.mark.parametrize(
+        "filter_param",
+        [
+            ("boot_source_id"),
+            ("kind"),
+            ("label"),
+            ("os"),
+            ("arch"),
+            ("release"),
+        ],
+    )
+    async def test_get_with_filters(
+        self,
+        factory: Factory,
+        db_connection: AsyncConnection,
+        filter_param: str,
+    ) -> None:
+        boot_source1 = await factory.make_BootSource()
+        boot_source2 = await factory.make_BootSource()
+        boot_asset1 = await factory.make_BootAsset(
+            boot_source1.id,
+            kind=BootAssetKind.BOOTLOADER,
+            label=BootAssetLabel.STABLE,
+            os="ubuntu",
+            release="plucky",
+            arch="amd64",
+        )
+        await factory.make_BootAsset(
+            boot_source2.id,
+            kind=BootAssetKind.OS,
+            label=BootAssetLabel.CANDIDATE,
+            os="centos",
+            release="idk",
+            arch="arm",
+        )
+
+        filters = {filter_param: [boot_asset1.model_dump()[filter_param]]}
+        service = BootAssetService(db_connection)
+        count, retrieved_boot_assets = await service.get([], **filters)  # type: ignore
+        assert count == 1
+        for rba in retrieved_boot_assets:
+            assert rba == boot_asset1
+
+    @pytest.mark.parametrize(
         "id,exists",
         [
             (1, True),
@@ -427,6 +470,32 @@ class TestBootAssetVersionService:
         assert count == 1
         for rbav in retrieved_boot_asset_versions:
             assert rbav == expected_boot_asset_version
+
+    @pytest.mark.parametrize(
+        "filter_param",
+        [("boot_asset_id"), ("version")],
+    )
+    async def test_get_with_filters(
+        self,
+        factory: Factory,
+        db_connection: AsyncConnection,
+        filter_param: str,
+    ) -> None:
+        boot_source = await factory.make_BootSource()
+        boot_asset1 = await factory.make_BootAsset(boot_source.id)
+        boot_asset2 = await factory.make_BootAsset(boot_source.id)
+        boot_asset_version1 = await factory.make_BootAssetVersion(
+            boot_asset1.id, version="1"
+        )
+        await factory.make_BootAssetVersion(boot_asset2.id, version="2")
+        service = BootAssetVersionService(db_connection)
+        count, retrieved_boot_asset_versions = await service.get(
+            [],
+            **{filter_param: [boot_asset_version1.model_dump()[filter_param]]},  # type: ignore
+        )
+        assert count == 1
+        for rbav in retrieved_boot_asset_versions:
+            assert rbav == boot_asset_version1
 
     async def test_create(
         self, factory: Factory, db_connection: AsyncConnection

@@ -48,6 +48,48 @@ class TestBootAssetsGetHandler:
         # to string representations, which are returned by the API
         assert resp_body["items"] == [json.loads(boot_asset.model_dump_json())]
 
+    @pytest.mark.parametrize(
+        "filter_param",
+        [
+            ("boot_source_id"),
+            ("kind"),
+            ("label"),
+            ("os"),
+            ("arch"),
+            ("release"),
+        ],
+    )
+    async def test_get_with_filters(
+        self, user_client: Client, factory: Factory, filter_param: str
+    ) -> None:
+        bs = await factory.make_BootSource()
+        bs2 = await factory.make_BootSource()
+        ba1 = await factory.make_BootAsset(
+            bs.id,
+            kind=BootAssetKind.OS,
+            label=BootAssetLabel.STABLE,
+            os="ubuntu",
+            arch="amd64",
+            release="plucky",
+        )
+        ba2 = await factory.make_BootAsset(
+            bs2.id,
+            kind=BootAssetKind.BOOTLOADER,
+            label=BootAssetLabel.CANDIDATE,
+            os="centos",
+            arch="arm",
+            release="uhh",
+        )
+        # dumping to JSON and back converts the Enums to their string/int values
+        url = f"/bootassets?{filter_param}={json.loads(ba1.model_dump_json())[filter_param]}"
+        resp = await user_client.get(url)
+        assert resp.status_code == 200
+        resp_body = resp.json()
+        assert len(resp_body["items"]) == 1
+        # dumping to JSON then loading back to a dict converts types like datetime
+        # to string representations, which are returned by the API
+        assert resp_body["items"][0] == json.loads(ba1.model_dump_json())
+
     async def test_get_with_sorting(
         self, user_client: Client, factory: Factory
     ) -> None:
@@ -374,6 +416,114 @@ class TestBootSourceSelectionsGetHandler:
         resp = await user_client.get(
             f"/bootasset-sources/1/selections?size={size}"
         )
+        assert resp.status_code == 422
+
+
+@pytest.mark.asyncio
+class TestBootAssetVersionsGetHandler:
+    async def test_get(self, user_client: Client, factory: Factory) -> None:
+        bs = await factory.make_BootSource()
+        boot_asset1 = await factory.make_BootAsset(bs.id)
+        boot_asset2 = await factory.make_BootAsset(bs.id)
+        v1 = await factory.make_BootAssetVersion(boot_asset1.id)
+        v2 = await factory.make_BootAssetVersion(boot_asset2.id)
+        resp = await user_client.get(f"/bootasset-versions")
+        assert resp.status_code == 200
+        resp_body = resp.json()
+        assert resp_body["page"] == 1
+        assert resp_body["size"] == 20
+        assert resp_body["total"] == 2
+        assert resp_body["items"] == [v1.model_dump(), v2.model_dump()]
+
+    @pytest.mark.parametrize(
+        "filter_param",
+        [
+            ("boot_asset_id"),
+            ("version"),
+        ],
+    )
+    async def test_get_with_filters(
+        self, user_client: Client, factory: Factory, filter_param: str
+    ) -> None:
+        bs = await factory.make_BootSource()
+        boot_asset1 = await factory.make_BootAsset(bs.id)
+        boot_asset2 = await factory.make_BootAsset(bs.id)
+        v1 = await factory.make_BootAssetVersion(boot_asset1.id, version="1")
+        await factory.make_BootAssetVersion(boot_asset2.id, version="2")
+        resp = await user_client.get(
+            f"/bootasset-versions?{filter_param}={v1.model_dump()[filter_param]}"
+        )
+        assert resp.status_code == 200
+        resp_body = resp.json()
+        assert len(resp_body["items"]) == 1
+        assert resp_body["items"][0] == v1.model_dump()
+
+    async def test_get_with_sorting(
+        self, user_client: Client, factory: Factory
+    ) -> None:
+        boot_source = await factory.make_BootSource()
+        ba = await factory.make_BootAsset(boot_source.id)
+        v1 = await factory.make_BootAssetVersion(ba.id, version=("20221212"))
+        v2 = await factory.make_BootAssetVersion(ba.id, version=("20211212"))
+
+        resp = await user_client.get(f"/bootasset-versions?sort_by=version")
+        assert resp.status_code == 200
+        resp_body = resp.json()
+        assert resp_body["items"] == [
+            v2.model_dump(),
+            v1.model_dump(),
+        ]
+
+        resp = await user_client.get(
+            f"/bootasset-versions?sort_by=version-desc"
+        )
+        assert resp.status_code == 200
+        resp_body = resp.json()
+        assert resp_body["items"] == [
+            v1.model_dump(),
+            v2.model_dump(),
+        ]
+
+    async def test_get_with_page_and_size(
+        self, user_client: Client, factory: Factory
+    ) -> None:
+        bs = await factory.make_BootSource()
+        ba = await factory.make_BootAsset(bs.id)
+        for i in range(4):
+            await factory.make_BootAssetVersion(ba.id, version=f"{i+1}")
+
+        resp = await user_client.get(
+            f"/bootasset-versions?page=2&size=2&sort_by=version"
+        )
+        assert resp.status_code == 200
+        resp_body = resp.json()
+        assert resp_body["page"] == 2
+        assert resp_body["size"] == 2
+        assert len(resp_body["items"]) == 2
+        assert resp_body["items"][0]["version"] == "3"
+        assert resp_body["items"][1]["version"] == "4"
+
+    @pytest.mark.parametrize(
+        "sort_by", ["id", "version,version", "not_a_field"]
+    )
+    async def test_invalid_sort_params(
+        self, user_client: Client, factory: Factory, sort_by: str
+    ) -> None:
+        resp = await user_client.get(f"/bootasset-versions?sort_by={sort_by}")
+        assert resp.status_code == 422
+
+    @pytest.mark.parametrize("page", [-1, 0])
+    async def test_invalid_page_params(
+        self, user_client: Client, factory: Factory, page: int
+    ) -> None:
+        resp = await user_client.get(f"/bootasset-versions?page={page}")
+        assert resp.status_code == 422
+
+    @pytest.mark.parametrize("size", [0, -1, 101])
+    async def test_invalid_size_params(
+        self, user_client: Client, factory: Factory, size: int
+    ) -> None:
+        resp = await user_client.get(f"/bootasset-versions?size={size}")
         assert resp.status_code == 422
 
 
