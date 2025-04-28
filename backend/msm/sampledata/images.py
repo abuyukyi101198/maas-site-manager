@@ -148,7 +148,7 @@ DmFoRWTU6CpKtwIg/lb1ncbslH2xAFeUX6ASHXR8vBOnIXWss21FuAaNmWe4lmw=
     collection = ModelCollection("boot_asset_item")
     collection.add(
         boot_asset_version_id=boot_asset_versions[0].id,
-        ftype="kernel",
+        ftype="boot-initrd",
         sha256=sha256().hexdigest(),
         path="ubuntu/noble",
         file_size=3635135734,
@@ -159,7 +159,7 @@ DmFoRWTU6CpKtwIg/lb1ncbslH2xAFeUX6ASHXR8vBOnIXWss21FuAaNmWe4lmw=
     )
     collection.add(
         boot_asset_version_id=boot_asset_versions[0].id,
-        ftype="kernel",
+        ftype="manifest",
         sha256=sha256().hexdigest(),
         path="ubuntu/jammy",
         file_size=3655135734,

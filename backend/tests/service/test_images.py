@@ -483,7 +483,7 @@ class TestBootAssetVersionService:
     ) -> None:
         boot_source = await factory.make_BootSource()
         boot_asset1 = await factory.make_BootAsset(boot_source.id)
-        boot_asset2 = await factory.make_BootAsset(boot_source.id)
+        boot_asset2 = await factory.make_BootAsset(boot_source.id, os="os")
         boot_asset_version1 = await factory.make_BootAssetVersion(
             boot_asset1.id, version="1"
         )
@@ -589,7 +589,7 @@ class TestBootAssetItemService:
         boot_asset = await factory.make_BootAsset(boot_source.id)
         boot_asset_version = await factory.make_BootAssetVersion(boot_asset.id)
         boot_asset_version2 = await factory.make_BootAssetVersion(
-            boot_asset.id
+            boot_asset.id, version="x"
         )
         expected_boot_asset_item = BootAssetItem(
             id=0,

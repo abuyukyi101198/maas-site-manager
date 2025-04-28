@@ -120,16 +120,16 @@ class TestBootAssetsGetHandler:
     ) -> None:
         bs = await factory.make_BootSource()
         for i in range(4):
-            await factory.make_BootAsset(bs.id, title=f"{i+1}")
+            await factory.make_BootAsset(bs.id, os=f"{i+1}")
 
-        resp = await user_client.get("/bootassets?page=2&size=2&sort_by=title")
+        resp = await user_client.get("/bootassets?page=2&size=2&sort_by=os")
         assert resp.status_code == 200
         resp_body = resp.json()
         assert resp_body["page"] == 2
         assert resp_body["size"] == 2
         assert len(resp_body["items"]) == 2
-        assert resp_body["items"][0]["title"] == "3"
-        assert resp_body["items"][1]["title"] == "4"
+        assert resp_body["items"][0]["os"] == "3"
+        assert resp_body["items"][1]["os"] == "4"
 
     @pytest.mark.parametrize("sort_by", ["id", "kind,kind", "not_a_field"])
     async def test_invalid_sort_params(
@@ -215,6 +215,46 @@ class TestBootAssetsPostHandler:
         }
         resp = await user_client.post("/bootassets", json=data)
         assert resp.status_code == 404
+
+    async def test_post_conflict(
+        self,
+        user_client: Client,
+        factory: Factory,
+    ) -> None:
+        bs = await factory.make_BootSource()
+        await factory.make_BootAsset(
+            bs.id,
+            kind=BootAssetKind.OS,
+            label=BootAssetLabel.CANDIDATE,
+            os="ubuntu",
+            release="noble",
+            codename="Noble Numbat",
+            title="Ubuntu Noble",
+            arch="amd64",
+            subarch="generic",
+            compatibility=["generic", "hwe-p"],
+            flavor="generic",
+            eol=now_utc() + timedelta(days=365),
+            esm_eol=now_utc() + timedelta(days=3650),
+        )
+        data = {
+            "boot_source_id": bs.id,
+            "kind": BootAssetKind.BOOTLOADER,
+            "label": BootAssetLabel.STABLE,
+            "os": "ubuntu",
+            "release": "noble",
+            "codename": "NobleNumbat",
+            "title": "Another Noble Image",
+            "arch": "amd64",
+            "subarch": "generic",
+            "compatibility": ["generic"],
+            "flavor": "highbank",
+            "base_image": "ubuntu",
+            "eol": (now_utc() + timedelta(days=366)).isoformat(),
+            "esm_eol": (now_utc() + timedelta(days=3660)).isoformat(),
+        }
+        resp = await user_client.post("/bootassets", json=data)
+        assert resp.status_code == 409
 
 
 @pytest.mark.asyncio
@@ -424,9 +464,9 @@ class TestBootAssetVersionsGetHandler:
     async def test_get(self, user_client: Client, factory: Factory) -> None:
         bs = await factory.make_BootSource()
         boot_asset1 = await factory.make_BootAsset(bs.id)
-        boot_asset2 = await factory.make_BootAsset(bs.id)
-        v1 = await factory.make_BootAssetVersion(boot_asset1.id)
-        v2 = await factory.make_BootAssetVersion(boot_asset2.id)
+        boot_asset2 = await factory.make_BootAsset(bs.id, os="os")
+        v1 = await factory.make_BootAssetVersion(boot_asset1.id, version="1")
+        v2 = await factory.make_BootAssetVersion(boot_asset2.id, version="2")
         resp = await user_client.get(f"/bootasset-versions")
         assert resp.status_code == 200
         resp_body = resp.json()
@@ -447,7 +487,7 @@ class TestBootAssetVersionsGetHandler:
     ) -> None:
         bs = await factory.make_BootSource()
         boot_asset1 = await factory.make_BootAsset(bs.id)
-        boot_asset2 = await factory.make_BootAsset(bs.id)
+        boot_asset2 = await factory.make_BootAsset(bs.id, os="os")
         v1 = await factory.make_BootAssetVersion(boot_asset1.id, version="1")
         await factory.make_BootAssetVersion(boot_asset2.id, version="2")
         resp = await user_client.get(
@@ -566,6 +606,17 @@ class TestBootAssetVersionsPostHandler:
         resp = await user_client.post(f"/bootassets/{999}/versions", json=data)
         assert resp.status_code == 404
 
+    async def test_post_conflict(
+        self, user_client: Client, factory: Factory
+    ) -> None:
+        bs = await factory.make_BootSource()
+        ba = await factory.make_BootAsset(bs.id)
+        await factory.make_BootAssetVersion(ba.id, version="x")
+        resp = await user_client.post(
+            f"bootassets/{ba.id}/versions", json={"version": "x"}
+        )
+        assert resp.status_code == 409
+
 
 @pytest.mark.asyncio
 class TestBootAssetItemsGetHandler:
@@ -606,7 +657,7 @@ class TestBootAssetItemsGetHandler:
         bs = await factory.make_BootSource()
         ba = await factory.make_BootAsset(bs.id)
         bv = await factory.make_BootAssetVersion(ba.id)
-        bv2 = await factory.make_BootAssetVersion(ba.id)
+        bv2 = await factory.make_BootAssetVersion(ba.id, version="x")
         bi = await factory.make_BootAssetItem(
             bv.id,
             ftype="ftype",
@@ -795,6 +846,27 @@ class TestBootAssetItemsPostHandler:
             f"/bootasset-versions/{999}/items", json=data
         )
         assert resp.status_code == 404
+
+    async def test_post_conflict(
+        self, user_client: Client, factory: Factory
+    ) -> None:
+        bs = await factory.make_BootSource()
+        ba = await factory.make_BootAsset(bs.id)
+        bv = await factory.make_BootAssetVersion(ba.id)
+        await factory.make_BootAssetItem(bv.id, ftype="ftype")
+        data = {
+            "ftype": "ftype",
+            "sha256": "testblaksjdflkj",
+            "path": "/item",
+            "file_size": 2321345623,
+            "source_package": "ubukernel",
+            "source_version": "23.4.1",
+            "source_release": "noble",
+        }
+        resp = await user_client.post(
+            f"/bootasset-versions/{bv.id}/items", json=data
+        )
+        assert resp.status_code == 409
 
 
 @pytest.mark.asyncio

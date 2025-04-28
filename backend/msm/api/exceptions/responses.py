@@ -125,7 +125,7 @@ class ValidationErrorResponse(JSONResponse):
 
 
 class BadRequestErrorBodyResponse(ErrorBodyResponse):
-    code: ExceptionCode = ExceptionCode.ALREADY_EXISTS
+    code: ExceptionCode = ExceptionCode.INVALID_PARAMS
     message: str = "Bad Request"
     status_code: int = Field(status.HTTP_400_BAD_REQUEST, exclude=True)
 
@@ -138,6 +138,26 @@ class BadRequestErrorResponseModel(
 
 class BadRequestErrorResponse(JSONResponse):
     def __init__(self, err: BadRequestErrorResponseModel):
+        super().__init__(
+            content=jsonable_encoder(err, exclude_none=True),
+            status_code=err.error.status_code,
+        )
+
+
+class AlreadyExistsErrorBodyResponse(ErrorBodyResponse):
+    code: ExceptionCode = ExceptionCode.ALREADY_EXISTS
+    message: str = "Resource already exists"
+    status_code: int = Field(status.HTTP_409_CONFLICT, exclude=True)
+
+
+class AlreadyExistsErrorResponseModel(
+    ErrorResponseModel[AlreadyExistsErrorBodyResponse]
+):
+    pass
+
+
+class AlreadyExistsErrorResponse(JSONResponse):
+    def __init__(self, err: AlreadyExistsErrorResponseModel):
         super().__init__(
             content=jsonable_encoder(err, exclude_none=True),
             status_code=err.error.status_code,

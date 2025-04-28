@@ -11,6 +11,7 @@ from sqlalchemy import (
     MetaData,
     Table,
     Text,
+    UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import (
     JSONB,
@@ -184,6 +185,7 @@ BootAsset = Table(
     Column("base_image", Text, nullable=False),
     Column("eol", DateTime(timezone=True), nullable=False),
     Column("esm_eol", DateTime(timezone=True), nullable=False),
+    UniqueConstraint("boot_source_id", "os", "release", "arch", "subarch"),
 )
 
 BootAssetVersion = Table(
@@ -194,6 +196,7 @@ BootAssetVersion = Table(
         "boot_asset_id", Integer, ForeignKey("boot_asset.id"), nullable=False
     ),
     Column("version", Text, nullable=False),
+    UniqueConstraint("boot_asset_id", "version"),
 )
 
 BootAssetItem = Table(
@@ -214,4 +217,5 @@ BootAssetItem = Table(
     Column("source_version", Text, nullable=True),
     Column("source_release", Text, nullable=True),
     Column("bytes_synced", BigInteger, nullable=False, default=0),
+    UniqueConstraint("boot_asset_version_id", "ftype"),
 )

@@ -34,6 +34,10 @@ class BadRequestException(MsmBaseException):
     status_code = status.HTTP_400_BAD_REQUEST
 
 
+class AlreadyExistsException(MsmBaseException):
+    status_code = status.HTTP_409_CONFLICT
+
+
 class UnauthorizedException(MsmBaseException):
     status_code = status.HTTP_401_UNAUTHORIZED
 

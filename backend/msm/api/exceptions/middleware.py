@@ -7,6 +7,7 @@ from fastapi.exceptions import RequestValidationError
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from msm.api.exceptions.catalog import (
+    AlreadyExistsException,
     BadRequestException,
     FileTooLargeException,
     ForbiddenException,
@@ -15,6 +16,9 @@ from msm.api.exceptions.catalog import (
     UnauthorizedException,
 )
 from msm.api.exceptions.responses import (
+    AlreadyExistsErrorBodyResponse,
+    AlreadyExistsErrorResponse,
+    AlreadyExistsErrorResponseModel,
     BadRequestErrorBodyResponse,
     BadRequestErrorResponse,
     BadRequestErrorResponseModel,
@@ -77,6 +81,12 @@ class ExceptionMiddleware(BaseHTTPMiddleware):
             return FileTooLargeErrorResponse(
                 err=FileTooLargeErrorResponseModel(
                     error=FileTooLargeErrorBodyResponse.from_exc(e)
+                )
+            )
+        except AlreadyExistsException as e:
+            return AlreadyExistsErrorResponse(
+                err=AlreadyExistsErrorResponseModel(
+                    error=AlreadyExistsErrorBodyResponse.from_exc(e)
                 )
             )
         except MsmBaseException as e:

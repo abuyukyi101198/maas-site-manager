@@ -12,12 +12,14 @@ from fastapi import (
 )
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, ValidationError, model_validator
+from sqlalchemy.exc import IntegrityError
 from streaming_form_data import StreamingFormDataParser  # type: ignore
 from streaming_form_data.targets import BaseTarget, ValueTarget  # type: ignore
 import streaming_form_data.validators  # type: ignore
 
 from msm.api.dependencies import services
 from msm.api.exceptions.catalog import (
+    AlreadyExistsException,
     BadRequestException,
     BaseExceptionDetail,
     FileTooLargeException,
@@ -26,6 +28,7 @@ from msm.api.exceptions.catalog import (
 )
 from msm.api.exceptions.constants import ExceptionCode
 from msm.api.exceptions.responses import (
+    AlreadyExistsErrorResponseModel,
     BadRequestErrorResponseModel,
     ForbiddenErrorResponseModel,
     NotFoundErrorResponseModel,
@@ -168,6 +171,7 @@ class BootAssetsPostResponse(BaseModel):
     responses={
         401: {"model": UnauthorizedErrorResponseModel},
         404: {"model": NotFoundErrorResponseModel},
+        409: {"model": AlreadyExistsErrorResponseModel},
         422: {"model": ValidationErrorResponseModel},
     },
 )
@@ -191,10 +195,26 @@ async def post_boot_assets(
                 )
             ],
         )
-    boot_asset = await services.boot_assets.create(
-        models.BootAssetCreate(**post_request.model_dump())
-    )
-    return BootAssetsPostResponse(id=boot_asset.id)
+    try:
+        boot_asset = await services.boot_assets.create(
+            models.BootAssetCreate(**post_request.model_dump())
+        )
+        return BootAssetsPostResponse(id=boot_asset.id)
+    except IntegrityError:
+        raise AlreadyExistsException(
+            code=ExceptionCode.ALREADY_EXISTS,
+            message="This boot asset already exists.",
+            details=[
+                BaseExceptionDetail(
+                    reason=ExceptionCode.ALREADY_EXISTS,
+                    messages=[
+                        "This boot asset already exists for the given boot source."
+                    ],
+                    field="os,release,arch,subarch",
+                    location="body",
+                )
+            ],
+        )
 
 
 @v1_router.get(
@@ -299,6 +319,7 @@ class BootAssetVersionPostResponse(BaseModel):
     responses={
         401: {"model": UnauthorizedErrorResponseModel},
         404: {"model": NotFoundErrorResponseModel},
+        409: {"model": AlreadyExistsErrorResponseModel},
         422: {"model": ValidationErrorResponseModel},
     },
 )
@@ -321,12 +342,29 @@ async def post_boot_asset_version(
                 )
             ],
         )
-    boot_asset_version = await services.boot_asset_versions.create(
-        models.BootAssetVersionCreate(
-            boot_asset_id=id, version=post_request.version
+
+    try:
+        boot_asset_version = await services.boot_asset_versions.create(
+            models.BootAssetVersionCreate(
+                boot_asset_id=id, version=post_request.version
+            )
         )
-    )
-    return BootAssetVersionPostResponse(id=boot_asset_version.id)
+        return BootAssetVersionPostResponse(id=boot_asset_version.id)
+    except IntegrityError:
+        raise AlreadyExistsException(
+            code=ExceptionCode.ALREADY_EXISTS,
+            message="This boot asset version already exists.",
+            details=[
+                BaseExceptionDetail(
+                    reason=ExceptionCode.ALREADY_EXISTS,
+                    messages=[
+                        "This boot asset version already exists for the given boot asset."
+                    ],
+                    field="version",
+                    location="body",
+                )
+            ],
+        )
 
 
 boot_asset_version_sort_parameters = SortParamParser(
@@ -392,6 +430,7 @@ class BootAssetItemPostResponse(BaseModel):
     responses={
         401: {"model": UnauthorizedErrorResponseModel},
         404: {"model": NotFoundErrorResponseModel},
+        409: {"model": AlreadyExistsErrorResponseModel},
         422: {"model": ValidationErrorResponseModel},
     },
 )
@@ -414,12 +453,29 @@ async def post_boot_asset_item(
                 )
             ],
         )
-    item = await services.boot_asset_items.create(
-        models.BootAssetItemCreate(
-            boot_asset_version_id=id, **post_request.model_dump()
+
+    try:
+        item = await services.boot_asset_items.create(
+            models.BootAssetItemCreate(
+                boot_asset_version_id=id, **post_request.model_dump()
+            )
         )
-    )
-    return BootAssetItemPostResponse(id=item.id)
+        return BootAssetItemPostResponse(id=item.id)
+    except IntegrityError:
+        raise AlreadyExistsException(
+            code=ExceptionCode.ALREADY_EXISTS,
+            message="This boot asset item already exists.",
+            details=[
+                BaseExceptionDetail(
+                    reason=ExceptionCode.ALREADY_EXISTS,
+                    messages=[
+                        "This boot asset item already exists for the given boot asset version."
+                    ],
+                    field="ftype",
+                    location="body",
+                )
+            ],
+        )
 
 
 boot_asset_items_sort_parameters = SortParamParser(
