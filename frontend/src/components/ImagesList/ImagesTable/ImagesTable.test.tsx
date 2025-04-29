@@ -7,7 +7,7 @@ import { createMockImagesResolver } from "@/mocks/resolvers";
 import { apiUrls } from "@/utils/test-urls";
 import { renderWithMemoryRouter, screen, setupServer, waitFor, within } from "@/utils/test-utils";
 
-const images = imageFactory.buildList(2, { name: "Hannah Montana Linux" });
+const images = imageFactory.buildList(2, { codename: "Hannah Montana Linux" });
 const initialHandlers = [rest.get(apiUrls.images, createMockImagesResolver(images))] as const;
 const mockServer = setupServer(...initialHandlers);
 
@@ -76,7 +76,7 @@ it("can display images", async () => {
 
   const rows = within(tableBody).getAllByRole("row");
 
-  expect(rows[0].textContent).toContain(images[0].name);
+  expect(rows[0].textContent).toContain(images[0].codename);
 
   images.forEach((image, i) => {
     expect(rows[i + 1].textContent).toContain(image.release);

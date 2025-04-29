@@ -1,47 +1,46 @@
 import type { MutateOptions, UseMutationOptions } from "@tanstack/react-query";
-import { useQueryClient, useMutation, useQuery, keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import type apiClient from "@/api";
-import type { Image, MutationErrorResponse } from "@/api";
+import type { BootAsset, MutationErrorResponse } from "@/api";
+import apiClient from "@/api";
 import type {
   PendingSitesPostRequest,
-  SitesGetResponse,
   Site,
-  UsersGetResponse,
-  User,
+  SitesGetResponse,
   TokensGetResponse,
+  User,
+  UsersGetResponse,
 } from "@/api/client";
 import {
-  deleteTokens,
-  postLogin,
-  postEnrollmentRequests,
-  getEnrollmentRequests,
-  postTokens,
-  getSites,
-  getTokens,
-  getCurrentUser,
-  updateUser,
-  getUsers,
   addUser,
-  getUser,
-  getSite,
-  getSitesCoordinates,
-  deleteUser,
-  getTokensExport,
-  deleteSites,
-  updateSite,
-  getImages,
-  getUpstreamImages,
-  updateUpstreamImageSource,
-  selectUpstreamImages,
-  getSettings,
-  updateSettings,
-  getUpstreamImageSource,
   deleteImages,
-  uploadImage,
-  updateSitesCoordinates,
-  updateCurrentUserPassword,
+  deleteSites,
+  deleteTokens,
+  deleteUser,
+  getCurrentUser,
+  getEnrollmentRequests,
+  getSettings,
+  getSite,
+  getSites,
+  getSitesCoordinates,
+  getTokens,
+  getTokensExport,
+  getUpstreamImages,
+  getUpstreamImageSource,
+  getUser,
+  getUsers,
+  postEnrollmentRequests,
+  postLogin,
+  postTokens,
+  selectUpstreamImages,
   updateCurrentUser,
+  updateCurrentUserPassword,
+  updateSettings,
+  updateSite,
+  updateSitesCoordinates,
+  updateUpstreamImageSource,
+  updateUser,
+  uploadImage,
 } from "@/api/handlers";
 import { saveToFile } from "@/utils";
 
@@ -365,19 +364,18 @@ export const useImagesInfiniteQuery = ({
     queryKey: ["images", sortBy, pageSize],
     initialPageParam: { page: 1, size: pageSize },
     refetchInterval,
-    queryFn: ({ pageParam: { page } }) => getImages({ page, size: pageSize, sortBy }),
+    queryFn: ({ pageParam: { page } }) =>
+      apiClient.default.getBootAssetsV1BootassetsGet({ page, size: pageSize, sortBy }),
     getNextPageParam: (lastPage, allPages) => {
       if (!lastPage) return undefined;
       const fetchedItemsCount = allPages.reduce((total, page) => total + page.items.length, 0);
-      const nextPage =
-        fetchedItemsCount < lastPage.total ? { page: lastPage.page + 1, size: DEFAULT_PAGE_SIZE } : undefined;
-      return nextPage;
+      return fetchedItemsCount < lastPage.total ? { page: lastPage.page + 1, size: DEFAULT_PAGE_SIZE } : undefined;
     },
     staleTime: Infinity,
   });
 
   const data = {
-    items: query.data?.pages ? query.data.pages.reduce((acc, page) => acc.concat(page.items), [] as Image[]) : [],
+    items: query.data?.pages ? query.data.pages.reduce((acc, page) => acc.concat(page.items), [] as BootAsset[]) : [],
   };
 
   const { hasNextPage, isFetchingNextPage, fetchNextPage } = query;

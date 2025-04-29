@@ -220,22 +220,6 @@ export const updateCurrentUserPassword = ({
 }: Parameters<typeof apiClient.default.patchMePasswordV1UsersMePasswordPatch>[0]) =>
   apiClient.default.patchMePasswordV1UsersMePasswordPatch({ requestBody });
 
-// TODO: replace with api client once API supports it https://warthogs.atlassian.net/browse/MAASENG-2570
-export const getImages = async (params: Record<string, number | string | null>) => {
-  let stringParams: Record<string, string> = {};
-  for (const [key, value] of Object.entries(params)) {
-    stringParams[key] = String(value);
-  }
-  const response = await fetch(`${apiUrls.images}?${new URLSearchParams(stringParams)}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  const data = (await response.json()) as { items: Image[]; page: number; total: number; size: number };
-  return data;
-};
-
 // TODO: replace with api client once API supports it https://warthogs.atlassian.net/browse/MAASENG-2569
 export const getUpstreamImages = async (params: Record<string, number>) => {
   let stringParams: Record<string, string> = {};

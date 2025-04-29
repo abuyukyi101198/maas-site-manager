@@ -27,10 +27,10 @@ const groupImagesByName = (images: UpstreamImage[]) => {
   let imagesByName: ImagesByName = {};
 
   images.forEach((image) => {
-    if (!!imagesByName[image.name]) {
-      imagesByName[image.name].push(image);
+    if (!!imagesByName[image.codename]) {
+      imagesByName[image.codename].push(image);
     } else {
-      imagesByName[image.name] = [image];
+      imagesByName[image.codename] = [image];
     }
   });
 
@@ -46,9 +46,9 @@ const groupArchesByRelease = (images: ImagesByName) => {
     }
     images[distro].forEach((image) => {
       if (!groupedImages[distro][image.release]) {
-        groupedImages[distro][image.release] = [{ label: image.architecture, value: image.id }];
+        groupedImages[distro][image.release] = [{ label: image.arch, value: image.id }];
       } else {
-        groupedImages[distro][image.release].push({ label: image.architecture, value: image.id });
+        groupedImages[distro][image.release].push({ label: image.arch, value: image.id });
       }
     });
   });
@@ -114,7 +114,7 @@ const DownloadImages = () => {
   const handleSubmit = (values: ReleasesWithArches, images: UpstreamImage[]) => {
     const submitData = images.map((image) => ({
       id: image.id,
-      download: values[getValueKey(image.name, image.release)].some((item) => item.value === image.id),
+      download: values[getValueKey(image.codename, image.release)].some((item) => item.value === image.id),
     }));
 
     selectUpstreamImages.mutate(submitData);

@@ -1,20 +1,14 @@
-import type { Settings, SettingsUpdate, ValidationErrorResponseModel } from "@/api/client";
+import type { BootAsset, Settings, SettingsUpdate, ValidationErrorResponseModel } from "@/api/client";
 
-// TODO: replace with auto-generated types from the API client https://warthogs.atlassian.net/browse/MAASENG-2570
-export type Image = {
-  id: number;
-  release: string;
-  architecture: string;
-  name: string;
+// TODO: replace with auto-generated type BootAsset when the missing fields are added
+export type Image = BootAsset & {
   size: number;
   downloaded: number;
-  number_of_sites_synced: number;
   is_custom_image: boolean;
-  last_synced: string | null; // <ISO 8601 date string>
 };
 
 // TODO: replace with auto-generated types from the API client https://warthogs.atlassian.net/browse/MAASENG-2569
-export type UpstreamImage = Pick<Image, "id" | "release" | "architecture" | "name" | "size">;
+export type UpstreamImage = Pick<Image, "id" | "release" | "arch" | "codename" | "size">;
 export type UpstreamImageSource = {
   upstreamSource: string;
   keepUpdated: boolean;

@@ -333,9 +333,9 @@ export const createMockImagesResolver =
     if (sortBy) {
       const [field, order] = sortBy.split("-") as [ImagesSortKey, SortDirection];
       images.sort((a, b) => {
-        if (a.name < b.name) {
+        if (a.codename < b.codename) {
           return -1;
-        } else if (a.name > b.name) {
+        } else if (a.codename > b.codename) {
           return 1;
         } else {
           if (a[field] < b[field]) {

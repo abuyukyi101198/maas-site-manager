@@ -12,12 +12,12 @@ vi.mock("@/context", async () => {
   };
 });
 
-const setupTestCase = (name = "test-row") => {
+const setupTestCase = (codename = "test-row") => {
   const { result } = renderHook(() => useImagesTableColumns());
   const props = {
-    getValue: () => name,
+    getValue: () => codename,
     row: {
-      original: { name },
+      original: { codename },
       getIsSelected: vi.fn(() => false),
       getCanSelect: vi.fn(() => true),
       getToggleSelectedHandler: vi.fn(() => () => {}),
@@ -33,9 +33,9 @@ it("returns the correct number of columns", () => {
   expect(result.current).toBeInstanceOf(Array);
   expect(result.current.map((column) => column.id)).toStrictEqual([
     "select",
-    "name",
+    "os",
     "release",
-    "architecture",
+    "arch",
     "size",
     "status",
     "custom",

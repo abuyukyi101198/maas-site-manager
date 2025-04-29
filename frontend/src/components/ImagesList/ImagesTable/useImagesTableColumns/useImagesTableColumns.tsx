@@ -30,7 +30,7 @@ const useImagesTableColumns = () => {
           ) : (
             <label className="p-checkbox--inline">
               <input
-                aria-label={row.original.name}
+                aria-label={row.original.codename}
                 className="p-checkbox__input"
                 type="checkbox"
                 {...{
@@ -45,9 +45,9 @@ const useImagesTableColumns = () => {
         },
       },
       {
-        id: "name",
-        accessorKey: "name",
-        cell: ({ row, getValue }: { row: Row<Image>; getValue: Getter<Image["name"]> }) => {
+        id: "os",
+        accessorKey: "os",
+        cell: ({ row, getValue }: { row: Row<Image>; getValue: Getter<Image["os"]> }) => {
           return (
             <div>
               <div>
@@ -60,8 +60,8 @@ const useImagesTableColumns = () => {
       },
       { id: "release", accessorKey: "release", enableSorting: true, header: () => "Release title" },
       {
-        id: "architecture",
-        accessorKey: "architecture",
+        id: "arch",
+        accessorKey: "arch",
         enableSorting: false,
         header: () => "Architecture",
       },

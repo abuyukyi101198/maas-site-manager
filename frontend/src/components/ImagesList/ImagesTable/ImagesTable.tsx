@@ -19,11 +19,12 @@ import {
   getExpandedRowModel,
 } from "@tanstack/react-table";
 import classNames from "classnames";
-
 import "./ImagesTable.scss";
+import { random } from "lodash";
+
 import useImagesTableColumns from "./useImagesTableColumns";
 
-import type { Image } from "@/api";
+import type { BootAsset, Image } from "@/api";
 import type { ImagesSortKey, SortBy } from "@/api/handlers";
 import DynamicTable from "@/components/DynamicTable";
 import TableCaption from "@/components/TableCaption";
@@ -47,14 +48,26 @@ export type ImagesTableProps = {
 };
 
 // Filter out the name column from the header
-const filterHeaders = (header: Header<Image, unknown>) => header.column.id !== "name";
+const filterHeaders = (header: Header<Image, unknown>) => header.column.id !== "os";
 // Filter out the name column from individual cells
 const filterCells = (row: Row<Image>, column: Column<Image, unknown>) => {
   if (row.getIsGrouped()) {
-    return ["select", "name", "action"].includes(column.id);
+    return ["select", "os", "action"].includes(column.id);
   } else {
-    return column.id !== "name";
+    return column.id !== "os";
   }
+};
+
+// TODO: remove when the missing fields are added to BootAsset
+const addMissingBootAssetFields = (data: { items: BootAsset[] }): Image[] => {
+  return data?.items.map((item) => {
+    return {
+      ...item,
+      downloaded: [0, 50, 100][random(0, 2, false)],
+      size: random(1, 10, true),
+      is_custom_image: random(0, 1, false) === 0,
+    } as Image;
+  });
 };
 
 export const ImagesTable: React.FC<ImagesTableProps> = ({
@@ -70,11 +83,11 @@ export const ImagesTable: React.FC<ImagesTableProps> = ({
   const columns = useImagesTableColumns();
   const noItems = useMemo<Image[]>(() => [], []);
 
-  const [grouping, setGrouping] = useState<GroupingState>(["name"]);
+  const [grouping, setGrouping] = useState<GroupingState>(["os"]);
   const [expanded, setExpanded] = useState<ExpandedState>(true);
 
   const table = useReactTable<Image>({
-    data: data?.items ? data.items : noItems,
+    data: data?.items ? addMissingBootAssetFields(data) : noItems,
     columns,
     state: {
       rowSelection,
@@ -178,7 +191,7 @@ export const ImagesTable: React.FC<ImagesTableProps> = ({
 export const ImagesTableContainer = () => {
   const { setSidebar } = useAppLayoutContext();
   const { rowSelection, setRowSelection } = useRowSelection("images", { clearOnUnmount: true });
-  const [sorting, setSorting] = useState<SortingState>([{ id: "name", desc: false }]);
+  const [sorting, setSorting] = useState<SortingState>([{ id: "codename", desc: false }]);
   const sortBy = getSortBy(sorting) as SortBy<ImagesSortKey>;
   const { data, error, isPending } = useImagesInfiniteQuery({ sortBy });
 

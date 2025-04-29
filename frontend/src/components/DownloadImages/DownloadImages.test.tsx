@@ -12,8 +12,8 @@ import {
 import { apiUrls } from "@/utils/test-urls";
 import { renderWithMemoryRouter, screen, setupServer, userEvent, waitFor } from "@/utils/test-utils";
 
-const ubuntuImages = upstreamImageFactory.buildList(5, { name: "Ubuntu" });
-const centOsImages = upstreamImageFactory.buildList(5, { name: "CentOS" });
+const ubuntuImages = upstreamImageFactory.buildList(5, { codename: "Ubuntu" });
+const centOsImages = upstreamImageFactory.buildList(5, { codename: "CentOS" });
 const upstreamImages = [...ubuntuImages, ...centOsImages];
 const upstreamImageSource = upstreamImageSourceFactory.build({
   upstreamSource: "https://images.example.com",
@@ -93,7 +93,7 @@ it("enables the submit button once the form has been edited", async () => {
   const arches = ["amd64", "arm64", "i386"];
 
   arches.forEach((architecture) => {
-    images.push(upstreamImageFactory.build({ name: "Ubuntu", release: "22.04 LTS", architecture }));
+    images.push(upstreamImageFactory.build({ codename: "Ubuntu", release: "22.04 LTS", arch: architecture }));
   });
 
   const localHandlers = [
@@ -160,7 +160,7 @@ it("displays errors that ocurred after submitting image selection", async () => 
   const arches = ["amd64", "arm64", "i386"];
 
   arches.forEach((architecture) => {
-    images.push(upstreamImageFactory.build({ name: "Ubuntu", release: "22.04 LTS", architecture }));
+    images.push(upstreamImageFactory.build({ codename: "Ubuntu", release: "22.04 LTS", arch: architecture }));
   });
 
   const localHandlers = [

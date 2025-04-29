@@ -1,17 +1,17 @@
 import Chance from "chance";
-import { sub, add } from "date-fns";
+import { add, sub } from "date-fns";
 import { Factory } from "fishery";
-import { uniqueNamesGenerator, adjectives, colors, animals, starWars } from "unique-names-generator";
+import { adjectives, animals, colors, starWars, uniqueNamesGenerator } from "unique-names-generator";
 
-import { ConnectionStatus, TimeZone } from "@/api";
-import type { Site, SiteData, Settings, Image, UpstreamImage, UpstreamImageSource, User } from "@/api";
+import type { Image, Settings, Site, SiteData, UpstreamImage, UpstreamImageSource, User } from "@/api";
+import { BootAssetKind, BootAssetLabel, ConnectionStatus, TimeZone } from "@/api";
 import type {
-  PendingSite,
   AccessTokenResponse,
-  SitesGetResponse,
-  UsersGetResponse,
+  PendingSite,
   PendingSitesGetResponse,
+  SitesGetResponse,
   Token,
+  UsersGetResponse,
 } from "@/api/client";
 import type { SiteMarkerType } from "@/components/Map/types";
 
@@ -194,14 +194,23 @@ export const imageFactory = Factory.define<Image>(({ sequence }) => {
   const OS = osFactory.build();
   return {
     id: sequence,
+    boot_source_id: chance.integer(),
+    kind: chance.pickone([BootAssetKind._0, BootAssetKind._1]),
+    label: chance.pickone([BootAssetLabel.STABLE, BootAssetLabel.CANDIDATE]),
+    os: OS.name,
     release: OS.release,
-    architecture: archFactory.build(),
-    name: OS.name,
+    codename: OS.release,
+    title: `${OS.name} ${OS.release}`,
+    arch: archFactory.build(),
+    subarch: "generic",
+    compatibility: ["generic"],
+    flavor: "generic",
+    base_image: OS.name,
+    eol: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(),
+    esm_eol: new Date(new Date().setFullYear(new Date().getFullYear() + 10)).toISOString(),
     size: chance.integer({ min: 300 * 1024, max: 4 * 1024 * 1024 }) * 1024,
     downloaded: Math.floor(Math.random() * 3),
-    number_of_sites_synced: Math.floor(Math.random() * 2),
     is_custom_image: chance.bool(),
-    last_synced: chance.pickone([new Date().toISOString(), null]),
   };
 });
 
@@ -211,8 +220,8 @@ export const upstreamImageFactory = Factory.define<UpstreamImage>(({ sequence })
   return {
     id: sequence,
     release: OS.release,
-    architecture: archFactory.build(),
-    name: OS.name,
+    arch: archFactory.build(),
+    codename: OS.name,
     size: Math.floor(chance.floating({ min: 0, max: 1 }) * 10000),
   };
 });
