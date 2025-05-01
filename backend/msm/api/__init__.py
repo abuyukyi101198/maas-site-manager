@@ -37,7 +37,12 @@ from msm.api.utils import create_subapp
 from msm.db import Database, check_server_version
 from msm.metrics import collect_stats
 from msm.middleware import DatabaseMetricsMiddleware, TransactionMiddleware
-from msm.service import ConfigService, ServiceCollection, SettingsService
+from msm.service import (
+    BootSourceService,
+    ConfigService,
+    ServiceCollection,
+    SettingsService,
+)
 from msm.settings import Settings
 
 
@@ -157,7 +162,10 @@ def create_app(
 async def ensure_db_entries(conn: AsyncConnection) -> None:
     """Ensure global database entries are populated."""
     await ConfigService(conn).ensure()
-    await SettingsService(conn).ensure()
+    settings_service = SettingsService(conn)
+    await settings_service.ensure()
+    service_url = await settings_service.get_service_url()
+    await BootSourceService(conn).ensure_custom_boot_source(service_url)
 
 
 def _log_settings(logger: Logger, settings: Settings) -> None:

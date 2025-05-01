@@ -101,6 +101,28 @@ class BootSourceService(Service):
     def _select_statement(self, *columns: Any) -> Select[Any]:
         return select(*columns).select_from(BootSource)
 
+    async def ensure_custom_boot_source(self, service_url: str) -> None:
+        """
+        Ensure that the custom image boot source is present in the database.
+        """
+        stmt = self._select_statement(
+            BootSource.c.id,
+            BootSource.c.url,
+        ).where(BootSource.c.id == 1)
+        result = await self.conn.execute(stmt)
+        if result.one_or_none():
+            # update the custom source url in case the MSM url has changed
+            await self.update(1, models.BootSourceUpdate(url=service_url))
+            return
+        data = {
+            "id": 1,
+            "url": service_url,
+            "keyring": "",
+            "sync_interval": 0,
+            "priority": 1,
+        }
+        await self.conn.execute(insert(BootSource), [data])
+
 
 class BootSourceSelectionService(Service):
     async def get(
