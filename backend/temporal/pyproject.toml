@@ -2,16 +2,16 @@
 # See LICENSE file for licensing details.
 
 [tool.poetry]
-name = "python-samples"
-version = "1.1.0"
+name = "msm-worker"
+version = "0.1"
 description = ""
-authors = ["ali-kelkawi <ali.kelkawi@canonical.com>"]
+authors = ["MAAS <maas-devel@lists.launchpad.net>"]
 packages = [
     { include = "**/*.py", from = "."  }
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.12"
 protobuf = "^3.2.0"
 PyYAML = "^6.0"
 temporal-lib-py = "^1.8.0"
@@ -19,7 +19,6 @@ httpx = "^0.28.1"
 boto3 = "^1.37.7"
 python-json-logger = "^2.0.4"
 urllib3 = "^1.26.16"
-psycopg2 = "^2.9.10"
 pydantic-settings = "^2.4.0"
 
 [tool.poetry.group.dev.dependencies]

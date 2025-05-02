@@ -4,8 +4,8 @@ name: msm-temporal-worker
 summary: Temporal worker app for MAAS Site Manager
 description: OCI image for MAAS Site Manager Temporal worker app
 version: "1.0"
-base: ubuntu@22.04
-build-base: ubuntu@22.04
+base: ubuntu@24.04
+build-base: ubuntu@24.04
 license: Apache-2.0
 
 services:
@@ -54,21 +54,10 @@ platforms:
 
 parts:
   worker-dependencies:
-    plugin: python
+    plugin: poetry
     source: .
-    build-packages:
-      - build-essential
-      - libpq-dev
-      - python3-dev
-    # Uncomment if using a 'requirements.txt' file
-    # python-requirements:
-    #   - requirements.txt
     stage-packages:
-      - python3.10-venv
-      - coreutils
-      - bash
-      - libpq-dev
-      - python3-dev
+      - python3-venv
   add-ca-certificates:
     # This installs ca-certificates in the build env to populate our /etc/ssl/certs,
     # then copies just the ca-certificates.crt to the final image
