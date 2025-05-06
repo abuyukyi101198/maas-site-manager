@@ -11,6 +11,7 @@ from pytest_mock import MockerFixture
 from msm.db.models import (
     BootAssetKind,
     BootAssetLabel,
+    BootSource,
     ItemFileType,
 )
 from msm.jwt import TokenAudience, TokenPurpose
@@ -276,6 +277,22 @@ class TestBootSourcesGetHandler:
         assert resp_body["size"] == 20
         assert resp_body["total"] == 1
         assert resp_body["items"] == [boot_source.model_dump()]
+
+    async def test_get_by_id(self, user_client: Client, factory: Factory) -> None:
+        boot_source = await factory.make_BootSource(
+            priority=2,
+            url="http://test.url",
+            keyring="test_keyring",
+            sync_interval=4200,
+        )
+        resp = await user_client.get(f"/bootasset-sources/{boot_source.id}")
+        assert resp.status_code == 200
+        source = BootSource(**resp.json())
+        assert source == boot_source
+
+    async def test_get_by_id_not_found(self, user_client: Client, factory: Factory) -> None:
+        resp = await user_client.get("/bootasset-sources/999")
+        assert resp.status_code == 404
 
     async def test_get_with_sorting(
         self, user_client: Client, factory: Factory

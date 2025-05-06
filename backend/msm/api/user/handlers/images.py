@@ -250,6 +250,34 @@ async def get_boot_sources(
         items=list(results),
     )
 
+@v1_router.get(
+    "/bootasset-sources/{id}",
+    responses={
+        401: {"model": UnauthorizedErrorResponseModel},
+        404: {"model": NotFoundErrorResponseModel},
+        422: {"model": ValidationErrorResponseModel},
+    }
+)
+async def get_boot_source_by_id(
+    services: Annotated[ServiceCollection, Depends(services)],
+    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
+    id: int,
+) -> models.BootSource:
+    bs = await services.boot_sources.get_by_id(id)
+    if bs is None:
+        raise NotFoundException(
+            code=ExceptionCode.MISSING_RESOURCE,
+            message="Boot Source does not exist.",
+            details=[
+                BaseExceptionDetail(
+                    reason=ExceptionCode.MISSING_RESOURCE,
+                    messages=[f"BootSource ID {id} does not exist"],
+                    field="id",
+                    location="path",
+                )
+            ],
+        )
+    return bs
 
 class BootSourcesPostRequest(BaseModel):
     priority: int
