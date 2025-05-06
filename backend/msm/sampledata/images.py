@@ -3,6 +3,7 @@ from hashlib import sha256
 
 from sqlalchemy.ext.asyncio import AsyncConnection
 
+from msm.db.models import ItemFileType
 from msm.sampledata.db import (
     ModelCollection,
     SampleDataModel,
@@ -119,7 +120,7 @@ DmFoRWTU6CpKtwIg/lb1ncbslH2xAFeUX6ASHXR8vBOnIXWss21FuAaNmWe4lmw=
     collection = ModelCollection("boot_asset_item")
     collection.add(
         boot_asset_version_id=boot_asset_versions[0].id,
-        ftype="boot-initrd",
+        ftype=ItemFileType.BOOT_INITRD,
         sha256=sha256().hexdigest(),
         path="ubuntu/noble",
         file_size=3635135734,
@@ -130,7 +131,7 @@ DmFoRWTU6CpKtwIg/lb1ncbslH2xAFeUX6ASHXR8vBOnIXWss21FuAaNmWe4lmw=
     )
     collection.add(
         boot_asset_version_id=boot_asset_versions[0].id,
-        ftype="manifest",
+        ftype=ItemFileType.SQUASHFS_IMAGE,
         sha256=sha256().hexdigest(),
         path="ubuntu/jammy",
         file_size=3655135734,

@@ -207,7 +207,7 @@ BootAssetItem = Table(
         "boot_asset_version_id",
         Integer,
         ForeignKey("boot_asset_version.id"),
-        nullable=False,
+        nullable=True,
     ),
     Column("ftype", Text, nullable=False),
     Column("sha256", Text, nullable=False),

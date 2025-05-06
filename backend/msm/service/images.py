@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+from datetime import datetime
 from typing import Any
 
 from sqlalchemy import Select, and_, delete, insert, select, update
@@ -311,9 +312,54 @@ class BootAssetService(Service):
         result = await self.conn.execute(stmt, [data])
         return models.BootAsset(**result.one()._asdict())
 
+    async def update(
+        self, id: int, details: models.BootAssetUpdate
+    ) -> models.BootAsset:
+        data = details.model_dump(exclude_none=True)
+        stmt = (
+            update(BootAsset)
+            .where(BootAsset.c.id == id)
+            .values(data)
+            .returning(
+                BootAsset.c.id,
+                BootAsset.c.boot_source_id,
+                BootAsset.c.kind,
+                BootAsset.c.label,
+                BootAsset.c.os,
+                BootAsset.c.release,
+                BootAsset.c.codename,
+                BootAsset.c.title,
+                BootAsset.c.arch,
+                BootAsset.c.subarch,
+                BootAsset.c.compatibility,
+                BootAsset.c.flavor,
+                BootAsset.c.base_image,
+                BootAsset.c.eol,
+                BootAsset.c.esm_eol,
+            )
+        )
+        result = await self.conn.execute(stmt)
+        return models.BootAsset(**result.one()._asdict())
+
     async def delete(self, boot_asset_id: int) -> None:
         stmt = delete(BootAsset).where(BootAsset.c.id == boot_asset_id)
         await self.conn.execute(stmt)
+
+    async def get_or_create(
+        self, asset: models.BootAssetCreate
+    ) -> models.BootAsset:
+        count, assets = await self.get(
+            [],
+            boot_source_id=[asset.boot_source_id],
+            kind=[asset.kind],
+            label=[asset.label],
+            os=[asset.os],
+            arch=[asset.arch],
+            release=[asset.release],
+        )
+        if count == 0:
+            return await self.create(asset)
+        return next(assets)  # type: ignore
 
     def _select_statement(self, *columns: Any) -> Select[Any]:
         return select(*columns).select_from(BootAsset)
@@ -374,6 +420,29 @@ class BootAssetVersionService(Service):
         result = await self.conn.execute(stmt, [data])
         return models.BootAssetVersion(**result.one()._asdict())
 
+    async def create_next_revision(
+        self, asset_id: int, date: datetime
+    ) -> models.BootAssetVersion:
+        date_str = date.strftime("%Y%m%d") + "."
+        count, versions = await self.get(
+            [],
+            boot_asset_id=[asset_id],
+            version=[date_str],
+        )
+        if count > 0:
+            latest_rev = max([int(v.version.split(".")[1]) for v in versions])
+            new_rev = latest_rev + 1
+            return await self.create(
+                models.BootAssetVersionCreate(
+                    boot_asset_id=asset_id, version=f"{date_str}{new_rev}"
+                )
+            )
+        return await self.create(
+            models.BootAssetVersionCreate(
+                boot_asset_id=asset_id, version=f"{date_str}1"
+            )
+        )
+
     async def delete(self, boot_asset_version_id: int) -> None:
         stmt = delete(BootAssetVersion).where(
             BootAssetVersion.c.id == boot_asset_version_id
@@ -391,7 +460,7 @@ class BootAssetItemService(Service):
         offset: int = 0,
         limit: int | None = None,
         boot_asset_version_id: list[int] | None = None,
-        ftype: list[str] | None = None,
+        ftype: list[models.ItemFileType] | None = None,
         sha256: list[str] | None = None,
         path: list[str] | None = None,
         file_size: list[int] | None = None,
@@ -467,12 +536,12 @@ class BootAssetItemService(Service):
         return models.BootAssetItem(**result.one()._asdict())
 
     async def create_temporary(
-        self, boot_asset_version_id: int
+        self, boot_asset_version_id: int | None = None
     ) -> models.BootAssetItem:
         """Create a temporary BootAssetItem that is meant to be overwritten."""
         details = models.BootAssetItemCreate(
             boot_asset_version_id=boot_asset_version_id,
-            ftype="",
+            ftype=models.ItemFileType.ROOT_TGZ,
             sha256="",
             path="",
             file_size=0,

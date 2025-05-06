@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import MAXYEAR, UTC, datetime
+from hashlib import sha256
 from logging import getLogger
 from os.path import join
 from typing import Annotated, Any, Self
@@ -11,7 +12,7 @@ from fastapi import (
     Request,
 )
 from fastapi.concurrency import run_in_threadpool
-from pydantic import BaseModel, ValidationError, model_validator
+from pydantic import BaseModel, model_validator
 from sqlalchemy.exc import IntegrityError
 from streaming_form_data import StreamingFormDataParser  # type: ignore
 from streaming_form_data.targets import BaseTarget, ValueTarget  # type: ignore
@@ -610,6 +611,7 @@ class S3MultipartUploadTarget(BaseTarget):  # type: ignore
         self.part_no = 1
         self.parts: list[dict[str, Any]] = []
         self.bytes_sent = 0
+        self.sha256 = sha256()
         super().__init__(
             validator=streaming_form_data.validators.MaxSizeValidator(
                 self.max_upload_size_bytes
@@ -628,6 +630,7 @@ class S3MultipartUploadTarget(BaseTarget):  # type: ignore
 
     def upload_current_chunk(self) -> None:
         self.upload()
+        self.sha256.update(self.current_chunk)
         self.part_no += 1
         self.bytes_sent += len(self.current_chunk)
         self.current_chunk = b""
@@ -677,8 +680,68 @@ class BootAssetItemValueValidator:
             )
 
 
+CUSTOM_IMAGE_FILE_EXTENSIONS = {
+    "tgz": models.ItemFileType.ROOT_TGZ,
+    "tbz": models.ItemFileType.ROOT_TBZ,
+    "txz": models.ItemFileType.ROOT_TXZ,
+    "ddtgz": models.ItemFileType.ROOT_DDTGZ,
+    "ddtbz": models.ItemFileType.ROOT_DDTBZ,
+    "ddtxz": models.ItemFileType.ROOT_DDTXZ,
+    "ddtar": models.ItemFileType.ROOT_DDTAR,
+    "ddbz2": models.ItemFileType.ROOT_DDBZ2,
+    "ddgz": models.ItemFileType.ROOT_DDGZ,
+    "ddxz": models.ItemFileType.ROOT_DDXZ,
+    "ddraw": models.ItemFileType.ROOT_DDRAW,
+}
+
+
+class FilenameValueValidator:
+    def __init__(self, type: type, name: str):
+        self._type = type
+        self._name = name
+
+    def __call__(self, chunk: bytes) -> None:
+        try:
+            self._type(chunk)
+        except:
+            raise BadRequestException(
+                message=f"Invalid type for {self._name}, expected {self._type}",
+                code=ExceptionCode.INVALID_PARAMS,
+                details=[
+                    BaseExceptionDetail(
+                        reason=ExceptionCode.INVALID_PARAMS,
+                        messages=[f"Invalid type for {self._name}"],
+                        field=self._name,
+                        location="body",
+                    )
+                ],
+            )
+        ext = chunk.decode().split(".")[-1]
+        if ext not in CUSTOM_IMAGE_FILE_EXTENSIONS.keys():
+            raise BadRequestException(
+                message="Unsupported file type",
+                code=ExceptionCode.INVALID_PARAMS,
+                details=[
+                    BaseExceptionDetail(
+                        reason=ExceptionCode.INVALID_PARAMS,
+                        messages=[
+                            f"Unsupported file type {ext}, must be one of {CUSTOM_IMAGE_FILE_EXTENSIONS.keys()}"
+                        ],
+                        field="filename",
+                        location="body",
+                    )
+                ],
+            )
+
+
+def get_file_type_from_filename(filename: str) -> models.ItemFileType:
+    ext = filename.split(".")[-1]
+    # ext is verified above, don't need to handle KeyError
+    return CUSTOM_IMAGE_FILE_EXTENSIONS[ext]
+
+
 @v1_router.post(
-    "/bootasset-items/{boot_asset_version_id}",
+    "/images",
     responses={
         400: {"model": BadRequestErrorResponseModel},
         401: {"model": UnauthorizedErrorResponseModel},
@@ -689,60 +752,32 @@ class BootAssetItemValueValidator:
 async def post_images(
     services: Annotated[ServiceCollection, Depends(services)],
     authenticated_user: Annotated[models.User, Depends(authenticated_user)],
-    boot_asset_version_id: int,
     request: Request,
 ) -> models.BootAssetItem:
-    boot_asset_version = await services.boot_asset_versions.get_by_id(
-        boot_asset_version_id
-    )
-    if not boot_asset_version:
-        raise NotFoundException(
-            code=ExceptionCode.MISSING_RESOURCE,
-            message="Boot Asset Version does not exist.",
-            details=[
-                BaseExceptionDetail(
-                    reason=ExceptionCode.MISSING_RESOURCE,
-                    messages=[
-                        f"BootAssetVersion ID {boot_asset_version_id} does not exist"
-                    ],
-                    field="boot_asset_version_id",
-                    location="path",
-                )
-            ],
-        )
     settings = Settings()
     api_settings = await services.settings.get()
     if not urlparse(settings.s3_endpoint).scheme:
         settings.s3_endpoint = f"http://{settings.s3_endpoint}"
 
     parser = StreamingFormDataParser(headers=request.headers)
-    ftype = ValueTarget(validator=BootAssetItemValueValidator(str, "ftype"))
-    parser.register("ftype", ftype)
-    sha256 = ValueTarget(validator=BootAssetItemValueValidator(str, "sha256"))
-    parser.register("sha256", sha256)
-    path = ValueTarget(validator=BootAssetItemValueValidator(str, "path"))
-    parser.register("path", path)
+    os = ValueTarget(validator=BootAssetItemValueValidator(str, "os"))
+    parser.register("os", os)
+    release = ValueTarget(
+        validator=BootAssetItemValueValidator(str, "release")
+    )
+    parser.register("release", release)
+    title = ValueTarget(validator=BootAssetItemValueValidator(str, "title"))
+    parser.register("title", title)
+    arch = ValueTarget(validator=BootAssetItemValueValidator(str, "arch"))
+    parser.register("arch", arch)
     file_size = ValueTarget(
         validator=BootAssetItemValueValidator(int, "file_size")
     )
     parser.register("file_size", file_size)
-    # don't need to pass type as str | None, since validator won't be called if it isn't passed
-    source_package = ValueTarget(
-        validator=BootAssetItemValueValidator(str, "source_package")
-    )
-    parser.register("source_package", source_package)
-    source_version = ValueTarget(
-        validator=BootAssetItemValueValidator(str, "source_version")
-    )
-    parser.register("source_version", source_version)
-    source_release = ValueTarget(
-        validator=BootAssetItemValueValidator(str, "source_release")
-    )
-    parser.register("source_release", source_release)
+    filename = ValueTarget(validator=FilenameValueValidator(str, "filename"))
+    parser.register("filename", filename)
 
-    tmp_item = await services.boot_asset_items.create_temporary(
-        boot_asset_version_id
-    )
+    tmp_item = await services.boot_asset_items.create_temporary()
     s3_upload_target = S3MultipartUploadTarget(
         settings,
         join(
@@ -774,50 +809,47 @@ async def post_images(
         except BadRequestException:
             await services.boot_asset_items.delete(tmp_item.id)
             raise
-    try:
-        boot_asset_item = await services.boot_asset_items.update(
-            tmp_item.id,
-            models.BootAssetItemUpdate(
-                ftype=ftype.value.decode(),
-                sha256=sha256.value.decode(),
-                path=path.value.decode(),
-                file_size=int(file_size.value),
-                source_package=source_package.value.decode()
-                if source_package.value
-                else None,
-                source_version=source_version.value.decode()
-                if source_version.value
-                else None,
-                source_release=source_release.value.decode()
-                if source_release.value
-                else None,
-            ),
-        )
-    except ValidationError as e:
-        await services.boot_asset_items.delete(tmp_item.id)
-        await run_in_threadpool(s3_upload_target.abort_upload)
-        details = []
-        for err in e.errors():
-            details.append(
-                BaseExceptionDetail(
-                    reason=ExceptionCode.INVALID_PARAMS,
-                    messages=[err["msg"]],
-                    location="body",
-                    field=err["loc"][0],
-                )
-            )
-        raise BadRequestException(
-            message="One or more request parameters are invalid",
-            code=ExceptionCode.INVALID_PARAMS,
-            details=details,
-        )
+
     # last part may have been left behind if it was smaller than
     # the minimum upload size.
     # the last upload has no minimum upload size requirement.
     if s3_upload_target.current_chunk:
         await run_in_threadpool(s3_upload_target.upload_current_chunk)
+
+    asset = await services.boot_assets.get_or_create(
+        models.BootAssetCreate(
+            boot_source_id=1,
+            kind=models.BootAssetKind.OS,
+            label=models.BootAssetLabel.STABLE,
+            os=os.value.decode(),
+            release=release.value.decode(),
+            codename="",
+            title=title.value.decode(),
+            arch=arch.value.decode(),
+            subarch="",
+            compatibility=[],
+            flavor="",
+            base_image=f"{os.value.decode()}/{release.value.decode()}",
+            eol=datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC),
+            esm_eol=datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC),
+        )
+    )
+    version = await services.boot_asset_versions.create_next_revision(
+        asset.id, datetime.now()
+    )
+    boot_asset_item = await services.boot_asset_items.update(
+        tmp_item.id,
+        models.BootAssetItemUpdate(
+            boot_asset_version_id=version.id,
+            ftype=get_file_type_from_filename(filename.value.decode()),
+            file_size=int(file_size.value),
+            sha256=s3_upload_target.sha256.hexdigest(),
+        ),
+    )
     if boot_asset_item.file_size != s3_upload_target.bytes_sent:
-        await services.boot_asset_items.delete(tmp_item.id)
+        await services.boot_asset_items.delete(boot_asset_item.id)
+        await services.boot_asset_versions.delete(version.id)
+        await services.boot_assets.delete(asset.id)
         await run_in_threadpool(s3_upload_target.abort_upload)
         raise BadRequestException(
             message="The size of the uploaded file does not match the 'file_size' parameter in the request",

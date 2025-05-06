@@ -2,7 +2,7 @@ from typing import NamedTuple
 
 from fastapi import Query
 
-from msm.db.models import BootAssetKind, BootAssetLabel
+from msm.db.models import BootAssetKind, BootAssetLabel, ItemFileType
 
 
 class SiteFilterParams(NamedTuple):
@@ -45,7 +45,7 @@ class BootAssetItemFilterParams(NamedTuple):
     """BootAssetItem filtering parameters."""
 
     boot_asset_version_id: list[int] | None
-    ftype: list[str] | None
+    ftype: list[ItemFileType] | None
     sha256: list[str] | None
     path: list[str] | None
     file_size: list[int] | None
@@ -154,7 +154,9 @@ async def boot_asset_item_filter_params(
     boot_asset_version_id: list[int] | None = Query(
         default=None, title="Filter for boot asset version ID"
     ),
-    ftype: list[str] | None = Query(default=None, title="Filter for ftype"),
+    ftype: list[ItemFileType] | None = Query(
+        default=None, title="Filter for ftype"
+    ),
     sha256: list[str] | None = Query(default=None, title="Filter for sha256"),
     path: list[str] | None = Query(default=None, title="Filter for path"),
     file_size: list[int] | None = Query(default=None, title="Filter for size"),

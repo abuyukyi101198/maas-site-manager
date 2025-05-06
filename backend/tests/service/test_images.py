@@ -11,6 +11,7 @@ from msm.db.models import (
     BootAssetItemUpdate,
     BootAssetKind,
     BootAssetLabel,
+    BootAssetUpdate,
     BootAssetVersion,
     BootAssetVersionCreate,
     BootSource,
@@ -19,6 +20,7 @@ from msm.db.models import (
     BootSourceSelectionCreate,
     BootSourceSelectionUpdate,
     BootSourceUpdate,
+    ItemFileType,
 )
 from msm.service import (
     BootAssetItemService,
@@ -216,6 +218,68 @@ class TestBootAssetService:
         await service.delete(boot_asset.id)
         assets = await factory.get("boot_asset")
         assert len(assets) == 0
+
+    async def test_update(
+        self, factory: Factory, db_connection: AsyncConnection
+    ) -> None:
+        boot_source = await factory.make_BootSource()
+        boot_asset = BootAsset(
+            id=0,  # not actually used, but need to specify here for pydantic
+            boot_source_id=boot_source.id,
+            kind=BootAssetKind.BOOTLOADER,
+            label=BootAssetLabel.CANDIDATE,
+            os="test OS",
+            release="test release",
+            codename="test codename",
+            title="test title",
+            arch="test arch",
+            subarch="test subarch",
+            compatibility=["test", "compatibility"],
+            flavor="test flavor",
+            base_image="test base image",
+            eol=now_utc() + timedelta(days=3650),
+            esm_eol=now_utc() + timedelta(days=5000),
+        )
+        boot_asset = await factory.make_BootAsset(
+            boot_source.id,
+            boot_asset.kind,
+            boot_asset.label,
+            boot_asset.os,
+            boot_asset.release,
+            boot_asset.codename,
+            boot_asset.title,
+            boot_asset.arch,
+            boot_asset.subarch,
+            boot_asset.compatibility,
+            boot_asset.flavor,
+            boot_asset.base_image,
+            boot_asset.eol,
+            boot_asset.esm_eol,
+        )
+        asset_updates = BootAssetUpdate(
+            kind=BootAssetKind.OS,
+            label=BootAssetLabel.STABLE,
+            os="ubuntu",
+            release="noble",
+            codename="Numbat",
+            title="new title",
+            arch="amd64",
+            subarch="subarch",
+            compatibility=["test"],
+            flavor="flavor",
+            base_image="ubuntu/noble",
+            eol=now_utc(),
+            esm_eol=now_utc(),
+        )
+
+        service = BootAssetService(db_connection)
+        await service.update(boot_asset.id, asset_updates)
+        assets = await factory.get("boot_asset")
+        assert len(assets) == 1
+        assert assets[0] == asset_updates.model_dump() | {
+            "id": boot_asset.id,
+            "boot_source_id": boot_source.id,
+        }
 
 
 @pytest.mark.asyncio
@@ -541,7 +605,7 @@ class TestBootAssetItemService:
         expected_boot_asset_item = BootAssetItem(
             id=0,
             boot_asset_version_id=boot_asset_version.id,
-            ftype="kernel",
+            ftype=ItemFileType.ARCHIVE_TAR_XZ,
             sha256="2349asldkfj2309854jhs",
             path="/test",
             file_size=23425323,
@@ -552,7 +616,7 @@ class TestBootAssetItemService:
         )
         boot_asset_item = await factory.make_BootAssetItem(
             boot_asset_version.id,
-            ftype="kernel",
+            ftype=ItemFileType.ARCHIVE_TAR_XZ,
             sha256="2349asldkfj2309854jhs",
             path="/test",
             file_size=23425323,
@@ -594,7 +658,7 @@ class TestBootAssetItemService:
         expected_boot_asset_item = BootAssetItem(
             id=0,
             boot_asset_version_id=boot_asset_version.id,
-            ftype="kernel",
+            ftype=ItemFileType.ARCHIVE_TAR_XZ,
             sha256="2349asldkfj2309854jhs",
             path="/test",
             file_size=23425323,
@@ -605,7 +669,7 @@ class TestBootAssetItemService:
         )
         boot_asset_item = await factory.make_BootAssetItem(
             boot_asset_version.id,
-            ftype="kernel",
+            ftype=ItemFileType.ARCHIVE_TAR_XZ,
             sha256="2349asldkfj2309854jhs",
             path="/test",
             file_size=23425323,
@@ -616,7 +680,7 @@ class TestBootAssetItemService:
         )
         await factory.make_BootAssetItem(
             boot_asset_version2.id,
-            ftype="2",
+            ftype=ItemFileType.BOOT_DTB,
             sha256="22222",
             path="/path",
             file_size=234253232,
@@ -665,7 +729,7 @@ class TestBootAssetItemService:
         boot_asset_version = await factory.make_BootAssetVersion(boot_asset.id)
         new_boot_asset_item = BootAssetItemCreate(
             boot_asset_version_id=boot_asset_version.id,
-            ftype="kernel",
+            ftype=ItemFileType.ARCHIVE_TAR_XZ,
             sha256="2349asldkfj2309854jhs",
             path="/test",
             file_size=23425323,
@@ -697,7 +761,7 @@ class TestBootAssetItemService:
         assert items[0] == {
             "id": boot_asset_item.id,
             "boot_asset_version_id": boot_asset_version.id,
-            "ftype": "",
+            "ftype": ItemFileType.ROOT_TGZ,
             "sha256": "",
             "path": "",
             "file_size": 0,
@@ -715,7 +779,7 @@ class TestBootAssetItemService:
         boot_asset_version = await factory.make_BootAssetVersion(boot_asset.id)
         boot_asset_item = await factory.make_BootAssetItem(
             boot_asset_version.id,
-            ftype="kernel",
+            ftype=ItemFileType.ARCHIVE_TAR_XZ,
             sha256="2349asldkfj2309854jhs",
             path="/test",
             file_size=23425323,
@@ -727,7 +791,7 @@ class TestBootAssetItemService:
 
         service = BootAssetItemService(db_connection)
         updates = BootAssetItemUpdate(
-            ftype="initrd",
+            ftype=ItemFileType.BOOT_INITRD,
             sha256="asdflkj234lkjsdlfkj23",
             path="/another-test",
             file_size=33425323,
@@ -739,10 +803,12 @@ class TestBootAssetItemService:
         await service.update(boot_asset_item.id, updates)
         items = await factory.get("boot_asset_item")
         assert len(items) == 1
+        updates_dict = updates.model_dump()
+        updates_dict.pop("boot_asset_version_id")
         expected_item = BootAssetItem(
             id=boot_asset_item.id,
             boot_asset_version_id=boot_asset_version.id,
-            **updates.model_dump(),
+            **updates_dict,
         )
         assert items[0] == expected_item.model_dump()
 
@@ -754,7 +820,7 @@ class TestBootAssetItemService:
         boot_asset_version = await factory.make_BootAssetVersion(boot_asset.id)
         boot_asset_item = await factory.make_BootAssetItem(
             boot_asset_version.id,
-            ftype="kernel",
+            ftype=ItemFileType.ARCHIVE_TAR_XZ,
             sha256="2349asldkfj2309854jhs",
             path="/test",
             file_size=23425323,
@@ -777,7 +843,7 @@ class TestBootAssetItemService:
         boot_asset_version = await factory.make_BootAssetVersion(boot_asset.id)
         boot_asset_item = await factory.make_BootAssetItem(
             boot_asset_version.id,
-            ftype="kernel",
+            ftype=ItemFileType.ARCHIVE_TAR_XZ,
             sha256="2349asldkfj2309854jhs",
             path="/test",
             file_size=23425323,

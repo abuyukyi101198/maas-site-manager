@@ -1,14 +1,17 @@
-from datetime import datetime, timedelta
+from datetime import MAXYEAR, UTC, datetime, timedelta
+from hashlib import sha256
 import json
-import os
+from pathlib import Path
 from uuid import uuid4
 
+from pydantic_core import ValidationError
 import pytest
 from pytest_mock import MockerFixture
 
 from msm.db.models import (
     BootAssetKind,
     BootAssetLabel,
+    ItemFileType,
 )
 from msm.jwt import TokenAudience, TokenPurpose
 from msm.time import now_utc
@@ -626,7 +629,7 @@ class TestBootAssetItemsGetHandler:
         bv = await factory.make_BootAssetVersion(ba.id)
         bi = await factory.make_BootAssetItem(
             bv.id,
-            ftype="ftype",
+            ftype=ItemFileType.ARCHIVE_TAR_XZ,
             sha256="sha256",
             path="test/path",
             file_size=1,
@@ -660,7 +663,7 @@ class TestBootAssetItemsGetHandler:
         bv2 = await factory.make_BootAssetVersion(ba.id, version="x")
         bi = await factory.make_BootAssetItem(
             bv.id,
-            ftype="ftype",
+            ftype=ItemFileType.ARCHIVE_TAR_XZ,
             sha256="sha256",
             path="test/path",
             file_size=1,
@@ -671,7 +674,7 @@ class TestBootAssetItemsGetHandler:
         )
         await factory.make_BootAssetItem(
             bv2.id,
-            ftype="2",
+            ftype=ItemFileType.BOOT_INITRD,
             sha256="3",
             path="somethingelse",
             file_size=2,
@@ -682,13 +685,13 @@ class TestBootAssetItemsGetHandler:
         )
         resp = await user_client.get(
             "/bootasset-items",
-            params=f"{filter_param}={bi.model_dump()[filter_param]}",
+            params=f"{filter_param}={json.loads(bi.model_dump_json())[filter_param]}",
         )
 
         assert resp.status_code == 200
         resp_data = resp.json()
         assert len(resp_data["items"]) == 1
-        assert resp_data["items"] == [bi.model_dump()]
+        assert resp_data["items"] == [json.loads(bi.model_dump_json())]
 
     @pytest.mark.parametrize(
         "sort_param",
@@ -711,7 +714,7 @@ class TestBootAssetItemsGetHandler:
         bv = await factory.make_BootAssetVersion(ba.id)
         bi1 = await factory.make_BootAssetItem(
             bv.id,
-            ftype="a",
+            ftype=ItemFileType.ARCHIVE_TAR_XZ,
             sha256="a",
             path="a",
             file_size=1,
@@ -722,7 +725,7 @@ class TestBootAssetItemsGetHandler:
         )
         bi2 = await factory.make_BootAssetItem(
             bv.id,
-            ftype="b",
+            ftype=ItemFileType.BOOT_INITRD,
             sha256="b",
             path="b",
             file_size=2,
@@ -747,19 +750,29 @@ class TestBootAssetItemsGetHandler:
         bs = await factory.make_BootSource()
         ba = await factory.make_BootAsset(bs.id)
         bv = await factory.make_BootAssetVersion(ba.id)
-        for i in range(4):
-            await factory.make_BootAssetItem(bv.id, ftype=f"{i+1}")
+        await factory.make_BootAssetItem(
+            bv.id, ftype=ItemFileType.ARCHIVE_TAR_XZ, path="1"
+        )
+        await factory.make_BootAssetItem(
+            bv.id, ftype=ItemFileType.BOOT_DTB, path="2"
+        )
+        await factory.make_BootAssetItem(
+            bv.id, ftype=ItemFileType.BOOT_INITRD, path="3"
+        )
+        await factory.make_BootAssetItem(
+            bv.id, ftype=ItemFileType.BOOT_KERNEL, path="4"
+        )
 
         resp = await user_client.get(
-            "/bootasset-items?page=2&size=2&sort_by=ftype"
+            "/bootasset-items?page=2&size=2&sort_by=path"
         )
         assert resp.status_code == 200
         resp_body = resp.json()
         assert resp_body["page"] == 2
         assert resp_body["size"] == 2
         assert len(resp_body["items"]) == 2
-        assert resp_body["items"][0]["ftype"] == "3"
-        assert resp_body["items"][1]["ftype"] == "4"
+        assert resp_body["items"][0]["path"] == "3"
+        assert resp_body["items"][1]["path"] == "4"
 
     @pytest.mark.parametrize("sort_by", ["id", "kind,kind", "not_a_field"])
     async def test_invalid_sort_params(
@@ -790,7 +803,7 @@ class TestBootAssetItemsPostHandler:
         ba = await factory.make_BootAsset(bs.id)
         boot_asset_version = await factory.make_BootAssetVersion(ba.id)
         data = {
-            "ftype": "kernel",
+            "ftype": ItemFileType.ARCHIVE_TAR_XZ,
             "sha256": "testblaksjdflkj",
             "path": "/item",
             "file_size": 2321345623,
@@ -834,7 +847,7 @@ class TestBootAssetItemsPostHandler:
         self, user_client: Client, factory: Factory
     ) -> None:
         data = {
-            "ftype": "kernel",
+            "ftype": ItemFileType.ARCHIVE_TAR_XZ,
             "sha256": "testblaksjdflkj",
             "path": "/item",
             "file_size": 2321345623,
@@ -853,9 +866,11 @@ class TestBootAssetItemsPostHandler:
         bs = await factory.make_BootSource()
         ba = await factory.make_BootAsset(bs.id)
         bv = await factory.make_BootAssetVersion(ba.id)
-        await factory.make_BootAssetItem(bv.id, ftype="ftype")
+        await factory.make_BootAssetItem(
+            bv.id, ftype=ItemFileType.ARCHIVE_TAR_XZ
+        )
         data = {
-            "ftype": "ftype",
+            "ftype": ItemFileType.ARCHIVE_TAR_XZ,
             "sha256": "testblaksjdflkj",
             "path": "/item",
             "file_size": 2321345623,
@@ -877,6 +892,7 @@ class TestCustomImageUploadHandler:
         factory: Factory,
         mocker: MockerFixture,
         monkeypatch: pytest.MonkeyPatch,
+        tmp_path: Path,
     ) -> None:
         mock_resource = mocker.patch(
             "msm.api.user.handlers.images.boto3.resource"
@@ -894,49 +910,202 @@ class TestCustomImageUploadHandler:
         monkeypatch.setenv("MSM_S3_PATH", "test/path")
 
         bs = await factory.make_BootSource()
-        ba = await factory.make_BootAsset(bs.id)
-        boot_asset_version = await factory.make_BootAssetVersion(ba.id)
         test_file_content = "This is a test file."
         data = {
-            "ftype": "kernel",
-            "sha256": "testblaksjdflkj",
-            "path": "/item",
+            "os": "ubuntu",
+            "release": "noble",
+            "arch": "amd64",
             "file_size": len(test_file_content),
-            "source_package": "ubukernel",
-            "source_version": "23.4.1",
-            "source_release": "noble",
+            "title": "My Custom Image",
+            "filename": "test.tgz",
         }
-        try:
-            test_filename = "testfile"
-            with open(test_filename, "w") as f:
-                f.write(test_file_content)
-            with open(test_filename, "rb") as f:
-                file_data = {"file": f}
-                resp = await user_client.post(
-                    f"/bootasset-items/{boot_asset_version.id}",
-                    data=data,
-                    files=file_data,
-                )
-                assert resp.status_code == 200
-                mock_resource.assert_called_with(
-                    "s3",
-                    use_ssl=False,
-                    verify=False,
-                    endpoint_url="http://test-endpoint",
-                    aws_access_key_id="test-access-key",
-                    aws_secret_access_key="test-secret-key",
-                )
-                mock_upload.assert_called_once()
-                mock_complete_upload.assert_called_once()
-                stored = await factory.get("boot_asset_item")
-                assert len(stored) == 1
-                assert stored[0] == data | {
-                    "id": 1,
-                    "boot_asset_version_id": boot_asset_version.id,
-                    "bytes_synced": len(test_file_content),
-                }
-        finally:
-            os.remove(test_filename)
+        test_file = tmp_path / "testfile"
+        test_file.write_text(test_file_content)
+        with test_file.open("rb") as f:
+            file_data = {"file": f}
+            resp = await user_client.post(
+                "/images",
+                data=data,
+                files=file_data,
+            )
+            assert resp.status_code == 200
+            mock_resource.assert_called_with(
+                "s3",
+                use_ssl=False,
+                verify=False,
+                endpoint_url="http://test-endpoint",
+                aws_access_key_id="test-access-key",
+                aws_secret_access_key="test-secret-key",
+            )
+            mock_upload.assert_called_once()
+            mock_complete_upload.assert_called_once()
+            stored_assets = await factory.get("boot_asset")
+            stored_versions = await factory.get("boot_asset_version")
+            stored_items = await factory.get("boot_asset_item")
+            assert len(stored_assets) == 1
+            assert len(stored_versions) == 1
+            assert len(stored_items) == 1
+            expected_asset = {
+                "id": 1,
+                "boot_source_id": bs.id,
+                "kind": 0,
+                "label": "stable",
+                "os": "ubuntu",
+                "release": "noble",
+                "arch": "amd64",
+                "title": "My Custom Image",
+                "codename": "",
+                "subarch": "",
+                "compatibility": [],
+                "flavor": "",
+                "base_image": "ubuntu/noble",
+                "eol": datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC),
+                "esm_eol": datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC),
+            }
+            expected_version = {
+                "id": 1,
+                "boot_asset_id": stored_assets[0]["id"],
+                "version": datetime.now().strftime("%Y%m%d") + ".1",
+            }
+            expected_item = {
+                "id": resp.json()["id"],
+                "boot_asset_version_id": stored_versions[0]["id"],
+                "file_size": len(test_file_content),
+                "sha256": sha256(test_file_content.encode()).hexdigest(),
+                "ftype": ItemFileType.ROOT_TGZ,
+                "bytes_synced": len(test_file_content),
+                "path": "",
+                "source_package": None,
+                "source_release": None,
+                "source_version": None,
+            }
+            assert stored_assets[0] == expected_asset
+            assert stored_versions[0] == expected_version
+            assert stored_items[0] == expected_item
+
+    async def test_post_duplicate_increments_revision(
+        self,
+        user_client: Client,
+        factory: Factory,
+        mocker: MockerFixture,
+        monkeypatch: pytest.MonkeyPatch,
+        tmp_path: Path,
+    ) -> None:
+        mock_resource = mocker.patch(
+            "msm.api.user.handlers.images.boto3.resource"
+        )
+        mock_upload = mocker.patch(
+            "msm.api.user.handlers.images.S3MultipartUploadTarget.upload"
+        )
+        mock_complete_upload = mocker.patch(
+            "msm.api.user.handlers.images.S3MultipartUploadTarget.complete_upload"
+        )
+        monkeypatch.setenv("MSM_S3_BUCKET", "test-bucket")
+        monkeypatch.setenv("MSM_S3_ENDPOINT", "test-endpoint")
+        monkeypatch.setenv("MSM_S3_ACCESS_KEY", "test-access-key")
+        monkeypatch.setenv("MSM_S3_SECRET_KEY", "test-secret-key")
+        monkeypatch.setenv("MSM_S3_PATH", "test/path")
+
+        bs = await factory.make_BootSource()
+        test_file_content = "This is a test file."
+        data = {
+            "os": "ubuntu",
+            "release": "noble",
+            "arch": "amd64",
+            "file_size": len(test_file_content),
+            "title": "My Custom Image",
+            "filename": "test.tgz",
+        }
+        test_file = tmp_path / "testfile"
+        test_file.write_text(test_file_content)
+        with test_file.open("rb") as f:
+            file_data = {"file": f}
+            resp = await user_client.post(
+                "/images",
+                data=data,
+                files=file_data,
+            )
+            assert resp.status_code == 200
+            first_item_id = resp.json()["id"]
+            resp = await user_client.post(
+                "/images",
+                data=data,
+                files=file_data,
+            )
+            assert resp.status_code == 200
+            second_item_id = resp.json()["id"]
+            mock_resource.assert_called_with(
+                "s3",
+                use_ssl=False,
+                verify=False,
+                endpoint_url="http://test-endpoint",
+                aws_access_key_id="test-access-key",
+                aws_secret_access_key="test-secret-key",
+            )
+            mock_upload.assert_called()
+            mock_complete_upload.assert_called()
+            stored_assets = await factory.get("boot_asset")
+            stored_versions = await factory.get("boot_asset_version")
+            stored_items = await factory.get("boot_asset_item")
+            assert len(stored_assets) == 1
+            assert len(stored_versions) == 2
+            assert len(stored_items) == 2
+            expected_asset = {
+                "id": 1,
+                "boot_source_id": bs.id,
+                "kind": 0,
+                "label": "stable",
+                "os": "ubuntu",
+                "release": "noble",
+                "arch": "amd64",
+                "title": "My Custom Image",
+                "codename": "",
+                "subarch": "",
+                "compatibility": [],
+                "flavor": "",
+                "base_image": "ubuntu/noble",
+                "eol": datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC),
+                "esm_eol": datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC),
+            }
+            expected_first_version = {
+                "id": 1,
+                "boot_asset_id": stored_assets[0]["id"],
+                "version": datetime.now().strftime("%Y%m%d") + ".1",
+            }
+            expected_second_version = {
+                "id": 2,
+                "boot_asset_id": stored_assets[0]["id"],
+                "version": datetime.now().strftime("%Y%m%d") + ".2",
+            }
+            expected_first_item = {
+                "id": first_item_id,
+                "boot_asset_version_id": stored_versions[0]["id"],
+                "file_size": len(test_file_content),
+                "sha256": sha256(test_file_content.encode()).hexdigest(),
+                "ftype": ItemFileType.ROOT_TGZ,
+                "bytes_synced": len(test_file_content),
+                "path": "",
+                "source_package": None,
+                "source_release": None,
+                "source_version": None,
+            }
+            expected_second_item = {
+                "id": second_item_id,
+                "boot_asset_version_id": stored_versions[1]["id"],
+                "file_size": len(test_file_content),
+                "sha256": sha256(test_file_content.encode()).hexdigest(),
+                "ftype": ItemFileType.ROOT_TGZ,
+                "bytes_synced": len(test_file_content),
+                "path": "",
+                "source_package": None,
+                "source_release": None,
+                "source_version": None,
+            }
+            assert stored_assets[0] == expected_asset
+            assert stored_versions[0] == expected_first_version
+            assert stored_versions[1] == expected_second_version
+            assert stored_items[0] == expected_first_item
+            assert stored_items[1] == expected_second_item
 
     async def test_post_filepath_is_correct(
         self,
@@ -944,6 +1113,7 @@ class TestCustomImageUploadHandler:
         factory: Factory,
         mocker: MockerFixture,
         monkeypatch: pytest.MonkeyPatch,
+        tmp_path: Path,
     ) -> None:
         mock_s3_target = mocker.patch(
             "msm.api.user.handlers.images.S3MultipartUploadTarget"
@@ -954,35 +1124,33 @@ class TestCustomImageUploadHandler:
         monkeypatch.setenv("MSM_S3_SECRET_KEY", "test-secret-key")
         monkeypatch.setenv("MSM_S3_PATH", "test/path")
 
-        bs = await factory.make_BootSource()
-        ba = await factory.make_BootAsset(bs.id)
-        boot_asset_version = await factory.make_BootAssetVersion(ba.id)
+        await factory.make_BootSource()
         test_file_content = "This is a test file."
         data = {
-            "ftype": "kernel",
-            "sha256": "testblaksjdflkj",
-            "path": "/item",
+            "os": "ubuntu",
+            "release": "noble",
+            "arch": "amd64",
             "file_size": len(test_file_content),
-            "source_package": "ubukernel",
-            "source_version": "23.4.1",
-            "source_release": "noble",
+            "title": "My Custom Image",
+            "filename": "test.tgz",
         }
-        try:
-            test_filename = "testfile"
-            with open(test_filename, "w") as f:
-                f.write(test_file_content)
-            with open(test_filename, "rb") as f:
-                file_data = {"file": f}
-                resp = await user_client.post(
-                    f"/bootasset-items/{boot_asset_version.id}",
+        test_file = tmp_path / "testfile"
+        test_file.write_text(test_file_content)
+        with test_file.open("rb") as f:
+            file_data = {"file": f}
+            # all we care about is whether S3MultipartUploadTarget
+            # was instantiated with the right filepath
+            # mocking this object will result in a ValidationError
+            # later down the line
+            with pytest.raises(ValidationError):
+                await user_client.post(
+                    "/images",
                     data=data,
                     files=file_data,
                 )
-                mock_s3_target.assert_called_with(
-                    mocker.ANY, "test/path/1", mocker.ANY
-                )
-        finally:
-            os.remove(test_filename)
+            mock_s3_target.assert_called_with(
+                mocker.ANY, "test/path/1", mocker.ANY
+            )
 
     async def test_post_wrong_file_size(
         self,
@@ -990,14 +1158,13 @@ class TestCustomImageUploadHandler:
         factory: Factory,
         mocker: MockerFixture,
         monkeypatch: pytest.MonkeyPatch,
+        tmp_path: Path,
     ) -> None:
-        mock_resource = mocker.patch(
-            "msm.api.user.handlers.images.boto3.resource"
-        )
-        mock_upload = mocker.patch(
+        mocker.patch("msm.api.user.handlers.images.boto3.resource")
+        mocker.patch(
             "msm.api.user.handlers.images.S3MultipartUploadTarget.upload"
         )
-        mock_complete_upload = mocker.patch(
+        mocker.patch(
             "msm.api.user.handlers.images.S3MultipartUploadTarget.complete_upload"
         )
         monkeypatch.setenv("MSM_S3_BUCKET", "test-bucket")
@@ -1006,39 +1173,36 @@ class TestCustomImageUploadHandler:
         monkeypatch.setenv("MSM_S3_SECRET_KEY", "test-secret-key")
         monkeypatch.setenv("MSM_S3_PATH", "test/path")
 
-        bs = await factory.make_BootSource()
-        ba = await factory.make_BootAsset(bs.id)
-        boot_asset_version = await factory.make_BootAssetVersion(ba.id)
+        await factory.make_BootSource()
         test_file_content = "This is a test file."
         data = {
-            "ftype": "kernel",
-            "sha256": "testblaksjdflkj",
-            "path": "/item",
+            "os": "ubuntu",
+            "release": "noble",
+            "arch": "amd64",
             "file_size": len(test_file_content) + 1,
-            "source_package": "ubukernel",
-            "source_version": "23.4.1",
-            "source_release": "noble",
+            "title": "My Custom Image",
+            "filename": "test.tgz",
         }
-        try:
-            test_filename = "testfile"
-            with open(test_filename, "w") as f:
-                f.write(test_file_content)
-            with open(test_filename, "rb") as f:
-                file_data = {"file": f}
-                resp = await user_client.post(
-                    f"/bootasset-items/{boot_asset_version.id}",
-                    data=data,
-                    files=file_data,
-                )
-                assert resp.status_code == 400
-                assert (
-                    json.loads(resp.text)["error"]["message"]
-                    == "The size of the uploaded file does not match the 'file_size' parameter in the request"
-                )
-                stored = await factory.get("boot_asset_item")
-                assert len(stored) == 0
-        finally:
-            os.remove(test_filename)
+        test_file = tmp_path / "testfile"
+        test_file.write_text(test_file_content)
+        with test_file.open("rb") as f:
+            file_data = {"file": f}
+            resp = await user_client.post(
+                "/images",
+                data=data,
+                files=file_data,
+            )
+            assert resp.status_code == 400
+            assert (
+                json.loads(resp.text)["error"]["message"]
+                == "The size of the uploaded file does not match the 'file_size' parameter in the request"
+            )
+            stored_assets = await factory.get("boot_asset")
+            assert len(stored_assets) == 0
+            stored_versions = await factory.get("boot_asset_version")
+            assert len(stored_versions) == 0
+            stored_images = await factory.get("boot_asset_item")
+            assert len(stored_images) == 0
 
     async def test_post_bad_parameters(
         self,
@@ -1046,6 +1210,7 @@ class TestCustomImageUploadHandler:
         factory: Factory,
         mocker: MockerFixture,
         monkeypatch: pytest.MonkeyPatch,
+        tmp_path: Path,
     ) -> None:
         mock_resource = mocker.patch(
             "msm.api.user.handlers.images.boto3.resource"
@@ -1063,49 +1228,89 @@ class TestCustomImageUploadHandler:
         monkeypatch.setenv("MSM_S3_PATH", "test/path")
 
         bs = await factory.make_BootSource()
-        ba = await factory.make_BootAsset(bs.id)
-        boot_asset_version = await factory.make_BootAssetVersion(ba.id)
         test_file_content = "This is a test file."
         data = {
-            "ftype": "kernel",
-            "sha256": "testblaksjdflkj",
-            "path": "/item",
+            "os": "ubuntu",
+            "release": "noble",
+            "arch": "amd64",
             "file_size": "this should have been an integer",
-            "source_package": "ubukernel",
-            "source_version": "23.4.1",
-            "source_release": "noble",
+            "title": "My Custom Image",
+            "filename": "test.tgz",
         }
-        try:
-            test_filename = "testfile"
-            with open(test_filename, "w") as f:
-                f.write(test_file_content)
-            with open(test_filename, "rb") as f:
-                file_data = {"file": f}
-                resp = await user_client.post(
-                    f"/bootasset-items/{boot_asset_version.id}",
-                    data=data,
-                    files=file_data,
-                )
-                assert resp.status_code == 400
-                assert (
-                    json.loads(resp.text)["error"]["message"]
-                    == "Invalid type for file_size, expected <class 'int'>"
-                )
-                stored = await factory.get("boot_asset_item")
-                assert len(stored) == 0
-        finally:
-            os.remove(test_filename)
+        test_file = tmp_path / "testfile"
+        test_file.write_text(test_file_content)
+        with test_file.open("rb") as f:
+            file_data = {"file": f}
+            resp = await user_client.post(
+                "/images",
+                data=data,
+                files=file_data,
+            )
+            assert resp.status_code == 400
+            assert (
+                json.loads(resp.text)["error"]["message"]
+                == "Invalid type for file_size, expected <class 'int'>"
+            )
+            stored_assets = await factory.get("boot_asset")
+            assert len(stored_assets) == 0
+            stored_versions = await factory.get("boot_asset_version")
+            assert len(stored_versions) == 0
+            stored_images = await factory.get("boot_asset_item")
+            assert len(stored_images) == 0
 
-    async def test_post_missing_version(
-        self, user_client: Client, factory: Factory
+    async def test_post_bad_filetype(
+        self,
+        user_client: Client,
+        factory: Factory,
+        mocker: MockerFixture,
+        monkeypatch: pytest.MonkeyPatch,
+        tmp_path: Path,
     ) -> None:
-        bs = await factory.make_BootSource()
-        ba = await factory.make_BootAsset(bs.id)
-        boot_asset_version = await factory.make_BootAssetVersion(ba.id)
-        resp = await user_client.post(
-            f"/bootasset-items/{boot_asset_version.id + 1}",
+        mock_resource = mocker.patch(
+            "msm.api.user.handlers.images.boto3.resource"
         )
-        assert resp.status_code == 404
+        mock_upload = mocker.patch(
+            "msm.api.user.handlers.images.S3MultipartUploadTarget.upload"
+        )
+        mock_complete_upload = mocker.patch(
+            "msm.api.user.handlers.images.S3MultipartUploadTarget.complete_upload"
+        )
+        monkeypatch.setenv("MSM_S3_BUCKET", "test-bucket")
+        monkeypatch.setenv("MSM_S3_ENDPOINT", "test-endpoint")
+        monkeypatch.setenv("MSM_S3_ACCESS_KEY", "test-access-key")
+        monkeypatch.setenv("MSM_S3_SECRET_KEY", "test-secret-key")
+        monkeypatch.setenv("MSM_S3_PATH", "test/path")
+
+        bs = await factory.make_BootSource()
+        test_file_content = "This is a test file."
+        data = {
+            "os": "ubuntu",
+            "release": "noble",
+            "arch": "amd64",
+            "file_size": len(test_file_content),
+            "title": "My Custom Image",
+            "filename": "test.badext",
+        }
+        test_file = tmp_path / "testfile"
+        test_file.write_text(test_file_content)
+        with test_file.open("rb") as f:
+            file_data = {"file": f}
+            resp = await user_client.post(
+                "/images",
+                data=data,
+                files=file_data,
+            )
+            assert resp.status_code == 400
+            assert (
+                json.loads(resp.text)["error"]["message"]
+                == "Unsupported file type"
+            )
+            stored_assets = await factory.get("boot_asset")
+            assert len(stored_assets) == 0
+            stored_versions = await factory.get("boot_asset_version")
+            assert len(stored_versions) == 0
+            stored_images = await factory.get("boot_asset_item")
+            assert len(stored_images) == 0
 
 
 @pytest.mark.asyncio
@@ -1116,7 +1321,7 @@ class TestBootAssetItemsPatchHandler:
         bv = await factory.make_BootAssetVersion(ba.id)
         item = await factory.make_BootAssetItem(
             bv.id,
-            ftype="testtype1",
+            ftype=ItemFileType.ARCHIVE_TAR_XZ,
             sha256="testsha1",
             path="testpath1",
             file_size=1,
@@ -1126,7 +1331,7 @@ class TestBootAssetItemsPatchHandler:
             source_release="testrelease1",
         )
         data = {
-            "ftype": "testtype2",
+            "ftype": ItemFileType.ROOT_TGZ,
             "source_package": "testpackage2",
             "source_version": "testversion2",
             "source_release": "testrelease2",
@@ -1154,7 +1359,7 @@ class TestBootAssetItemsPatchHandler:
         bv = await factory.make_BootAssetVersion(ba.id)
         item = await factory.make_BootAssetItem(
             bv.id,
-            ftype="testtype1",
+            ftype=ItemFileType.ARCHIVE_TAR_XZ,
             sha256="testsha1",
             path="testpath1",
             file_size=1,
@@ -1179,7 +1384,7 @@ class TestBootAssetItemsPatchHandler:
         bv = await factory.make_BootAssetVersion(ba.id)
         item = await factory.make_BootAssetItem(
             bv.id,
-            ftype="testtype1",
+            ftype=ItemFileType.ARCHIVE_TAR_XZ,
             sha256="testsha1",
             path="testpath1",
             file_size=1,
@@ -1189,7 +1394,7 @@ class TestBootAssetItemsPatchHandler:
             source_release="testrelease1",
         )
         data = {
-            "ftype": "testtype2",
+            "ftype": ItemFileType.BOOT_DTB,
             "sha256": "testsha2",
             "path": "testpath2",
             "file_size": 2,
@@ -1213,7 +1418,7 @@ class TestBootAssetItemsPatchHandler:
         bv = await factory.make_BootAssetVersion(ba.id)
         item = await factory.make_BootAssetItem(
             bv.id,
-            ftype="testtype1",
+            ftype=ItemFileType.ARCHIVE_TAR_XZ,
             sha256="testsha1",
             path="testpath1",
             file_size=1,
@@ -1223,7 +1428,7 @@ class TestBootAssetItemsPatchHandler:
             source_release="testrelease1",
         )
         data = {
-            "ftype": "testtype2",
+            "ftype": ItemFileType.BOOT_DTB,
             "source_package": "testpackage2",
             "source_version": "testversion2",
             "source_release": "testrelease2",
@@ -1244,7 +1449,7 @@ class TestBootAssetItemsPatchHandler:
         bv = await factory.make_BootAssetVersion(ba.id)
         item = await factory.make_BootAssetItem(
             bv.id,
-            ftype="testtype1",
+            ftype=ItemFileType.ARCHIVE_TAR_XZ,
             sha256="testsha1",
             path="testpath1",
             file_size=1,
@@ -1269,7 +1474,7 @@ class TestBootAssetItemsPatchHandler:
         bv = await factory.make_BootAssetVersion(ba.id)
         item = await factory.make_BootAssetItem(
             bv.id,
-            ftype="testtype1",
+            ftype=ItemFileType.ARCHIVE_TAR_XZ,
             sha256="testsha1",
             path="testpath1",
             file_size=1,
@@ -1299,7 +1504,7 @@ class TestBootAssetItemsPatchHandler:
         assert stored[0] == data | {
             "id": item.id,
             "boot_asset_version_id": bv.id,
-            "ftype": "testtype1",
+            "ftype": ItemFileType.ARCHIVE_TAR_XZ,
             "sha256": "testsha1",
             "path": "testpath1",
             "file_size": 1,

@@ -31,6 +31,7 @@ from msm.db.models import (
     BootSourceSelection,
     ConnectionStatus,
     Coordinates,
+    ItemFileType,
     PendingSite,
     Site,
     SiteData,
@@ -419,7 +420,7 @@ class Factory:
     async def make_BootAssetItem(
         self,
         boot_asset_version_id: int,
-        ftype: str = "",
+        ftype: ItemFileType = ItemFileType.ARCHIVE_TAR_XZ,
         sha256: str = "",
         path: str = "",
         file_size: int = 0,

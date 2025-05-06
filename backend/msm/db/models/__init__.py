@@ -7,6 +7,7 @@ from msm.db.models.images import (
     BootAssetItemUpdate,
     BootAssetKind,
     BootAssetLabel,
+    BootAssetUpdate,
     BootAssetVersion,
     BootAssetVersionCreate,
     BootSource,
@@ -15,6 +16,7 @@ from msm.db.models.images import (
     BootSourceSelectionCreate,
     BootSourceSelectionUpdate,
     BootSourceUpdate,
+    ItemFileType,
 )
 from msm.db.models.settings import Settings
 from msm.db.models.site import (
@@ -45,6 +47,7 @@ __all__ = [
     "BootAssetItemUpdate",
     "BootAssetKind",
     "BootAssetLabel",
+    "BootAssetUpdate",
     "BootAssetVersion",
     "BootAssetVersionCreate",
     "BootSource",
@@ -57,6 +60,7 @@ __all__ = [
     "ConnectionStatus",
     "Coordinates",
     "EnrollingSite",
+    "ItemFileType",
     "PendingSite",
     "PendingSiteCreate",
     "Settings",
