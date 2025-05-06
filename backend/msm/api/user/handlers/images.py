@@ -6,13 +6,9 @@ from typing import Annotated, Any, Self
 from urllib.parse import urlparse
 
 import boto3  # type: ignore
-from fastapi import (
-    APIRouter,
-    Depends,
-    Request,
-)
+from fastapi import APIRouter, Depends, Path, Request
 from fastapi.concurrency import run_in_threadpool
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, Field, model_validator
 from sqlalchemy.exc import IntegrityError
 from streaming_form_data import StreamingFormDataParser  # type: ignore
 from streaming_form_data.targets import BaseTarget, ValueTarget  # type: ignore
@@ -250,13 +246,14 @@ async def get_boot_sources(
         items=list(results),
     )
 
+
 @v1_router.get(
     "/bootasset-sources/{id}",
     responses={
         401: {"model": UnauthorizedErrorResponseModel},
         404: {"model": NotFoundErrorResponseModel},
         422: {"model": ValidationErrorResponseModel},
-    }
+    },
 )
 async def get_boot_source_by_id(
     services: Annotated[ServiceCollection, Depends(services)],
@@ -278,6 +275,7 @@ async def get_boot_source_by_id(
             ],
         )
     return bs
+
 
 class BootSourcesPostRequest(BaseModel):
     priority: int
@@ -306,6 +304,89 @@ async def post_boot_sources(
         models.BootSourceCreate(**post_request.model_dump())
     )
     return BootSourcesPostResponse(id=boot_source.id)
+
+
+class BootSourcesPatchRequest(BaseModel):
+    priority: int | None = None
+    url: str | None = None
+    keyring: str | None = None
+    sync_interval: int | None = Field(default=None, ge=0)
+
+    model_config = {"extra": "forbid"}
+
+    @model_validator(mode="after")
+    def check_at_least_one_field_present(self) -> Self:
+        if not self.model_fields_set:
+            raise ValueError("At least one field must be set.")
+        return self
+
+
+@v1_router.patch(
+    "/bootasset-sources/{id}",
+    responses={
+        401: {"model": UnauthorizedErrorResponseModel},
+        404: {"model": NotFoundErrorResponseModel},
+        422: {"model": ValidationErrorResponseModel},
+    },
+)
+async def patch_boot_source(
+    services: Annotated[ServiceCollection, Depends(services)],
+    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
+    id: Annotated[
+        int, Path(title="The ID of the Boot Source to update", ge=2)
+    ],
+    patch_request: BootSourcesPatchRequest,
+) -> models.BootSource:
+    bs = await services.boot_sources.get_by_id(id)
+    if bs is None:
+        raise NotFoundException(
+            code=ExceptionCode.MISSING_RESOURCE,
+            message="Boot Source does not exist.",
+            details=[
+                BaseExceptionDetail(
+                    reason=ExceptionCode.MISSING_RESOURCE,
+                    messages=[f"BootSource ID {id} does not exist"],
+                    field="id",
+                    location="path",
+                )
+            ],
+        )
+    updated_source = await services.boot_sources.update(
+        id, models.BootSourceUpdate(**patch_request.model_dump())
+    )
+    return updated_source
+
+
+@v1_router.delete(
+    "/bootasset-sources/{id}",
+    responses={
+        401: {"model": UnauthorizedErrorResponseModel},
+        404: {"model": NotFoundErrorResponseModel},
+        422: {"model": ValidationErrorResponseModel},
+    },
+)
+async def delete_boot_source(
+    services: Annotated[ServiceCollection, Depends(services)],
+    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
+    id: Annotated[
+        int, Path(title="The ID of the Boot Source to delete", ge=2)
+    ],
+) -> None:
+    bs = await services.boot_sources.get_by_id(id)
+    if bs is None:
+        raise NotFoundException(
+            code=ExceptionCode.MISSING_RESOURCE,
+            message="Boot Source does not exist.",
+            details=[
+                BaseExceptionDetail(
+                    reason=ExceptionCode.MISSING_RESOURCE,
+                    messages=[f"BootSource ID {id} does not exist"],
+                    field="id",
+                    location="path",
+                )
+            ],
+        )
+    await services.boot_sources.delete(id)
 
 
 @v1_router.get(

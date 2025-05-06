@@ -278,7 +278,9 @@ class TestBootSourcesGetHandler:
         assert resp_body["total"] == 1
         assert resp_body["items"] == [boot_source.model_dump()]
 
-    async def test_get_by_id(self, user_client: Client, factory: Factory) -> None:
+    async def test_get_by_id(
+        self, user_client: Client, factory: Factory
+    ) -> None:
         boot_source = await factory.make_BootSource(
             priority=2,
             url="http://test.url",
@@ -290,7 +292,9 @@ class TestBootSourcesGetHandler:
         source = BootSource(**resp.json())
         assert source == boot_source
 
-    async def test_get_by_id_not_found(self, user_client: Client, factory: Factory) -> None:
+    async def test_get_by_id_not_found(
+        self, user_client: Client, factory: Factory
+    ) -> None:
         resp = await user_client.get("/bootasset-sources/999")
         assert resp.status_code == 404
 
@@ -378,6 +382,105 @@ class TestBootSourcesPostHandler:
             "keyring": "testkeyring",
         }
         resp = await user_client.post("/bootasset-sources", json=data)
+        assert resp.status_code == 422
+
+
+@pytest.mark.asyncio
+class TestBootSourcesUpdateHandler:
+    async def test_update(self, user_client: Client, factory: Factory) -> None:
+        # need to create custom boot source and edit second one
+        await factory.make_BootSource()
+        bs = await factory.make_BootSource(
+            priority=1,
+            url="http://test.url",
+            keyring="test-keyring",
+            sync_interval=100,
+        )
+        data = {
+            "priority": 2,
+            "url": "http://another.url",
+            "keyring": "another-keyring",
+            "sync_interval": 200,
+        }
+        resp = await user_client.patch(
+            f"/bootasset-sources/{bs.id}", json=data
+        )
+        assert resp.status_code == 200
+        assert resp.json() == {"id": bs.id} | data
+        sources = await factory.get("boot_source")
+        assert len(sources) == 2
+        assert sources[1] == {"id": bs.id} | data
+
+    async def test_update_custom_source_fails(
+        self, user_client: Client, factory: Factory
+    ) -> None:
+        await factory.make_BootSource()
+        resp = await user_client.patch(
+            f"/bootasset-sources/1", json={"priority": 2}
+        )
+        assert resp.status_code == 422
+
+    async def test_update_no_fields(
+        self, user_client: Client, factory: Factory
+    ) -> None:
+        await factory.make_BootSource()
+        bs = await factory.make_BootSource(
+            priority=1,
+            url="http://test.url",
+            keyring="test-keyring",
+            sync_interval=100,
+        )
+        resp = await user_client.patch(f"/bootasset-sources/{bs.id}", json={})
+        assert resp.status_code == 422
+
+    async def test_update_extra_fields(
+        self, user_client: Client, factory: Factory
+    ) -> None:
+        await factory.make_BootSource()
+        bs = await factory.make_BootSource(
+            priority=1,
+            url="http://test.url",
+            keyring="test-keyring",
+            sync_interval=100,
+        )
+        data = {
+            "priority": 2,
+            "url": "http://another.url",
+            "keyring": "another-keyring",
+            "sync_interval": 200,
+            "something": "extra",
+        }
+        resp = await user_client.patch(
+            f"/bootasset-sources/{bs.id}", json=data
+        )
+        assert resp.status_code == 422
+
+    async def test_update_not_found(self, user_client: Client) -> None:
+        resp = await user_client.patch(
+            "/bootasset-sources/333", json={"priority": 2}
+        )
+        assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
+class TestBootSourcesDeleteHandler:
+    async def test_delete(self, user_client: Client, factory: Factory) -> None:
+        # need to create custom boot source and delete second one
+        await factory.make_BootSource()
+        bs = await factory.make_BootSource()
+        resp = await user_client.delete(f"/bootasset-sources/{bs.id}")
+        assert resp.status_code == 200
+        sources = await factory.get("boot_source")
+        assert len(sources) == 1
+
+    async def test_delete_not_found(self, user_client: Client) -> None:
+        resp = await user_client.delete("/bootasset-sources/333")
+        assert resp.status_code == 404
+
+    async def test_cant_delete_custom_source(
+        self, user_client: Client
+    ) -> None:
+        resp = await user_client.delete("/bootasset-sources/1")
         assert resp.status_code == 422
 
 
