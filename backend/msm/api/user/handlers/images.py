@@ -857,6 +857,47 @@ def get_file_type_from_filename(filename: str) -> models.ItemFileType:
         404: {"model": NotFoundErrorResponseModel},
         422: {"model": ValidationErrorResponseModel},
     },
+    openapi_extra={
+        "requestBody": {
+            "required": True,
+            "content": {
+                "multipart/form-data": {
+                    "schema": {
+                        "properties": {
+                            "os": {
+                                "type": "string",
+                                "example": "ubuntu",
+                            },
+                            "release": {
+                                "type": "string",
+                                "example": "noble",
+                            },
+                            "title": {
+                                "type": "string",
+                                "example": "My Custom Image",
+                            },
+                            "arch": {
+                                "type": "string",
+                                "example": "amd64",
+                            },
+                            "file_size": {
+                                "type": "number",
+                                "example": 123456789,
+                            },
+                            "filename": {
+                                "type": "string",
+                                "example": "custom-image.tgz",
+                            },
+                            "file": {
+                                "type": "string",
+                                "format": "binary",
+                            },
+                        }
+                    }
+                }
+            },
+        },
+    },
 )
 async def post_images(
     services: Annotated[ServiceCollection, Depends(services)],
