@@ -1,4 +1,4 @@
-import RequestsList from "@/components/RequestsList";
+import RequestsList from "@/app/settings/views/RequestsList";
 
 const Requests: React.FC = () => <RequestsList />;
 

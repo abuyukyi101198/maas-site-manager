@@ -3,12 +3,18 @@ import { add, sub } from "date-fns";
 import { Factory } from "fishery";
 import { adjectives, animals, colors, starWars, uniqueNamesGenerator } from "unique-names-generator";
 
-import type { Settings, Image, UpstreamImage, UpstreamImageSource } from "@/api";
-import { BootAssetKind, BootAssetLabel } from "@/api";
-import type { PendingSite, AccessTokenResponse, UsersGetResponse, PendingSitesGetResponse, Token } from "@/api/client";
-import { TimeZone, ConnectionStatus } from "@/apiclient";
-import type { GetV1SitesGetResponse, Site, SiteData, User, BootSource } from "@/apiclient";
-import type { SiteMarkerType } from "@/components/Map/types";
+import type { Settings, Image, UpstreamImage, UpstreamImageSource } from "@/app/api";
+import { BootAssetKind, BootAssetLabel } from "@/app/api";
+import type {
+  PendingSite,
+  AccessTokenResponse,
+  UsersGetResponse,
+  PendingSitesGetResponse,
+  Token,
+} from "@/app/api/client";
+import { TimeZone, ConnectionStatus } from "@/app/apiclient";
+import type { GetV1SitesGetResponse, Site, SiteData, User, BootSource } from "@/app/apiclient";
+import type { SiteMarkerType } from "@/app/sites/views/SitesMap/components/Map/types";
 
 export const connections: ConnectionStatus[] = [
   ConnectionStatus.STABLE,

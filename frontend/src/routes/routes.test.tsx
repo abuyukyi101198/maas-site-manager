@@ -1,4 +1,4 @@
-import { pages } from "@/config/routes";
+import { pages } from "@/app/base/routes";
 import routes from "@/routes";
 import { createMemoryRouter, RouterProvider } from "@/utils/router";
 import { render, screen, waitFor, setupServer } from "@/utils/test-utils";

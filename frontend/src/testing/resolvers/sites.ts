@@ -1,7 +1,7 @@
 import { http, HttpResponse } from "msw";
 
-import type { SitesSortKey, SortDirection } from "@/api/handlers";
-import type { GetV1SitesGetData, Site, SitesGetResponse } from "@/apiclient";
+import type { SitesSortKey, SortDirection } from "@/app/api/handlers";
+import type { GetV1SitesGetData, Site, SitesGetResponse } from "@/app/apiclient";
 import { siteFactory } from "@/mocks/factories";
 import { apiUrls } from "@/utils/test-urls";
 

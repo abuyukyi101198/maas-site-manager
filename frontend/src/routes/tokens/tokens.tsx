@@ -1,4 +1,4 @@
-import TokensList from "@/components/TokensList";
+import TokensList from "@/app/settings/views/TokensList";
 
 const Tokens: React.FC = () => <TokensList />;
 

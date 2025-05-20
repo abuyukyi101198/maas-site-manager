@@ -1,4 +1,4 @@
-import { baseURL } from "@/api/config";
+import { baseURL } from "@/app/api/config";
 
 export const getApiUrl = (path: string): string => {
   return `${baseURL}/v1${path}`;

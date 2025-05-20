@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-import { useAuthContext } from "@/context";
+import { useAuthContext } from "@/app/context";
 import { Outlet, createSearchParams, useLocation, useNavigate } from "@/utils/router";
 
 const RequireLogin = () => {

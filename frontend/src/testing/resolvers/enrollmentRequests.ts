@@ -1,6 +1,6 @@
 import { http, HttpResponse } from "msw";
 
-import type { PendingSite, PendingSitesPostRequest } from "@/api";
+import type { PendingSite, PendingSitesPostRequest } from "@/app/api";
 import { enrollmentRequestFactory } from "@/mocks/factories";
 import { apiUrls } from "@/utils/test-urls";
 

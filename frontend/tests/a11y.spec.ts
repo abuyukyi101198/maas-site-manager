@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import { AxeBuilder } from "@axe-core/playwright"; // 1
-import { protectedPages, publicPages, routesConfig } from "@/config/routes";
+import { protectedPages, publicPages, routesConfig } from "@/app/base/routes";
 import { adminAuthFile, LONG_TEST_TIMEOUT } from "./constants";
 
 type ColorScheme = Pick<NonNullable<Parameters<Page["emulateMedia"]>[0]>, "colorScheme">["colorScheme"];

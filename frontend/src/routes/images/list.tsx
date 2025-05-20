@@ -1,4 +1,4 @@
-import SitesList from "@/components/SitesList";
+import SitesList from "@/app/sites/views/SitesList";
 
 const List: React.FC = () => <SitesList />;
 

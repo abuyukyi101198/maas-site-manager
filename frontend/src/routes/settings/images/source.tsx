@@ -1,4 +1,4 @@
-import ImageSourceList from "@/components/ImageSourceList";
+import ImageSourceList from "@/app/settings/views/ImageSourceList";
 
 const ImageSources: React.FC = () => <ImageSourceList />;
 

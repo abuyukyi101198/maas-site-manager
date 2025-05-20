@@ -10,7 +10,7 @@ import {
   unsecureCopyToClipboard,
 } from "./utils";
 
-import { TimeZone } from "@/apiclient";
+import { TimeZone } from "@/app/apiclient";
 
 beforeEach(() => {
   const date = new Date("Fri Apr 21 2023 12:00:00 GMT+0100 (GMT)");

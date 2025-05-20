@@ -6,7 +6,7 @@ import * as ReactDOM from "react-dom/client";
 import packageInfo from "../package.json";
 
 import App from "@/App";
-import { baseURL } from "@/api";
+import { baseURL } from "@/app/api";
 import { useMockData } from "@/constants";
 import { getApiUrl } from "@/utils/test-urls";
 

@@ -1,4 +1,4 @@
-import PersonalDetailsUpdate from "@/components/PersonalDetailsUpdate";
+import PersonalDetailsUpdate from "@/app/account/views/PersonalDetailsUpdate";
 
 const PersonalDetails = () => <PersonalDetailsUpdate />;
 

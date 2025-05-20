@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 import { adminAuthFile } from "./constants";
-import { routesConfig } from "@/config/routes";
+import { routesConfig } from "@/app/base/routes";
 
 test.use({ storageState: adminAuthFile });
 

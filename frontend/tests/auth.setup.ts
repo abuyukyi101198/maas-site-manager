@@ -1,4 +1,4 @@
-import { routesConfig } from "@/config/routes";
+import { routesConfig } from "@/app/base/routes";
 import { expect, test as setup } from "@playwright/test";
 import { adminAuthFile, LONG_EXPECTATION_TIMEOUT, LONG_TEST_TIMEOUT } from "./constants";
 import fs from "fs";

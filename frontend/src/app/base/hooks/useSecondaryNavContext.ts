@@ -1,0 +1,15 @@
+import type { SecondaryNavContext } from "@/app/base/components/SecondaryNavigation/SecondaryNavigation";
+import { useLocation } from "@/utils/router";
+
+export default function useSecondaryNavContext() {
+  let context: SecondaryNavContext = "settings";
+  const { pathname } = useLocation();
+
+  if (pathname.startsWith("/account")) {
+    context = "account";
+  } else if (pathname.startsWith("/settings")) {
+    context = "settings";
+  }
+
+  return context;
+}

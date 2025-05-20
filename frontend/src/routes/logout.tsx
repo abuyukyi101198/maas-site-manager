@@ -1,4 +1,4 @@
-import { useAuthContext } from "@/context";
+import { useAuthContext } from "@/app/context";
 import { useNavigate } from "@/utils/router";
 
 const Logout = () => {

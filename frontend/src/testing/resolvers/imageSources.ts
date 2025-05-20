@@ -1,12 +1,12 @@
 import { http, HttpResponse } from "msw";
 
-import type { SortDirection } from "@/api/handlers";
+import type { SortDirection } from "@/app/api/handlers";
 import type {
   BootSource,
   BootSourcesPostRequest,
   BootSourcesPostResponse,
   GetBootSourcesV1BootassetSourcesGetResponse,
-} from "@/apiclient";
+} from "@/app/apiclient";
 import { imageSourceFactory } from "@/mocks/factories";
 import { apiUrls } from "@/utils/test-urls";
 

@@ -1,6 +1,6 @@
 import RequireLogin from "./RequireLogin";
 
-import { AuthContextProvider } from "@/context";
+import { AuthContextProvider } from "@/app/context";
 import * as router from "@/utils/router";
 import { renderWithMemoryRouter } from "@/utils/test-utils";
 

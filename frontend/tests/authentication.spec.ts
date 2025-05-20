@@ -1,6 +1,6 @@
 import { test, expect, Page } from "@playwright/test";
 import { admin, LONG_TEST_TIMEOUT } from "./constants";
-import { routesConfig } from "@/config/routes";
+import { routesConfig } from "@/app/base/routes";
 import { scenarios } from "@/mocks/scenarios";
 
 test.setTimeout(LONG_TEST_TIMEOUT);

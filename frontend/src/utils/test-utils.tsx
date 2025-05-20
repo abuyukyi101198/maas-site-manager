@@ -6,8 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { RenderOptions, RenderResult } from "@testing-library/react";
 import { screen, render, waitForElementToBeRemoved } from "@testing-library/react";
 
-import MainLayout from "@/components/MainLayout";
-import { AppLayoutContextProvider, AuthContextProvider, RowSelectionContextProviders } from "@/context";
+import MainLayout from "@/app/base/components/MainLayout";
+import { AppLayoutContextProvider, AuthContextProvider, RowSelectionContextProviders } from "@/app/context";
 import type { MemoryRouterProps } from "@/utils/router";
 import { MemoryRouter } from "@/utils/router";
 

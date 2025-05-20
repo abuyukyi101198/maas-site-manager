@@ -1,7 +1,7 @@
 import { http, HttpResponse } from "msw";
 
-import type { User, UsersPostRequest } from "@/api";
-import { type SortDirection, type UserSortKey } from "@/api/handlers";
+import type { User, UsersPostRequest } from "@/app/api";
+import { type SortDirection, type UserSortKey } from "@/app/api/handlers";
 import { userFactory } from "@/mocks/factories";
 import { apiUrls } from "@/utils/test-urls";
 

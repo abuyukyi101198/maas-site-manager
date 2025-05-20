@@ -1,6 +1,6 @@
 import RequireLogin from "./RequireLogin";
 
-import MainLayout from "@/components/MainLayout";
+import MainLayout from "@/app/base/components/MainLayout";
 import { hasImagesPage } from "@/featureFlags";
 import { lazyWithErrorBoundary } from "@/utils/hoc";
 import { createRoutesFromElements, Route, redirect } from "@/utils/router";
@@ -11,12 +11,12 @@ const NotFound = lazyWithErrorBoundary(() => import("@/routes/404"));
 const Sites = lazyWithErrorBoundary(() => import("@/routes/sites"));
 const List = lazyWithErrorBoundary(() => import("@/routes/sites/list"));
 const Map = lazyWithErrorBoundary(() => import("@/routes/sites/map"));
-const ImagesList = lazyWithErrorBoundary(() => import("@/components/ImagesList"));
+const ImagesList = lazyWithErrorBoundary(() => import("@/app/images/views/ImagesList"));
 const Settings = lazyWithErrorBoundary(() => import("@/routes/settings"));
 const Tokens = lazyWithErrorBoundary(() => import("@/routes/tokens/tokens"));
 const Requests = lazyWithErrorBoundary(() => import("@/routes/requests"));
 const Users = lazyWithErrorBoundary(() => import("@/routes/users"));
-const MapSettings = lazyWithErrorBoundary(() => import("@/components/MapSettings"));
+const MapSettings = lazyWithErrorBoundary(() => import("@/app/settings/views/MapSettings"));
 const Account = lazyWithErrorBoundary(() => import("@/routes/account"));
 const PersonalDetails = lazyWithErrorBoundary(() => import("@/routes/personalDetails"));
 const Password = lazyWithErrorBoundary(() => import("@/routes/account/password"));

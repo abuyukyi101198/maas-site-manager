@@ -1,4 +1,4 @@
-import PasswordUpdate from "@/components/PasswordUpdate/PasswordUpdate";
+import PasswordUpdate from "@/app/account/views/PasswordUpdate/PasswordUpdate";
 
 const Password = () => <PasswordUpdate />;
 

@@ -1,7 +1,7 @@
 import { http, HttpResponse } from "msw";
 
-import type { Image, UpstreamImage, UpstreamImageSource } from "@/api";
-import { type ImagesSortKey, type SortDirection } from "@/api/handlers";
+import type { Image, UpstreamImage, UpstreamImageSource } from "@/app/api";
+import { type ImagesSortKey, type SortDirection } from "@/app/api/handlers";
 import { imageFactory, upstreamImageSourceFactory } from "@/mocks/factories";
 import { apiUrls } from "@/utils/test-urls";
 

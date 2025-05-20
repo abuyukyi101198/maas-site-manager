@@ -38,10 +38,10 @@ yarnpkg
 endef
 
 ifdef JENKINS_URL
-	YARN_PATH := /var/cache/yarn yarnpkg install
+    YARN_CACHE_FOLDER := /var/cache/yarn
     PLAYWRIGHT_PATH := /var/cache/playwright-browsers
 else
-	YARN_PATH := .cache/yarn yarnpkg install
+    YARN_CACHE_FOLDER := .cache/yarn
     PLAYWRIGHT_PATH := .cache/playwright-browsers
 endif
 
@@ -53,7 +53,7 @@ install-dependencies:
 		apt -y install --no-install-recommends $(PACKAGES)
 
 ci-dep:
-	YARN_CACHE_FOLDER=$(YARN_PATH)
+	YARN_CACHE_FOLDER=$(YARN_CACHE_FOLDER) yarnpkg install
 	PLAYWRIGHT_BROWSERS_PATH=$(PLAYWRIGHT_PATH) \
 		npx --yes playwright install
 
@@ -73,6 +73,10 @@ unit-test:
 		--outputFile.junit=../junit-frontend.xml
 
 e2e-test:
+	@if [ -z "$(JENKINS_URL)" ]; then \
+		VITE_UI_PORT=8405 VITE_USE_MOCK_TILES=true yarnpkg run dev > dev.log 2>&1 & \
+		sleep 10; \
+	fi; \
 	PLAYWRIGHT_BROWSERS_PATH=$(PLAYWRIGHT_PATH) \
 	PLAYWRIGHT_JUNIT_OUTPUT_NAME=../junit-e2e.xml \
 	npx playwright test --reporter=junit

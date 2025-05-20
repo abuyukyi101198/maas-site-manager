@@ -1,6 +1,6 @@
 import { http, HttpResponse } from "msw";
 
-import type { Token, TokensPostRequest, TokensPostResponse } from "@/api";
+import type { Token, TokensPostRequest, TokensPostResponse } from "@/app/api";
 import { tokenFactory } from "@/mocks/factories";
 import { apiUrls } from "@/utils/test-urls";
 
