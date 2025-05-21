@@ -60,13 +60,23 @@ class MSMImageStore(ObjectStore):  # type: ignore
         bootloader_type = product.get("bootloader-type")
         if bootloader_type is None:
             # TODO: replace +0000 with .replace(UTC) when python version is 3.12
-            eol = datetime.strptime(
-                product.get("support_eol", "1970-01-01") + "+0000",
-                "%Y-%m-%d%z",
+            eol_str = product.get("support_eol")
+            esm_eol_str = product.get("support_esm_eol")
+            eol = (
+                datetime.strptime(
+                    eol_str + "+0000",
+                    "%Y-%m-%d%z",
+                )
+                if eol_str
+                else None
             )
-            esm_eol = datetime.strptime(
-                product.get("support_esm_eol", "1970-01-01") + "+0000",
-                "%Y-%m-%d%z",
+            esm_eol = (
+                datetime.strptime(
+                    esm_eol_str + "+0000",
+                    "%Y-%m-%d%z",
+                )
+                if esm_eol_str
+                else None
             )
             return BootAsset(
                 boot_source_id=boot_source_id,

@@ -117,16 +117,16 @@ class BootAsset(BaseModel):
     kind: BootAssetKind
     label: BootAssetLabel
     os: str
-    release: str
-    codename: str
-    title: str
     arch: str
-    subarch: str
-    compatibility: list[str]
-    flavor: str
-    base_image: str
-    eol: AwareDatetime
-    esm_eol: AwareDatetime
+    release: str | None = None
+    codename: str | None = None
+    title: str | None = None
+    subarch: str | None = None
+    compatibility: list[str] | None = None
+    flavor: str | None = None
+    base_image: str | None = None
+    eol: AwareDatetime | None = None
+    esm_eol: AwareDatetime | None = None
 
 
 class BootAssetCreate(BaseModel):
@@ -134,16 +134,16 @@ class BootAssetCreate(BaseModel):
     kind: BootAssetKind
     label: BootAssetLabel
     os: str
-    release: str
-    codename: str
-    title: str
     arch: str
-    subarch: str
-    compatibility: list[str]
-    flavor: str
-    base_image: str
-    eol: AwareDatetime
-    esm_eol: AwareDatetime
+    release: str | None = None
+    codename: str | None = None
+    title: str | None = None
+    subarch: str | None = None
+    compatibility: list[str] | None = None
+    flavor: str | None = None
+    base_image: str | None = None
+    eol: AwareDatetime | None = None
+    esm_eol: AwareDatetime | None = None
 
 
 class BootAssetUpdate(BaseModel):

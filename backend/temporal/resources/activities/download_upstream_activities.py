@@ -1,4 +1,4 @@
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from os.path import join
@@ -80,7 +80,6 @@ class BootAssetLabel(str, Enum):
 class BootAsset:
     """
     A boot asset to either find or create.
-    TODO: refactor to make default values None
     """
 
     boot_source_id: int
@@ -88,23 +87,14 @@ class BootAsset:
     label: BootAssetLabel
     os: str
     arch: str
-    release: str = ""
-    codename: str = ""
-    title: str = ""
-    subarch: str = ""
-    compatibility: list[str] = field(default_factory=list)
-    flavor: str = ""
-    base_image: str = ""  # TODO: Remove field when nullable in DB, only used for custom images
-    eol: datetime = field(
-        default_factory=lambda: datetime.strptime(
-            "1970-01-01+0000", "%Y-%m-%d%z"
-        )
-    )
-    esm_eol: datetime = field(
-        default_factory=lambda: datetime.strptime(
-            "1970-01-01+0000", "%Y-%m-%d%z"
-        )
-    )
+    release: str | None = None
+    codename: str | None = None
+    title: str | None = None
+    subarch: str | None = None
+    compatibility: list[str] | None = None
+    flavor: str | None = None
+    eol: datetime | None = None
+    esm_eol: datetime | None = None
 
 
 @dataclass

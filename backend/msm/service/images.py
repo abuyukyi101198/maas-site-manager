@@ -224,7 +224,7 @@ class BootAssetService(Service):
         label: list[models.BootAssetLabel] | None = None,
         os: list[str] | None = None,
         arch: list[str] | None = None,
-        release: list[str] | None = None,
+        release: list[str | None] | None = None,
     ) -> tuple[int, Iterable[models.BootAsset]]:
         filters = queries.filters_from_arguments(
             BootAsset,

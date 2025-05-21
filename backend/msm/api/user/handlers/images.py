@@ -710,7 +710,6 @@ class S3MultipartUploadTarget(BaseTarget):  # type: ignore
             aws_secret_access_key=settings.s3_secret_key,
         )
         self.s3_bucket = settings.s3_bucket
-
         self.filename = join(
             settings.s3_path if settings.s3_path else "",
             filename,
@@ -977,12 +976,12 @@ async def post_images(
             label=models.BootAssetLabel.STABLE,
             os=os.value.decode(),
             release=release.value.decode(),
-            codename="",
+            codename=None,
             title=title.value.decode(),
             arch=arch.value.decode(),
-            subarch="",
-            compatibility=[],
-            flavor="",
+            subarch=None,
+            compatibility=None,
+            flavor=None,
             base_image=f"{os.value.decode()}/{release.value.decode()}",
             eol=datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC),
             esm_eol=datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC),
