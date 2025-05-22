@@ -270,7 +270,7 @@ export const useWithDelay = (delay = MARKER_HOVER_DELAY) => {
   const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const resetDelay = () => clearTimeout(timeoutRef.current);
 
-  const withDelay = (fn: () => any) => {
+  const withDelay = (fn: () => unknown) => {
     resetDelay();
     timeoutRef.current = setTimeout(fn, delay);
   };

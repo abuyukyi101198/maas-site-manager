@@ -66,7 +66,7 @@ const addMissingBootAssetFields = (data: { items: BootAsset[] }): Image[] => {
       downloaded: [0, 50, 100][random(0, 2, false)],
       size: random(1, 10, true),
       is_custom_image: random(0, 1, false) === 0,
-    } as Image;
+    } as unknown as Image;
   });
 };
 

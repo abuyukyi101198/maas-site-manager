@@ -26,7 +26,7 @@ type ImagesByName = { [key: string]: UpstreamImage[] };
 
 const groupImagesByName = (images: UpstreamImage[]) => {
   if (!images) return {};
-  let imagesByName: ImagesByName = {};
+  const imagesByName: ImagesByName = {};
 
   images.forEach((image) => {
     if (!!imagesByName[image.codename]) {
@@ -40,7 +40,7 @@ const groupImagesByName = (images: UpstreamImage[]) => {
 };
 
 const groupArchesByRelease = (images: ImagesByName) => {
-  let groupedImages: GroupedImages = {};
+  const groupedImages: GroupedImages = {};
 
   Object.keys(images).forEach((distro) => {
     if (!groupedImages[distro]) {
@@ -59,7 +59,7 @@ const groupArchesByRelease = (images: ImagesByName) => {
 };
 
 const getInitialState = (images: ImagesByName) => {
-  let initialState: ReleasesWithArches = {};
+  const initialState: ReleasesWithArches = {};
 
   Object.keys(images).forEach((distro) => {
     images[distro].forEach((image) => {

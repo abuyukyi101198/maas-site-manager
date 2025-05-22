@@ -21,7 +21,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ children, initialOptions, c
   const [map, setMap] = useState<maplibregl.Map | null>(null);
 
   useEffect(() => {
-    let protocol = new Protocol();
+    const protocol = new Protocol();
     maplibregl.addProtocol("pmtiles", protocol.tile);
     return () => {
       maplibregl.removeProtocol("pmtiles");

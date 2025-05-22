@@ -196,7 +196,7 @@ export const imageFactory = Factory.define<Image>(({ sequence }) => {
   return {
     id: sequence,
     boot_source_id: chance.integer(),
-    kind: chance.pickone([BootAssetKind._0, BootAssetKind._1]),
+    kind: BootAssetKind,
     label: chance.pickone([BootAssetLabel.STABLE, BootAssetLabel.CANDIDATE]),
     os: OS.name,
     release: OS.release,

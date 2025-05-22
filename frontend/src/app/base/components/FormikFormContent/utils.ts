@@ -15,7 +15,7 @@ export type FieldErrors = {
  * @returns An object mapping field names to their respective error messages.
  */
 export const getFieldErrorsFromErrorResponse = (error: MutationErrorResponse): FieldErrors => {
-  let fieldErrors: FieldErrors = {};
+  const fieldErrors: FieldErrors = {};
   if (error.body.error.details) {
     for (const detail of error.body.error.details) {
       if (detail.field) {

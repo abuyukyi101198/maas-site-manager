@@ -9,7 +9,7 @@ import type { BootAssetLabel } from './BootAssetLabel';
 export type BootAsset = {
     id: number;
     boot_source_id: number;
-    kind: BootAssetKind;
+    kind: typeof BootAssetKind;
     label: BootAssetLabel;
     os: string;
     release: string;

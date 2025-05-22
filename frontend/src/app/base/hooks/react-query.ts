@@ -69,7 +69,7 @@ export const useUpstreamImageSourceQuery = () =>
 
 export const useUpstreamImageSourceMutation = (
   options?: Omit<
-    UseMutationOptions<any, unknown, Parameters<typeof updateUpstreamImageSource>[0], unknown>,
+    UseMutationOptions<unknown, unknown, Parameters<typeof updateUpstreamImageSource>[0], unknown>,
     "mutationFn"
   >,
 ) => {
@@ -83,7 +83,10 @@ export const useUpstreamImageSourceMutation = (
 };
 
 export const useSelectUpstreamImagesMutation = (
-  options?: Omit<UseMutationOptions<any, unknown, Parameters<typeof selectUpstreamImages>[0], unknown>, "mutationFn">,
+  options?: Omit<
+    UseMutationOptions<unknown, unknown, Parameters<typeof selectUpstreamImages>[0], unknown>,
+    "mutationFn"
+  >,
 ) => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -97,7 +100,7 @@ export const useSelectUpstreamImagesMutation = (
 };
 
 export const useDeleteImagesMutation = (
-  options?: Omit<UseMutationOptions<any, unknown, Parameters<typeof deleteImages>[0], unknown>, "mutationFn">,
+  options?: Omit<UseMutationOptions<unknown, unknown, Parameters<typeof deleteImages>[0], unknown>, "mutationFn">,
 ) => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -114,7 +117,7 @@ export const useDeleteImagesMutation = (
 };
 
 export const useUploadImageMutation = (
-  options?: Omit<UseMutationOptions<any, unknown, Parameters<typeof uploadImage>[0], unknown>, "mutationFn">,
+  options?: Omit<UseMutationOptions<unknown, unknown, Parameters<typeof uploadImage>[0], unknown>, "mutationFn">,
 ) => {
   const queryClient = useQueryClient();
   return useMutation({

@@ -8,11 +8,7 @@ import RemoveButton from "@/app/base/components/RemoveButton";
 import { useAppLayoutContext, useUserSelectionContext } from "@/app/context";
 import type { UserSelectionContextValue } from "@/app/context/UserSelectionContext";
 
-const initialValues = {
-  confirmUsername: "",
-};
-
-type DeleteUserFormValues = typeof initialValues;
+type DeleteUserFormValues = { confirmUsername: string };
 const createValidationSchema = (username: string) => {
   return Yup.object().shape({
     confirmUsername: Yup.string()

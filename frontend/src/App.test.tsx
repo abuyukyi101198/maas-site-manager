@@ -1,4 +1,3 @@
-/* eslint-disable testing-library/no-container */
 import App from "./App";
 
 import { waitFor, render } from "@/utils/test-utils";

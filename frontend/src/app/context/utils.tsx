@@ -9,7 +9,7 @@ type SelectedEntityContextValue<T extends string | number | null = null> = {
   selected: T | null;
   setSelected: OnChangeFn<T | null>;
 };
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ContextsCache = new Map<Entity, React.Context<any>>();
 
 export const getSelectedEntityContext = <T extends string | number | null = null>(
@@ -36,7 +36,7 @@ export const useSelectedEntityContext = <T extends string | number | null = null
 
 export const getSelectedEntityContextProvider =
   <T extends string | number | null = null>(entity: Entity) =>
-  ({ children }: PropsWithChildren<{}>) => {
+  ({ children }: PropsWithChildren<object>) => {
     const SelectedEntityContext = getSelectedEntityContext<T>(entity);
     const [selected, setSelected] = useState<T | null>(null);
 

@@ -15,7 +15,7 @@ const a11yTest =
       page,
     }) => {
       await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
-      // eslint-disable-next-line playwright/no-networkidle
+
       await page.goto(path, {
         // map tends to trigger continuous network requests disallowing the use of networkidle
         waitUntil: path.includes(routesConfig.sitesMap.path) ? "domcontentloaded" : "networkidle",

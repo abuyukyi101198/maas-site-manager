@@ -13,7 +13,7 @@ export type SortBy<T extends SitesSortKey | UserSortKey | ImagesSortKey> = `${T}
 
 // TODO: replace with api client once API supports it https://warthogs.atlassian.net/browse/MAASENG-2569
 export const getUpstreamImages = async (params: Record<string, number>) => {
-  let stringParams: Record<string, string> = {};
+  const stringParams: Record<string, string> = {};
   for (const [key, value] of Object.entries(params)) {
     stringParams[key] = String(value);
   }

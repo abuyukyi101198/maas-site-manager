@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export enum BootAssetKind {
-    '_0' = 0,
-    '_1' = 1,
-}
+export const BootAssetKind={
+    '_0' : 0,
+    '_1' : 1,
+} as const;

@@ -47,7 +47,7 @@ it("input has correct accessible label", () => {
   const { result, props } = setupTestCase("Ubuntu");
 
   const selectColumn = result.current.find((column) => column.id === "select");
-  // @ts-ignore-next-line
+  // @ts-expect-error-next-line
   const cellValue = selectColumn.cell(props);
   render(cellValue);
 
@@ -60,7 +60,7 @@ it("size column formats bytes correctly", () => {
 
   const sizeColumn = result.current.find((column) => column.id === "size");
   expect(sizeColumn).toBeDefined();
-  // @ts-ignore-next-line
+  // @ts-expect-error-next-line
   const cellValue = sizeColumn.cell({ getValue: () => 1000 });
 
   expect(cellValue).toBe("1 KB");
@@ -70,7 +70,7 @@ it("custom column returns correct value for custom images", () => {
   const { result } = setupTestCase();
 
   const customColumn = result.current.find((column) => column.id === "custom");
-  // @ts-ignore-next-line
+  // @ts-expect-error-next-line
   render(customColumn.cell({ getValue: () => true }));
 
   expect(screen.getByLabelText("checked")).toBeInTheDocument();
@@ -81,7 +81,7 @@ it("action column toggles row selection on delete", async () => {
   const { result, props } = setupTestCase();
 
   const actionColumn = result.current.find((column) => column.id === "action");
-  // @ts-ignore-next-line
+  // @ts-expect-error-next-line
   render(actionColumn.cell({ ...props, row: { ...props.row, toggleSelected } }));
   screen.getByRole("button", { name: /delete/i }).click();
 

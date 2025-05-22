@@ -51,7 +51,7 @@ export type BodyPostV1LoginPost = {
 export type BootAsset = {
   id: number;
   boot_source_id: number;
-  kind: BootAssetKind;
+  kind: typeof BootAssetKind;
   label: BootAssetLabel;
   os: string;
   release: string;
@@ -108,10 +108,10 @@ export type BootAssetItemsGetResponse = {
   items: Array<BootAssetItem>;
 };
 
-export enum BootAssetKind {
-  _0 = 0,
-  _1 = 1,
-}
+export const BootAssetKind = {
+  _0: 0,
+  _1: 1,
+} as const;
 
 export enum BootAssetLabel {
   STABLE = "stable",
@@ -148,7 +148,7 @@ export type BootAssetsGetResponse = {
 
 export type BootAssetsPostRequest = {
   boot_source_id: number;
-  kind: BootAssetKind;
+  kind: typeof BootAssetKind;
   label: BootAssetLabel;
   os: string;
   release: string;
@@ -1129,7 +1129,7 @@ export type GetBootAssetsV1BootassetsGetData = {
     page?: number;
     size?: number;
     boot_source_id?: Array<number> | null;
-    kind?: Array<BootAssetKind> | null;
+    kind?: Array<typeof BootAssetKind> | null;
     label?: Array<BootAssetLabel> | null;
     os?: Array<string> | null;
     arch?: Array<string> | null;

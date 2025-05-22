@@ -80,7 +80,7 @@ it("separates images by distro", async () => {
 });
 
 it("enables the submit button once the form has been edited", async () => {
-  let images: UpstreamImage[] = [];
+  const images: UpstreamImage[] = [];
   const arches = ["amd64", "arm64", "i386"];
 
   arches.forEach((architecture) => {
@@ -156,7 +156,7 @@ it("displays errors that ocurred while fetching the upstream image source", asyn
 
 // this will be fixed in https://warthogs.atlassian.net/browse/MAASENG-4706
 it.skip("displays errors that ocurred after submitting image selection", async () => {
-  let images: UpstreamImage[] = [];
+  const images: UpstreamImage[] = [];
   const arches = ["amd64", "arm64", "i386"];
 
   arches.forEach((architecture) => {

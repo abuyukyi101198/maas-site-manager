@@ -12,7 +12,7 @@ type AuthStatus = "initial" | "authenticated" | "unauthorised";
 
 interface AuthContextType {
   status: AuthStatus;
-  login: ({ username, password }: Pick<PostV1LoginPostData["body"], "username" | "password">) => void;
+  login: ({}: Pick<PostV1LoginPostData["body"], "username" | "password">) => void;
   logout: () => Promise<void>;
   isError: boolean;
   error: MutationErrorResponse | null;
@@ -32,12 +32,8 @@ export const actionTypes = {
   LOGOUT: "LOGOUT",
 } as const;
 
-const status = {
-  AUTHENTICATED: "authenticated",
-  UNAUTHORISED: "unauthorised",
-} as const;
+type Status = "authenticated" | "unauthorised";
 
-type Status = (typeof status)[keyof typeof status];
 type ActionType = (typeof actionTypes)[keyof typeof actionTypes];
 type AuthToken = string | null;
 type AuthState = {
@@ -119,7 +115,7 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
       const response = await loginQuery.mutateAsync({ body: { username, password } });
       updateAuthToken(response.access_token);
       dispatch({ type: actionTypes.LOGIN_SUCCESS, payload: response.access_token });
-    } catch (error) {
+    } catch {
       dispatch({ type: actionTypes.LOGIN_ERROR });
     }
   };

@@ -1,5 +1,3 @@
-/* eslint-disable testing-library/no-unnecessary-act, testing-library/no-container, testing-library/no-node-access  */
-
 import DynamicTable from "./DynamicTable";
 
 import BREAKPOINTS from "@/app/base/breakpoints";

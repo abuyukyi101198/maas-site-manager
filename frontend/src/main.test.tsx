@@ -1,4 +1,3 @@
-/* eslint-disable testing-library/no-node-access */
 import { act, waitFor, setupServer } from "@/utils/test-utils";
 
 const mockServer = setupServer();

@@ -32,7 +32,7 @@ const TokensCreateSchema = Yup.object().shape({
       }
       try {
         return !!humanIntervalToISODuration(value);
-      } catch (error) {
+      } catch {
         return false;
       }
     })

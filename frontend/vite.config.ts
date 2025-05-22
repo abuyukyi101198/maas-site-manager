@@ -3,8 +3,9 @@ import react from "@vitejs/plugin-react-swc";
 import AutoImport from "unplugin-auto-import/vite";
 import stylelint from "vite-plugin-stylelint";
 import * as path from "path";
+import childProcess from "child_process";
 
-const commitHash = require("child_process").execSync("git rev-parse --short HEAD").toString();
+const commitHash = childProcess.execSync("git rev-parse --short HEAD").toString();
 // https://vitejs.dev/config/
 
 export default defineConfig(({ mode }) => {

@@ -1,7 +1,7 @@
 import { config } from "dotenv";
 import { expect, afterEach } from "vitest";
 import { cleanup } from "@testing-library/react";
-import matchers from "@testing-library/jest-dom/matchers";
+import * as matchers from "@testing-library/jest-dom/matchers";
 import { fetch, Request, Response } from "@remix-run/web-fetch";
 import { TextEncoder as NodeTextEncoder, TextDecoder as NodeTextDecoder } from "util";
 import { AbortSignal as NodeAbortSignal, AbortController as NodeAbortController } from "abort-controller";
@@ -9,6 +9,7 @@ import "vitest-canvas-mock";
 import "vitest-webgl-canvas-mock";
 import { mockResizeObserver, configMocks } from "jsdom-testing-mocks";
 import "@/testing/customMatchers";
+//import "@testing-library/jest-dom";
 
 config();
 configMocks({ beforeEach, afterEach, afterAll });
@@ -17,36 +18,33 @@ configMocks({ beforeEach, afterEach, afterAll });
 expect.extend(matchers);
 
 // use the Web Fetch API in tests which is used by Remix
-// expect errors, Web Fetch API types differ from jsdom implementation
+// @ts-expect-error because Web Fetch API types differ from jsdom implementation
 // https://github.com/remix-run/react-router/blob/b154367/packages/router/__tests__/setup.ts
-// @ts-expect-error
+
 if (globalThis.fetch !== fetch) {
-  // Built-in lib.dom.d.ts expects `fetch(Request | string, ...)` but the web
+  // @ts-expect-error built-in lib.dom.d.ts expects `fetch(Request | string, ...)` but the web
   // fetch API allows a URL so @remix-run/web-fetch defines
   // `fetch(string | URL | Request, ...)`
-  // @ts-expect-error
   globalThis.fetch = fetch;
-  // Same as above, lib.dom.d.ts doesn't allow a URL to the Request constructor
-  // @ts-expect-error
+  // @ts-expect-error same as above, lib.dom.d.ts doesn't allow a URL to the Request constructor
   globalThis.Request = Request;
-  // web-std/fetch Response does not currently implement Response.error()
-  // @ts-expect-error
+  // @ts-expect-error web-std/fetch Response does not currently implement Response.error()
   globalThis.Response = Response;
 }
 
 if (!globalThis.AbortController) {
-  // @ts-expect-error
+  // @ts-expect-error because NodeAbortController is not a global in jsdom
   globalThis.AbortController = NodeAbortController;
 }
 
 if (!globalThis.AbortSignal) {
-  // @ts-expect-error
+  // @ts-expect-error because NodeAbortSignal is not a global in jsdom
   globalThis.AbortSignal = NodeAbortSignal;
 }
 
 if (!globalThis.TextEncoder || !globalThis.TextDecoder) {
   globalThis.TextEncoder = NodeTextEncoder;
-  // @ts-expect-error
+  // @ts-expect-error because NodeTextDecoder is not a global in jsdom
   globalThis.TextDecoder = NodeTextDecoder;
 }
 

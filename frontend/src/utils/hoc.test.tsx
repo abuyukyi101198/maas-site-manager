@@ -1,4 +1,7 @@
 /* eslint-disable no-console */
+import { expect, vi } from "vitest";
+import "@testing-library/jest-dom";
+
 import { lazyWithErrorBoundary } from "./hoc";
 
 import { render, screen } from "@/utils/test-utils";

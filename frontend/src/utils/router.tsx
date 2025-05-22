@@ -1,5 +1,4 @@
-/* eslint-disable no-restricted-imports */
-
+// eslint-disable-next-line no-restricted-imports
 import type {
   Path as BasePath,
   LinkProps as BaseLinkProps,
@@ -9,6 +8,7 @@ import type {
   NavigateOptions as BaseNavigateOptions,
   RedirectFunction as BaseRedirectFunction,
 } from "react-router";
+// eslint-disable-next-line no-restricted-imports
 import {
   createSearchParams as baseCreateSearchParams,
   Link as BaseLink,
@@ -53,6 +53,7 @@ export const matchPath = baseMatchPath as MatchPath;
 export type RedirectFunction = (url: RoutePath, init?: number | ResponseInit) => ReturnType<BaseRedirectFunction>;
 export const redirect = baseRedirect as RedirectFunction;
 
+// eslint-disable-next-line no-restricted-imports
 export {
   createBrowserRouter,
   createRoutesFromElements,
