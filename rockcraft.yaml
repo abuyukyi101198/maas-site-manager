@@ -25,7 +25,7 @@ parts:
     build-packages:
       - git
     build-snaps:
-      - node/20/stable
+      - node/22/stable
     override-build: |
       cd frontend
       npm install --location=global --prefix ${CRAFT_PART_BUILD} yarn
