@@ -1,15 +1,12 @@
 .DEFAULT_GOAL := ci-build
 
-# return changed paths at first level of the tree
-TOP_LEVEL_CHANGES := $(shell git diff-tree --no-commit-id --name-only -r HEAD | cut -d/ -f1| sort | uniq)
+# Uncomment and use if statement in directive below to determine if changes were
+# made in frontend or backend once we have visibility of the main branch in lpci
+# TOP_LEVEL_CHANGES := $(shell git diff-tree --no-commit-id --name-only -r main HEAD | cut -d/ -f1| sort | uniq)
 
 install-dependencies ci-dep ci-build ci-lint ci-test:
-ifneq (,$(findstring backend,$(TOP_LEVEL_CHANGES)))
 	$(MAKE) -C backend $@
-endif
-ifneq (,$(findstring frontend,$(TOP_LEVEL_CHANGES)))
 	$(MAKE) -C frontend $@
-endif
 .PHONY: install-dependencies ci-dep ci-build ci-lint ci-test
 
 # run by the build-env-prepare job

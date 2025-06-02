@@ -7,8 +7,13 @@ endef
 
 
 install-dependencies:
-	sudo -E DEBIAN_FRONTEND=noninteractive \
-		apt -y install $(PACKAGES)
+	@if [ "$(shell id -u)" = 0 ]; then \
+            export DEBIAN_FRONTEND=noninteractive; \
+			apt -y install $(PACKAGES); \
+	else \
+			sudo -E DEBIAN_FRONTEND=noninteractive \
+				apt -y install $(PACKAGES); \
+	fi
 .PHONY: install-dependencies
 
 ci-dep: install-dependencies

@@ -22,7 +22,7 @@ jobs:
   lint:
     architectures: amd64
     series: noble
-    root: false
+    root: true
     run: |
       make ci-dep
       make ci-lint
@@ -30,7 +30,7 @@ jobs:
   build:
     architectures: amd64
     series: noble
-    root: false
+    root: true
     run: |
       make ci-dep
       make ci-build
@@ -40,5 +40,5 @@ jobs:
     series: noble
     root: false
     run: |
-      make ci-dep
+      make -C frontend ci-dep
       make ci-test
