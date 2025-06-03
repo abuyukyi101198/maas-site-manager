@@ -32,9 +32,7 @@ libpangocairo-1.0-0 \
 libx11-xcb1 \
 libxdamage1 \
 libxkbcommon0 \
-libxtst6 \
-npm \
-yarnpkg
+libxtst6
 endef
 
 ifdef JENKINS_URL
@@ -62,29 +60,35 @@ install-dependencies:
 
 ci-dep: install-node
 	export PATH=$$(pwd)/node-22/bin:$$PATH && \
-	YARN_CACHE_FOLDER=$(YARN_CACHE_FOLDER) yarnpkg install && \
+	npm install -g yarn && \
+	YARN_CACHE_FOLDER=$(YARN_CACHE_FOLDER) yarn install && \
 	PLAYWRIGHT_BROWSERS_PATH=$(PLAYWRIGHT_PATH) npx --yes playwright install
 
 ci-build:
-	yarnpkg run build
+	export PATH=$$(pwd)/node-22/bin:$$PATH && \
+	yarn run build
 
 ci-lint:
-	yarnpkg run lint
+	export PATH=$$(pwd)/node-22/bin:$$PATH && \
+	yarn run lint
 
 ci-test: unit-test e2e-test
 
 unit-test:
+	export PATH=$$(pwd)/node-22/bin:$$PATH && \
 	VITEST_JUNIT_SUITE_NAME='maas-site-manager frontend tests' \
-		yarnpkg run coverage --test-timeout=$(FE_TEST_TIMEOUT) \
+		yarn run coverage --test-timeout=$(FE_TEST_TIMEOUT) \
 		--retry=$(FE_TEST_RETRY) --silent --reporter=junit \
 		--reporter=default \
 		--outputFile.junit=../junit-frontend.xml
 
 e2e-test:
 	@if [ -z "$(JENKINS_URL)" ]; then \
-		VITE_UI_PORT=8405 VITE_USE_MOCK_TILES=true yarnpkg run dev > dev.log 2>&1 & \
+		export PATH=$$(pwd)/node-22/bin:$$PATH && \
+		VITE_UI_PORT=8405 VITE_USE_MOCK_TILES=true yarn run dev > dev.log 2>&1 & \
 		sleep 10; \
 	fi; \
+	export PATH=$$(pwd)/node-22/bin:$$PATH && \
 	PLAYWRIGHT_BROWSERS_PATH=$(PLAYWRIGHT_PATH) \
 	PLAYWRIGHT_JUNIT_OUTPUT_NAME=../junit-e2e.xml \
 	npx playwright test --reporter=junit

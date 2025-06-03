@@ -13,8 +13,6 @@ jobs:
       - sudo
       - git
       - curl
-      - npm
-      - yarnpkg
     root: true
     run: |
       make install-dependencies
