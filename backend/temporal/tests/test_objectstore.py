@@ -159,7 +159,7 @@ class TestMSMImageStore:
         mock_execute = mocker.patch.object(
             workflow,
             "execute_child_workflow",
-            return_value=expected_returned_id,
+            return_value=(True, expected_returned_id),
         )
         product = {
             "bootloader-type": "uefi",
@@ -212,7 +212,7 @@ class TestMSMImageStore:
         )
 
         image_store = MSMImageStore("http://base.url", "test.jwt", s3_params)
-        result_id = await image_store._get_or_create_product(
+        created, result_id = await image_store._get_or_create_product(
             product, test_bootsource_id
         )
         mock_execute.assert_called_once_with(
@@ -228,6 +228,7 @@ class TestMSMImageStore:
             id_reuse_policy=WorkflowIDReusePolicy.REJECT_DUPLICATE,
             parent_close_policy=ParentClosePolicy.TERMINATE,
         )
+        assert created
         assert result_id == expected_returned_id
         mock_get_asset.assert_called_once_with(
             product,
@@ -236,9 +237,9 @@ class TestMSMImageStore:
         mock_get_version.assert_called_once_with(product)
         mock_get_item.assert_called_once_with(product)
 
-    async def test_insert(self, mocker: MockerFixture) -> None:
+    async def test_insert_created(self, mocker: MockerFixture) -> None:
         mock_create_product = mocker.patch.object(
-            MSMImageStore, "_get_or_create_product", return_value=1
+            MSMImageStore, "_get_or_create_product", return_value=(True, 1)
         )
         product = {
             "bootloader-type": "uefi",
@@ -264,6 +265,33 @@ class TestMSMImageStore:
         assert image_store._files_to_download == {
             product["sha256"]: {"ss_url": "http://test.ss.url", "id": 1}
         }
+
+    async def test_insert_not_created(self, mocker: MockerFixture) -> None:
+        mock_create_product = mocker.patch.object(
+            MSMImageStore, "_get_or_create_product", return_value=(False, 1)
+        )
+        product = {
+            "bootloader-type": "uefi",
+            "label": "stable",
+            "os": "grub-efi-signed",
+            "arch": "amd64",
+            "version": "20170417",
+            "ftype": "boot-initrd",
+            "path": "precise/amd64/20170417/hwe-p/generic/boot-initrd",
+            "sha256": "1d87c3e76b8ffd8ec724a2ca2c29bbf840981b615ee76060d851d546d218ed7d",
+            "size": 19150429,
+        }
+        s3_params = S3Params(
+            endpoint="http://s3",
+            access_key="accesskey",
+            secret_key="secretkey",
+            path="test/path",
+            bucket="test-bucket",
+        )
+        image_store = MSMImageStore("http://base.url", "test.jwt", s3_params)
+        await image_store.insert(product, "http://test.ss.url", 4)
+        mock_create_product.assert_called_once_with(product, 4)
+        assert image_store._files_to_download == {}
 
     async def test_finalize(self, mocker: MockerFixture) -> None:
         async def start() -> bool:

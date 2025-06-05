@@ -37,7 +37,6 @@ dependencies = [
   "pydantic-settings",
   "python-jose[cryptography]",
   "python-multipart",
-  "python-simplestreams",
   "pytz",
   "sqlalchemy[postgresql-asyncpg,postgresql-psycopg]",
   "streaming-form-data",

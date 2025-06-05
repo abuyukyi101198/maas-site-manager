@@ -10,7 +10,6 @@ from activities.download_upstream_activities import (  # type: ignore
     BootAssetVersion,
     S3Params,
 )
-from simplestreams.objectstores import ObjectStore  # type: ignore
 from temporalio import workflow
 from temporalio.common import WorkflowIDReusePolicy
 from temporalio.exceptions import ApplicationError
@@ -23,7 +22,7 @@ from workflows.download_upstream import (  # type: ignore
 )
 
 
-class MSMImageStore(ObjectStore):  # type: ignore
+class MSMImageStore:
     def __init__(
         self, msm_base_url: str, msm_jwt: str, s3_params: S3Params
     ) -> None:
@@ -123,11 +122,11 @@ class MSMImageStore(ObjectStore):  # type: ignore
 
     async def _get_or_create_product(
         self, product: dict[str, str], boot_source_id: int
-    ) -> int:
+    ) -> tuple[bool, int]:
         """
         Get or create a Boot Asset, Boot Asset Version, and Boot Asset Item in the Site Manager DB.
 
-        Returns: Boot Asset Item ID
+        Returns: tuple[bool, int]: Whether a new version was created, and the Boot Asset Item ID
         """
         asset = self._get_asset_from_product(product, boot_source_id)
         version = self._get_version_from_product(product)
@@ -150,8 +149,11 @@ class MSMImageStore(ObjectStore):  # type: ignore
     async def insert(
         self, product: dict[str, str], ss_url: str, boot_source_id: int
     ) -> None:
-        item_id = await self._get_or_create_product(product, boot_source_id)
-        self._mark_for_download(ss_url, item_id, product.get("sha256", ""))
+        created, item_id = await self._get_or_create_product(
+            product, boot_source_id
+        )
+        if created:
+            self._mark_for_download(ss_url, item_id, product.get("sha256", ""))
 
     def _mark_for_download(
         self, ss_url: str, item_id: int, sha256: str

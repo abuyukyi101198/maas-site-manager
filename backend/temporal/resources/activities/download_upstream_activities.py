@@ -211,7 +211,12 @@ class ImageManagementActivity:
         post_url: str,
         post_data: dict[str, typing.Any],
         headers: dict[str, str],
-    ) -> int:
+    ) -> tuple[bool, int]:
+        """
+        Get or create the given asset/version/item.
+
+        Returns: tuple of (created, ID)
+        """
         resp = await self.client.get(
             get_url,
             headers=headers,
@@ -232,14 +237,14 @@ class ImageManagementActivity:
                     headers=headers,
                     params=get_params,
                 )
-                return resp.json()["items"][0]["id"]  # type: ignore
+                return False, resp.json()["items"][0]["id"]
             elif resp.status_code == 200:
-                return resp.json()["id"]  # type: ignore
+                return True, resp.json()["id"]
             else:
                 raise ApplicationError(
                     f"Got an unexpected response ({resp.status_code}) from MSM API: {resp.text}"
                 )
-        return items[0]["id"]  # type: ignore
+        return False, items[0]["id"]
 
     @activity.defn(name=UPDATE_BYTES_SYNCED_ACTIVITY)
     async def update_bytes_synced(
@@ -288,14 +293,15 @@ class ImageManagementActivity:
         }
         asset_dict = asdict(params.asset)
 
-        return await self._get_or_create(
+        _, id = await self._get_or_create(
             url, get_params, url, asset_dict, headers
         )
+        return id
 
     @activity.defn(name=GET_OR_CREATE_VERSION_ACTIVITY)
     async def get_or_create_version(
         self, params: GetOrCreateVersionParams
-    ) -> int:
+    ) -> tuple[bool, int]:
         headers = self._get_header(params.msm_jwt)
         get_url = compose_url(params.msm_base_url, "api/v1/bootasset-versions")
         post_url = compose_url(
@@ -322,6 +328,7 @@ class ImageManagementActivity:
         )
         item_dict = asdict(params.item)
         item_dict.pop("boot_asset_version_id")
-        return await self._get_or_create(
+        _, id = await self._get_or_create(
             get_url, get_params, post_url, item_dict, headers
         )
+        return id

@@ -74,7 +74,7 @@ class DownloadUpstreamImage:
 @workflow.defn(name=GET_OR_CREATE_PRODUCT_WF_NAME)
 class GetOrCreateProduct:
     @workflow.run
-    async def run(self, params: GetOrCreateProductParams) -> int:
+    async def run(self, params: GetOrCreateProductParams) -> tuple[bool, int]:
         asset_id = await workflow.execute_activity(
             GET_OR_CREATE_ASSET_ACTIVITY,
             GetOrCreateAssetParams(
@@ -84,7 +84,7 @@ class GetOrCreateProduct:
         )
         version = params.version
         version.boot_asset_id = asset_id
-        version_id = await workflow.execute_activity(
+        created, version_id = await workflow.execute_activity(
             GET_OR_CREATE_VERSION_ACTIVITY,
             GetOrCreateVersionParams(
                 params.msm_base_url, params.msm_jwt, version
@@ -93,8 +93,9 @@ class GetOrCreateProduct:
         )
         item = params.item
         item.boot_asset_version_id = version_id
-        return await workflow.execute_activity(  # type: ignore
+        item_id = await workflow.execute_activity(
             GET_OR_CREATE_ITEM_ACTIVITY,
             GetOrCreateItemParams(params.msm_base_url, params.msm_jwt, item),
             start_to_close_timeout=timedelta(seconds=30),
         )
+        return created, item_id

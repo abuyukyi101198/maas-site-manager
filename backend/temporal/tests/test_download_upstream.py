@@ -250,7 +250,7 @@ class TestDownloadUpstreamActivities:
             version=BootAssetVersion(boot_asset_id=1, version="20250903.1"),
         )
         result = await act_env.run(im_act.get_or_create_version, params)
-        assert result == 2
+        assert result == (False, 2)
         im_act.client.get.assert_called_with(
             f"{params.msm_base_url}/api/v1/bootasset-versions",
             headers={"Authorization": f"bearer {params.msm_jwt}"},
@@ -281,7 +281,7 @@ class TestDownloadUpstreamActivities:
             version=BootAssetVersion(boot_asset_id=1, version="20250903.1"),
         )
         result = await act_env.run(im_act.get_or_create_version, params)
-        assert result == 2
+        assert result == (True, 2)
         im_act.client.get.assert_called_with(
             f"{params.msm_base_url}/api/v1/bootasset-versions",
             headers={"Authorization": f"bearer {params.msm_jwt}"},
