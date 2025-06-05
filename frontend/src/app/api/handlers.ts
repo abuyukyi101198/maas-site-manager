@@ -12,18 +12,14 @@ export type ImagesSortKey = keyof Pick<Image, "release">;
 export type SortBy<T extends SitesSortKey | UserSortKey | ImagesSortKey> = `${T}-${SortDirection}` | null;
 
 // TODO: replace with api client once API supports it https://warthogs.atlassian.net/browse/MAASENG-2569
-export const getUpstreamImages = async (params: Record<string, number>) => {
-  const stringParams: Record<string, string> = {};
-  for (const [key, value] of Object.entries(params)) {
-    stringParams[key] = String(value);
-  }
-  const response = await fetch(`${apiUrls.upstreamImages}?${new URLSearchParams(stringParams)}`, {
+export const getUpstreamImages = async () => {
+  const response = await fetch(apiUrls.upstreamImages, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
     },
   });
-  const data = (await response.json()) as { items: UpstreamImage[]; page: number; total: number; size: number };
+  const data = (await response.json()) as { items: UpstreamImage[]; total: number };
   return data;
 };
 

@@ -131,7 +131,12 @@ export const tokenFactory = Factory.define<Token>(({ sequence }) => {
     audience: chance.pickone(["maas", "maas-ui"]),
     purpose: chance.pickone(["access", "refresh"]),
     value: chance.hash({ length: 64 }),
-    expired: new Date(chance.date({ min: add(now, { seconds: 1 }), max: add(now, { days: 1 }) })).toISOString(), //<ISO 8601 date string>,
+    expired: new Date(
+      chance.date({
+        min: add(now, { seconds: 1 }),
+        max: add(now, { days: 1 }),
+      }),
+    ).toISOString(), //<ISO 8601 date string>,
     created: new Date(chance.date({ min: sub(now, { minutes: 15 }), max: now })).toISOString(), //<ISO 8601 date string>
   };
 });
@@ -186,7 +191,10 @@ const osFactory = Factory.define<{ name: string; release: string }>(({ sequence 
     { name: "CentOS", release: chance.pickone(["8", "7"]) },
     { name: "Windows", release: chance.pickone(["10", "8.1", "7"]) },
     { name: "RHEL", release: chance.pickone(["8", "7"]) },
-    { name: "Hannah Montana Linux", release: chance.pickone(["6.0.0-GitGuitar", "7.0.0-CommandLineQueen"]) },
+    {
+      name: "Hannah Montana Linux",
+      release: chance.pickone(["6.0.0", "7.0.0"]),
+    },
   ]);
 });
 
@@ -238,8 +246,9 @@ export const upstreamImageFactory = Factory.define<UpstreamImage>(({ sequence })
     id: sequence,
     release: OS.release,
     arch: archFactory.build(),
-    codename: OS.name,
+    os: OS.name,
     size: Math.floor(chance.floating({ min: 0, max: 1 }) * 10000),
+    source_name: `${chance.pickone(["maas", "canonical", "ubuntu"])}.${chance.pickone(["io", "com"])} (${chance.pickone(["stable", "candidate", "beta", "edge"])})`,
   };
 });
 

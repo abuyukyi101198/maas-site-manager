@@ -126,3 +126,12 @@ export const createAccessor =
   <T, K extends keyof T>(keys: K[] | K) =>
   (obj: T) =>
     pick(keys, obj);
+
+/**
+ * Removes the protocol (http:// or https://) from a URL.
+ * @param url The URL string from which to remove the protocol.
+ * @returns The same URL, but without the protocol.
+ */
+export const stripProtocolFromUrl = (url: string) => {
+  return url.replace(/^(https?:\/\/)?/, "");
+};

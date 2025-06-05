@@ -8,7 +8,7 @@ export type Image = BootAsset & {
 };
 
 // TODO: replace with auto-generated types from the API client https://warthogs.atlassian.net/browse/MAASENG-2569
-export type UpstreamImage = Pick<Image, "id" | "release" | "arch" | "codename" | "size">;
+export type UpstreamImage = Pick<Image, "id" | "release" | "arch" | "os" | "size"> & { source_name: string };
 export type UpstreamImageSource = {
   upstreamSource: string;
   keepUpdated: boolean;

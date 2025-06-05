@@ -2,10 +2,12 @@ import { http, HttpResponse } from "msw";
 
 import type { Image, UpstreamImage, UpstreamImageSource } from "@/app/api";
 import { type ImagesSortKey, type SortDirection } from "@/app/api/handlers";
-import { imageFactory, upstreamImageSourceFactory } from "@/mocks/factories";
+import { imageFactory, upstreamImageFactory, upstreamImageSourceFactory } from "@/mocks/factories";
 import { apiUrls } from "@/utils/test-urls";
 
-const mockImages = imageFactory.buildList(155);
+const mockImages = imageFactory.buildList(30);
+const mockUpstreamImages = upstreamImageFactory.buildList(150);
+
 const imagesResolvers = {
   listImages: {
     resolved: false,
@@ -52,17 +54,11 @@ const imagesResolvers = {
   },
   listUpstreamImages: {
     resolved: false,
-    handler: (data: UpstreamImage[] = mockImages) => {
-      return http.get(apiUrls.upstreamImages, ({ request }) => {
-        const searchParams = new URL(request.url).searchParams;
-        const page = Number(searchParams.get("page"));
-        const size = Number(searchParams.get("size"));
-        const items_page = data.slice((page - 1) * size, page * size);
+    handler: (data: UpstreamImage[] = mockUpstreamImages) => {
+      return http.get(apiUrls.upstreamImages, () => {
         const response = {
-          items: items_page,
-          page,
+          items: data,
           total: data.length,
-          size,
         };
         imagesResolvers.listUpstreamImages.resolved = true;
         return HttpResponse.json(response);

@@ -51,10 +51,10 @@ export const useImagesInfiniteQuery = ({
   return { ...query, data };
 };
 
-export const useUpstreamImagesQuery = ({ page, size }: Record<string, number>) =>
+export const useUpstreamImagesQuery = () =>
   useQuery({
-    queryKey: ["upstreamImages", page, size],
-    queryFn: () => getUpstreamImages({ page, size }),
+    queryKey: ["upstreamImages"],
+    queryFn: () => getUpstreamImages(),
     placeholderData: keepPreviousData,
     refetchInterval,
   });
