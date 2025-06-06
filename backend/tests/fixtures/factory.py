@@ -375,6 +375,7 @@ class Factory:
         compatibility: list[str] | None = None,
         flavor: str | None = None,
         base_image: str | None = None,
+        bootloader_type: str | None = None,
         eol: datetime | None = None,
         esm_eol: datetime | None = None,
     ) -> BootAsset:
@@ -394,6 +395,7 @@ class Factory:
                     "compatibility": compatibility,
                     "flavor": flavor,
                     "base_image": base_image,
+                    "bootloader_type": bootloader_type,
                     "eol": eol,
                     "esm_eol": esm_eol,
                 }

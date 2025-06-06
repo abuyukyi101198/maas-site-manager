@@ -225,6 +225,7 @@ class BootAssetService(Service):
         os: list[str] | None = None,
         arch: list[str] | None = None,
         release: list[str | None] | None = None,
+        bootloader_type: list[str | None] | None = None,
     ) -> tuple[int, Iterable[models.BootAsset]]:
         filters = queries.filters_from_arguments(
             BootAsset,
@@ -234,6 +235,7 @@ class BootAssetService(Service):
             os=os,
             arch=arch,
             release=release,
+            bootloader_type=bootloader_type,
         )
         order_by = queries.order_by_from_arguments(sort_params=sort_params)
         count = await queries.row_count(self.conn, BootAsset, *filters)
@@ -252,6 +254,7 @@ class BootAssetService(Service):
                 BootAsset.c.compatibility,
                 BootAsset.c.flavor,
                 BootAsset.c.base_image,
+                BootAsset.c.bootloader_type,
                 BootAsset.c.eol,
                 BootAsset.c.esm_eol,
             )
@@ -279,6 +282,7 @@ class BootAssetService(Service):
             BootAsset.c.compatibility,
             BootAsset.c.flavor,
             BootAsset.c.base_image,
+            BootAsset.c.bootloader_type,
             BootAsset.c.eol,
             BootAsset.c.esm_eol,
         ).where(BootAsset.c.id == id)
@@ -306,6 +310,7 @@ class BootAssetService(Service):
             BootAsset.c.compatibility,
             BootAsset.c.flavor,
             BootAsset.c.base_image,
+            BootAsset.c.bootloader_type,
             BootAsset.c.eol,
             BootAsset.c.esm_eol,
         )
@@ -334,6 +339,7 @@ class BootAssetService(Service):
                 BootAsset.c.compatibility,
                 BootAsset.c.flavor,
                 BootAsset.c.base_image,
+                BootAsset.c.bootloader_type,
                 BootAsset.c.eol,
                 BootAsset.c.esm_eol,
             )

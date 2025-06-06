@@ -74,6 +74,7 @@ boot_asset_sort_parameters = SortParamParser(
         "compatibility",
         "flavor",
         "base_image",
+        "bootloader_type",
         "eol",
         "esm_eol",
     ]
@@ -152,16 +153,17 @@ class BootAssetsPostRequest(BaseModel):
     kind: models.BootAssetKind
     label: models.BootAssetLabel
     os: str
-    release: str
-    codename: str
-    title: str
     arch: str
-    subarch: str
-    compatibility: list[str]
-    flavor: str
-    base_image: str
-    eol: datetime
-    esm_eol: datetime
+    release: str | None = None
+    codename: str | None = None
+    title: str | None = None
+    subarch: str | None = None
+    compatibility: list[str] | None = None
+    flavor: str | None = None
+    base_image: str | None = None
+    bootloader_type: str | None = None
+    eol: datetime | None = None
+    esm_eol: datetime | None = None
 
 
 class BootAssetsPostResponse(BaseModel):

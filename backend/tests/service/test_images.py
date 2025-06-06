@@ -53,6 +53,7 @@ class TestBootAssetService:
             compatibility=["test", "compatibility"],
             flavor="test flavor",
             base_image="test base image",
+            bootloader_type="test bootloader type",
             eol=now_utc() + timedelta(days=3650),
             esm_eol=now_utc() + timedelta(days=5000),
         )
@@ -69,6 +70,7 @@ class TestBootAssetService:
             expected_boot_asset.compatibility,
             expected_boot_asset.flavor,
             expected_boot_asset.base_image,
+            expected_boot_asset.bootloader_type,
             expected_boot_asset.eol,
             expected_boot_asset.esm_eol,
         )
@@ -163,6 +165,7 @@ class TestBootAssetService:
             compatibility=["test", "compatibility"],
             flavor="test flavor",
             base_image="test base image",
+            bootloader_type="test bootloader type",
             eol=now_utc() + timedelta(days=3650),
             esm_eol=now_utc() + timedelta(days=5000),
         )
@@ -194,6 +197,7 @@ class TestBootAssetService:
             compatibility=["test", "compatibility"],
             flavor="test flavor",
             base_image="test base image",
+            bootloader_type="test bootloader type",
             eol=now_utc() + timedelta(days=3650),
             esm_eol=now_utc() + timedelta(days=5000),
         )
@@ -210,6 +214,7 @@ class TestBootAssetService:
             expected_boot_asset.compatibility,
             expected_boot_asset.flavor,
             expected_boot_asset.base_image,
+            expected_boot_asset.bootloader_type,
             expected_boot_asset.eol,
             expected_boot_asset.esm_eol,
         )
@@ -237,6 +242,7 @@ class TestBootAssetService:
             compatibility=["test", "compatibility"],
             flavor="test flavor",
             base_image="test base image",
+            bootloader_type="test bootloader type",
             eol=now_utc() + timedelta(days=3650),
             esm_eol=now_utc() + timedelta(days=5000),
         )
@@ -253,6 +259,7 @@ class TestBootAssetService:
             boot_asset.compatibility,
             boot_asset.flavor,
             boot_asset.base_image,
+            boot_asset.bootloader_type,
             boot_asset.eol,
             boot_asset.esm_eol,
         )
@@ -268,6 +275,7 @@ class TestBootAssetService:
             compatibility=["test"],
             flavor="flavor",
             base_image="ubuntu/noble",
+            bootloader_type="pxe",
             eol=now_utc(),
             esm_eol=now_utc(),
         )

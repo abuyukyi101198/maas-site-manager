@@ -99,6 +99,7 @@ class MSMImageStore:
                 label=BootAssetLabel(product.get("label")),
                 os=product.get("os"),
                 arch=product.get("arch"),
+                bootloader_type=product.get("bootloader-type"),
             )
 
     def _get_version_from_product(

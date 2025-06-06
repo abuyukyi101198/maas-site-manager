@@ -125,6 +125,7 @@ class BootAsset(BaseModel):
     compatibility: list[str] | None = None
     flavor: str | None = None
     base_image: str | None = None
+    bootloader_type: str | None = None
     eol: AwareDatetime | None = None
     esm_eol: AwareDatetime | None = None
 
@@ -142,6 +143,7 @@ class BootAssetCreate(BaseModel):
     compatibility: list[str] | None = None
     flavor: str | None = None
     base_image: str | None = None
+    bootloader_type: str | None = None
     eol: AwareDatetime | None = None
     esm_eol: AwareDatetime | None = None
 
@@ -158,6 +160,7 @@ class BootAssetUpdate(BaseModel):
     compatibility: list[str] | None = None
     flavor: str | None = None
     base_image: str | None = None
+    bootloader_type: str | None = None
     eol: AwareDatetime | None = None
     esm_eol: AwareDatetime | None = None
 

@@ -168,6 +168,7 @@ class TestDownloadUpstreamActivities:
                 os="ubuntu",
                 arch="amd64",
                 release="24.04",
+                bootloader_type="pxe",
             ),
         )
         result = await act_env.run(im_act.get_or_create_asset, params)
@@ -213,6 +214,7 @@ class TestDownloadUpstreamActivities:
                 subarch="amd64",
                 compatibility=["amd64"],
                 flavor="flav",
+                bootloader_type="pxe",
                 eol=datetime(year=2026, month=3, day=24, tzinfo=UTC),
                 esm_eol=datetime(year=2027, month=3, day=24, tzinfo=UTC),
             ),

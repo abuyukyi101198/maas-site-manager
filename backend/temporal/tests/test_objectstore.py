@@ -86,6 +86,7 @@ class TestMSMImageStore:
             label=BootAssetLabel.STABLE,
             os="grub-efi-signed",
             arch="amd64",
+            bootloader_type="uefi",
         )
 
         assert expected_asset == returned_asset
@@ -186,6 +187,7 @@ class TestMSMImageStore:
             label=BootAssetLabel.STABLE,
             os="grub-efi-signed",
             arch="amd64",
+            bootloader_type="uefi",
         )
         expected_version = BootAssetVersion(
             boot_asset_id=0, version="20170417"

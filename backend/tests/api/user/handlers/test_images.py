@@ -37,6 +37,7 @@ class TestBootAssetsGetHandler:
             compatibility=["test", "compatibility"],
             flavor="test_flavor",
             base_image="test_base_image",
+            bootloader_type="test_bootloader",
             eol=now_utc() + timedelta(days=3650),
             esm_eol=now_utc() + timedelta(days=7000),
         )
@@ -174,6 +175,7 @@ class TestBootAssetsPostHandler:
             "compatibility": ["generic"],
             "flavor": "generic",
             "base_image": "ubuntu",
+            "bootloader_type": "uefi",
             "eol": (now_utc() + timedelta(days=365)).isoformat(),
             "esm_eol": (now_utc() + timedelta(days=3650)).isoformat(),
         }
@@ -1079,6 +1081,7 @@ class TestCustomImageUploadHandler:
                 "compatibility": None,
                 "flavor": None,
                 "base_image": "ubuntu/noble",
+                "bootloader_type": None,
                 "eol": datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC),
                 "esm_eol": datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC),
             }
@@ -1184,6 +1187,7 @@ class TestCustomImageUploadHandler:
                 "compatibility": None,
                 "flavor": None,
                 "base_image": "ubuntu/noble",
+                "bootloader_type": None,
                 "eol": datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC),
                 "esm_eol": datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC),
             }

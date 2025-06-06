@@ -183,6 +183,7 @@ BootAsset = Table(
     Column("compatibility", ARRAY(Text), nullable=True),
     Column("flavor", Text, nullable=True),
     Column("base_image", Text, nullable=True),
+    Column("bootloader_type", Text, nullable=True),
     Column("eol", DateTime(timezone=True), nullable=True),
     Column("esm_eol", DateTime(timezone=True), nullable=True),
     UniqueConstraint("boot_source_id", "os", "release", "arch", "subarch"),

@@ -93,6 +93,7 @@ class BootAsset:
     subarch: str | None = None
     compatibility: list[str] | None = None
     flavor: str | None = None
+    bootloader_type: str | None = None
     eol: datetime | None = None
     esm_eol: datetime | None = None
 
