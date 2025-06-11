@@ -2,7 +2,7 @@ from asyncio import gather
 from datetime import datetime
 import typing
 
-from activities.download_upstream_activities import (  # type: ignore
+from activities.images import (  # type: ignore
     BootAsset,
     BootAssetItem,
     BootAssetKind,

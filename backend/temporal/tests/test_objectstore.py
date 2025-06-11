@@ -1,7 +1,7 @@
 from datetime import datetime
 from unittest.mock import call
 
-from activities.download_upstream_activities import (  # type: ignore
+from activities.images import (  # type: ignore
     BootAsset,
     BootAssetItem,
     BootAssetKind,
@@ -25,7 +25,9 @@ from workflows.download_upstream import (  # type: ignore
 
 
 class TestMSMImageStore:
-    def test_start_download_workflow(self, mocker: MockerFixture) -> None:
+    async def test_start_download_workflow(
+        self, mocker: MockerFixture
+    ) -> None:
         mock_start = mocker.patch.object(workflow, "execute_child_workflow")
         s3_params = S3Params(
             endpoint="http://s3",
@@ -43,7 +45,7 @@ class TestMSMImageStore:
             "ss_url": "http://test.ss.url",
             "id": 2,
         }
-        image_store._start_download_workflow(test_item)
+        await image_store._start_download_workflow(test_item)
         mock_start.assert_called_once_with(
             DOWNLOAD_UPSTREAM_IMAGE_WF_NAME,
             DownloadUpstreamImageParams(

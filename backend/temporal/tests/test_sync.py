@@ -1,7 +1,8 @@
 import typing
 import uuid
 
-from activities.download_upstream_activities import (  # type: ignore
+from activities.images import S3Params  # type: ignore
+from activities.simplestream import (  # type: ignore
     DOWNLOAD_SS_JSON_ACTIVITY,
     GET_BOOT_SOURCE_ACTIVITY,
     LOAD_PRODUCT_MAP_ACTIVITY,
@@ -10,7 +11,6 @@ from activities.download_upstream_activities import (  # type: ignore
     GetBootSourceParams,
     LoadProductMapParams,
     ParseSsIndexParams,
-    S3Params,
 )
 import pytest
 from pytest_mock import MockerFixture

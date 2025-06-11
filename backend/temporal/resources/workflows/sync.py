@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from datetime import timedelta
 
-from activities.download_upstream_activities import (  # type: ignore
+from activities.images import S3Params, compose_url  # type: ignore
+from activities.simplestream import (  # type: ignore
     DOWNLOAD_SS_JSON_ACTIVITY,
     GET_BOOT_SOURCE_ACTIVITY,
     LOAD_PRODUCT_MAP_ACTIVITY,
@@ -10,8 +11,6 @@ from activities.download_upstream_activities import (  # type: ignore
     GetBootSourceParams,
     LoadProductMapParams,
     ParseSsIndexParams,
-    S3Params,
-    compose_url,
 )
 from management.objectstore import MSMImageStore  # type: ignore
 from temporalio import workflow

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import timedelta
 
-from activities.download_upstream_activities import (  # type: ignore
+from activities.images import (  # type: ignore
     DOWNLOAD_ASSET_ACTIVITY,
     GET_OR_CREATE_ASSET_ACTIVITY,
     GET_OR_CREATE_ITEM_ACTIVITY,

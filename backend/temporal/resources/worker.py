@@ -1,8 +1,11 @@
 import asyncio
 import logging
 
-from activities.download_upstream_activities import (  # type: ignore
+from activities.images import (  # type: ignore
     ImageManagementActivity,
+)
+from activities.simplestream import (  # type: ignore
+    SimplestreamActivity,
 )
 from temporallib.client import Client, Options  # type: ignore
 from temporallib.encryption import EncryptionOptions  # type: ignore
@@ -27,7 +30,8 @@ async def run_worker() -> None:
     client = await Client.connect(
         client_opt=Options(encryption=EncryptionOptions()),
     )
-    activities = ImageManagementActivity()
+    img_act = ImageManagementActivity()
+    ss_act = SimplestreamActivity()
     worker = Worker(
         client=client,
         workflows=[
@@ -36,15 +40,15 @@ async def run_worker() -> None:
             SyncUpstreamSourceWorkflow,
         ],
         activities=[
-            activities.download_asset,
-            activities.update_bytes_synced,
-            activities.get_or_create_asset,
-            activities.get_or_create_item,
-            activities.get_or_create_version,
-            activities.get_boot_source,
-            activities.download_json,
-            activities.parse_ss_index,
-            activities.load_product_map,
+            img_act.download_asset,
+            img_act.update_bytes_synced,
+            img_act.get_or_create_asset,
+            img_act.get_or_create_item,
+            img_act.get_or_create_version,
+            ss_act.get_boot_source,
+            ss_act.download_json,
+            ss_act.parse_ss_index,
+            ss_act.load_product_map,
         ],
         worker_opt=WorkerOptions(sentry=SentryOptions()),
     )
