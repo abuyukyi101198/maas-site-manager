@@ -17,10 +17,18 @@ const Map: React.FC<MapProps> = ({ markers }) => {
     storageSync: true,
     defaultValue: {},
   });
-  const bounds = useMemo(() => {
-    if (!markers || markers.length === 0) return null;
 
-    return markers.reduce(
+  const [bounds, setBounds] = useState<{
+    minLng: number;
+    maxLng: number;
+    minLat: number;
+    maxLat: number;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!markers || markers.length === 0 || bounds !== null) return;
+
+    const newBounds = markers.reduce(
       (acc, marker) => {
         const [lng, lat] = marker.position;
         return {
@@ -37,13 +45,14 @@ const Map: React.FC<MapProps> = ({ markers }) => {
         maxLat: -90,
       },
     );
-  }, [markers]);
+
+    setBounds(newBounds);
+  }, [markers, bounds]);
 
   const center = useMemo(() => {
     if (!bounds) return null;
-
-    const centerLng = (bounds!.minLng + bounds!.maxLng) / 2;
-    const centerLat = (bounds!.minLat + bounds!.maxLat) / 2;
+    const centerLng = (bounds.minLng + bounds.maxLng) / 2;
+    const centerLat = (bounds.minLat + bounds.maxLat) / 2;
     return [centerLng, centerLat] as LngLatLike;
   }, [bounds]);
 

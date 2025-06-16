@@ -15,6 +15,7 @@ interface MapContainerProps extends React.HTMLAttributes<HTMLDivElement> {
  */
 const MapContainer: React.FC<MapContainerProps> = ({ children, initialOptions, customAttribution, ...props }) => {
   const [map, setMap] = useState<maplibregl.Map | null>(null);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   useEffect(() => {
     const protocol = new Protocol();
@@ -35,15 +36,16 @@ const MapContainer: React.FC<MapContainerProps> = ({ children, initialOptions, c
   );
 
   useEffect(() => {
-    if (map && initialOptions.bounds) {
+    if (map && initialOptions.bounds && !hasInitialized) {
       map.fitBounds(initialOptions.bounds as maplibregl.LngLatBoundsLike, {
         padding: 40,
         duration: 0,
       });
 
       map.setCenter(initialOptions.center as maplibregl.LngLatLike);
+      setHasInitialized(true);
     }
-  }, [map, initialOptions.bounds, initialOptions.center]);
+  }, [map, initialOptions.bounds, initialOptions.center, hasInitialized]);
 
   useEffect(() => {
     if (map) {
