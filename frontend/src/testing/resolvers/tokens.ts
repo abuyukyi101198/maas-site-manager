@@ -1,10 +1,46 @@
 import { http, HttpResponse } from "msw";
 
 import type { Token, TokensPostRequest, TokensPostResponse } from "@/app/api";
+import type {
+  DeleteV1TokensIdDeleteError,
+  GetExportV1TokensExportGetError,
+  GetV1TokensGetError,
+  PostV1TokensPostError,
+} from "@/app/apiclient";
+import { ExceptionCode } from "@/app/apiclient";
 import { tokenFactory } from "@/mocks/factories";
 import { apiUrls } from "@/utils/test-urls";
 
 const mockTokens = tokenFactory.buildList(155);
+
+const mockCreateTokensError: PostV1TokensPostError = {
+  error: {
+    code: ExceptionCode.INVALID_PARAMETERS,
+    message: "Invalid parameters provided for token creation",
+  },
+};
+
+const mockListTokensError: GetV1TokensGetError = {
+  error: {
+    code: ExceptionCode.NOT_AUTHENTICATED,
+    message: "You must be authenticated to access this resource",
+  },
+};
+
+const mockDeleteTokensError: DeleteV1TokensIdDeleteError = {
+  error: {
+    code: ExceptionCode.MISSING_PERMISSIONS,
+    message: "You do not have permission to delete tokens",
+  },
+};
+
+const mockExportTokensError: GetExportV1TokensExportGetError = {
+  error: {
+    code: ExceptionCode.MISSING_RESOURCE,
+    message: "No tokens found for export",
+  },
+};
+
 const tokensResolvers = {
   createTokens: {
     resolved: false,
@@ -19,6 +55,15 @@ const tokensResolvers = {
         }
         const response: TokensPostResponse = { items: tokens };
         return HttpResponse.json(response);
+      });
+    },
+    error: (error: PostV1TokensPostError = mockCreateTokensError) => {
+      return http.post(apiUrls.tokens, () => {
+        tokensResolvers.createTokens.resolved = true;
+        return new HttpResponse(JSON.stringify(error), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
       });
     },
   },
@@ -39,12 +84,24 @@ const tokensResolvers = {
         return HttpResponse.json(response);
       });
     },
+    error: (error: GetV1TokensGetError = mockListTokensError) => {
+      return http.get(apiUrls.tokens, () => {
+        tokensResolvers.listTokens.resolved = true;
+        return HttpResponse.json(error, { status: 401 });
+      });
+    },
   },
   deleteTokens: {
     resolved: false,
     handler: () => {
       return http.delete(apiUrls.tokens, () => {
         return new HttpResponse(null, { status: 204 });
+      });
+    },
+    error: (error: DeleteV1TokensIdDeleteError = mockDeleteTokensError) => {
+      return http.delete(apiUrls.tokens, () => {
+        tokensResolvers.deleteTokens.resolved = true;
+        return HttpResponse.json(error, { status: 403 });
       });
     },
   },
@@ -72,6 +129,12 @@ const tokensResolvers = {
             "Content-Type": "text/csv",
           },
         });
+      });
+    },
+    error: (error: GetExportV1TokensExportGetError = mockExportTokensError) => {
+      return http.get(apiUrls.tokensExport, () => {
+        tokensResolvers.exportTokens.resolved = true;
+        return HttpResponse.json(error, { status: 404 });
       });
     },
   },

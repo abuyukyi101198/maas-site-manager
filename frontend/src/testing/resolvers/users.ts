@@ -1,11 +1,46 @@
 import { http, HttpResponse } from "msw";
 
-import type { User, UsersPostRequest } from "@/app/api";
+import { ExceptionCode, type User, type UsersPostRequest } from "@/app/api";
 import { type SortDirection, type UserSortKey } from "@/app/api/handlers";
+import type {
+  DeleteV1UsersIdDeleteError,
+  GetV1UsersGetError,
+  PatchV1UsersIdPatchError,
+  PostV1UsersPostError,
+} from "@/app/apiclient";
 import { userFactory } from "@/mocks/factories";
 import { apiUrls } from "@/utils/test-urls";
 
 const mockUsers = userFactory.buildList(155);
+
+const mockListGetUsersError: GetV1UsersGetError = {
+  error: {
+    code: ExceptionCode.NOT_AUTHENTICATED,
+    message: "internal server error",
+  },
+};
+
+const mockPatchUsersError: PatchV1UsersIdPatchError = {
+  error: {
+    code: ExceptionCode.MISSING_PERMISSIONS,
+    message: "You do not have permission to update this user",
+  },
+};
+
+const mockPostUsersError: PostV1UsersPostError = {
+  error: {
+    code: ExceptionCode.INVALID_PARAMETERS,
+    message: "Invalid parameters",
+  },
+};
+
+const mockDeleteUserError: DeleteV1UsersIdDeleteError = {
+  error: {
+    code: ExceptionCode.MISSING_PERMISSIONS,
+    message: "You do not have permission to delete this user",
+  },
+};
+
 const usersResolvers = {
   listUsers: {
     resolved: false,
@@ -39,6 +74,12 @@ const usersResolvers = {
         return HttpResponse.json(response);
       });
     },
+    error: (error: GetV1UsersGetError = mockListGetUsersError) => {
+      return http.get(apiUrls.users, () => {
+        usersResolvers.listUsers.resolved = true;
+        return HttpResponse.json(error, { status: 401 });
+      });
+    },
   },
   getUser: {
     resolved: false,
@@ -56,6 +97,16 @@ const usersResolvers = {
         return user ? HttpResponse.json(user) : HttpResponse.error();
       });
     },
+    error: (error: GetV1UsersGetError = mockListGetUsersError) => {
+      return http.get(`${apiUrls.users}/:id`, ({ params }) => {
+        usersResolvers.getUser.resolved = true;
+        const id = params.id;
+        if (id === "me") {
+          return HttpResponse.json(error, { status: 401 });
+        }
+        return HttpResponse.json(error, { status: 404 });
+      });
+    },
   },
   getCurrentUser: {
     resolved: false,
@@ -66,6 +117,12 @@ const usersResolvers = {
           data ? data : { username: "admin", full_name: "MAAS Admin", email: "admin@example.com" },
         );
         return HttpResponse.json(user);
+      });
+    },
+    error: (error: GetV1UsersGetError = mockListGetUsersError) => {
+      usersResolvers.getCurrentUser.resolved = true;
+      return http.get(apiUrls.currentUser, () => {
+        return HttpResponse.json(error, { status: 401 });
       });
     },
   },
@@ -80,6 +137,12 @@ const usersResolvers = {
         return HttpResponse.json(user);
       });
     },
+    error: (error: PatchV1UsersIdPatchError = mockPatchUsersError) => {
+      return http.patch(`${apiUrls.users}/:id`, () => {
+        usersResolvers.updateUser.resolved = true;
+        return HttpResponse.json(error, { status: 403 });
+      });
+    },
   },
   updateCurrentUser: {
     resolved: false,
@@ -89,6 +152,12 @@ const usersResolvers = {
         return new HttpResponse(null, { status: 200 });
       });
     },
+    error: (error: PatchV1UsersIdPatchError = mockPatchUsersError) => {
+      return http.patch(apiUrls.currentUser, () => {
+        usersResolvers.updateCurrentUser.resolved = true;
+        return HttpResponse.json(error, { status: 403 });
+      });
+    },
   },
   updateCurrentUserPassword: {
     resolved: false,
@@ -96,6 +165,12 @@ const usersResolvers = {
       return http.patch(`${apiUrls.currentUser}/password`, async () => {
         usersResolvers.updateCurrentUserPassword.resolved = true;
         return new HttpResponse(null, { status: 200 });
+      });
+    },
+    error: (error: PatchV1UsersIdPatchError = mockPatchUsersError) => {
+      return http.patch(`${apiUrls.currentUser}/password`, () => {
+        usersResolvers.updateCurrentUserPassword.resolved = true;
+        return HttpResponse.json(error, { status: 403 });
       });
     },
   },
@@ -112,6 +187,12 @@ const usersResolvers = {
         });
       });
     },
+    error: (error: PostV1UsersPostError = mockPostUsersError) => {
+      return http.post(apiUrls.users, () => {
+        usersResolvers.createUser.resolved = true;
+        return HttpResponse.json(error, { status: 400 });
+      });
+    },
   },
   deleteUser: {
     resolved: false,
@@ -119,6 +200,12 @@ const usersResolvers = {
       return http.delete(`${apiUrls.users}/:id`, async () => {
         usersResolvers.deleteUser.resolved = true;
         return new HttpResponse(null, { status: 204 });
+      });
+    },
+    error: (error: DeleteV1UsersIdDeleteError = mockDeleteUserError) => {
+      return http.delete(`${apiUrls.users}/:id`, () => {
+        usersResolvers.deleteUser.resolved = true;
+        return HttpResponse.json(error, { status: 403 });
       });
     },
   },

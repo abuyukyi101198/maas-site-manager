@@ -1,11 +1,16 @@
 import { http, HttpResponse } from "msw";
 
+import { ExceptionCode } from "@/app/api";
 import type { SortDirection } from "@/app/api/handlers";
 import type {
+  PostBootSourcesV1BootassetSourcesPostError,
   BootSource,
   BootSourcesPostRequest,
   BootSourcesPostResponse,
+  GetBootSourcesV1BootassetSourcesGetError,
   GetBootSourcesV1BootassetSourcesGetResponse,
+  PatchBootSourceV1BootassetSourcesIdPatchError,
+  DeleteBootSourceV1BootassetSourcesIdDeleteError,
 } from "@/app/apiclient";
 import { imageSourceFactory } from "@/mocks/factories";
 import { apiUrls } from "@/utils/test-urls";
@@ -13,6 +18,34 @@ import { apiUrls } from "@/utils/test-urls";
 type BootSourcesSortKey = keyof Pick<BootSource, "id" | "url" | "priority" | "sync_interval">;
 
 const mockImageSources = imageSourceFactory.buildList(10);
+
+const mockListGetImageSourcesError: GetBootSourcesV1BootassetSourcesGetError = {
+  error: {
+    code: ExceptionCode.NOT_AUTHENTICATED,
+    message: "You must be authenticated to access this resource",
+  },
+};
+
+const mockPostImageSourcesError: PostBootSourcesV1BootassetSourcesPostError = {
+  error: {
+    code: ExceptionCode.INVALID_PARAMETERS,
+    message: "Invalid parameters provided for image source creation",
+  },
+};
+
+const mockPatchImageSourcesError: PatchBootSourceV1BootassetSourcesIdPatchError = {
+  error: {
+    code: ExceptionCode.MISSING_PERMISSIONS,
+    message: "You do not have permission to update this image source",
+  },
+};
+
+const mockDeleteImageSourcesError: DeleteBootSourceV1BootassetSourcesIdDeleteError = {
+  error: {
+    code: ExceptionCode.MISSING_PERMISSIONS,
+    message: "You do not have permission to delete this image source",
+  },
+};
 
 const imageSourceResolvers = {
   listImageSources: {
@@ -47,6 +80,12 @@ const imageSourceResolvers = {
         return HttpResponse.json(response);
       });
     },
+    error: (error: GetBootSourcesV1BootassetSourcesGetError = mockListGetImageSourcesError) => {
+      return http.get(apiUrls.imageSources, () => {
+        imageSourceResolvers.listImageSources.resolved = true;
+        return HttpResponse.json(error, { status: 401 });
+      });
+    },
   },
   getImageSource: {
     resolved: false,
@@ -56,6 +95,12 @@ const imageSourceResolvers = {
         const imageSource = data.find((imageSource) => imageSource.id === id);
         imageSourceResolvers.getImageSource.resolved = true;
         return imageSource ? HttpResponse.json(imageSource) : HttpResponse.error();
+      });
+    },
+    error: (error: GetBootSourcesV1BootassetSourcesGetError = mockListGetImageSourcesError) => {
+      return http.get(`${apiUrls.imageSources}/:id`, () => {
+        imageSourceResolvers.getImageSource.resolved = true;
+        return HttpResponse.json(error, { status: 401 });
       });
     },
   },
@@ -77,6 +122,15 @@ const imageSourceResolvers = {
         });
       });
     },
+    error: (error: PostBootSourcesV1BootassetSourcesPostError = mockPostImageSourcesError) => {
+      return http.post(apiUrls.imageSources, () => {
+        imageSourceResolvers.createImageSource.resolved = true;
+        return new HttpResponse(JSON.stringify(error), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      });
+    },
   },
   updateImageSource: {
     resolved: false,
@@ -86,6 +140,12 @@ const imageSourceResolvers = {
         return new HttpResponse(null, { status: 200 });
       });
     },
+    error: (error: PatchBootSourceV1BootassetSourcesIdPatchError = mockPatchImageSourcesError) => {
+      return http.patch(`${apiUrls.imageSources}/:id`, () => {
+        imageSourceResolvers.updateImageSource.resolved = true;
+        return HttpResponse.json(error, { status: 403 });
+      });
+    },
   },
   deleteImageSource: {
     resolved: false,
@@ -93,6 +153,12 @@ const imageSourceResolvers = {
       return http.delete(`${apiUrls.imageSources}/:id`, async () => {
         imageSourceResolvers.deleteImageSource.resolved = true;
         return new HttpResponse(null, { status: 204 });
+      });
+    },
+    error: (error: DeleteBootSourceV1BootassetSourcesIdDeleteError = mockDeleteImageSourcesError) => {
+      return http.delete(`${apiUrls.imageSources}/:id`, () => {
+        imageSourceResolvers.deleteImageSource.resolved = true;
+        return HttpResponse.json(error, { status: 403 });
       });
     },
   },

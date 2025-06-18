@@ -1,11 +1,49 @@
 import { http, HttpResponse } from "msw";
 
 import type { SitesSortKey, SortDirection } from "@/app/api/handlers";
-import type { GetV1SitesGetData, Site, SitesGetResponse } from "@/app/apiclient";
+import { ExceptionCode } from "@/app/apiclient";
+import type {
+  GetV1SitesGetData,
+  GetV1SitesGetError,
+  Site,
+  SitesGetResponse,
+  GetCoordinatesV1SitesCoordinatesGetError,
+  DeleteV1SitesIdDeleteError,
+  PatchV1SettingsPatchError,
+} from "@/app/apiclient";
 import { siteFactory } from "@/mocks/factories";
 import { apiUrls } from "@/utils/test-urls";
 
 const mockSites = siteFactory.buildList(155);
+
+const mockListGetSitesError: GetV1SitesGetError = {
+  error: {
+    code: ExceptionCode.NOT_AUTHENTICATED,
+    message: "You must be authenticated to access this resource",
+  },
+};
+
+const mockGetCoordinatesError: GetCoordinatesV1SitesCoordinatesGetError = {
+  error: {
+    code: ExceptionCode.MISSING_PERMISSIONS,
+    message: "You do not have permission to access site coordinates",
+  },
+};
+
+const mockDeleteSitesError: DeleteV1SitesIdDeleteError = {
+  error: {
+    code: ExceptionCode.MISSING_PERMISSIONS,
+    message: "You do not have permission to delete this site",
+  },
+};
+
+const mockPatchSitesError: PatchV1SettingsPatchError = {
+  error: {
+    code: ExceptionCode.MISSING_PERMISSIONS,
+    message: "You do not have permission to update this site",
+  },
+};
+
 const sitesResolvers = {
   listSites: {
     resolved: false,
@@ -44,6 +82,12 @@ const sitesResolvers = {
         return HttpResponse.json(response);
       });
     },
+    error: (error: GetV1SitesGetError = mockListGetSitesError) => {
+      return http.get(apiUrls.sites, () => {
+        sitesResolvers.listSites.resolved = true;
+        return HttpResponse.json(error, { status: 401 });
+      });
+    },
   },
   sitesCoordinates: {
     resolved: false,
@@ -51,6 +95,12 @@ const sitesResolvers = {
       return http.get(apiUrls.sitesCoordinates, () => {
         const response = data.map(({ id, coordinates }) => ({ id, coordinates }));
         return HttpResponse.json(response);
+      });
+    },
+    error: (error: GetCoordinatesV1SitesCoordinatesGetError = mockGetCoordinatesError) => {
+      return http.get(apiUrls.sitesCoordinates, () => {
+        sitesResolvers.sitesCoordinates.resolved = true;
+        return HttpResponse.json(error, { status: 403 });
       });
     },
   },
@@ -63,12 +113,24 @@ const sitesResolvers = {
         return site ? HttpResponse.json({ ...site }) : HttpResponse.error();
       });
     },
+    error: (error: GetV1SitesGetError = mockListGetSitesError) => {
+      return http.get(`${apiUrls.sites}/:id`, () => {
+        sitesResolvers.getSite.resolved = true;
+        return HttpResponse.json(error, { status: 401 });
+      });
+    },
   },
   deleteSites: {
     resolved: false,
     handler: () => {
       return http.delete(apiUrls.sites, () => {
         return new HttpResponse(null, { status: 204 });
+      });
+    },
+    error: (error: DeleteV1SitesIdDeleteError = mockDeleteSitesError) => {
+      return http.delete(`${apiUrls.sites}/:id`, () => {
+        sitesResolvers.deleteSites.resolved = true;
+        return HttpResponse.json(error, { status: 403 });
       });
     },
   },
@@ -81,6 +143,12 @@ const sitesResolvers = {
           status: 200,
           headers: { "Content-Type": "application/json" },
         });
+      });
+    },
+    error: (error: PatchV1SettingsPatchError = mockPatchSitesError) => {
+      return http.patch(`${apiUrls.sites}/:id`, () => {
+        sitesResolvers.updateSites.resolved = true;
+        return HttpResponse.json(error, { status: 403 });
       });
     },
   },

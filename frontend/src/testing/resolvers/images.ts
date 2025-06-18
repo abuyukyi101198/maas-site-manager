@@ -2,11 +2,38 @@ import { http, HttpResponse } from "msw";
 
 import type { Image, UpstreamImage, UpstreamImageSource } from "@/app/api";
 import { type ImagesSortKey, type SortDirection } from "@/app/api/handlers";
+import type {
+  DeleteImagesV1BootassetItemsIdDeleteError,
+  GetBootAssetsV1BootassetsGetError,
+  PostImagesV1ImagesPostError,
+} from "@/app/apiclient";
+import { ExceptionCode } from "@/app/apiclient";
 import { imageFactory, upstreamImageFactory, upstreamImageSourceFactory } from "@/mocks/factories";
 import { apiUrls } from "@/utils/test-urls";
 
 const mockImages = imageFactory.buildList(30);
 const mockUpstreamImages = upstreamImageFactory.buildList(150);
+
+const mockListImagesError: GetBootAssetsV1BootassetsGetError = {
+  error: {
+    code: ExceptionCode.NOT_AUTHENTICATED,
+    message: "You must be authenticated to access this resource",
+  },
+};
+
+const mockDeleteImagesError: DeleteImagesV1BootassetItemsIdDeleteError = {
+  error: {
+    code: ExceptionCode.MISSING_PERMISSIONS,
+    message: "You do not have permission to delete images",
+  },
+};
+
+const mockPostImagesError: PostImagesV1ImagesPostError = {
+  error: {
+    code: ExceptionCode.INVALID_PARAMETERS,
+    message: "Invalid parameters provided for image upload",
+  },
+};
 
 const imagesResolvers = {
   listImages: {
@@ -49,6 +76,12 @@ const imagesResolvers = {
 
         imagesResolvers.listImages.resolved = true;
         return HttpResponse.json(response);
+      });
+    },
+    error: (error: GetBootAssetsV1BootassetsGetError = mockListImagesError) => {
+      return http.get(apiUrls.bootAssets, () => {
+        imagesResolvers.listImages.resolved = true;
+        return HttpResponse.json(error, { status: 401 });
       });
     },
   },
@@ -106,6 +139,12 @@ const imagesResolvers = {
         return new HttpResponse(null, { status: 400 });
       });
     },
+    error: (error: DeleteImagesV1BootassetItemsIdDeleteError = mockDeleteImagesError) => {
+      return http.delete(`${apiUrls.bootAssets}/:id`, () => {
+        imagesResolvers.deleteImages.resolved = true;
+        return HttpResponse.json(error, { status: 403 });
+      });
+    },
   },
   uploadImage: {
     resolved: false,
@@ -113,6 +152,12 @@ const imagesResolvers = {
       return http.post(apiUrls.images, async () => {
         imagesResolvers.uploadImage.resolved = true;
         return new HttpResponse(null, { status: 201 });
+      });
+    },
+    error: (error: PostImagesV1ImagesPostError = mockPostImagesError) => {
+      return http.post(apiUrls.images, () => {
+        imagesResolvers.uploadImage.resolved = true;
+        return HttpResponse.json(error, { status: 400 });
       });
     },
   },
