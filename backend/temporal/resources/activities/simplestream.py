@@ -2,11 +2,12 @@ from dataclasses import dataclass
 import json
 import typing
 
-from activities.images import compose_url  # type: ignore
-from httpx import AsyncClient
 from management.utils import check_tree_paths, read_signed  # type: ignore
 from temporalio import activity
 from temporalio.exceptions import ApplicationError
+
+from .base import BaseActivity
+from .images import compose_url
 
 BASE_ASSET_ATTRS = frozenset(
     [
@@ -54,16 +55,7 @@ def get_selection_key(os: str, release: str) -> str:
     return f"{os}---{release}"
 
 
-class SimpleStreamActivities:
-    def __init__(self) -> None:
-        self.client = self._create_client()
-
-    def _create_client(self) -> AsyncClient:
-        return AsyncClient(trust_env=True)
-
-    def _get_header(self, jwt: str) -> dict[str, str]:
-        return {"Authorization": f"bearer {jwt}"}
-
+class SimpleStreamActivities(BaseActivity):
     async def _download_json(
         self,
         url: str,

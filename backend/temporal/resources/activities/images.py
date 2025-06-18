@@ -8,9 +8,10 @@ from os.path import join
 import typing
 
 import boto3  # type: ignore
-from httpx import AsyncClient
 from temporalio import activity
 from temporalio.exceptions import ApplicationError
+
+from .base import BaseActivity
 
 MIN_S3_PART_SIZE = 5 * 1024**2  # 5MiB
 
@@ -242,16 +243,10 @@ def reverse_fqdn(fqdn: str) -> str:
     return ".".join(sp)
 
 
-class ImageManagementActivity:
+class ImageManagementActivity(BaseActivity):
     """
     Activities for image management
     """
-
-    def __init__(self) -> None:
-        self.client = self._create_client()
-
-    def _create_client(self) -> AsyncClient:
-        return AsyncClient(trust_env=True)
 
     def _create_s3_manager(
         self,
@@ -260,9 +255,6 @@ class ImageManagementActivity:
         multipart: bool = True,
     ) -> S3ResourceManager:
         return S3ResourceManager(params, item_id, multipart=multipart)
-
-    def _get_header(self, jwt: str) -> dict[str, str]:
-        return {"Authorization": f"bearer {jwt}"}
 
     async def _get_or_create(
         self,
