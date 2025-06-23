@@ -171,7 +171,8 @@ class BootSourceSelection(BaseModel):
     label: BootAssetLabel
     os: str
     release: str
-    arches: list[str]
+    available: list[str]
+    selected: list[str]
 
 
 class BootSourceSelectionCreate(BaseModel):
@@ -179,7 +180,8 @@ class BootSourceSelectionCreate(BaseModel):
     label: BootAssetLabel
     os: str
     release: str
-    arches: list[str]
+    available: list[str]
+    selected: list[str]
 
 
 class BootSourceSelectionUpdate(BaseModel):
@@ -188,7 +190,8 @@ class BootSourceSelectionUpdate(BaseModel):
     label: BootAssetLabel | None = None
     os: str | None = None
     release: str | None = None
-    arches: list[str] | None = None
+    available: list[str] | None = None
+    selected: list[str] | None = None
 
 
 class BootSource(BaseModel):

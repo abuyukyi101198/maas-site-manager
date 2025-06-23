@@ -13,7 +13,7 @@ class SortParam(NamedTuple):
     """Sort parameter."""
 
     field: str
-    asc: bool
+    asc: bool = True
 
 
 class SortParamParser:

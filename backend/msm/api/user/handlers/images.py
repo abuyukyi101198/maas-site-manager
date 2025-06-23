@@ -2,7 +2,7 @@ from datetime import MAXYEAR, UTC, datetime
 from hashlib import sha256
 from logging import getLogger
 from os.path import join
-from typing import Annotated, Any, Self
+from typing import Annotated, Any, NamedTuple, Self
 from urllib.parse import urlparse
 
 import boto3  # type: ignore
@@ -104,7 +104,7 @@ boot_source_selection_sort_parameters = SortParamParser(
         "label",
         "os",
         "release",
-        "arches",
+        "available",
     ]
 )
 
@@ -423,6 +423,92 @@ async def get_boot_source_selections(
         size=pagination_params.size,
         items=list(results),
     )
+
+
+class AvailableBootSourceSelection(NamedTuple):
+    os: str
+    release: str
+    label: models.BootAssetLabel
+    arches: list[str]
+
+    def __eq__(self, other: Any) -> bool:
+        return (self.os, self.release) == (other.os, other.release)
+
+
+class BootSourceSelectionsPatchRequest(BaseModel):
+    available: list[AvailableBootSourceSelection]
+
+
+class BootSourceSelectionsPatchResponse(BaseModel):
+    stale: list[models.BootSourceSelection]
+
+
+@v1_router.patch(
+    "/bootasset-sources/{id}/selections",
+    responses={
+        401: {"model": UnauthorizedErrorResponseModel},
+        404: {"model": NotFoundErrorResponseModel},
+        422: {"model": ValidationErrorResponseModel},
+    },
+)
+async def patch_boot_source_selections(
+    services: Annotated[ServiceCollection, Depends(services)],
+    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
+    id: int,
+    patch_request: BootSourceSelectionsPatchRequest,
+) -> BootSourceSelectionsPatchResponse:
+    bs = await services.boot_sources.get_by_id(id)
+    if bs is None:
+        raise NotFoundException(
+            code=ExceptionCode.MISSING_RESOURCE,
+            message="Boot Source does not exist.",
+            details=[
+                BaseExceptionDetail(
+                    reason=ExceptionCode.MISSING_RESOURCE,
+                    messages=[f"BootSource ID {id} does not exist"],
+                    field="id",
+                    location="path",
+                )
+            ],
+        )
+
+    _, existing = await services.boot_source_selections.get(id, [])
+    incoming_map = {(p.os, p.release): p for p in patch_request.available}
+    existing_map = {(p.os, p.release): p for p in existing}
+
+    stale_keys = set(existing_map.keys()) - set(incoming_map.keys())
+
+    for in_k, in_v in incoming_map.items():
+        if cur := existing_map.get(in_k, None):
+            await services.boot_source_selections.update(
+                boot_source_id=cur.boot_source_id,
+                selection_id=cur.id,
+                details=models.BootSourceSelectionUpdate(
+                    available=in_v.arches,
+                ),
+            )
+        else:
+            await services.boot_source_selections.create(
+                models.BootSourceSelectionCreate(
+                    boot_source_id=id,
+                    label=in_v.label,
+                    os=in_v.os,
+                    release=in_v.release,
+                    available=in_v.arches,
+                    selected=[],
+                )
+            )
+
+    stale = []
+    for cur_k, cur_v in existing_map.items():
+        if cur_k in stale_keys:
+            stale.append(cur_v)
+            if len(cur_v.selected) == 0:
+                await services.boot_source_selections.delete(
+                    cur_v.boot_source_id, cur_v.id
+                )
+
+    return BootSourceSelectionsPatchResponse(stale=stale)
 
 
 class BootAssetVersionPostRequest(BaseModel):

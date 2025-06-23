@@ -2,6 +2,7 @@ from datetime import MAXYEAR, UTC, datetime, timedelta
 from hashlib import sha256
 import json
 from pathlib import Path
+from typing import Any
 from uuid import uuid4
 
 from pydantic_core import ValidationError
@@ -12,6 +13,7 @@ from msm.db.models import (
     BootAssetKind,
     BootAssetLabel,
     BootSource,
+    BootSourceSelection,
     ItemFileType,
 )
 from msm.jwt import TokenAudience, TokenPurpose
@@ -496,7 +498,8 @@ class TestBootSourceSelectionsGetHandler:
             label=BootAssetLabel.CANDIDATE,
             os="test_os",
             release="test_release",
-            arches=["test", "arches"],
+            available=["test", "arches"],
+            selected=["test", "arches"],
         )
         await factory.make_BootSourceSelection(boot_source2.id)
         selections = await user_client.get(
@@ -580,6 +583,98 @@ class TestBootSourceSelectionsGetHandler:
     ) -> None:
         resp = await user_client.get(
             f"/bootasset-sources/1/selections?size={size}"
+        )
+        assert resp.status_code == 422
+
+
+@pytest.mark.asyncio
+class TestPatchBootSourceSelections:
+    @pytest.fixture
+    async def boot_source(self, factory: Factory) -> BootSource:
+        return await factory.make_BootSource()
+
+    @pytest.fixture
+    async def selection(
+        self, factory: Factory, boot_source: BootSource
+    ) -> BootSourceSelection:
+        return await factory.make_BootSourceSelection(
+            boot_source.id,
+            label=BootAssetLabel.STABLE,
+            os="ubuntu",
+            release="noble",
+            available=["amd64"],
+            selected=["amd64"],
+        )
+
+    async def test_patch_add_and_update_selections(
+        self,
+        user_client: Client,
+        factory: Factory,
+        boot_source: BootSource,
+        selection: BootSourceSelection,
+    ) -> None:
+        # Add a new selection and update the existing one
+        up_sel = {
+            "os": selection.os,
+            "release": selection.release,
+            "label": selection.label,
+            "arches": ["amd64", "arm64"],
+        }
+        new_sel = {
+            "os": "centos",
+            "release": "stream9",
+            "label": "candidate",
+            "arches": ["amd64"],
+        }
+        patch_data = {"available": [up_sel, new_sel]}
+        resp = await user_client.patch(
+            f"/bootasset-sources/{boot_source.id}/selections", json=patch_data
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "stale" in data
+        # The original selection should be updated, and a new one added
+        stored = await factory.get("boot_source_selection")
+        assert len(stored) == 2
+        assert stored[0]["os"] == up_sel["os"]
+        assert stored[0]["available"] == up_sel["arches"]
+        assert stored[1]["os"] == new_sel["os"]
+        assert stored[1]["available"] == new_sel["arches"]
+
+    async def test_patch_removes_stale_selections(
+        self,
+        user_client: Client,
+        boot_source: BootSource,
+        selection: BootSourceSelection,
+    ) -> None:
+        # Remove all selections (should mark existing as stale)
+        patch_data: dict[str, Any] = {"available": []}
+        resp = await user_client.patch(
+            f"/bootasset-sources/{boot_source.id}/selections", json=patch_data
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert isinstance(data["stale"], list)
+        assert any(s["id"] == selection.id for s in data["stale"])
+
+    async def test_patch_boot_source_not_found(
+        self,
+        user_client: Client,
+    ) -> None:
+        patch_data: dict[str, Any] = {"available": []}
+        resp = await user_client.patch(
+            "/bootasset-sources/9999/selections", json=patch_data
+        )
+        assert resp.status_code == 404
+
+    async def test_patch_invalid_payload(
+        self,
+        user_client: Client,
+        boot_source: BootSource,
+    ) -> None:
+        # Missing 'available' field
+        resp = await user_client.patch(
+            f"/bootasset-sources/{boot_source.id}/selections", json={}
         )
         assert resp.status_code == 422
 

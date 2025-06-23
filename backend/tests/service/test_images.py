@@ -302,14 +302,16 @@ class TestBootSourceSelectionService:
             label=BootAssetLabel.CANDIDATE,
             os="test os",
             release="test release",
-            arches=["test", "arches"],
+            available=["test", "arches"],
+            selected=["test", "arches"],
         )
         boot_source_selection = await factory.make_BootSourceSelection(
             boot_source.id,
             label=expected_boot_src_selection.label,
             os=expected_boot_src_selection.os,
             release=expected_boot_src_selection.release,
-            arches=expected_boot_src_selection.arches,
+            available=expected_boot_src_selection.available,
+            selected=expected_boot_src_selection.selected,
         )
 
         expected_boot_src_selection.id = boot_source_selection.id
@@ -334,7 +336,8 @@ class TestBootSourceSelectionService:
             label=BootAssetLabel.CANDIDATE,
             os="test os",
             release="test release",
-            arches=["test", "arches"],
+            available=["test", "arches"],
+            selected=["test", "arches"],
         )
         service = BootSourceSelectionService(db_connection)
         boot_src_selection = await service.create(new_boot_src_selection)
@@ -356,14 +359,16 @@ class TestBootSourceSelectionService:
             label=BootAssetLabel.CANDIDATE,
             os="test os",
             release="test release",
-            arches=["test", "arches"],
+            available=["test", "arches"],
+            selected=["test", "arches"],
         )
         boot_source_selection = await factory.make_BootSourceSelection(
             boot_source.id,
             label=expected_boot_src_selection.label,
             os=expected_boot_src_selection.os,
             release=expected_boot_src_selection.release,
-            arches=expected_boot_src_selection.arches,
+            available=expected_boot_src_selection.available,
+            selected=expected_boot_src_selection.selected,
         )
 
         expected_boot_src_selection.id = boot_source_selection.id
@@ -393,14 +398,16 @@ class TestBootSourceSelectionService:
             label=BootAssetLabel.CANDIDATE,
             os="test os",
             release="test release",
-            arches=["test", "arches"],
+            available=["test", "arches"],
+            selected=["test", "arches"],
         )
         boot_source_selection = await factory.make_BootSourceSelection(
             boot_source.id,
             label=expected_boot_src_selection.label,
             os=expected_boot_src_selection.os,
             release=expected_boot_src_selection.release,
-            arches=expected_boot_src_selection.arches,
+            available=expected_boot_src_selection.available,
+            selected=expected_boot_src_selection.selected,
         )
 
         service = BootSourceSelectionService(db_connection)

@@ -62,14 +62,16 @@ DmFoRWTU6CpKtwIg/lb1ncbslH2xAFeUX6ASHXR8vBOnIXWss21FuAaNmWe4lmw=
         label="stable",
         os="Ubuntu",
         release="24.04",
-        arches=["amd64"],
+        available=["amd64"],
+        selected=["amd64"],
     )
     collection.add(
         boot_source_id=boot_sources[1].id,
         label="candidate",
         os="Ubuntu",
         release="22.04",
-        arches=["amd64", "arm"],
+        available=["amd64", "arm"],
+        selected=["amd64", "arm"],
     )
 
     await collection.create(conn)

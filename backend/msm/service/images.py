@@ -141,7 +141,8 @@ class BootSourceSelectionService(Service):
                 BootSourceSelection.c.label,
                 BootSourceSelection.c.os,
                 BootSourceSelection.c.release,
-                BootSourceSelection.c.arches,
+                BootSourceSelection.c.available,
+                BootSourceSelection.c.selected,
             )
             .where(BootSourceSelection.c.boot_source_id == boot_source_id)
             .order_by(*order_by)
@@ -176,7 +177,8 @@ class BootSourceSelectionService(Service):
                 BootSourceSelection.c.label,
                 BootSourceSelection.c.os,
                 BootSourceSelection.c.release,
-                BootSourceSelection.c.arches,
+                BootSourceSelection.c.available,
+                BootSourceSelection.c.selected,
             )
         )
         result = await self.conn.execute(stmt)
@@ -192,7 +194,8 @@ class BootSourceSelectionService(Service):
             BootSourceSelection.c.label,
             BootSourceSelection.c.os,
             BootSourceSelection.c.release,
-            BootSourceSelection.c.arches,
+            BootSourceSelection.c.available,
+            BootSourceSelection.c.selected,
         )
         result = await self.conn.execute(
             stmt,
