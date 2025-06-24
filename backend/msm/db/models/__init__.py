@@ -1,5 +1,6 @@
 from msm.db.models.config import Config
 from msm.db.models.images import (
+    AvailableImage,
     BootAsset,
     BootAssetCreate,
     BootAssetItem,
@@ -40,6 +41,7 @@ from msm.db.models.user import (
 )
 
 __all__ = [
+    "AvailableImage",
     "BootAsset",
     "BootAssetCreate",
     "BootAssetItem",

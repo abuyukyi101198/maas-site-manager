@@ -1840,3 +1840,96 @@ class TestBootAssetItemsDownloadHandler:
             "/images/latest/edge/ubuntu/noble/boot-kernel"
         )
         assert resp.status_code == 400
+
+
+@pytest.mark.asyncio
+class TestGetAvailableImagesHandler:
+    async def test_get_available_images(
+        self, user_client: Client, factory: Factory
+    ) -> None:
+        low_prio_source = await factory.make_BootSource(
+            priority=1,
+            name="Low Prio Source",
+        )
+        high_prio_source = await factory.make_BootSource(
+            priority=2,
+            name="High Prio Source",
+        )
+        await factory.make_BootSourceSelection(
+            low_prio_source.id,
+            os="ubuntu",
+            release="noble",
+            available=["amd64", "arm64", "ppc64el"],
+            selected=["amd64", "arm64"],
+        )
+        await factory.make_BootSourceSelection(
+            high_prio_source.id,
+            os="ubuntu",
+            release="noble",
+            available=["amd64", "arm64"],
+            selected=["amd64"],
+        )
+        await factory.make_BootSourceSelection(
+            high_prio_source.id,
+            os="ubuntu",
+            release="jammy",
+            available=["amd64", "arm64"],
+            selected=[],
+        )
+        await factory.make_BootSourceSelection(
+            low_prio_source.id,
+            os="windows",
+            release="11",
+            available=["amd64", "ppc64el"],
+            selected=["amd64", "ppc64el"],
+        )
+        resp = await user_client.get("/available-images")
+        assert resp.status_code == 200
+        data = resp.json()
+        expected = {
+            "items": [
+                {
+                    "os": "ubuntu",
+                    "release": "jammy",
+                    "arch": "amd64",
+                    "source_name": "High Prio Source",
+                    "selected": False,
+                },
+                {
+                    "os": "ubuntu",
+                    "release": "jammy",
+                    "arch": "arm64",
+                    "source_name": "High Prio Source",
+                    "selected": False,
+                },
+                {
+                    "os": "ubuntu",
+                    "release": "noble",
+                    "arch": "amd64",
+                    "source_name": "High Prio Source",
+                    "selected": True,
+                },
+                {
+                    "os": "ubuntu",
+                    "release": "noble",
+                    "arch": "arm64",
+                    "source_name": "High Prio Source",
+                    "selected": False,
+                },
+                {
+                    "os": "windows",
+                    "release": "11",
+                    "arch": "amd64",
+                    "source_name": "Low Prio Source",
+                    "selected": True,
+                },
+                {
+                    "os": "windows",
+                    "release": "11",
+                    "arch": "ppc64el",
+                    "source_name": "Low Prio Source",
+                    "selected": True,
+                },
+            ]
+        }
+        assert expected == data

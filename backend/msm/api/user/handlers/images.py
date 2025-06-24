@@ -1298,3 +1298,44 @@ async def download(
             ],
         )
     return S3StreamResponse(content=None, file_id=str(boot_item.id))
+
+
+class GetAvailableImagesResponse(BaseModel):
+    items: list[models.AvailableImage]
+
+
+@v1_router.get(
+    "/available-images",
+    responses={
+        401: {"model": UnauthorizedErrorResponseModel},
+    },
+)
+async def get_available_images(
+    services: Annotated[ServiceCollection, Depends(services)],
+    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
+) -> GetAvailableImagesResponse:
+    available = []
+    images_found: set[tuple[str, str]] = set()
+    _, sources = await services.boot_sources.get(
+        [SortParam("priority", asc=False)]
+    )
+    for source in sources:
+        _, selections = await services.boot_source_selections.get(
+            source.id, []
+        )
+        for selection in selections:
+            # ignore if os/release already exists in a previous source
+            if (selection.os, selection.release) not in images_found:
+                images_found.add((selection.os, selection.release))
+                for arch in selection.available:
+                    available.append(
+                        models.AvailableImage(
+                            os=selection.os,
+                            release=selection.release,
+                            arch=arch,
+                            source_name=source.name,
+                            selected=arch in selection.selected,
+                        )
+                    )
+    available.sort(key=lambda x: (x.os, x.release, x.arch))
+    return GetAvailableImagesResponse(items=available)

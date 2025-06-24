@@ -219,3 +219,11 @@ class BootSourceUpdate(BaseModel):
     name: str | None = None
     keyring: str | None = None
     sync_interval: int | None = Field(default=None, ge=0)
+
+
+class AvailableImage(BaseModel):
+    os: str
+    release: str
+    arch: str
+    source_name: str
+    selected: bool
