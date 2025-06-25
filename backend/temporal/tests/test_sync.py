@@ -4,15 +4,20 @@ import uuid
 
 from activities.images import S3Params  # type: ignore
 from activities.simplestream import (  # type: ignore
+    FETCH_SS_ASSETS_ACTIVITY,
     FETCH_SS_INDEXES,
     GET_BOOT_SOURCE_ACTIVITY,
     LOAD_PRODUCT_MAP_ACTIVITY,
+    PATCH_AVAILABLE_ASSETS_ACTIVITY,
+    FetchAssetListParams,
+    FetchAssetListResult,
     FetchSsIndexesParams,
     FetchSsIndexesResult,
     GetBootSourceParams,
     GetBootSourceResult,
     LoadProductMapParams,
     LoadProductMapResult,
+    PatchAssetListParams,
 )
 import pytest
 from pytest_mock import MockerFixture
@@ -22,6 +27,8 @@ from temporalio.testing import WorkflowEnvironment
 from temporalio.worker import Worker
 
 from temporal.resources.workflows.sync import (
+    RefreshUpstreamSourceParams,
+    RefreshUpstreamSourceWorkflow,
     SyncUpstreamSourceParams,
     SyncUpstreamSourceWorkflow,
 )
@@ -51,6 +58,15 @@ def sync_params(s3_params: S3Params) -> SyncUpstreamSourceParams:
 
 
 @pytest.fixture
+def refresh_params() -> RefreshUpstreamSourceParams:
+    return RefreshUpstreamSourceParams(
+        msm_url="http://msm.example.com",
+        msm_jwt="jwt-token",
+        boot_source_id=1,
+    )
+
+
+@pytest.fixture
 def boot_source_data() -> dict[str, typing.Any]:
     return {
         "boot-source": {
@@ -59,6 +75,14 @@ def boot_source_data() -> dict[str, typing.Any]:
         },
         "selections": {"ubuntu---noble": ["amd64"]},
     }
+
+
+@pytest.fixture
+def available_assets() -> list[tuple[str, str, str, list[str]]]:
+    return [
+        ("ubuntu", "oracular", "candidate", ["amd64", "ppc64el"]),
+        ("ubuntu", "jammy", "candidate", ["s390x"]),
+    ]
 
 
 @pytest.fixture
@@ -245,3 +269,58 @@ class TestSyncUpstreamSourceWorkflow:
         # Assert
         assert result is True
         assert len(mock_store.mock_calls) == len(product_list) + 2
+
+
+class TestRefreshUpstreamSourceWorkflow:
+    @pytest.mark.asyncio
+    async def test_refresh_upstream_source_success(
+        self,
+        refresh_params: RefreshUpstreamSourceParams,
+        boot_source_data: dict[str, typing.Any],
+        available_assets: list[tuple[str, str, str, list[str]]],
+    ) -> None:
+        # Mock activities
+        @activity.defn(name=GET_BOOT_SOURCE_ACTIVITY)
+        async def get_boot_source_data(
+            params: GetBootSourceParams,
+        ) -> GetBootSourceResult:
+            return GetBootSourceResult(
+                index_url=boot_source_data["boot-source"]["url"],
+                keyring=boot_source_data["boot-source"]["keyring"],
+            )
+
+        @activity.defn(name=FETCH_SS_ASSETS_ACTIVITY)
+        async def fetch_ss_asset_list(
+            params: FetchAssetListParams,
+        ) -> FetchAssetListResult:
+            return FetchAssetListResult(assets=available_assets)
+
+        @activity.defn(name=PATCH_AVAILABLE_ASSETS_ACTIVITY)
+        async def patch_asset_list(
+            params: PatchAssetListParams,
+        ) -> bool:
+            return bool(params.available.assets == available_assets)
+
+        # Act
+        async with await WorkflowEnvironment.start_time_skipping() as env:
+            async with Worker(
+                env.client,
+                task_queue="abcd:region",
+                debug_mode=True,
+                workflows=[RefreshUpstreamSourceWorkflow],
+                activities=[
+                    get_boot_source_data,
+                    fetch_ss_asset_list,
+                    patch_asset_list,
+                ],
+            ) as worker:
+                result = await env.client.execute_workflow(
+                    RefreshUpstreamSourceWorkflow.run,
+                    refresh_params,
+                    id=f"workflow-{uuid.uuid4()}",
+                    task_queue=worker.task_queue,
+                    run_timeout=TEST_WF_TIMEOUT,
+                )
+
+        # Assert
+        assert result is True

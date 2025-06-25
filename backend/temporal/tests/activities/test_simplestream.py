@@ -2,10 +2,14 @@ import typing
 from unittest.mock import AsyncMock, MagicMock
 
 from activities.simplestream import (  # type: ignore
+    AvailableAsset,
+    FetchAssetListParams,
+    FetchAssetListResult,
     FetchSsIndexesParams,
     GetBootSourceParams,
     LoadProductMapParams,
     LoadProductMapResult,
+    PatchAssetListParams,
     SimpleStreamActivities,
 )
 from httpx import AsyncClient, Response
@@ -361,3 +365,129 @@ class TestLoadProductMapActivity:
 
         # Assert
         assert result.items == []
+
+
+class TestFetchAsAssetListActivity:
+    @pytest.mark.asyncio
+    async def fetch_ss_asset_list(
+        self, ss_act: SimpleStreamActivities, mocker: MockerFixture
+    ) -> None:
+        # Arrange
+        act_env = ActivityEnvironment()
+        products = {
+            "products": {
+                "prod1:amd64": {
+                    "arch": "amd64",
+                    "os": "ubuntu",
+                    "release": "oracular",
+                    "label": "candidate",
+                    "versions": {},
+                },
+                "prod1:s390x": {
+                    "arch": "s390x",
+                    "os": "ubuntu",
+                    "release": "oracular",
+                    "label": "candidate",
+                    "versions": {},
+                },
+                "prod2:amd64": {
+                    "arch": "amd64",
+                    "os": "ubuntu",
+                    "release": "jammy",
+                    "label": "candidate",
+                    "versions": {},
+                },
+                "prod3:shim": {
+                    "arch": "amd64",
+                    "os": "grub-efi-signed",
+                    "label": "candidate",
+                    "bootloader-type": "uefi",
+                    "versions": {},
+                },
+            }
+        }
+
+        mocker.patch.object(
+            ss_act, "_download_json", return_value=(products, False)
+        )
+
+        params = FetchAssetListParams(
+            index_url="http://example.com/streams/v1/index.sjson",
+        )
+
+        # Act
+        result = await act_env.run(ss_act.fetch_ss_asset_list, params)
+
+        # Assert
+        assert isinstance(result, dict)
+        assert len(result) == 2
+        assert ("ubuntu", "oracular", "candidate") in result
+        assert ("ubuntu", "jammy", "candidate") in result
+        assert result[("ubuntu", "oracular", "candidate")] == [
+            "amd64",
+            "s390x",
+        ]
+        assert result[("ubuntu", "jammy", "candidate")] == ["amd64"]
+
+
+@pytest.mark.asyncio
+class TestPatchAvailableAssetsActivity:
+    async def test_patch_asset_list_success(
+        self, ss_act: SimpleStreamActivities, mocker: MockerFixture
+    ) -> None:
+        # Arrange
+        act_env = ActivityEnvironment()
+        params = PatchAssetListParams(
+            msm_base_url="http://msm.example.com",
+            msm_jwt="jwt-token",
+            boot_source_id=1,
+            available=FetchAssetListResult(
+                assets=[
+                    AvailableAsset(
+                        "ubuntu", "oracular", "candidate", ["amd64", "arm64"]
+                    ),
+                    AvailableAsset("ubuntu", "jammy", "candidate", ["amd64"]),
+                ]
+            ),
+        )
+        mock_response = mocker.Mock(spec=Response)
+        mock_response.status_code = 200
+        ss_act.client.patch.return_value = mock_response
+
+        # Act
+        result = await act_env.run(ss_act.patch_asset_list, params)
+
+        # Assert
+        assert result is True
+        ss_act.client.patch.assert_called_once()
+        call_args = ss_act.client.patch.call_args
+        assert call_args is not None
+        _, kwargs = call_args
+        assert kwargs["json"]["available"][0]["os"] == "ubuntu"
+
+    async def test_patch_asset_list_failure(
+        self, ss_act: SimpleStreamActivities, mocker: MockerFixture
+    ) -> None:
+        # Arrange
+        act_env = ActivityEnvironment()
+        params = PatchAssetListParams(
+            msm_base_url="http://msm.example.com",
+            msm_jwt="jwt-token",
+            boot_source_id=1,
+            available=FetchAssetListResult(
+                assets=[
+                    AvailableAsset(
+                        "ubuntu", "oracular", "candidate", ["amd64", "arm64"]
+                    ),
+                ]
+            ),
+        )
+        mock_response = mocker.Mock(spec=Response)
+        mock_response.status_code = 400
+        mock_response.text = "Bad request"
+        ss_act.client.patch.return_value = mock_response
+
+        # Act & Assert
+        with pytest.raises(Exception) as excinfo:
+            await act_env.run(ss_act.patch_asset_list, params)
+        assert "Failed to update available asset list" in str(excinfo.value)

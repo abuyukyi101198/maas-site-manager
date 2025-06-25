@@ -1,3 +1,4 @@
+from collections import defaultdict
 from dataclasses import dataclass, field
 import json
 import typing
@@ -29,6 +30,8 @@ BASE_ASSET_ATTRS = frozenset(
 GET_BOOT_SOURCE_ACTIVITY = "get-boot-source"
 FETCH_SS_INDEXES = "fetch-simplestream-indexes"
 LOAD_PRODUCT_MAP_ACTIVITY = "load-product-map"
+FETCH_SS_ASSETS_ACTIVITY = "fetch-simplestream-asset-list"
+PATCH_AVAILABLE_ASSETS_ACTIVITY = "patch-available-asset-list"
 
 
 @dataclass
@@ -80,6 +83,36 @@ class LoadProductMapResult:
     @classmethod
     def from_dict(cls, data: dict[str, typing.Any]) -> typing.Self:
         return cls(**data)
+
+
+@dataclass
+class FetchAssetListParams:
+    index_url: str
+    keyring: str | None = None
+
+
+class AvailableAsset(typing.NamedTuple):
+    os: str
+    release: str
+    label: str
+    arches: list[str]
+
+
+@dataclass
+class FetchAssetListResult:
+    assets: list[AvailableAsset]
+
+    @classmethod
+    def from_dict(cls, data: dict[str, typing.Any]) -> typing.Self:
+        return cls(**data)
+
+
+@dataclass
+class PatchAssetListParams:
+    msm_base_url: str
+    msm_jwt: str
+    boot_source_id: int
+    available: FetchAssetListResult
 
 
 def get_selection_key(os: str, release: str) -> str:
@@ -235,3 +268,68 @@ class SimpleStreamActivities(BaseActivity):
                 download_items.append(new_item)
 
         return LoadProductMapResult(download_items)
+
+    @activity.defn(name=FETCH_SS_ASSETS_ACTIVITY)
+    async def fetch_ss_asset_list(
+        self, params: FetchAssetListParams
+    ) -> FetchAssetListResult:
+        content, signed = await self._download_json(
+            params.index_url, params.keyring
+        )
+        check_tree_paths(content, format="products:1.0")
+
+        activity.logger.info(
+            "Index '%s' retrieved, signed: %s", params.index_url, signed
+        )
+        activity.heartbeat()
+
+        available: dict[tuple[str, str, str], list[str]] = defaultdict(list)
+        for product_data in content["products"].values():
+            if "bootloader-type" in product_data:
+                continue
+            available[
+                (
+                    product_data["os"],
+                    product_data["release"],
+                    product_data["label"],
+                )
+            ].append(product_data["arch"])
+
+        return FetchAssetListResult(
+            assets=[
+                AvailableAsset(k[0], k[1], k[2], v)
+                for k, v in available.items()
+            ]
+        )
+
+    @activity.defn(name=PATCH_AVAILABLE_ASSETS_ACTIVITY)
+    async def patch_asset_list(self, params: PatchAssetListParams) -> bool:
+        headers = self._get_header(params.msm_jwt)
+
+        url = compose_url(
+            params.msm_base_url,
+            f"api/v1/bootasset-sources/{params.boot_source_id}/selections",
+        )
+
+        patch_req = {
+            "available": [
+                {
+                    "os": sel.os,
+                    "release": sel.release,
+                    "label": sel.label,
+                    "arches": sel.arches,
+                }
+                for sel in params.available.assets
+            ]
+        }
+
+        response = await self.client.patch(
+            url, headers=headers, json=patch_req
+        )
+
+        if response.status_code != 200:
+            raise ApplicationError(
+                f"Failed to update available asset list: {response.status_code} {response.text}"
+            )
+
+        return True
