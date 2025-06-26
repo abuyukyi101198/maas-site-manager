@@ -128,6 +128,7 @@ class BootAsset(BaseModel):
     bootloader_type: str | None = None
     eol: AwareDatetime | None = None
     esm_eol: AwareDatetime | None = None
+    signed: bool = False
 
 
 class BootAssetCreate(BaseModel):
@@ -146,6 +147,7 @@ class BootAssetCreate(BaseModel):
     bootloader_type: str | None = None
     eol: AwareDatetime | None = None
     esm_eol: AwareDatetime | None = None
+    signed: bool = False
 
 
 class BootAssetUpdate(BaseModel):
@@ -163,6 +165,7 @@ class BootAssetUpdate(BaseModel):
     bootloader_type: str | None = None
     eol: AwareDatetime | None = None
     esm_eol: AwareDatetime | None = None
+    signed: bool = False
 
 
 class BootSourceSelection(BaseModel):

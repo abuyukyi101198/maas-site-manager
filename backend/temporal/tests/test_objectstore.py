@@ -217,7 +217,9 @@ class TestMSMImageStore:
 
         image_store = MSMImageStore("http://base.url", "test.jwt", s3_params)
         created, result_id = await image_store._get_or_create_product(
-            product, test_bootsource_id
+            product,
+            test_bootsource_id,
+            True,
         )
         mock_execute.assert_called_once_with(
             GET_OR_CREATE_PRODUCT_WF_NAME,
@@ -264,8 +266,8 @@ class TestMSMImageStore:
             bucket="test-bucket",
         )
         image_store = MSMImageStore("http://base.url", "test.jwt", s3_params)
-        await image_store.insert(product, "http://test.ss.url", 4)
-        mock_create_product.assert_called_once_with(product, 4)
+        await image_store.insert(product, "http://test.ss.url", 4, True)
+        mock_create_product.assert_called_once_with(product, 4, True)
         assert image_store._files_to_download == {
             product["sha256"]: {"ss_url": "http://test.ss.url", "id": 1}
         }
@@ -293,8 +295,8 @@ class TestMSMImageStore:
             bucket="test-bucket",
         )
         image_store = MSMImageStore("http://base.url", "test.jwt", s3_params)
-        await image_store.insert(product, "http://test.ss.url", 4)
-        mock_create_product.assert_called_once_with(product, 4)
+        await image_store.insert(product, "http://test.ss.url", 4, True)
+        mock_create_product.assert_called_once_with(product, 4, True)
         assert image_store._files_to_download == {}
 
     async def test_finalize(self, mocker: MockerFixture) -> None:

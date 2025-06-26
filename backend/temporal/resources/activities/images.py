@@ -102,6 +102,7 @@ class BootAsset:
     bootloader_type: str | None = None
     eol: datetime | None = None
     esm_eol: datetime | None = None
+    signed: bool = False
 
 
 @dataclass

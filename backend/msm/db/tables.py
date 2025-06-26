@@ -188,6 +188,7 @@ BootAsset = Table(
     Column("bootloader_type", Text, nullable=True),
     Column("eol", DateTime(timezone=True), nullable=True),
     Column("esm_eol", DateTime(timezone=True), nullable=True),
+    Column("signed", Boolean, nullable=False, default=False),
     UniqueConstraint("boot_source_id", "os", "release", "arch", "subarch"),
 )
 

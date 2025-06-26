@@ -99,6 +99,7 @@ class SyncUpstreamSourceWorkflow:
                     item,
                     compose_url(indexes.base_url, item["path"]),
                     params.boot_source_id,
+                    indexes.signed,
                 )
             workflow.logger.info(
                 "Processed %d items", len(product_items.items)

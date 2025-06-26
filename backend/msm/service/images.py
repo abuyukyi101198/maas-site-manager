@@ -265,6 +265,7 @@ class BootAssetService(Service):
                 BootAsset.c.bootloader_type,
                 BootAsset.c.eol,
                 BootAsset.c.esm_eol,
+                BootAsset.c.signed,
             )
             .where(*filters)
             .order_by(*order_by)
@@ -293,6 +294,7 @@ class BootAssetService(Service):
             BootAsset.c.bootloader_type,
             BootAsset.c.eol,
             BootAsset.c.esm_eol,
+            BootAsset.c.signed,
         ).where(BootAsset.c.id == id)
         result = await self.conn.execute(stmt)
         if row := result.one_or_none():
@@ -321,6 +323,7 @@ class BootAssetService(Service):
             BootAsset.c.bootloader_type,
             BootAsset.c.eol,
             BootAsset.c.esm_eol,
+            BootAsset.c.signed,
         )
         result = await self.conn.execute(stmt, [data])
         return models.BootAsset(**result.one()._asdict())
@@ -350,6 +353,7 @@ class BootAssetService(Service):
                 BootAsset.c.bootloader_type,
                 BootAsset.c.eol,
                 BootAsset.c.esm_eol,
+                BootAsset.c.signed,
             )
         )
         result = await self.conn.execute(stmt)

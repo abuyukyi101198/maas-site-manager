@@ -56,6 +56,7 @@ class TestBootAssetService:
             bootloader_type="test bootloader type",
             eol=now_utc() + timedelta(days=3650),
             esm_eol=now_utc() + timedelta(days=5000),
+            signed=True,
         )
         boot_asset = await factory.make_BootAsset(
             boot_source.id,
@@ -73,6 +74,7 @@ class TestBootAssetService:
             expected_boot_asset.bootloader_type,
             expected_boot_asset.eol,
             expected_boot_asset.esm_eol,
+            expected_boot_asset.signed,
         )
         expected_boot_asset.id = boot_asset.id
 
@@ -168,6 +170,7 @@ class TestBootAssetService:
             bootloader_type="test bootloader type",
             eol=now_utc() + timedelta(days=3650),
             esm_eol=now_utc() + timedelta(days=5000),
+            signed=True,
         )
         service = BootAssetService(db_connection)
         boot_asset = await service.create(new_boot_asset)
@@ -200,6 +203,7 @@ class TestBootAssetService:
             bootloader_type="test bootloader type",
             eol=now_utc() + timedelta(days=3650),
             esm_eol=now_utc() + timedelta(days=5000),
+            signed=True,
         )
         boot_asset = await factory.make_BootAsset(
             boot_source.id,
@@ -217,6 +221,7 @@ class TestBootAssetService:
             expected_boot_asset.bootloader_type,
             expected_boot_asset.eol,
             expected_boot_asset.esm_eol,
+            expected_boot_asset.signed,
         )
 
         service = BootAssetService(db_connection)
@@ -245,6 +250,7 @@ class TestBootAssetService:
             bootloader_type="test bootloader type",
             eol=now_utc() + timedelta(days=3650),
             esm_eol=now_utc() + timedelta(days=5000),
+            signed=True,
         )
         boot_asset = await factory.make_BootAsset(
             boot_source.id,
@@ -262,6 +268,7 @@ class TestBootAssetService:
             boot_asset.bootloader_type,
             boot_asset.eol,
             boot_asset.esm_eol,
+            boot_asset.signed,
         )
         asset_updates = BootAssetUpdate(
             kind=BootAssetKind.OS,
@@ -278,6 +285,7 @@ class TestBootAssetService:
             bootloader_type="pxe",
             eol=now_utc(),
             esm_eol=now_utc(),
+            signed=False,
         )
 
         service = BootAssetService(db_connection)

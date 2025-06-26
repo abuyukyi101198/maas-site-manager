@@ -77,6 +77,7 @@ boot_asset_sort_parameters = SortParamParser(
         "bootloader_type",
         "eol",
         "esm_eol",
+        "signed",
     ]
 )
 
@@ -164,6 +165,7 @@ class BootAssetsPostRequest(BaseModel):
     bootloader_type: str | None = None
     eol: datetime | None = None
     esm_eol: datetime | None = None
+    signed: bool = False
 
 
 class BootAssetsPostResponse(BaseModel):
@@ -1075,6 +1077,7 @@ async def post_images(
             base_image=f"{os.value.decode()}/{release.value.decode()}",
             eol=datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC),
             esm_eol=datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC),
+            signed=False,
         )
     )
     version = await services.boot_asset_versions.create_next_revision(

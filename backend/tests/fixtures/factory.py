@@ -382,6 +382,7 @@ class Factory:
         bootloader_type: str | None = None,
         eol: datetime | None = None,
         esm_eol: datetime | None = None,
+        signed: bool = False,
     ) -> BootAsset:
         [row] = await self.create(
             "boot_asset",
@@ -402,6 +403,7 @@ class Factory:
                     "bootloader_type": bootloader_type,
                     "eol": eol,
                     "esm_eol": esm_eol,
+                    "signed": signed,
                 }
             ],
         )

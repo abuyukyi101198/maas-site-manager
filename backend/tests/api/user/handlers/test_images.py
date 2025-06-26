@@ -42,6 +42,7 @@ class TestBootAssetsGetHandler:
             bootloader_type="test_bootloader",
             eol=now_utc() + timedelta(days=3650),
             esm_eol=now_utc() + timedelta(days=7000),
+            signed=True,
         )
         assets = await user_client.get("/bootassets")
         assert assets.status_code == 200
@@ -180,6 +181,7 @@ class TestBootAssetsPostHandler:
             "bootloader_type": "uefi",
             "eol": (now_utc() + timedelta(days=365)).isoformat(),
             "esm_eol": (now_utc() + timedelta(days=3650)).isoformat(),
+            "signed": True,
         }
         resp = await user_client.post("/bootassets", json=data)
         new_id = resp.json()["id"]
@@ -1196,6 +1198,7 @@ class TestCustomImageUploadHandler:
                 "bootloader_type": None,
                 "eol": datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC),
                 "esm_eol": datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC),
+                "signed": False,
             }
             expected_version = {
                 "id": 1,
@@ -1302,6 +1305,7 @@ class TestCustomImageUploadHandler:
                 "bootloader_type": None,
                 "eol": datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC),
                 "esm_eol": datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC),
+                "signed": False,
             }
             expected_first_version = {
                 "id": 1,

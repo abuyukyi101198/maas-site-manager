@@ -122,7 +122,7 @@ class MSMImageStore:
         )
 
     async def _get_or_create_product(
-        self, product: dict[str, str], boot_source_id: int
+        self, product: dict[str, str], boot_source_id: int, signed: bool
     ) -> tuple[bool, int]:
         """
         Get or create a Boot Asset, Boot Asset Version, and Boot Asset Item in the Site Manager DB.
@@ -130,6 +130,7 @@ class MSMImageStore:
         Returns: tuple[bool, int]: Whether a new version was created, and the Boot Asset Item ID
         """
         asset = self._get_asset_from_product(product, boot_source_id)
+        asset.signed = signed
         version = self._get_version_from_product(product)
         item = self._get_item_from_product(product)
         params = GetOrCreateProductParams(
@@ -148,10 +149,16 @@ class MSMImageStore:
         )
 
     async def insert(
-        self, product: dict[str, str], ss_url: str, boot_source_id: int
+        self,
+        product: dict[str, str],
+        ss_url: str,
+        boot_source_id: int,
+        signed: bool,
     ) -> None:
         created, item_id = await self._get_or_create_product(
-            product, boot_source_id
+            product,
+            boot_source_id,
+            signed,
         )
         if created:
             self._mark_for_download(ss_url, item_id, product.get("sha256", ""))
