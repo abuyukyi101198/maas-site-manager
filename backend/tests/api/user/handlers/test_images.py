@@ -1103,7 +1103,7 @@ class TestBootAssetItemsPostHandler:
         ba = await factory.make_BootAsset(bs.id)
         bv = await factory.make_BootAssetVersion(ba.id)
         await factory.make_BootAssetItem(
-            bv.id, ftype=ItemFileType.ARCHIVE_TAR_XZ
+            bv.id, ftype=ItemFileType.ARCHIVE_TAR_XZ, path="/item"
         )
         data = {
             "ftype": ItemFileType.ARCHIVE_TAR_XZ,

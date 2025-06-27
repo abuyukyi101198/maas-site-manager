@@ -63,6 +63,9 @@ class ItemFileType(str, Enum):
     # by MAAS
     ARCHIVE_TAR_XZ = "archive.tar.xz"
 
+    # Manifest
+    MANIFEST = "manifest"
+
 
 class BootAssetItem(BaseModel):
     id: int

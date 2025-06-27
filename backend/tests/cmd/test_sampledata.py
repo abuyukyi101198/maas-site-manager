@@ -46,11 +46,11 @@ class TestSampleData:
         boot_source = await factory.get("boot_source")
         assert len(boot_source) == 2
         boot_asset = await factory.get("boot_asset")
-        assert len(boot_asset) == 2
+        assert len(boot_asset) == 4
         boot_asset_version = await factory.get("boot_asset_version")
-        assert len(boot_asset_version) == 2
+        assert len(boot_asset_version) == 8
         boot_asset_item = await factory.get("boot_asset_item")
-        assert len(boot_asset_item) == 2
+        assert len(boot_asset_item) == 28
 
         await purge_sampledata_action._delete_fixtures(db_connection)
         site = await factory.get("site")

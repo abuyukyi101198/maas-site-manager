@@ -31,13 +31,17 @@ class FixturesAction(DatabaseAction):
             config = await self._get_config(conn)
             try:
                 await self._make_fixtures(conn, config)
-            except IntegrityError:
+            except IntegrityError as e:
                 print(
-                    "Cannot create sampledata. Your database seems to contain data."
+                    "Cannot create sampledata. Your database seems to contain data, "
                 )
                 print(
-                    "Try running with 'purge-fixtures' to empty relevant tables."
+                    "or there might be an issue with the sample data (see error below)."
                 )
+                print(
+                    "Try running with 'purge-fixtures' to empty relevant tables.\n\nERROR:\n"
+                )
+                print(e)
                 return 1
 
         return 0
