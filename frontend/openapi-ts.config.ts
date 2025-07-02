@@ -3,7 +3,7 @@ import { defineConfig } from "@hey-api/openapi-ts";
 export default defineConfig({
   input: `http://localhost:8000/api/openapi.json`,
   output: {
-    path: "src/apiclient",
+    path: "src/app/apiclient",
     format: "prettier",
     lint: "eslint",
   },

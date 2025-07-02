@@ -16,7 +16,7 @@ const renderSelectGroupCheckbox = (rowProps: Partial<Row<Image>> = {}) => {
       getIsGrouped: vi.fn(() => true),
       toggleSelected: vi.fn(),
       subRows: imageFactory.buildList(2).map((image) => ({ toggleSelected: vi.fn(), ...image })),
-      original: imageFactory.build({ codename: "Ubuntu" }),
+      original: imageFactory.build({ os: "Ubuntu" }),
     },
     rowProps,
   );

@@ -30,7 +30,7 @@ const useImagesTableColumns = () => {
           ) : (
             <label className="p-checkbox--inline">
               <input
-                aria-label={row.original.codename}
+                aria-label={row.original.os}
                 className="p-checkbox__input"
                 type="checkbox"
                 {...{

@@ -7,124 +7,135 @@ import {
   formDataBodySerializer,
   urlSearchParamsBodySerializer,
 } from "@hey-api/client-axios";
-
-import { client as _heyApiClient } from "./client.gen";
 import type {
   GetBootAssetsV1BootassetsGetData,
-  GetBootAssetsV1BootassetsGetResponse,
-  GetBootAssetsV1BootassetsGetError,
+  GetBootAssetsV1BootassetsGetResponses,
+  GetBootAssetsV1BootassetsGetErrors,
   PostBootAssetsV1BootassetsPostData,
-  PostBootAssetsV1BootassetsPostResponse,
-  PostBootAssetsV1BootassetsPostError,
+  PostBootAssetsV1BootassetsPostResponses,
+  PostBootAssetsV1BootassetsPostErrors,
   GetBootSourcesV1BootassetSourcesGetData,
-  GetBootSourcesV1BootassetSourcesGetResponse,
-  GetBootSourcesV1BootassetSourcesGetError,
+  GetBootSourcesV1BootassetSourcesGetResponses,
+  GetBootSourcesV1BootassetSourcesGetErrors,
   PostBootSourcesV1BootassetSourcesPostData,
-  PostBootSourcesV1BootassetSourcesPostResponse,
-  PostBootSourcesV1BootassetSourcesPostError,
+  PostBootSourcesV1BootassetSourcesPostResponses,
+  PostBootSourcesV1BootassetSourcesPostErrors,
   DeleteBootSourceV1BootassetSourcesIdDeleteData,
-  DeleteBootSourceV1BootassetSourcesIdDeleteError,
+  DeleteBootSourceV1BootassetSourcesIdDeleteResponses,
+  DeleteBootSourceV1BootassetSourcesIdDeleteErrors,
   GetBootSourceByIdV1BootassetSourcesIdGetData,
-  GetBootSourceByIdV1BootassetSourcesIdGetResponse,
-  GetBootSourceByIdV1BootassetSourcesIdGetError,
+  GetBootSourceByIdV1BootassetSourcesIdGetResponses,
+  GetBootSourceByIdV1BootassetSourcesIdGetErrors,
   PatchBootSourceV1BootassetSourcesIdPatchData,
-  PatchBootSourceV1BootassetSourcesIdPatchResponse,
-  PatchBootSourceV1BootassetSourcesIdPatchError,
+  PatchBootSourceV1BootassetSourcesIdPatchResponses,
+  PatchBootSourceV1BootassetSourcesIdPatchErrors,
   GetBootSourceSelectionsV1BootassetSourcesIdSelectionsGetData,
-  GetBootSourceSelectionsV1BootassetSourcesIdSelectionsGetResponse,
-  GetBootSourceSelectionsV1BootassetSourcesIdSelectionsGetError,
+  GetBootSourceSelectionsV1BootassetSourcesIdSelectionsGetResponses,
+  GetBootSourceSelectionsV1BootassetSourcesIdSelectionsGetErrors,
+  PatchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatchData,
+  PatchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatchResponses,
+  PatchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatchErrors,
   PostBootAssetVersionV1BootassetsIdVersionsPostData,
-  PostBootAssetVersionV1BootassetsIdVersionsPostResponse,
-  PostBootAssetVersionV1BootassetsIdVersionsPostError,
+  PostBootAssetVersionV1BootassetsIdVersionsPostResponses,
+  PostBootAssetVersionV1BootassetsIdVersionsPostErrors,
   GetBootAssetVersionsV1BootassetVersionsGetData,
-  GetBootAssetVersionsV1BootassetVersionsGetResponse,
-  GetBootAssetVersionsV1BootassetVersionsGetError,
+  GetBootAssetVersionsV1BootassetVersionsGetResponses,
+  GetBootAssetVersionsV1BootassetVersionsGetErrors,
   PostBootAssetItemV1BootassetVersionsIdItemsPostData,
-  PostBootAssetItemV1BootassetVersionsIdItemsPostResponse,
-  PostBootAssetItemV1BootassetVersionsIdItemsPostError,
+  PostBootAssetItemV1BootassetVersionsIdItemsPostResponses,
+  PostBootAssetItemV1BootassetVersionsIdItemsPostErrors,
   GetBootAssetItemsV1BootassetItemsGetData,
-  GetBootAssetItemsV1BootassetItemsGetResponse,
-  GetBootAssetItemsV1BootassetItemsGetError,
+  GetBootAssetItemsV1BootassetItemsGetResponses,
+  GetBootAssetItemsV1BootassetItemsGetErrors,
   DeleteImagesV1BootassetItemsIdDeleteData,
-  DeleteImagesV1BootassetItemsIdDeleteError,
+  DeleteImagesV1BootassetItemsIdDeleteResponses,
+  DeleteImagesV1BootassetItemsIdDeleteErrors,
   PatchBootAssetItemsV1BootassetItemsIdPatchData,
-  PatchBootAssetItemsV1BootassetItemsIdPatchResponse,
-  PatchBootAssetItemsV1BootassetItemsIdPatchError,
+  PatchBootAssetItemsV1BootassetItemsIdPatchResponses,
+  PatchBootAssetItemsV1BootassetItemsIdPatchErrors,
   PostImagesV1ImagesPostData,
-  PostImagesV1ImagesPostResponse,
-  PostImagesV1ImagesPostError,
+  PostImagesV1ImagesPostResponses,
+  PostImagesV1ImagesPostErrors,
   DownloadV1ImagesTrackRiskFilePathGetData,
-  DownloadV1ImagesTrackRiskFilePathGetError,
+  DownloadV1ImagesTrackRiskFilePathGetResponses,
+  DownloadV1ImagesTrackRiskFilePathGetErrors,
+  GetAvailableImagesV1AvailableImagesGetData,
+  GetAvailableImagesV1AvailableImagesGetResponses,
+  GetAvailableImagesV1AvailableImagesGetErrors,
   PostV1LoginPostData,
-  PostV1LoginPostResponse,
-  PostV1LoginPostError,
+  PostV1LoginPostResponses,
+  PostV1LoginPostErrors,
   GetV1SettingsGetData,
-  GetV1SettingsGetResponse,
-  GetV1SettingsGetError,
+  GetV1SettingsGetResponses,
+  GetV1SettingsGetErrors,
   PatchV1SettingsPatchData,
-  PatchV1SettingsPatchError,
+  PatchV1SettingsPatchResponses,
+  PatchV1SettingsPatchErrors,
   GetPendingV1SitesPendingGetData,
-  GetPendingV1SitesPendingGetResponse,
-  GetPendingV1SitesPendingGetError,
+  GetPendingV1SitesPendingGetResponses,
+  GetPendingV1SitesPendingGetErrors,
   PostPendingV1SitesPendingPostData,
-  PostPendingV1SitesPendingPostResponse,
-  PostPendingV1SitesPendingPostError,
+  PostPendingV1SitesPendingPostResponses,
+  PostPendingV1SitesPendingPostErrors,
   DeleteManyV1SitesDeleteData,
-  DeleteManyV1SitesDeleteResponse,
-  DeleteManyV1SitesDeleteError,
+  DeleteManyV1SitesDeleteResponses,
+  DeleteManyV1SitesDeleteErrors,
   GetV1SitesGetData,
-  GetV1SitesGetResponse,
-  GetV1SitesGetError,
+  GetV1SitesGetResponses,
+  GetV1SitesGetErrors,
   GetCoordinatesV1SitesCoordinatesGetData,
-  GetCoordinatesV1SitesCoordinatesGetResponse,
-  GetCoordinatesV1SitesCoordinatesGetError,
+  GetCoordinatesV1SitesCoordinatesGetResponses,
+  GetCoordinatesV1SitesCoordinatesGetErrors,
   DeleteV1SitesIdDeleteData,
-  DeleteV1SitesIdDeleteResponse,
-  DeleteV1SitesIdDeleteError,
+  DeleteV1SitesIdDeleteResponses,
+  DeleteV1SitesIdDeleteErrors,
   GetIdV1SitesIdGetData,
-  GetIdV1SitesIdGetResponse,
-  GetIdV1SitesIdGetError,
+  GetIdV1SitesIdGetResponses,
+  GetIdV1SitesIdGetErrors,
   PatchV1SitesIdPatchData,
-  PatchV1SitesIdPatchResponse,
-  PatchV1SitesIdPatchError,
+  PatchV1SitesIdPatchResponses,
+  PatchV1SitesIdPatchErrors,
   DeleteManyV1TokensDeleteData,
-  DeleteManyV1TokensDeleteResponse,
-  DeleteManyV1TokensDeleteError,
+  DeleteManyV1TokensDeleteResponses,
+  DeleteManyV1TokensDeleteErrors,
   GetV1TokensGetData,
-  GetV1TokensGetResponse,
-  GetV1TokensGetError,
+  GetV1TokensGetResponses,
+  GetV1TokensGetErrors,
   PostV1TokensPostData,
-  PostV1TokensPostResponse,
-  PostV1TokensPostError,
+  PostV1TokensPostResponses,
+  PostV1TokensPostErrors,
   GetExportV1TokensExportGetData,
-  GetExportV1TokensExportGetError,
+  GetExportV1TokensExportGetResponses,
+  GetExportV1TokensExportGetErrors,
   DeleteV1TokensIdDeleteData,
-  DeleteV1TokensIdDeleteResponse,
-  DeleteV1TokensIdDeleteError,
+  DeleteV1TokensIdDeleteResponses,
+  DeleteV1TokensIdDeleteErrors,
   GetV1UsersGetData,
-  GetV1UsersGetResponse,
-  GetV1UsersGetError,
+  GetV1UsersGetResponses,
+  GetV1UsersGetErrors,
   PostV1UsersPostData,
-  PostV1UsersPostResponse,
-  PostV1UsersPostError,
+  PostV1UsersPostResponses,
+  PostV1UsersPostErrors,
   GetMeV1UsersMeGetData,
-  GetMeV1UsersMeGetResponse,
-  GetMeV1UsersMeGetError,
+  GetMeV1UsersMeGetResponses,
+  GetMeV1UsersMeGetErrors,
   PatchMeV1UsersMePatchData,
-  PatchMeV1UsersMePatchResponse,
-  PatchMeV1UsersMePatchError,
+  PatchMeV1UsersMePatchResponses,
+  PatchMeV1UsersMePatchErrors,
   PatchMePasswordV1UsersMePasswordPatchData,
-  PatchMePasswordV1UsersMePasswordPatchError,
+  PatchMePasswordV1UsersMePasswordPatchResponses,
+  PatchMePasswordV1UsersMePasswordPatchErrors,
   DeleteV1UsersIdDeleteData,
-  DeleteV1UsersIdDeleteResponse,
-  DeleteV1UsersIdDeleteError,
+  DeleteV1UsersIdDeleteResponses,
+  DeleteV1UsersIdDeleteErrors,
   GetIdV1UsersIdGetData,
-  GetIdV1UsersIdGetResponse,
-  GetIdV1UsersIdGetError,
+  GetIdV1UsersIdGetResponses,
+  GetIdV1UsersIdGetErrors,
   PatchV1UsersIdPatchData,
-  PatchV1UsersIdPatchResponse,
-  PatchV1UsersIdPatchError,
+  PatchV1UsersIdPatchResponses,
+  PatchV1UsersIdPatchErrors,
 } from "./types.gen";
+import { client as _heyApiClient } from "./client.gen";
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = ClientOptions<
   TData,
@@ -151,10 +162,11 @@ export const getBootAssetsV1BootassetsGet = <ThrowOnError extends boolean = fals
   options?: Options<GetBootAssetsV1BootassetsGetData, ThrowOnError>,
 ) => {
   return (options?.client ?? _heyApiClient).get<
-    GetBootAssetsV1BootassetsGetResponse,
-    GetBootAssetsV1BootassetsGetError,
+    GetBootAssetsV1BootassetsGetResponses,
+    GetBootAssetsV1BootassetsGetErrors,
     ThrowOnError
   >({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -173,10 +185,11 @@ export const postBootAssetsV1BootassetsPost = <ThrowOnError extends boolean = fa
   options: Options<PostBootAssetsV1BootassetsPostData, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).post<
-    PostBootAssetsV1BootassetsPostResponse,
-    PostBootAssetsV1BootassetsPostError,
+    PostBootAssetsV1BootassetsPostResponses,
+    PostBootAssetsV1BootassetsPostErrors,
     ThrowOnError
   >({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -187,7 +200,7 @@ export const postBootAssetsV1BootassetsPost = <ThrowOnError extends boolean = fa
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...options?.headers,
+      ...options.headers,
     },
   });
 };
@@ -200,10 +213,11 @@ export const getBootSourcesV1BootassetSourcesGet = <ThrowOnError extends boolean
   options?: Options<GetBootSourcesV1BootassetSourcesGetData, ThrowOnError>,
 ) => {
   return (options?.client ?? _heyApiClient).get<
-    GetBootSourcesV1BootassetSourcesGetResponse,
-    GetBootSourcesV1BootassetSourcesGetError,
+    GetBootSourcesV1BootassetSourcesGetResponses,
+    GetBootSourcesV1BootassetSourcesGetErrors,
     ThrowOnError
   >({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -222,10 +236,11 @@ export const postBootSourcesV1BootassetSourcesPost = <ThrowOnError extends boole
   options: Options<PostBootSourcesV1BootassetSourcesPostData, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).post<
-    PostBootSourcesV1BootassetSourcesPostResponse,
-    PostBootSourcesV1BootassetSourcesPostError,
+    PostBootSourcesV1BootassetSourcesPostResponses,
+    PostBootSourcesV1BootassetSourcesPostErrors,
     ThrowOnError
   >({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -236,7 +251,7 @@ export const postBootSourcesV1BootassetSourcesPost = <ThrowOnError extends boole
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...options?.headers,
+      ...options.headers,
     },
   });
 };
@@ -248,10 +263,11 @@ export const deleteBootSourceV1BootassetSourcesIdDelete = <ThrowOnError extends 
   options: Options<DeleteBootSourceV1BootassetSourcesIdDeleteData, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).delete<
-    unknown,
-    DeleteBootSourceV1BootassetSourcesIdDeleteError,
+    DeleteBootSourceV1BootassetSourcesIdDeleteResponses,
+    DeleteBootSourceV1BootassetSourcesIdDeleteErrors,
     ThrowOnError
   >({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -270,10 +286,11 @@ export const getBootSourceByIdV1BootassetSourcesIdGet = <ThrowOnError extends bo
   options: Options<GetBootSourceByIdV1BootassetSourcesIdGetData, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).get<
-    GetBootSourceByIdV1BootassetSourcesIdGetResponse,
-    GetBootSourceByIdV1BootassetSourcesIdGetError,
+    GetBootSourceByIdV1BootassetSourcesIdGetResponses,
+    GetBootSourceByIdV1BootassetSourcesIdGetErrors,
     ThrowOnError
   >({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -292,10 +309,11 @@ export const patchBootSourceV1BootassetSourcesIdPatch = <ThrowOnError extends bo
   options: Options<PatchBootSourceV1BootassetSourcesIdPatchData, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).patch<
-    PatchBootSourceV1BootassetSourcesIdPatchResponse,
-    PatchBootSourceV1BootassetSourcesIdPatchError,
+    PatchBootSourceV1BootassetSourcesIdPatchResponses,
+    PatchBootSourceV1BootassetSourcesIdPatchErrors,
     ThrowOnError
   >({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -306,7 +324,7 @@ export const patchBootSourceV1BootassetSourcesIdPatch = <ThrowOnError extends bo
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...options?.headers,
+      ...options.headers,
     },
   });
 };
@@ -319,10 +337,11 @@ export const getBootSourceSelectionsV1BootassetSourcesIdSelectionsGet = <ThrowOn
   options: Options<GetBootSourceSelectionsV1BootassetSourcesIdSelectionsGetData, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).get<
-    GetBootSourceSelectionsV1BootassetSourcesIdSelectionsGetResponse,
-    GetBootSourceSelectionsV1BootassetSourcesIdSelectionsGetError,
+    GetBootSourceSelectionsV1BootassetSourcesIdSelectionsGetResponses,
+    GetBootSourceSelectionsV1BootassetSourcesIdSelectionsGetErrors,
     ThrowOnError
   >({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -335,16 +354,44 @@ export const getBootSourceSelectionsV1BootassetSourcesIdSelectionsGet = <ThrowOn
 };
 
 /**
+ * Patch Boot Source Selections
+ */
+export const patchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatch = <ThrowOnError extends boolean = false>(
+  options: Options<PatchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatchData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).patch<
+    PatchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatchResponses,
+    PatchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatchErrors,
+    ThrowOnError
+  >({
+    responseType: "json",
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
+    url: "/v1/bootasset-sources/{id}/selections",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+};
+
+/**
  * Post Boot Asset Version
  */
 export const postBootAssetVersionV1BootassetsIdVersionsPost = <ThrowOnError extends boolean = false>(
   options: Options<PostBootAssetVersionV1BootassetsIdVersionsPostData, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).post<
-    PostBootAssetVersionV1BootassetsIdVersionsPostResponse,
-    PostBootAssetVersionV1BootassetsIdVersionsPostError,
+    PostBootAssetVersionV1BootassetsIdVersionsPostResponses,
+    PostBootAssetVersionV1BootassetsIdVersionsPostErrors,
     ThrowOnError
   >({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -355,7 +402,7 @@ export const postBootAssetVersionV1BootassetsIdVersionsPost = <ThrowOnError exte
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...options?.headers,
+      ...options.headers,
     },
   });
 };
@@ -368,10 +415,11 @@ export const getBootAssetVersionsV1BootassetVersionsGet = <ThrowOnError extends 
   options?: Options<GetBootAssetVersionsV1BootassetVersionsGetData, ThrowOnError>,
 ) => {
   return (options?.client ?? _heyApiClient).get<
-    GetBootAssetVersionsV1BootassetVersionsGetResponse,
-    GetBootAssetVersionsV1BootassetVersionsGetError,
+    GetBootAssetVersionsV1BootassetVersionsGetResponses,
+    GetBootAssetVersionsV1BootassetVersionsGetErrors,
     ThrowOnError
   >({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -390,10 +438,11 @@ export const postBootAssetItemV1BootassetVersionsIdItemsPost = <ThrowOnError ext
   options: Options<PostBootAssetItemV1BootassetVersionsIdItemsPostData, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).post<
-    PostBootAssetItemV1BootassetVersionsIdItemsPostResponse,
-    PostBootAssetItemV1BootassetVersionsIdItemsPostError,
+    PostBootAssetItemV1BootassetVersionsIdItemsPostResponses,
+    PostBootAssetItemV1BootassetVersionsIdItemsPostErrors,
     ThrowOnError
   >({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -404,7 +453,7 @@ export const postBootAssetItemV1BootassetVersionsIdItemsPost = <ThrowOnError ext
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...options?.headers,
+      ...options.headers,
     },
   });
 };
@@ -416,10 +465,11 @@ export const getBootAssetItemsV1BootassetItemsGet = <ThrowOnError extends boolea
   options?: Options<GetBootAssetItemsV1BootassetItemsGetData, ThrowOnError>,
 ) => {
   return (options?.client ?? _heyApiClient).get<
-    GetBootAssetItemsV1BootassetItemsGetResponse,
-    GetBootAssetItemsV1BootassetItemsGetError,
+    GetBootAssetItemsV1BootassetItemsGetResponses,
+    GetBootAssetItemsV1BootassetItemsGetErrors,
     ThrowOnError
   >({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -437,7 +487,12 @@ export const getBootAssetItemsV1BootassetItemsGet = <ThrowOnError extends boolea
 export const deleteImagesV1BootassetItemsIdDelete = <ThrowOnError extends boolean = false>(
   options: Options<DeleteImagesV1BootassetItemsIdDeleteData, ThrowOnError>,
 ) => {
-  return (options.client ?? _heyApiClient).delete<unknown, DeleteImagesV1BootassetItemsIdDeleteError, ThrowOnError>({
+  return (options.client ?? _heyApiClient).delete<
+    DeleteImagesV1BootassetItemsIdDeleteResponses,
+    DeleteImagesV1BootassetItemsIdDeleteErrors,
+    ThrowOnError
+  >({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -456,10 +511,11 @@ export const patchBootAssetItemsV1BootassetItemsIdPatch = <ThrowOnError extends 
   options: Options<PatchBootAssetItemsV1BootassetItemsIdPatchData, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).patch<
-    PatchBootAssetItemsV1BootassetItemsIdPatchResponse,
-    PatchBootAssetItemsV1BootassetItemsIdPatchError,
+    PatchBootAssetItemsV1BootassetItemsIdPatchResponses,
+    PatchBootAssetItemsV1BootassetItemsIdPatchErrors,
     ThrowOnError
   >({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -470,7 +526,7 @@ export const patchBootAssetItemsV1BootassetItemsIdPatch = <ThrowOnError extends 
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...options?.headers,
+      ...options.headers,
     },
   });
 };
@@ -482,11 +538,12 @@ export const postImagesV1ImagesPost = <ThrowOnError extends boolean = false>(
   options: Options<PostImagesV1ImagesPostData, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).post<
-    PostImagesV1ImagesPostResponse,
-    PostImagesV1ImagesPostError,
+    PostImagesV1ImagesPostResponses,
+    PostImagesV1ImagesPostErrors,
     ThrowOnError
   >({
     ...formDataBodySerializer,
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -497,7 +554,7 @@ export const postImagesV1ImagesPost = <ThrowOnError extends boolean = false>(
     ...options,
     headers: {
       "Content-Type": null,
-      ...options?.headers,
+      ...options.headers,
     },
   });
 };
@@ -508,8 +565,36 @@ export const postImagesV1ImagesPost = <ThrowOnError extends boolean = false>(
 export const downloadV1ImagesTrackRiskFilePathGet = <ThrowOnError extends boolean = false>(
   options: Options<DownloadV1ImagesTrackRiskFilePathGetData, ThrowOnError>,
 ) => {
-  return (options.client ?? _heyApiClient).get<unknown, DownloadV1ImagesTrackRiskFilePathGetError, ThrowOnError>({
+  return (options.client ?? _heyApiClient).get<
+    DownloadV1ImagesTrackRiskFilePathGetResponses,
+    DownloadV1ImagesTrackRiskFilePathGetErrors,
+    ThrowOnError
+  >({
+    responseType: "json",
     url: "/v1/images/{track}/{risk}/{file_path}",
+    ...options,
+  });
+};
+
+/**
+ * Get Available Images
+ */
+export const getAvailableImagesV1AvailableImagesGet = <ThrowOnError extends boolean = false>(
+  options?: Options<GetAvailableImagesV1AvailableImagesGetData, ThrowOnError>,
+) => {
+  return (options?.client ?? _heyApiClient).get<
+    GetAvailableImagesV1AvailableImagesGetResponses,
+    GetAvailableImagesV1AvailableImagesGetErrors,
+    ThrowOnError
+  >({
+    responseType: "json",
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
+    url: "/v1/available-images",
     ...options,
   });
 };
@@ -520,13 +605,14 @@ export const downloadV1ImagesTrackRiskFilePathGet = <ThrowOnError extends boolea
 export const postV1LoginPost = <ThrowOnError extends boolean = false>(
   options: Options<PostV1LoginPostData, ThrowOnError>,
 ) => {
-  return (options.client ?? _heyApiClient).post<PostV1LoginPostResponse, PostV1LoginPostError, ThrowOnError>({
+  return (options.client ?? _heyApiClient).post<PostV1LoginPostResponses, PostV1LoginPostErrors, ThrowOnError>({
     ...urlSearchParamsBodySerializer,
+    responseType: "json",
     url: "/v1/login",
     ...options,
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
-      ...options?.headers,
+      ...options.headers,
     },
   });
 };
@@ -538,7 +624,8 @@ export const postV1LoginPost = <ThrowOnError extends boolean = false>(
 export const getV1SettingsGet = <ThrowOnError extends boolean = false>(
   options?: Options<GetV1SettingsGetData, ThrowOnError>,
 ) => {
-  return (options?.client ?? _heyApiClient).get<GetV1SettingsGetResponse, GetV1SettingsGetError, ThrowOnError>({
+  return (options?.client ?? _heyApiClient).get<GetV1SettingsGetResponses, GetV1SettingsGetErrors, ThrowOnError>({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -556,7 +643,12 @@ export const getV1SettingsGet = <ThrowOnError extends boolean = false>(
 export const patchV1SettingsPatch = <ThrowOnError extends boolean = false>(
   options: Options<PatchV1SettingsPatchData, ThrowOnError>,
 ) => {
-  return (options.client ?? _heyApiClient).patch<unknown, PatchV1SettingsPatchError, ThrowOnError>({
+  return (options.client ?? _heyApiClient).patch<
+    PatchV1SettingsPatchResponses,
+    PatchV1SettingsPatchErrors,
+    ThrowOnError
+  >({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -567,7 +659,7 @@ export const patchV1SettingsPatch = <ThrowOnError extends boolean = false>(
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...options?.headers,
+      ...options.headers,
     },
   });
 };
@@ -580,10 +672,11 @@ export const getPendingV1SitesPendingGet = <ThrowOnError extends boolean = false
   options?: Options<GetPendingV1SitesPendingGetData, ThrowOnError>,
 ) => {
   return (options?.client ?? _heyApiClient).get<
-    GetPendingV1SitesPendingGetResponse,
-    GetPendingV1SitesPendingGetError,
+    GetPendingV1SitesPendingGetResponses,
+    GetPendingV1SitesPendingGetErrors,
     ThrowOnError
   >({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -603,8 +696,8 @@ export const postPendingV1SitesPendingPost = <ThrowOnError extends boolean = fal
   options: Options<PostPendingV1SitesPendingPostData, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).post<
-    PostPendingV1SitesPendingPostResponse,
-    PostPendingV1SitesPendingPostError,
+    PostPendingV1SitesPendingPostResponses,
+    PostPendingV1SitesPendingPostErrors,
     ThrowOnError
   >({
     security: [
@@ -617,7 +710,7 @@ export const postPendingV1SitesPendingPost = <ThrowOnError extends boolean = fal
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...options?.headers,
+      ...options.headers,
     },
   });
 };
@@ -630,8 +723,8 @@ export const deleteManyV1SitesDelete = <ThrowOnError extends boolean = false>(
   options: Options<DeleteManyV1SitesDeleteData, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).delete<
-    DeleteManyV1SitesDeleteResponse,
-    DeleteManyV1SitesDeleteError,
+    DeleteManyV1SitesDeleteResponses,
+    DeleteManyV1SitesDeleteErrors,
     ThrowOnError
   >({
     security: [
@@ -652,7 +745,8 @@ export const deleteManyV1SitesDelete = <ThrowOnError extends boolean = false>(
 export const getV1SitesGet = <ThrowOnError extends boolean = false>(
   options?: Options<GetV1SitesGetData, ThrowOnError>,
 ) => {
-  return (options?.client ?? _heyApiClient).get<GetV1SitesGetResponse, GetV1SitesGetError, ThrowOnError>({
+  return (options?.client ?? _heyApiClient).get<GetV1SitesGetResponses, GetV1SitesGetErrors, ThrowOnError>({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -672,10 +766,11 @@ export const getCoordinatesV1SitesCoordinatesGet = <ThrowOnError extends boolean
   options?: Options<GetCoordinatesV1SitesCoordinatesGetData, ThrowOnError>,
 ) => {
   return (options?.client ?? _heyApiClient).get<
-    GetCoordinatesV1SitesCoordinatesGetResponse,
-    GetCoordinatesV1SitesCoordinatesGetError,
+    GetCoordinatesV1SitesCoordinatesGetResponses,
+    GetCoordinatesV1SitesCoordinatesGetErrors,
     ThrowOnError
   >({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -695,8 +790,8 @@ export const deleteV1SitesIdDelete = <ThrowOnError extends boolean = false>(
   options: Options<DeleteV1SitesIdDeleteData, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).delete<
-    DeleteV1SitesIdDeleteResponse,
-    DeleteV1SitesIdDeleteError,
+    DeleteV1SitesIdDeleteResponses,
+    DeleteV1SitesIdDeleteErrors,
     ThrowOnError
   >({
     security: [
@@ -717,7 +812,8 @@ export const deleteV1SitesIdDelete = <ThrowOnError extends boolean = false>(
 export const getIdV1SitesIdGet = <ThrowOnError extends boolean = false>(
   options: Options<GetIdV1SitesIdGetData, ThrowOnError>,
 ) => {
-  return (options.client ?? _heyApiClient).get<GetIdV1SitesIdGetResponse, GetIdV1SitesIdGetError, ThrowOnError>({
+  return (options.client ?? _heyApiClient).get<GetIdV1SitesIdGetResponses, GetIdV1SitesIdGetErrors, ThrowOnError>({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -736,20 +832,23 @@ export const getIdV1SitesIdGet = <ThrowOnError extends boolean = false>(
 export const patchV1SitesIdPatch = <ThrowOnError extends boolean = false>(
   options: Options<PatchV1SitesIdPatchData, ThrowOnError>,
 ) => {
-  return (options.client ?? _heyApiClient).patch<PatchV1SitesIdPatchResponse, PatchV1SitesIdPatchError, ThrowOnError>({
-    security: [
-      {
-        scheme: "bearer",
-        type: "http",
+  return (options.client ?? _heyApiClient).patch<PatchV1SitesIdPatchResponses, PatchV1SitesIdPatchErrors, ThrowOnError>(
+    {
+      responseType: "json",
+      security: [
+        {
+          scheme: "bearer",
+          type: "http",
+        },
+      ],
+      url: "/v1/sites/{id}",
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
       },
-    ],
-    url: "/v1/sites/{id}",
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options?.headers,
     },
-  });
+  );
 };
 
 /**
@@ -760,8 +859,8 @@ export const deleteManyV1TokensDelete = <ThrowOnError extends boolean = false>(
   options: Options<DeleteManyV1TokensDeleteData, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).delete<
-    DeleteManyV1TokensDeleteResponse,
-    DeleteManyV1TokensDeleteError,
+    DeleteManyV1TokensDeleteResponses,
+    DeleteManyV1TokensDeleteErrors,
     ThrowOnError
   >({
     security: [
@@ -782,7 +881,8 @@ export const deleteManyV1TokensDelete = <ThrowOnError extends boolean = false>(
 export const getV1TokensGet = <ThrowOnError extends boolean = false>(
   options?: Options<GetV1TokensGetData, ThrowOnError>,
 ) => {
-  return (options?.client ?? _heyApiClient).get<GetV1TokensGetResponse, GetV1TokensGetError, ThrowOnError>({
+  return (options?.client ?? _heyApiClient).get<GetV1TokensGetResponses, GetV1TokensGetErrors, ThrowOnError>({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -803,7 +903,8 @@ export const getV1TokensGet = <ThrowOnError extends boolean = false>(
 export const postV1TokensPost = <ThrowOnError extends boolean = false>(
   options: Options<PostV1TokensPostData, ThrowOnError>,
 ) => {
-  return (options.client ?? _heyApiClient).post<PostV1TokensPostResponse, PostV1TokensPostError, ThrowOnError>({
+  return (options.client ?? _heyApiClient).post<PostV1TokensPostResponses, PostV1TokensPostErrors, ThrowOnError>({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -814,7 +915,7 @@ export const postV1TokensPost = <ThrowOnError extends boolean = false>(
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...options?.headers,
+      ...options.headers,
     },
   });
 };
@@ -826,7 +927,12 @@ export const postV1TokensPost = <ThrowOnError extends boolean = false>(
 export const getExportV1TokensExportGet = <ThrowOnError extends boolean = false>(
   options?: Options<GetExportV1TokensExportGetData, ThrowOnError>,
 ) => {
-  return (options?.client ?? _heyApiClient).get<unknown, GetExportV1TokensExportGetError, ThrowOnError>({
+  return (options?.client ?? _heyApiClient).get<
+    GetExportV1TokensExportGetResponses,
+    GetExportV1TokensExportGetErrors,
+    ThrowOnError
+  >({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -846,8 +952,8 @@ export const deleteV1TokensIdDelete = <ThrowOnError extends boolean = false>(
   options: Options<DeleteV1TokensIdDeleteData, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).delete<
-    DeleteV1TokensIdDeleteResponse,
-    DeleteV1TokensIdDeleteError,
+    DeleteV1TokensIdDeleteResponses,
+    DeleteV1TokensIdDeleteErrors,
     ThrowOnError
   >({
     security: [
@@ -868,7 +974,8 @@ export const deleteV1TokensIdDelete = <ThrowOnError extends boolean = false>(
 export const getV1UsersGet = <ThrowOnError extends boolean = false>(
   options?: Options<GetV1UsersGetData, ThrowOnError>,
 ) => {
-  return (options?.client ?? _heyApiClient).get<GetV1UsersGetResponse, GetV1UsersGetError, ThrowOnError>({
+  return (options?.client ?? _heyApiClient).get<GetV1UsersGetResponses, GetV1UsersGetErrors, ThrowOnError>({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -887,7 +994,8 @@ export const getV1UsersGet = <ThrowOnError extends boolean = false>(
 export const postV1UsersPost = <ThrowOnError extends boolean = false>(
   options: Options<PostV1UsersPostData, ThrowOnError>,
 ) => {
-  return (options.client ?? _heyApiClient).post<PostV1UsersPostResponse, PostV1UsersPostError, ThrowOnError>({
+  return (options.client ?? _heyApiClient).post<PostV1UsersPostResponses, PostV1UsersPostErrors, ThrowOnError>({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -898,7 +1006,7 @@ export const postV1UsersPost = <ThrowOnError extends boolean = false>(
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...options?.headers,
+      ...options.headers,
     },
   });
 };
@@ -910,7 +1018,8 @@ export const postV1UsersPost = <ThrowOnError extends boolean = false>(
 export const getMeV1UsersMeGet = <ThrowOnError extends boolean = false>(
   options?: Options<GetMeV1UsersMeGetData, ThrowOnError>,
 ) => {
-  return (options?.client ?? _heyApiClient).get<GetMeV1UsersMeGetResponse, GetMeV1UsersMeGetError, ThrowOnError>({
+  return (options?.client ?? _heyApiClient).get<GetMeV1UsersMeGetResponses, GetMeV1UsersMeGetErrors, ThrowOnError>({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -930,10 +1039,11 @@ export const patchMeV1UsersMePatch = <ThrowOnError extends boolean = false>(
   options: Options<PatchMeV1UsersMePatchData, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).patch<
-    PatchMeV1UsersMePatchResponse,
-    PatchMeV1UsersMePatchError,
+    PatchMeV1UsersMePatchResponses,
+    PatchMeV1UsersMePatchErrors,
     ThrowOnError
   >({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -944,7 +1054,7 @@ export const patchMeV1UsersMePatch = <ThrowOnError extends boolean = false>(
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...options?.headers,
+      ...options.headers,
     },
   });
 };
@@ -956,7 +1066,12 @@ export const patchMeV1UsersMePatch = <ThrowOnError extends boolean = false>(
 export const patchMePasswordV1UsersMePasswordPatch = <ThrowOnError extends boolean = false>(
   options: Options<PatchMePasswordV1UsersMePasswordPatchData, ThrowOnError>,
 ) => {
-  return (options.client ?? _heyApiClient).patch<unknown, PatchMePasswordV1UsersMePasswordPatchError, ThrowOnError>({
+  return (options.client ?? _heyApiClient).patch<
+    PatchMePasswordV1UsersMePasswordPatchResponses,
+    PatchMePasswordV1UsersMePasswordPatchErrors,
+    ThrowOnError
+  >({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -967,7 +1082,7 @@ export const patchMePasswordV1UsersMePasswordPatch = <ThrowOnError extends boole
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...options?.headers,
+      ...options.headers,
     },
   });
 };
@@ -980,8 +1095,8 @@ export const deleteV1UsersIdDelete = <ThrowOnError extends boolean = false>(
   options: Options<DeleteV1UsersIdDeleteData, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).delete<
-    DeleteV1UsersIdDeleteResponse,
-    DeleteV1UsersIdDeleteError,
+    DeleteV1UsersIdDeleteResponses,
+    DeleteV1UsersIdDeleteErrors,
     ThrowOnError
   >({
     security: [
@@ -1002,7 +1117,8 @@ export const deleteV1UsersIdDelete = <ThrowOnError extends boolean = false>(
 export const getIdV1UsersIdGet = <ThrowOnError extends boolean = false>(
   options: Options<GetIdV1UsersIdGetData, ThrowOnError>,
 ) => {
-  return (options.client ?? _heyApiClient).get<GetIdV1UsersIdGetResponse, GetIdV1UsersIdGetError, ThrowOnError>({
+  return (options.client ?? _heyApiClient).get<GetIdV1UsersIdGetResponses, GetIdV1UsersIdGetErrors, ThrowOnError>({
+    responseType: "json",
     security: [
       {
         scheme: "bearer",
@@ -1021,18 +1137,21 @@ export const getIdV1UsersIdGet = <ThrowOnError extends boolean = false>(
 export const patchV1UsersIdPatch = <ThrowOnError extends boolean = false>(
   options: Options<PatchV1UsersIdPatchData, ThrowOnError>,
 ) => {
-  return (options.client ?? _heyApiClient).patch<PatchV1UsersIdPatchResponse, PatchV1UsersIdPatchError, ThrowOnError>({
-    security: [
-      {
-        scheme: "bearer",
-        type: "http",
+  return (options.client ?? _heyApiClient).patch<PatchV1UsersIdPatchResponses, PatchV1UsersIdPatchErrors, ThrowOnError>(
+    {
+      responseType: "json",
+      security: [
+        {
+          scheme: "bearer",
+          type: "http",
+        },
+      ],
+      url: "/v1/users/{id}",
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
       },
-    ],
-    url: "/v1/users/{id}",
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options?.headers,
     },
-  });
+  );
 };

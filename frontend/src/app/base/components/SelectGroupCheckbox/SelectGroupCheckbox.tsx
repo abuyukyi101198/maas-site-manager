@@ -9,7 +9,7 @@ const SelectGroupCheckbox: React.FC<SelectGroupCheckboxProps> = ({ row }) => {
     <label className="p-checkbox--inline">
       <input
         aria-checked={row.getIsSomeSelected() ? "mixed" : undefined}
-        aria-label={row.original?.codename}
+        aria-label={row.original?.os}
         className="p-checkbox__input"
         type="checkbox"
         {...{

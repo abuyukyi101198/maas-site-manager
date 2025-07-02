@@ -204,7 +204,7 @@ export const imageFactory = Factory.define<Image>(({ sequence }) => {
   return {
     id: sequence,
     boot_source_id: chance.integer(),
-    kind: BootAssetKind,
+    kind: chance.pickone([BootAssetKind._0, BootAssetKind._1]),
     label: chance.pickone([BootAssetLabel.STABLE, BootAssetLabel.CANDIDATE]),
     os: OS.name,
     release: OS.release,
@@ -234,6 +234,7 @@ export const imageSourceFactory = Factory.define<BootSource>(({ sequence }) => {
       `http://boot-source-${chance.word()}.domain.${chance.domain()}`,
     ]),
     keyring: chance.pickone(["none", "gpg", "gpg-keyring"]),
+    name: chance.pickone(["Windows", "Ubuntu", "CentOS"]),
     sync_interval: chance.pickone([0, 60, 120, 300, 600]),
     priority: chance.integer({ min: 1, max: 10 }),
   };

@@ -43,10 +43,10 @@ const groupArchesByRelease = (images: ImagesByName) => {
       groupedImages[os] = {};
     }
     images[os].forEach((image) => {
-      if (!groupedImages[os][image.release]) {
-        groupedImages[os][image.release] = [{ label: image.arch, value: image.id, group: image.source_name }];
+      if (!groupedImages[os][image.release!]) {
+        groupedImages[os][image.release!] = [{ label: image.arch, value: image.id, group: image.source_name }];
       } else {
-        groupedImages[os][image.release].push({
+        groupedImages[os][image.release!].push({
           label: image.arch,
           value: image.id,
           group: image.source_name,
@@ -63,8 +63,8 @@ const getInitialState = (images: ImagesByName) => {
 
   Object.keys(images).forEach((os) => {
     images[os].forEach((image) => {
-      if (!initialState[getValueKey(os, image.release)]) {
-        initialState[getValueKey(os, image.release)] = [];
+      if (!initialState[getValueKey(os, image.release!)]) {
+        initialState[getValueKey(os, image.release!)] = [];
       }
     });
   });
@@ -115,7 +115,7 @@ const DownloadImages = () => {
   ) => {
     const submitData = images.map((image) => ({
       id: image.id,
-      download: values[getValueKey(image.os, image.release)].some((item) => item.value === image.id),
+      download: values[getValueKey(image.os, image.release!)].some((item) => item.value === image.id),
     }));
 
     selectUpstreamImages.mutate(submitData);

@@ -107,6 +107,7 @@ describe("useCreateImageSource", () => {
       url: "https://example.com/image.iso",
       priority: 1,
       keyring: "",
+      name: "Ubuntu",
       sync_interval: 100,
     };
 

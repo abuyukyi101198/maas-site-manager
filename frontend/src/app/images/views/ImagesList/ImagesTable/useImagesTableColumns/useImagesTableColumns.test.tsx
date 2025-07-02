@@ -17,7 +17,7 @@ const setupTestCase = (codename = "test-row") => {
   const props = {
     getValue: () => codename,
     row: {
-      original: { codename },
+      original: { os: codename },
       getIsSelected: vi.fn(() => false),
       getCanSelect: vi.fn(() => true),
       getToggleSelectedHandler: vi.fn(() => () => {}),
@@ -50,8 +50,8 @@ it("input has correct accessible label", () => {
   // @ts-expect-error-next-line
   const cellValue = selectColumn.cell(props);
   render(cellValue);
-
   const inputElement = screen.getByRole("checkbox");
+  screen.debug();
   expect(inputElement).toHaveAccessibleName("Ubuntu");
 });
 

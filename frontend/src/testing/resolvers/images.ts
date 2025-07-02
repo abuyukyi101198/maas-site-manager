@@ -47,14 +47,14 @@ const imagesResolvers = {
         if (sortBy) {
           const [field, order] = sortBy.split("-") as [ImagesSortKey, SortDirection];
           data.sort((a, b) => {
-            if (a.codename < b.codename) {
+            if (a.os < b.os) {
               return -1;
-            } else if (a.codename > b.codename) {
+            } else if (a.os > b.os) {
               return 1;
             } else {
-              if (a[field] < b[field]) {
+              if (a[field]! < b[field]!) {
                 return order === "asc" ? -1 : 1;
-              } else if (a[field] > b[field]) {
+              } else if (a[field]! > b[field]!) {
                 return order === "asc" ? 1 : -1;
               } else {
                 return 0;
