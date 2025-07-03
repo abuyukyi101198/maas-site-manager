@@ -18,7 +18,6 @@ from activities.images import (  # type: ignore
     ImageManagementActivity,
     S3Params,
     S3ResourceManager,
-    UpdateBytesSyncedParams,
 )
 from httpx import AsyncClient, Response
 import pytest
@@ -58,22 +57,6 @@ async def im_act(mocker: MockerFixture) -> ImageManagementActivity:
 
 
 class TestDownloadUpstreamActivities:
-    async def test_update_bytes_synced(
-        self, mocker: MockerFixture, im_act: typing.Any
-    ) -> None:
-        act_env = ActivityEnvironment()
-        params = UpdateBytesSyncedParams(
-            msm_url="http://test.msm.url",
-            msm_jwt="test.msm.jwt",
-            bytes_synced=10,
-        )
-        await act_env.run(im_act.update_bytes_synced, params)
-        im_act.client.patch.assert_called_with(
-            params.msm_url,
-            headers={"Authorization": f"bearer {params.msm_jwt}"},
-            json={"bytes_synced": params.bytes_synced},
-        )
-
     async def test_download_asset(
         self, mocker: MockerFixture, im_act: typing.Any
     ) -> None:
@@ -94,9 +77,16 @@ class TestDownloadUpstreamActivities:
         mocker.patch.object(
             im_act, "_create_s3_manager", return_value=s3_manager
         )
+
+        mock_response = mocker.create_autospec(Response)
+        type(mock_response).status_code = PropertyMock(return_value=200)
+        im_act.client.patch.return_value = mock_response
+
         act_env = ActivityEnvironment()
         params = DownloadAssetParams(
             ss_url="http://test.ss.url",
+            msm_url="http://test.msm.url",
+            msm_jwt="test.msm.jwt",
             boot_asset_item_id=item_id,
             s3_params=s3_params,
         )
@@ -108,6 +98,58 @@ class TestDownloadUpstreamActivities:
         s3_manager.upload_part.assert_called_once_with(b"abcdef")
         s3_manager.complete_upload.assert_called_once()
         s3_manager.abort_upload.assert_not_called()
+        im_act.client.patch.assert_called_once_with(
+            params.msm_url,
+            headers={"Authorization": f"bearer {params.msm_jwt}"},
+            json={"bytes_synced": 6},
+        )
+
+    async def test_download_asset_item_deleted(
+        self, mocker: MockerFixture, im_act: typing.Any
+    ) -> None:
+        mocker.patch.object(S3ResourceManager, "_create_multipart_upload")
+        mocker.patch.object(S3ResourceManager, "upload_part")
+        mocker.patch.object(S3ResourceManager, "abort_upload")
+        mocker.patch.object(S3ResourceManager, "complete_upload")
+        s3_params = S3Params(
+            endpoint="http://s3",
+            access_key="test-key",
+            secret_key="test-secret-key",
+            bucket="test-bucket",
+            path="test/path",
+        )
+        item_id = 1
+        s3_manager = S3ResourceManager(s3_params, item_id)
+        mocker.patch.object(s3_manager, "bytes_sent", 6)
+        mocker.patch.object(
+            im_act, "_create_s3_manager", return_value=s3_manager
+        )
+
+        mock_response = mocker.create_autospec(Response)
+        type(mock_response).status_code = PropertyMock(return_value=404)
+        im_act.client.patch.return_value = mock_response
+
+        act_env = ActivityEnvironment()
+        params = DownloadAssetParams(
+            ss_url="http://test.ss.url",
+            msm_url="http://test.msm.url",
+            msm_jwt="test.msm.jwt",
+            boot_asset_item_id=item_id,
+            s3_params=s3_params,
+        )
+
+        result = await act_env.run(im_act.download_asset, params)
+        # len of total bytes mocked in AsyncIterator from im_act fixture
+        assert result == -1
+        s3_manager._create_multipart_upload.assert_called_once()
+        s3_manager.upload_part.assert_called_once_with(b"abcdef")
+        s3_manager.complete_upload.assert_not_called()
+        s3_manager.abort_upload.assert_called_once()
+        im_act.client.patch.assert_called_once_with(
+            params.msm_url,
+            headers={"Authorization": f"bearer {params.msm_jwt}"},
+            json={"bytes_synced": 6},
+        )
 
     async def test_download_asset_is_aborted(
         self, mocker: MockerFixture, im_act: typing.Any
@@ -133,6 +175,8 @@ class TestDownloadUpstreamActivities:
         act_env = ActivityEnvironment()
         params = DownloadAssetParams(
             ss_url="http://test.ss.url",
+            msm_url="http://test.msm.url",
+            msm_jwt="test.msm.jwt",
             boot_asset_item_id=1,
             s3_params=S3Params(
                 endpoint="http://s3",

@@ -7,7 +7,6 @@ from activities.images import (  # type: ignore
     GET_OR_CREATE_ASSET_ACTIVITY,
     GET_OR_CREATE_ITEM_ACTIVITY,
     GET_OR_CREATE_VERSION_ACTIVITY,
-    UPDATE_BYTES_SYNCED_ACTIVITY,
     BootAsset,
     BootAssetItem,
     BootAssetVersion,
@@ -17,7 +16,6 @@ from activities.images import (  # type: ignore
     GetOrCreateItemParams,
     GetOrCreateVersionParams,
     S3Params,
-    UpdateBytesSyncedParams,
 )
 from temporalio import workflow
 
@@ -52,24 +50,17 @@ class DownloadUpstreamImage:
             DOWNLOAD_ASSET_ACTIVITY,
             DownloadAssetParams(
                 ss_url=params.ss_url,
+                msm_url=params.msm_url,
+                msm_jwt=params.msm_jwt,
                 boot_asset_item_id=params.boot_asset_item_id,
                 s3_params=params.s3_params,
             ),
             start_to_close_timeout=timedelta(hours=2),
         )
-        result = await workflow.execute_activity(
-            UPDATE_BYTES_SYNCED_ACTIVITY,
-            UpdateBytesSyncedParams(
-                msm_url=params.msm_url,
-                msm_jwt=params.msm_jwt,
-                bytes_synced=bytes_synced,
-            ),
-            start_to_close_timeout=timedelta(minutes=1),
-        )
         # mypy doesn't let you do `return x == y  # type: ignore`
-        if result == 200:
-            return True
-        return False
+        if bytes_synced == -1:
+            return False
+        return True
 
 
 @workflow.defn(name=GET_OR_CREATE_PRODUCT_WF_NAME, sandboxed=False)

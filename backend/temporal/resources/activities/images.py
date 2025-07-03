@@ -42,6 +42,8 @@ class UpdateBytesSyncedParams:
 @dataclass
 class DownloadAssetParams:
     ss_url: str
+    msm_url: str
+    msm_jwt: str
     boot_asset_item_id: int
     s3_params: S3Params
 
@@ -299,22 +301,33 @@ class ImageManagementActivity(BaseActivity):
                 )
         return False, items[0]["id"]
 
-    @activity.defn(name=UPDATE_BYTES_SYNCED_ACTIVITY)
-    async def update_bytes_synced(
-        self, params: UpdateBytesSyncedParams
-    ) -> int:
-        msm_headers = self._get_header(params.msm_jwt)
-        new_item = {"bytes_synced": params.bytes_synced}
+    async def _update_bytes_synced(
+        self,
+        url: str,
+        headers: dict[str, str],
+        bytes_synced: int,
+    ) -> bool:
+        """
+        Update the bytes synced for the item at the given url.
+        Returns: Whether the item still exists.
+        """
         response = await self.client.patch(
-            params.msm_url, headers=msm_headers, json=new_item
+            url, headers=headers, json={"bytes_synced": bytes_synced}
         )
-        return response.status_code
+        if response.status_code == 404:
+            return False
+        if response.status_code != 200:
+            raise ApplicationError(
+                f"Got an unexpected response ({response.status_code}) from MSM API: {response.text}"
+            )
+        return True
 
     @activity.defn(name=DOWNLOAD_ASSET_ACTIVITY)
     async def download_asset(self, params: DownloadAssetParams) -> int:
         s3_manager = self._create_s3_manager(
             params.s3_params, params.boot_asset_item_id
         )
+        msm_headers = self._get_header(params.msm_jwt)
         chunk = b""
         try:
             async with self.client.stream(
@@ -324,10 +337,29 @@ class ImageManagementActivity(BaseActivity):
                     chunk += data
                     if len(chunk) >= MIN_S3_PART_SIZE:
                         s3_manager.upload_part(chunk)
+                        activity.heartbeat(
+                            f"Uploaded {s3_manager.bytes_sent} bytes to storage."
+                        )
+                        if not await self._update_bytes_synced(
+                            params.msm_url, msm_headers, s3_manager.bytes_sent
+                        ):
+                            activity.logger.info(
+                                f"Item at {params.msm_url} no longer exists, aborting download"
+                            )
+                            s3_manager.abort_upload()
+                            return -1
                         chunk = b""
                 # finalize upload
                 if chunk:
                     s3_manager.upload_part(chunk)
+                    if not await self._update_bytes_synced(
+                        params.msm_url, msm_headers, s3_manager.bytes_sent
+                    ):
+                        activity.logger.info(
+                            f"Item at {params.msm_url} no longer exists, aborting download"
+                        )
+                        s3_manager.abort_upload()
+                        return -1
                 s3_manager.complete_upload()
         except:
             s3_manager.abort_upload()
