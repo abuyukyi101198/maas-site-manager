@@ -1,4 +1,5 @@
 from msm.api.user.handlers import (
+    bootassets,
     images,
     login,
     settings,
@@ -8,6 +9,7 @@ from msm.api.user.handlers import (
 )
 
 ROUTERS = (
+    bootassets.v1_router,
     images.v1_router,
     login.v1_router,
     settings.v1_router,

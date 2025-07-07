@@ -2,15 +2,13 @@ from datetime import MAXYEAR, UTC, datetime
 from hashlib import sha256
 from logging import getLogger
 from os.path import join
-from typing import Annotated, Any, NamedTuple, Self
+from typing import Annotated, Any
 from urllib.parse import urlparse
 
 import boto3  # type: ignore
-from fastapi import APIRouter, Depends, Path, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, Field, model_validator
-from sqlalchemy.exc import IntegrityError
 from starlette.background import BackgroundTask
 from starlette.types import Send
 from streaming_form_data import StreamingFormDataParser  # type: ignore
@@ -19,40 +17,25 @@ import streaming_form_data.validators  # type: ignore
 
 from msm.api.dependencies import services
 from msm.api.exceptions.catalog import (
-    AlreadyExistsException,
     BadRequestException,
     BaseExceptionDetail,
     FileTooLargeException,
-    ForbiddenException,
     NotFoundException,
 )
 from msm.api.exceptions.constants import ExceptionCode
 from msm.api.exceptions.responses import (
-    AlreadyExistsErrorResponseModel,
     BadRequestErrorResponseModel,
-    ForbiddenErrorResponseModel,
     NotFoundErrorResponseModel,
     UnauthorizedErrorResponseModel,
     ValidationErrorResponseModel,
 )
 from msm.api.user.auth import (
     authenticated_user,
-    verify_authenticated_user_or_worker,
 )
-from msm.api.user.forms import (
-    BootAssetFilterParams,
-    BootAssetItemFilterParams,
-    BootAssetVersionFilterParams,
-    boot_asset_filter_params,
-    boot_asset_item_filter_params,
-    boot_asset_version_filter_params,
-)
+import msm.api.user.models.bootassets as dm
 from msm.db import models
 from msm.schema import (
-    PaginatedResults,
-    PaginationParams,
     SortParam,
-    SortParamParser,
 )
 from msm.service import ServiceCollection
 from msm.settings import Settings
@@ -61,730 +44,158 @@ logger = getLogger()
 
 v1_router = APIRouter(prefix="/v1")
 
-boot_asset_sort_parameters = SortParamParser(
-    fields=[
-        "kind",
-        "label",
-        "os",
-        "release",
-        "codename",
-        "title",
-        "arch",
-        "subarch",
-        "compatibility",
-        "flavor",
-        "base_image",
-        "bootloader_type",
-        "eol",
-        "esm_eol",
-        "signed",
-    ]
-)
 
-
-class BootAssetsGetResponse(PaginatedResults):
-    items: list[models.BootAsset]
-
-
-boot_sources_sort_parameters = SortParamParser(
-    fields=[
-        "url",
-        "keyring",
-        "sync_interval",
-        "priority",
-    ]
-)
-
-
-class BootSourcesGetResponse(PaginatedResults):
-    items: list[models.BootSource]
-
-
-boot_source_selection_sort_parameters = SortParamParser(
-    fields=[
-        "label",
-        "os",
-        "release",
-        "available",
-    ]
-)
-
-
-class BootSourceSelectionsGetResponse(PaginatedResults):
-    items: list[models.BootSourceSelection]
-
-
-@v1_router.get(
-    "/bootassets",
-    responses={
-        401: {"model": UnauthorizedErrorResponseModel},
-        422: {"model": ValidationErrorResponseModel},
-    },
-)
-async def get_boot_assets(
-    services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[
-        models.User | None, Depends(verify_authenticated_user_or_worker)
-    ],
-    sort_params: Annotated[
-        list[SortParam], Depends(boot_asset_sort_parameters)
-    ],
-    pagination_params: Annotated[PaginationParams, Depends()],
-    filter_params: Annotated[
-        BootAssetFilterParams, Depends(boot_asset_filter_params)
-    ],
-) -> BootAssetsGetResponse:
-    """Return boot assets."""
-    total, results = await services.boot_assets.get(
-        sort_params,
-        offset=pagination_params.offset,
-        limit=pagination_params.size,
-        **filter_params._asdict(),
-    )
-    return BootAssetsGetResponse(
-        total=total,
-        page=pagination_params.page,
-        size=pagination_params.size,
-        items=list(results),
-    )
-
-
-class BootAssetsPostRequest(BaseModel):
-    boot_source_id: int
-    kind: models.BootAssetKind
-    label: models.BootAssetLabel
-    os: str
-    arch: str
-    release: str | None = None
-    codename: str | None = None
-    title: str | None = None
-    subarch: str | None = None
-    compatibility: list[str] | None = None
-    flavor: str | None = None
-    base_image: str | None = None
-    bootloader_type: str | None = None
-    eol: datetime | None = None
-    esm_eol: datetime | None = None
-    signed: bool = False
-
-
-class BootAssetsPostResponse(BaseModel):
-    id: int
-
-
-@v1_router.post(
-    "/bootassets",
-    responses={
-        401: {"model": UnauthorizedErrorResponseModel},
-        404: {"model": NotFoundErrorResponseModel},
-        409: {"model": AlreadyExistsErrorResponseModel},
-        422: {"model": ValidationErrorResponseModel},
-    },
-)
-async def post_boot_assets(
-    services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[
-        models.User | None, Depends(verify_authenticated_user_or_worker)
-    ],
-    post_request: BootAssetsPostRequest,
-) -> BootAssetsPostResponse:
-    if not await services.boot_sources.get_by_id(post_request.boot_source_id):
-        raise NotFoundException(
-            code=ExceptionCode.MISSING_RESOURCE,
-            message="Boot Source does not exist.",
-            details=[
-                BaseExceptionDetail(
-                    reason=ExceptionCode.MISSING_RESOURCE,
-                    messages=[
-                        f"BootSource ID {post_request.boot_source_id} does not exist"
-                    ],
-                    field="bootsource_id",
-                    location="body",
-                )
-            ],
+class S3StreamResponse(StreamingResponse):
+    def __init__(
+        self,
+        content: Any,
+        status_code: int = 200,
+        headers: dict[str, str] | None = None,
+        media_type: str = "application/octet-stream",
+        background: BackgroundTask | None = None,
+        file_id: str = "",
+    ) -> None:
+        super().__init__(content, status_code, headers, media_type, background)
+        settings = Settings()
+        self.file_path = join(
+            settings.s3_path if settings.s3_path else "",
+            file_id,
         )
-    try:
-        boot_asset = await services.boot_assets.create(
-            models.BootAssetCreate(**post_request.model_dump())
-        )
-        return BootAssetsPostResponse(id=boot_asset.id)
-    except IntegrityError:
-        raise AlreadyExistsException(
-            code=ExceptionCode.ALREADY_EXISTS,
-            message="This boot asset already exists.",
-            details=[
-                BaseExceptionDetail(
-                    reason=ExceptionCode.ALREADY_EXISTS,
-                    messages=[
-                        "This boot asset already exists for the given boot source."
-                    ],
-                    field="os,release,arch,subarch",
-                    location="body",
-                )
-            ],
+        self.s3_bucket = settings.s3_bucket
+        self.s3 = boto3.resource(
+            "s3",
+            use_ssl=False,
+            verify=False,
+            endpoint_url=settings.s3_endpoint,
+            aws_access_key_id=settings.s3_access_key,
+            aws_secret_access_key=settings.s3_secret_key,
         )
 
-
-@v1_router.get(
-    "/bootasset-sources",
-    responses={
-        401: {"model": UnauthorizedErrorResponseModel},
-        422: {"model": ValidationErrorResponseModel},
-    },
-)
-async def get_boot_sources(
-    services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
-    sort_params: Annotated[
-        list[SortParam], Depends(boot_sources_sort_parameters)
-    ],
-    pagination_params: Annotated[PaginationParams, Depends()],
-) -> BootSourcesGetResponse:
-    """Return boot sources."""
-    total, results = await services.boot_sources.get(
-        sort_params,
-        offset=pagination_params.offset,
-        limit=pagination_params.size,
-    )
-    return BootSourcesGetResponse(
-        total=total,
-        page=pagination_params.page,
-        size=pagination_params.size,
-        items=list(results),
-    )
-
-
-@v1_router.get(
-    "/bootasset-sources/{id}",
-    responses={
-        401: {"model": UnauthorizedErrorResponseModel},
-        404: {"model": NotFoundErrorResponseModel},
-        422: {"model": ValidationErrorResponseModel},
-    },
-)
-async def get_boot_source_by_id(
-    services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
-    id: int,
-) -> models.BootSource:
-    bs = await services.boot_sources.get_by_id(id)
-    if bs is None:
-        raise NotFoundException(
-            code=ExceptionCode.MISSING_RESOURCE,
-            message="Boot Source does not exist.",
-            details=[
-                BaseExceptionDetail(
-                    reason=ExceptionCode.MISSING_RESOURCE,
-                    messages=[f"BootSource ID {id} does not exist"],
-                    field="id",
-                    location="path",
-                )
-            ],
-        )
-    return bs
-
-
-class BootSourcesPostRequest(BaseModel):
-    priority: int
-    url: str
-    keyring: str
-    sync_interval: int
-    name: str
-
-
-class BootSourcesPostResponse(BaseModel):
-    id: int
-
-
-@v1_router.post(
-    "/bootasset-sources",
-    responses={
-        401: {"model": UnauthorizedErrorResponseModel},
-        422: {"model": ValidationErrorResponseModel},
-    },
-)
-async def post_boot_sources(
-    services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
-    post_request: BootSourcesPostRequest,
-) -> BootSourcesPostResponse:
-    boot_source = await services.boot_sources.create(
-        models.BootSourceCreate(**post_request.model_dump())
-    )
-    return BootSourcesPostResponse(id=boot_source.id)
-
-
-class BootSourcesPatchRequest(BaseModel):
-    priority: int | None = None
-    url: str | None = None
-    keyring: str | None = None
-    sync_interval: int | None = Field(default=None, ge=0)
-    name: str | None = None
-
-    model_config = {"extra": "forbid"}
-
-    @model_validator(mode="after")
-    def check_at_least_one_field_present(self) -> Self:
-        if not self.model_fields_set:
-            raise ValueError("At least one field must be set.")
-        return self
-
-
-@v1_router.patch(
-    "/bootasset-sources/{id}",
-    responses={
-        401: {"model": UnauthorizedErrorResponseModel},
-        404: {"model": NotFoundErrorResponseModel},
-        422: {"model": ValidationErrorResponseModel},
-    },
-)
-async def patch_boot_source(
-    services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
-    id: Annotated[
-        int, Path(title="The ID of the Boot Source to update", ge=2)
-    ],
-    patch_request: BootSourcesPatchRequest,
-) -> models.BootSource:
-    bs = await services.boot_sources.get_by_id(id)
-    if bs is None:
-        raise NotFoundException(
-            code=ExceptionCode.MISSING_RESOURCE,
-            message="Boot Source does not exist.",
-            details=[
-                BaseExceptionDetail(
-                    reason=ExceptionCode.MISSING_RESOURCE,
-                    messages=[f"BootSource ID {id} does not exist"],
-                    field="id",
-                    location="path",
-                )
-            ],
-        )
-    updated_source = await services.boot_sources.update(
-        id, models.BootSourceUpdate(**patch_request.model_dump())
-    )
-    return updated_source
-
-
-@v1_router.delete(
-    "/bootasset-sources/{id}",
-    responses={
-        401: {"model": UnauthorizedErrorResponseModel},
-        404: {"model": NotFoundErrorResponseModel},
-        422: {"model": ValidationErrorResponseModel},
-    },
-)
-async def delete_boot_source(
-    services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
-    id: Annotated[
-        int, Path(title="The ID of the Boot Source to delete", ge=2)
-    ],
-) -> None:
-    bs = await services.boot_sources.get_by_id(id)
-    if bs is None:
-        raise NotFoundException(
-            code=ExceptionCode.MISSING_RESOURCE,
-            message="Boot Source does not exist.",
-            details=[
-                BaseExceptionDetail(
-                    reason=ExceptionCode.MISSING_RESOURCE,
-                    messages=[f"BootSource ID {id} does not exist"],
-                    field="id",
-                    location="path",
-                )
-            ],
-        )
-    await services.boot_sources.delete(id)
-
-
-@v1_router.get(
-    "/bootasset-sources/{id}/selections",
-    responses={
-        401: {"model": UnauthorizedErrorResponseModel},
-        422: {"model": ValidationErrorResponseModel},
-    },
-)
-async def get_boot_source_selections(
-    services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
-    id: int,
-    sort_params: Annotated[
-        list[SortParam], Depends(boot_source_selection_sort_parameters)
-    ],
-    pagination_params: Annotated[PaginationParams, Depends()],
-) -> BootSourceSelectionsGetResponse:
-    """Return boot source selections."""
-    total, results = await services.boot_source_selections.get(
-        id,
-        sort_params,
-        offset=pagination_params.offset,
-        limit=pagination_params.size,
-    )
-    return BootSourceSelectionsGetResponse(
-        total=total,
-        page=pagination_params.page,
-        size=pagination_params.size,
-        items=list(results),
-    )
-
-
-class AvailableBootSourceSelection(NamedTuple):
-    os: str
-    release: str
-    label: models.BootAssetLabel
-    arches: list[str]
-
-    def __eq__(self, other: Any) -> bool:
-        return (self.os, self.release) == (other.os, other.release)
-
-
-class BootSourceSelectionsPatchRequest(BaseModel):
-    available: list[AvailableBootSourceSelection]
-
-
-class BootSourceSelectionsPatchResponse(BaseModel):
-    stale: list[models.BootSourceSelection]
-
-
-@v1_router.patch(
-    "/bootasset-sources/{id}/selections",
-    responses={
-        401: {"model": UnauthorizedErrorResponseModel},
-        404: {"model": NotFoundErrorResponseModel},
-        422: {"model": ValidationErrorResponseModel},
-    },
-)
-async def patch_boot_source_selections(
-    services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
-    id: int,
-    patch_request: BootSourceSelectionsPatchRequest,
-) -> BootSourceSelectionsPatchResponse:
-    bs = await services.boot_sources.get_by_id(id)
-    if bs is None:
-        raise NotFoundException(
-            code=ExceptionCode.MISSING_RESOURCE,
-            message="Boot Source does not exist.",
-            details=[
-                BaseExceptionDetail(
-                    reason=ExceptionCode.MISSING_RESOURCE,
-                    messages=[f"BootSource ID {id} does not exist"],
-                    field="id",
-                    location="path",
-                )
-            ],
+    async def stream_response(self, send: Send) -> None:
+        await send(
+            {
+                "type": "http.response.start",
+                "status": self.status_code,
+                "headers": self.raw_headers,
+            }
         )
 
-    _, existing = await services.boot_source_selections.get(id, [])
-    incoming_map = {(p.os, p.release): p for p in patch_request.available}
-    existing_map = {(p.os, p.release): p for p in existing}
+        result = self.s3.meta.client.get_object(
+            Bucket=self.s3_bucket, Key=self.file_path
+        )
 
-    stale_keys = set(existing_map.keys()) - set(incoming_map.keys())
-
-    for in_k, in_v in incoming_map.items():
-        if cur := existing_map.get(in_k, None):
-            await services.boot_source_selections.update(
-                boot_source_id=cur.boot_source_id,
-                selection_id=cur.id,
-                details=models.BootSourceSelectionUpdate(
-                    available=in_v.arches,
-                ),
-            )
-        else:
-            await services.boot_source_selections.create(
-                models.BootSourceSelectionCreate(
-                    boot_source_id=id,
-                    label=in_v.label,
-                    os=in_v.os,
-                    release=in_v.release,
-                    available=in_v.arches,
-                    selected=[],
-                )
+        for chunk in result["Body"]:
+            await send(
+                {
+                    "type": "http.response.body",
+                    "body": chunk,
+                    "more_body": True,
+                }
             )
 
-    stale = []
-    for cur_k, cur_v in existing_map.items():
-        if cur_k in stale_keys:
-            stale.append(cur_v)
-            if len(cur_v.selected) == 0:
-                await services.boot_source_selections.delete(
-                    cur_v.boot_source_id, cur_v.id
-                )
-
-    return BootSourceSelectionsPatchResponse(stale=stale)
-
-
-class BootAssetVersionPostRequest(BaseModel):
-    version: str
-
-
-class BootAssetVersionPostResponse(BaseModel):
-    id: int
-
-
-@v1_router.post(
-    "/bootassets/{id}/versions",
-    responses={
-        401: {"model": UnauthorizedErrorResponseModel},
-        404: {"model": NotFoundErrorResponseModel},
-        409: {"model": AlreadyExistsErrorResponseModel},
-        422: {"model": ValidationErrorResponseModel},
-    },
-)
-async def post_boot_asset_version(
-    services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[
-        models.User | None, Depends(verify_authenticated_user_or_worker)
-    ],
-    id: int,
-    post_request: BootAssetVersionPostRequest,
-) -> BootAssetVersionPostResponse:
-    if not await services.boot_assets.get_by_id(id):
-        raise NotFoundException(
-            code=ExceptionCode.MISSING_RESOURCE,
-            message="Boot Asset does not exist.",
-            details=[
-                BaseExceptionDetail(
-                    reason=ExceptionCode.MISSING_RESOURCE,
-                    messages=[f"BootAsset ID {id} does not exist"],
-                    field="id",
-                    location="path",
-                )
-            ],
+        await send(
+            {"type": "http.response.body", "body": b"", "more_body": False}
         )
-
-    try:
-        boot_asset_version = await services.boot_asset_versions.create(
-            models.BootAssetVersionCreate(
-                boot_asset_id=id, version=post_request.version
-            )
-        )
-        return BootAssetVersionPostResponse(id=boot_asset_version.id)
-    except IntegrityError:
-        raise AlreadyExistsException(
-            code=ExceptionCode.ALREADY_EXISTS,
-            message="This boot asset version already exists.",
-            details=[
-                BaseExceptionDetail(
-                    reason=ExceptionCode.ALREADY_EXISTS,
-                    messages=[
-                        "This boot asset version already exists for the given boot asset."
-                    ],
-                    field="version",
-                    location="body",
-                )
-            ],
-        )
-
-
-boot_asset_version_sort_parameters = SortParamParser(
-    fields=[
-        "version",
-    ]
-)
-
-
-class BootAssetVersionsGetResponse(PaginatedResults):
-    items: list[models.BootAssetVersion]
 
 
 @v1_router.get(
-    "/bootasset-versions",
+    "/images/{track}/{risk}/{file_path:path}",
     responses={
-        401: {"model": UnauthorizedErrorResponseModel},
-        422: {"model": ValidationErrorResponseModel},
-    },
-)
-async def get_boot_asset_versions(
-    services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[
-        models.User | None, Depends(verify_authenticated_user_or_worker)
-    ],
-    sort_params: Annotated[
-        list[SortParam], Depends(boot_asset_version_sort_parameters)
-    ],
-    pagination_params: Annotated[PaginationParams, Depends()],
-    filter_params: Annotated[
-        BootAssetVersionFilterParams, Depends(boot_asset_version_filter_params)
-    ],
-) -> BootAssetVersionsGetResponse:
-    """Return Boot Asset Versions"""
-    total, results = await services.boot_asset_versions.get(
-        sort_params,
-        offset=pagination_params.offset,
-        limit=pagination_params.size,
-        **filter_params._asdict(),
-    )
-    return BootAssetVersionsGetResponse(
-        total=total,
-        page=pagination_params.page,
-        size=pagination_params.size,
-        items=list(results),
-    )
-
-
-class BootAssetItemPostRequest(BaseModel):
-    ftype: str
-    sha256: str
-    path: str
-    file_size: int
-    source_package: str | None = None
-    source_version: str | None = None
-    source_release: str | None = None
-
-
-class BootAssetItemPostResponse(BaseModel):
-    id: int
-
-
-@v1_router.post(
-    "/bootasset-versions/{id}/items",
-    responses={
+        400: {"model": BadRequestErrorResponseModel},
         401: {"model": UnauthorizedErrorResponseModel},
         404: {"model": NotFoundErrorResponseModel},
-        409: {"model": AlreadyExistsErrorResponseModel},
-        422: {"model": ValidationErrorResponseModel},
     },
 )
-async def post_boot_asset_item(
+async def download(
     services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[
-        models.User | None, Depends(verify_authenticated_user_or_worker)
-    ],
-    id: int,
-    post_request: BootAssetItemPostRequest,
-) -> BootAssetItemPostResponse:
-    if not await services.boot_asset_versions.get_by_id(id):
-        raise NotFoundException(
-            code=ExceptionCode.MISSING_RESOURCE,
-            message="Boot Asset Version does not exist.",
-            details=[
-                BaseExceptionDetail(
-                    reason=ExceptionCode.MISSING_RESOURCE,
-                    messages=[f"BootAssetVersion ID {id} does not exist"],
-                    field="id",
-                    location="path",
-                )
-            ],
-        )
+    track: str,
+    risk: str,
+    file_path: str,
+) -> StreamingResponse:
+    errors: list[BaseExceptionDetail] = []
 
-    try:
-        item = await services.boot_asset_items.create(
-            models.BootAssetItemCreate(
-                boot_asset_version_id=id, **post_request.model_dump()
+    if track != "latest":
+        errors.append(
+            BaseExceptionDetail(
+                reason=ExceptionCode.INVALID_PARAMS,
+                messages=[f"Invalid track '{track}' requested"],
+                field="track",
+                location="path",
             )
         )
-        return BootAssetItemPostResponse(id=item.id)
-    except IntegrityError:
-        raise AlreadyExistsException(
-            code=ExceptionCode.ALREADY_EXISTS,
-            message="This boot asset item already exists.",
-            details=[
-                BaseExceptionDetail(
-                    reason=ExceptionCode.ALREADY_EXISTS,
-                    messages=[
-                        "This boot asset item already exists for the given boot asset version."
-                    ],
-                    field="ftype",
-                    location="body",
-                )
-            ],
+
+    if risk != "stable":
+        errors.append(
+            BaseExceptionDetail(
+                reason=ExceptionCode.INVALID_PARAMS,
+                messages=[f"Invalid risk '{risk}' requested"],
+                field="risk",
+                location="path",
+            )
         )
 
+    if errors:
+        raise BadRequestException(
+            code=ExceptionCode.INVALID_PARAMS,
+            message="Invalid track/risk requested.",
+            details=errors,
+        )
 
-boot_asset_items_sort_parameters = SortParamParser(
-    fields=[
-        "ftype",
-        "sha256",
-        "path",
-        "file_size",
-        "source_package",
-        "source_version",
-        "source_release",
-        "bytes_synced",
-    ]
-)
+    if file_path == "streams/v1/index.json":
+        return S3StreamResponse(content=None, file_id="index.json")
 
-
-class BootAssetItemsGetResponse(PaginatedResults):
-    items: list[models.BootAssetItem]
-
-
-@v1_router.get(
-    "/bootasset-items",
-    responses={
-        401: {"model": UnauthorizedErrorResponseModel},
-        422: {"model": ValidationErrorResponseModel},
-    },
-)
-async def get_boot_asset_items(
-    services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[
-        models.User | None, Depends(verify_authenticated_user_or_worker)
-    ],
-    sort_params: Annotated[
-        list[SortParam], Depends(boot_asset_items_sort_parameters)
-    ],
-    pagination_params: Annotated[PaginationParams, Depends()],
-    filter_params: Annotated[
-        BootAssetItemFilterParams, Depends(boot_asset_item_filter_params)
-    ],
-) -> BootAssetItemsGetResponse:
-    total, results = await services.boot_asset_items.get(
-        sort_params,
-        offset=pagination_params.offset,
-        limit=pagination_params.size,
-        **filter_params._asdict(),
-    )
-    return BootAssetItemsGetResponse(
-        total=total,
-        page=pagination_params.page,
-        size=pagination_params.size,
-        items=list(results),
-    )
-
-
-@v1_router.delete(
-    "/bootasset-items/{id}",
-    responses={
-        401: {"model": UnauthorizedErrorResponseModel},
-        404: {"model": NotFoundErrorResponseModel},
-        422: {"model": ValidationErrorResponseModel},
-    },
-)
-async def delete_images(
-    services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
-    id: int,
-) -> None:
-    boot_asset_version = await services.boot_asset_items.get_by_id(id)
-    if not boot_asset_version:
+    boot_item = await services.boot_asset_items.get_by_path(file_path)
+    if not boot_item:
         raise NotFoundException(
             code=ExceptionCode.MISSING_RESOURCE,
             message="Boot Asset Item does not exist.",
             details=[
                 BaseExceptionDetail(
                     reason=ExceptionCode.MISSING_RESOURCE,
-                    messages=[f"BootAssetItem ID {id} does not exist"],
-                    field="id",
+                    messages=[f"BootAssetItem '{file_path}' does not exist"],
+                    field="file_path",
                     location="path",
                 )
             ],
         )
-    settings = Settings()
-    s3 = boto3.resource(
-        "s3",
-        use_ssl=False,
-        verify=False,
-        endpoint_url=settings.s3_endpoint,
-        aws_access_key_id=settings.s3_access_key,
-        aws_secret_access_key=settings.s3_secret_key,
+    return S3StreamResponse(content=None, file_id=str(boot_item.id))
+
+
+@v1_router.get(
+    "/available-images",
+    responses={
+        401: {"model": UnauthorizedErrorResponseModel},
+    },
+)
+async def get_available_images(
+    services: Annotated[ServiceCollection, Depends(services)],
+    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
+) -> dm.GetAvailableImagesResponse:
+    available = []
+    images_found: set[tuple[str, str]] = set()
+    _, sources = await services.boot_sources.get(
+        [SortParam("priority", asc=False)]
     )
-    await run_in_threadpool(
-        s3.meta.client.delete_object, Bucket=settings.s3_bucket, Key=str(id)
-    )
-    await services.boot_asset_items.delete(id)
+    for source in sources:
+        _, selections = await services.boot_source_selections.get(
+            source.id, []
+        )
+        for selection in selections:
+            # ignore if os/release already exists in a previous source
+            if (selection.os, selection.release) not in images_found:
+                images_found.add((selection.os, selection.release))
+                for arch in selection.available:
+                    available.append(
+                        models.AvailableImage(
+                            os=selection.os,
+                            release=selection.release,
+                            arch=arch,
+                            source_name=source.name,
+                            selected=arch in selection.selected,
+                        )
+                    )
+    available.sort(key=lambda x: (x.os, x.release, x.arch))
+    return dm.GetAvailableImagesResponse(items=available)
 
 
 class S3MultipartUploadTarget(BaseTarget):  # type: ignore
@@ -1001,7 +412,7 @@ async def post_images(
     services: Annotated[ServiceCollection, Depends(services)],
     authenticated_user: Annotated[models.User, Depends(authenticated_user)],
     request: Request,
-) -> models.BootAssetItem:
+) -> dm.ImagesPostResponse:
     settings = Settings()
     api_settings = await services.settings.get()
     if not urlparse(settings.s3_endpoint).scheme:
@@ -1113,232 +524,4 @@ async def post_images(
         boot_asset_item.id, s3_upload_target.bytes_sent
     )
     await run_in_threadpool(s3_upload_target.complete_upload)
-    return boot_asset_item
-
-
-class BootAssetItemPatchRequest(BaseModel):
-    ftype: str | None = None
-    source_package: str | None = None
-    source_version: str | None = None
-    source_release: str | None = None
-    bytes_synced: int | None = None  # can only be changed by workers
-
-    model_config = {"extra": "forbid"}
-
-    @model_validator(mode="after")
-    def check_at_least_one_field_present(self) -> Self:
-        if not self.model_fields_set:
-            raise ValueError("At least one field must be set.")
-        return self
-
-
-@v1_router.patch(
-    "/bootasset-items/{id}",
-    responses={
-        401: {"model": UnauthorizedErrorResponseModel},
-        403: {"model": ForbiddenErrorResponseModel},
-        404: {"model": NotFoundErrorResponseModel},
-        422: {"model": ValidationErrorResponseModel},
-    },
-)
-async def patch_boot_asset_items(
-    services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[
-        models.User | None, Depends(verify_authenticated_user_or_worker)
-    ],
-    id: int,
-    patch_request: BootAssetItemPatchRequest,
-) -> models.BootAssetItem:
-    if (
-        patch_request.bytes_synced is not None
-        and authenticated_user is not None
-    ):
-        raise ForbiddenException(
-            code=ExceptionCode.MISSING_PERMISSIONS,
-            message="Insufficient permissions.",
-            details=[
-                BaseExceptionDetail(
-                    reason=ExceptionCode.MISSING_PERMISSIONS,
-                    messages=[
-                        "Users cannot change a Boot Asset Item's bytes_synced field."
-                    ],
-                    field="Authorization",
-                    location="header",
-                )
-            ],
-        )
-    boot_asset_item = await services.boot_asset_items.get_by_id(id)
-    if not boot_asset_item:
-        raise NotFoundException(
-            code=ExceptionCode.MISSING_RESOURCE,
-            message="Boot Asset Item does not exist.",
-            details=[
-                BaseExceptionDetail(
-                    reason=ExceptionCode.MISSING_RESOURCE,
-                    messages=[f"BootAssetItem ID {id} does not exist"],
-                    field="boot_asset_item_id",
-                    location="path",
-                )
-            ],
-        )
-    updated_item = await services.boot_asset_items.update(
-        id, models.BootAssetItemUpdate(**patch_request.model_dump())
-    )
-    return updated_item
-
-
-class S3StreamResponse(StreamingResponse):
-    def __init__(
-        self,
-        content: Any,
-        status_code: int = 200,
-        headers: dict[str, str] | None = None,
-        media_type: str = "application/octet-stream",
-        background: BackgroundTask | None = None,
-        file_id: str = "",
-    ) -> None:
-        super().__init__(content, status_code, headers, media_type, background)
-        settings = Settings()
-        self.file_path = join(
-            settings.s3_path if settings.s3_path else "",
-            file_id,
-        )
-        self.s3_bucket = settings.s3_bucket
-        self.s3 = boto3.resource(
-            "s3",
-            use_ssl=False,
-            verify=False,
-            endpoint_url=settings.s3_endpoint,
-            aws_access_key_id=settings.s3_access_key,
-            aws_secret_access_key=settings.s3_secret_key,
-        )
-
-    async def stream_response(self, send: Send) -> None:
-        await send(
-            {
-                "type": "http.response.start",
-                "status": self.status_code,
-                "headers": self.raw_headers,
-            }
-        )
-
-        result = self.s3.meta.client.get_object(
-            Bucket=self.s3_bucket, Key=self.file_path
-        )
-
-        for chunk in result["Body"]:
-            await send(
-                {
-                    "type": "http.response.body",
-                    "body": chunk,
-                    "more_body": True,
-                }
-            )
-
-        await send(
-            {"type": "http.response.body", "body": b"", "more_body": False}
-        )
-
-
-@v1_router.get(
-    "/images/{track}/{risk}/{file_path:path}",
-    responses={
-        400: {"model": BadRequestErrorResponseModel},
-        401: {"model": UnauthorizedErrorResponseModel},
-        404: {"model": NotFoundErrorResponseModel},
-    },
-)
-async def download(
-    services: Annotated[ServiceCollection, Depends(services)],
-    track: str,
-    risk: str,
-    file_path: str,
-) -> StreamingResponse:
-    errors: list[BaseExceptionDetail] = []
-
-    if track != "latest":
-        errors.append(
-            BaseExceptionDetail(
-                reason=ExceptionCode.INVALID_PARAMS,
-                messages=[f"Invalid track '{track}' requested"],
-                field="track",
-                location="path",
-            )
-        )
-
-    if risk != "stable":
-        errors.append(
-            BaseExceptionDetail(
-                reason=ExceptionCode.INVALID_PARAMS,
-                messages=[f"Invalid risk '{risk}' requested"],
-                field="risk",
-                location="path",
-            )
-        )
-
-    if errors:
-        raise BadRequestException(
-            code=ExceptionCode.INVALID_PARAMS,
-            message="Invalid track/risk requested.",
-            details=errors,
-        )
-
-    if file_path == "streams/v1/index.json":
-        return S3StreamResponse(content=None, file_id="index.json")
-
-    boot_item = await services.boot_asset_items.get_by_path(file_path)
-    if not boot_item:
-        raise NotFoundException(
-            code=ExceptionCode.MISSING_RESOURCE,
-            message="Boot Asset Item does not exist.",
-            details=[
-                BaseExceptionDetail(
-                    reason=ExceptionCode.MISSING_RESOURCE,
-                    messages=[f"BootAssetItem '{file_path}' does not exist"],
-                    field="file_path",
-                    location="path",
-                )
-            ],
-        )
-    return S3StreamResponse(content=None, file_id=str(boot_item.id))
-
-
-class GetAvailableImagesResponse(BaseModel):
-    items: list[models.AvailableImage]
-
-
-@v1_router.get(
-    "/available-images",
-    responses={
-        401: {"model": UnauthorizedErrorResponseModel},
-    },
-)
-async def get_available_images(
-    services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
-) -> GetAvailableImagesResponse:
-    available = []
-    images_found: set[tuple[str, str]] = set()
-    _, sources = await services.boot_sources.get(
-        [SortParam("priority", asc=False)]
-    )
-    for source in sources:
-        _, selections = await services.boot_source_selections.get(
-            source.id, []
-        )
-        for selection in selections:
-            # ignore if os/release already exists in a previous source
-            if (selection.os, selection.release) not in images_found:
-                images_found.add((selection.os, selection.release))
-                for arch in selection.available:
-                    available.append(
-                        models.AvailableImage(
-                            os=selection.os,
-                            release=selection.release,
-                            arch=arch,
-                            source_name=source.name,
-                            selected=arch in selection.selected,
-                        )
-                    )
-    available.sort(key=lambda x: (x.os, x.release, x.arch))
-    return GetAvailableImagesResponse(items=available)
+    return dm.ImagesPostResponse.from_model(boot_asset_item)
