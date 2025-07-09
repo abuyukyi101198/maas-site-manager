@@ -88,7 +88,7 @@
     "eslint-plugin-testing-library": "7.1.1",
     "eslint-plugin-unused-imports": "4.1.4",
     "fishery": "2.2.3",
-    "happy-dom": "17.4.4",
+    "happy-dom": "18.0.1",
     "i18n-iso-countries": "7.14.0",
     "jsdom": "26.0.0",
     "jsdom-testing-mocks": "1.13.1",
