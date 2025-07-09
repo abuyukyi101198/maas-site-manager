@@ -51,7 +51,6 @@ it("input has correct accessible label", () => {
   const cellValue = selectColumn.cell(props);
   render(cellValue);
   const inputElement = screen.getByRole("checkbox");
-  screen.debug();
   expect(inputElement).toHaveAccessibleName("Ubuntu");
 });
 
