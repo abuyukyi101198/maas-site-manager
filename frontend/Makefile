@@ -58,7 +58,7 @@ install-dependencies:
 	sudo -E DEBIAN_FRONTEND=noninteractive \
 		apt -y install --no-install-recommends $(PACKAGES)
 
-ci-dep: install-node
+ci-dep: install-node install-dependencies
 	export PATH=$$(pwd)/node-22/bin:$$PATH && \
 	npm install -g yarn && \
 	YARN_CACHE_FOLDER=$(YARN_CACHE_FOLDER) yarn install && \
