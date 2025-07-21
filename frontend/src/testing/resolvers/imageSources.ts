@@ -15,7 +15,7 @@ import type {
 import { imageSourceFactory } from "@/mocks/factories";
 import { apiUrls } from "@/utils/test-urls";
 
-type BootSourcesSortKey = keyof Pick<BootSource, "id" | "url" | "priority" | "sync_interval">;
+type BootSourcesSortKey = keyof Pick<BootSource, "id" | "priority" | "sync_interval" | "url">;
 
 const mockImageSources = imageSourceFactory.buildList(10);
 

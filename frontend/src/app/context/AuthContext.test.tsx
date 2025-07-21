@@ -12,6 +12,8 @@ protectedPages.forEach(({ path }) => {
         <RouterProvider router={router} />
       </AuthContextProvider>,
     );
-    await waitFor(() => expect(router.state.location.pathname).toEqual("/login"));
+    await waitFor(() => {
+      expect(router.state.location.pathname).toEqual("/login");
+    });
   });
 });

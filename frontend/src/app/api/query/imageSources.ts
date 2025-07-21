@@ -50,7 +50,7 @@ export const useImageSources = (options?: Options<GetBootSourcesV1BootassetSourc
   });
 
   const data = {
-    items: query.data?.pages ? query.data.pages.reduce((acc, page) => acc.concat(page.items), [] as BootSource[]) : [],
+    items: query.data?.pages ? query.data.pages.reduce<BootSource[]>((acc, page) => acc.concat(page.items), []) : [],
   };
   const { hasNextPage, isFetchingNextPage, fetchNextPage } = query;
 

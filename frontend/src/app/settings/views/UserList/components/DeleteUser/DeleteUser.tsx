@@ -100,7 +100,13 @@ const DeleteUserContent = ({
                 />
                 <hr className="is-muted" />
                 <div className="u-padding-top--medium u-flex u-flex--justify-end">
-                  <Button appearance="base" onClick={() => setSidebar(null)} type="button">
+                  <Button
+                    appearance="base"
+                    onClick={() => {
+                      setSidebar(null);
+                    }}
+                    type="button"
+                  >
                     Cancel
                   </Button>
                   <RemoveButton

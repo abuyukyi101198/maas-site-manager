@@ -53,9 +53,7 @@ export const useCreateTokens = (mutationOptions?: Options<PostV1TokensPostData>)
 
 const useExportTokensByIds = (
   options?: Options<GetExportV1TokensExportGetData>,
-):
-  | UseQueryResult<GetExportV1TokensExportGetResponses, GetExportV1TokensExportGetErrors>
-  | UseQueryResult<unknown, Error> => {
+): UseQueryResult | UseQueryResult<GetExportV1TokensExportGetResponses, GetExportV1TokensExportGetErrors> => {
   return useQuery({
     ...getExportV1TokensExportGetOptions({
       ...options,
@@ -71,9 +69,7 @@ const useExportTokensByIds = (
 
 const useExportAllTokens = (
   options?: Options<GetExportV1TokensExportGetData>,
-):
-  | UseQueryResult<GetExportV1TokensExportGetResponses, GetExportV1TokensExportGetErrors>[]
-  | UseQueryResult<unknown, Error>[] => {
+): UseQueryResult[] | UseQueryResult<GetExportV1TokensExportGetResponses, GetExportV1TokensExportGetErrors>[] => {
   const { data: totalTokens } = useTokenCount(options, !options?.query?.id?.length);
 
   const pagesToLoad = useMemo(() => {

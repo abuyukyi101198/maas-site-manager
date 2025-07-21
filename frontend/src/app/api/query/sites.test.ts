@@ -30,7 +30,9 @@ describe("useSites", () => {
   it("should return sites", async () => {
     const { result } = renderHook(() => useSites({ query: { page: 1, size: 2 } }), { wrapper: Providers });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
 
     expect(result.current.data!.items).toEqual(sitesData);
   });
@@ -40,7 +42,9 @@ describe("useSitesCoordinates", () => {
   it("should return sites coordinates", async () => {
     const { result } = renderHook(() => useSitesCoordinates(), { wrapper: Providers });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
 
     expect(result.current.data!).toEqual(
       sitesData.map((site): SiteCoordinates => ({ id: site.id, coordinates: site.coordinates })),

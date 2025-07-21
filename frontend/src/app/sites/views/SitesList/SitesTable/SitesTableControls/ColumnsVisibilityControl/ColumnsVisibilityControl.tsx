@@ -14,7 +14,9 @@ function ColumnsVisibilityControl({ columns }: { columns: SitesColumn[] }) {
     filteredColumns
       // If the "select all" checkbox is checked, find all hidden columns. Otherwise, find all visible columns
       .filter((column) => (isChecked ? column.getIsVisible() === false : column.getIsVisible() === true))
-      .forEach((column) => column.toggleVisibility());
+      .forEach((column) => {
+        column.toggleVisibility();
+      });
   };
 
   return (

@@ -3,16 +3,16 @@ import React, { createContext, useContext, useReducer } from "react";
 
 import useLocalStorageState from "use-local-storage-state";
 
-import type { MutationErrorResponse } from "@/app/api";
+import type { AccessTokenResponse, MutationErrorResponse } from "@/app/api";
 import { OpenAPI } from "@/app/api/client";
 import { useLogin } from "@/app/api/query/auth";
 import type { PostV1LoginPostData } from "@/app/apiclient";
 import { client } from "@/app/apiclient/client.gen";
-type AuthStatus = "initial" | "authenticated" | "unauthorised";
+type AuthStatus = "authenticated" | "initial" | "unauthorised";
 
 interface AuthContextType {
   status: AuthStatus;
-  login: ({}: Pick<PostV1LoginPostData["body"], "username" | "password">) => void;
+  login: ({}: Pick<PostV1LoginPostData["body"], "password" | "username">) => Promise<AccessTokenResponse>;
   logout: () => Promise<void>;
   isError: boolean;
   error: MutationErrorResponse | null;
@@ -20,7 +20,7 @@ interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType>({
   status: "initial",
-  login: () => null,
+  login: () => new Promise(() => {}),
   logout: () => new Promise(() => {}),
   isError: false,
   error: null,
@@ -42,11 +42,11 @@ type AuthState = {
 };
 type AuthAction =
   | {
-      type: typeof actionTypes.LOGIN_SUCCESS;
-      payload: AuthToken;
+      type: Exclude<ActionType, "LOGIN_SUCCESS">;
     }
   | {
-      type: Exclude<ActionType, "LOGIN_SUCCESS">;
+      type: typeof actionTypes.LOGIN_SUCCESS;
+      payload: AuthToken;
     };
 
 const authReducer: Reducer<AuthState, AuthAction> = (state, action) => {
@@ -107,7 +107,13 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
     );
   }, [clearAuthToken]);
 
-  const login = async ({ username, password }: { username: string; password: string }) => {
+  const login = async ({
+    username,
+    password,
+  }: {
+    username: string;
+    password: string;
+  }): Promise<AccessTokenResponse> => {
     try {
       if (!username || !password) {
         throw Error("Missing required fields");
@@ -115,8 +121,10 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
       const response = await loginQuery.mutateAsync({ body: { username, password } });
       updateAuthToken(response.access_token);
       dispatch({ type: actionTypes.LOGIN_SUCCESS, payload: response.access_token });
+      return response;
     } catch {
       dispatch({ type: actionTypes.LOGIN_ERROR });
+      return Promise.reject();
     }
   };
 

@@ -27,7 +27,13 @@ const DeleteImageSource = () => {
             </p>
             <hr />
             <div className="u-flex u-flex--justify-end u-padding-top--medium">
-              <Button appearance="base" onClick={() => setSidebar(null)} type="button">
+              <Button
+                appearance="base"
+                onClick={() => {
+                  setSidebar(null);
+                }}
+                type="button"
+              >
                 Cancel
               </Button>
               <ActionButton

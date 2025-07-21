@@ -63,7 +63,9 @@ it("displays email validation error for invalid input", async () => {
   const emailInput = screen.getByRole("textbox", { name: "Email Address" });
 
   // Wait for the form to pre-fill first
-  await waitFor(() => expect(emailInput).toHaveValue("admin@example.com"));
+  await waitFor(() => {
+    expect(emailInput).toHaveValue("admin@example.com");
+  });
 
   await userEvent.clear(emailInput);
   await userEvent.type(emailInput, "test");

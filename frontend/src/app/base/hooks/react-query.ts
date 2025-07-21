@@ -37,7 +37,7 @@ export const useImagesInfiniteQuery = ({
   });
 
   const data = {
-    items: query.data?.pages ? query.data.pages.reduce((acc, page) => acc.concat(page.items), [] as BootAsset[]) : [],
+    items: query.data?.pages ? query.data.pages.reduce<BootAsset[]>((acc, page) => acc.concat(page.items), []) : [],
   };
 
   const { hasNextPage, isFetchingNextPage, fetchNextPage } = query;
@@ -68,10 +68,7 @@ export const useUpstreamImageSourceQuery = () =>
   });
 
 export const useUpstreamImageSourceMutation = (
-  options?: Omit<
-    UseMutationOptions<unknown, unknown, Parameters<typeof updateUpstreamImageSource>[0], unknown>,
-    "mutationFn"
-  >,
+  options?: Omit<UseMutationOptions<unknown, unknown, Parameters<typeof updateUpstreamImageSource>[0]>, "mutationFn">,
 ) => {
   return useMutation({
     mutationFn: updateUpstreamImageSource,
@@ -83,10 +80,7 @@ export const useUpstreamImageSourceMutation = (
 };
 
 export const useSelectUpstreamImagesMutation = (
-  options?: Omit<
-    UseMutationOptions<unknown, unknown, Parameters<typeof selectUpstreamImages>[0], unknown>,
-    "mutationFn"
-  >,
+  options?: Omit<UseMutationOptions<unknown, unknown, Parameters<typeof selectUpstreamImages>[0]>, "mutationFn">,
 ) => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -100,7 +94,7 @@ export const useSelectUpstreamImagesMutation = (
 };
 
 export const useDeleteImagesMutation = (
-  options?: Omit<UseMutationOptions<unknown, unknown, Parameters<typeof deleteImages>[0], unknown>, "mutationFn">,
+  options?: Omit<UseMutationOptions<unknown, unknown, Parameters<typeof deleteImages>[0]>, "mutationFn">,
 ) => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -117,7 +111,7 @@ export const useDeleteImagesMutation = (
 };
 
 export const useUploadImageMutation = (
-  options?: Omit<UseMutationOptions<unknown, unknown, Parameters<typeof uploadImage>[0], unknown>, "mutationFn">,
+  options?: Omit<UseMutationOptions<unknown, unknown, Parameters<typeof uploadImage>[0]>, "mutationFn">,
 ) => {
   const queryClient = useQueryClient();
   return useMutation({

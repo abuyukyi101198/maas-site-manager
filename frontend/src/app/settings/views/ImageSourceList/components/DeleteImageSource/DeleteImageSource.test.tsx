@@ -11,9 +11,15 @@ const mockServer = setupServer(
   imageSourceResolvers.deleteImageSource.handler(),
 );
 
-beforeAll(() => mockServer.listen());
-afterEach(() => mockServer.resetHandlers());
-afterAll(() => mockServer.close());
+beforeAll(() => {
+  mockServer.listen();
+});
+afterEach(() => {
+  mockServer.resetHandlers();
+});
+afterAll(() => {
+  mockServer.close();
+});
 
 const renderForm = async (id: number) => {
   const view = render(

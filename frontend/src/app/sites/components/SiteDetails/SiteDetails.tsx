@@ -45,7 +45,9 @@ const SiteDetailsContent = ({ id }: { id: NonNullable<SiteDetailsContextValue["s
         aria-label="Close"
         className="site-details__close-button"
         hasIcon
-        onClick={() => setSidebar(null)}
+        onClick={() => {
+          setSidebar(null);
+        }}
       >
         <Icon name="close" />
       </Button>
@@ -148,7 +150,12 @@ const SiteDetailsContent = ({ id }: { id: NonNullable<SiteDetailsContextValue["s
           </table>
           <hr />
           <span className="u-flex u-flex--justify-end">
-            <Button appearance="base" onClick={() => setSidebar("editSite")}>
+            <Button
+              appearance="base"
+              onClick={() => {
+                setSidebar("editSite");
+              }}
+            >
               <Icon name="edit" /> Edit
             </Button>
             <RemoveButton

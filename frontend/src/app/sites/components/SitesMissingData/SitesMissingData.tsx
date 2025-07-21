@@ -16,11 +16,12 @@ import { parseCoordinatesFormValue } from "@/app/sites/components/EditSite/utils
 import "./_SitesMissingData.scss";
 
 type SitesMissingDataValues = {
-  sitesCoordinates: {
-    [key: Site["id"]]: {
+  sitesCoordinates: Record<
+    Site["id"],
+    {
       coordinates: CoordinatesFormValue;
-    };
-  };
+    }
+  >;
 };
 
 const SitesMissingDataSchema = Yup.object().shape({

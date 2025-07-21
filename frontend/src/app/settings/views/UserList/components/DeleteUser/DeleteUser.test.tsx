@@ -34,9 +34,9 @@ describe("DeleteUser", () => {
   it("displays the user delete dialog", async () => {
     renderDeleteForm();
 
-    await waitFor(() =>
-      expect(screen.getByRole("heading", { name: new RegExp(`delete ${mockUser.username}`, "i") })).toBeInTheDocument(),
-    );
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: new RegExp(`delete ${mockUser.username}`, "i") })).toBeInTheDocument();
+    });
     expect(screen.getByRole("heading", { name: new RegExp(`delete ${mockUser.username}`, "i") })).toBeInTheDocument();
     expect(
       screen.getByRole("textbox", {
@@ -48,13 +48,17 @@ describe("DeleteUser", () => {
 
   it("displays the username as the input placeholder", async () => {
     renderDeleteForm();
-    await waitFor(() => expect(screen.getByPlaceholderText(mockUser.username)).toBeInTheDocument());
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText(mockUser.username)).toBeInTheDocument();
+    });
   });
 
   it("disables delete button on mount", async () => {
     renderDeleteForm();
 
-    await waitFor(() => expect(screen.getByRole("button", { name: /delete/i })).toBeAriaDisabled());
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /delete/i })).toBeAriaDisabled();
+    });
   });
 
   it("only enables delete button when username is typed", async () => {
@@ -67,11 +71,15 @@ describe("DeleteUser", () => {
     );
     // type random string
     await userEvent.type(input, "test");
-    await expect(screen.getByRole("button", { name: /delete/i })).toBeAriaDisabled();
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /delete/i })).toBeAriaDisabled();
+    });
 
     // type correct username
     await userEvent.clear(input);
     await userEvent.type(input, mockUser.username);
-    await expect(screen.getByRole("button", { name: /delete/i })).not.toBeAriaDisabled();
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /delete/i })).not.toBeAriaDisabled();
+    });
   });
 });

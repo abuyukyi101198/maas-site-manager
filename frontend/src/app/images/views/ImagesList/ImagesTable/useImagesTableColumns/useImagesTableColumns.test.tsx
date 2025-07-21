@@ -84,5 +84,7 @@ it("action column toggles row selection on delete", async () => {
   render(actionColumn.cell({ ...props, row: { ...props.row, toggleSelected } }));
   screen.getByRole("button", { name: /delete/i }).click();
 
-  await waitFor(() => expect(toggleSelected).toHaveBeenCalled());
+  await waitFor(() => {
+    expect(toggleSelected).toHaveBeenCalled();
+  });
 });

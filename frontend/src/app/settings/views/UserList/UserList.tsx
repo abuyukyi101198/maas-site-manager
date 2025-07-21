@@ -51,7 +51,12 @@ const UserList = () => {
               onChange={handleSearchInput}
               placeholder="Search"
             />
-            <button onClick={() => setSidebar("addUser")} type="button">
+            <button
+              onClick={() => {
+                setSidebar("addUser");
+              }}
+              type="button"
+            >
               Add user
             </button>
           </MainToolbar.Controls>

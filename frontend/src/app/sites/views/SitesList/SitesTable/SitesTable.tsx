@@ -32,7 +32,7 @@ import { createAccessor, getCountryName } from "@/utils";
 
 export type Site = SitesGetResponse["items"][number];
 export type SitesColumnDef = ColumnDef<Site, Partial<Site>>;
-export type SitesColumn = Column<Site, unknown>;
+export type SitesColumn = Column<Site>;
 
 type SortProps = {
   sorting: SortingState;
@@ -47,11 +47,12 @@ const SitesTable = ({
   paginationProps,
   sorting,
   setSorting,
-}: Pick<UseSitesResult, "data" | "isPending" | "error"> & {
-  searchText: string;
-  setSearchText: (text: string) => void;
-  paginationProps: PaginationBarProps;
-} & SortProps) => {
+}: Pick<UseSitesResult, "data" | "error" | "isPending"> &
+  SortProps & {
+    searchText: string;
+    setSearchText: (text: string) => void;
+    paginationProps: PaginationBarProps;
+  }) => {
   const [columnVisibility, setColumnVisibility] = useLocalStorageState("sitesTableColumnVisibility", {
     defaultValue: {},
   });

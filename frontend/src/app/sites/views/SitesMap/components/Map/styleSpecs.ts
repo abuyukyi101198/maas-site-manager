@@ -30,5 +30,5 @@ export const naturalEarth: maplibregl.StyleSpecification = {
       url: `pmtiles://${window.location.protocol}//${window.location.host}${basename}natural_earth.vector_v2.pmtiles`,
     },
   },
-  layers: mapStyle.layers as Array<maplibregl.LayerSpecification>,
+  layers: mapStyle.layers as maplibregl.LayerSpecification[],
 };

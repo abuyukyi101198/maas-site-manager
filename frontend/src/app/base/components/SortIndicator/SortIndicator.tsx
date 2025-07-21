@@ -7,7 +7,7 @@ import type { Site, User } from "@/app/apiclient";
 export const SortIndicator = ({
   header,
 }: {
-  header: Header<User, Partial<User>> | Header<Site, Partial<Site>> | Header<Image, Partial<Image>>;
+  header: Header<Image, Partial<Image>> | Header<Site, Partial<Site>> | Header<User, Partial<User>>;
 }) =>
   ({
     asc: <Icon name="chevron-up">ascending</Icon>,

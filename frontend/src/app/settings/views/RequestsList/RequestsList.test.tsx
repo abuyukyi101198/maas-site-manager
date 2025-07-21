@@ -39,7 +39,9 @@ it("action buttons are enabled if some rows are selected", async () => {
   await waitForLoadingToFinish();
   await userEvent.click(screen.getByRole("checkbox", { name: /select all/i }));
 
-  await waitFor(() => expect(screen.getByRole("button", { name: /Accept/i })).not.toBeAriaDisabled());
+  await waitFor(() => {
+    expect(screen.getByRole("button", { name: /Accept/i })).not.toBeAriaDisabled();
+  });
   expect(screen.getByRole("button", { name: /Deny/i })).not.toBeAriaDisabled();
 });
 

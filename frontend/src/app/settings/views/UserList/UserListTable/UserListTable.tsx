@@ -16,7 +16,7 @@ import { createAccessor } from "@/utils";
 import { useNavigate } from "@/utils/router";
 
 export type UserColumnDef = ColumnDef<User, User>;
-export type UserColumn = Column<User, unknown>;
+export type UserColumn = Column<User>;
 
 type SortProps = {
   sorting: SortingState;

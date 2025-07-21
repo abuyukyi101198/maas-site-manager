@@ -93,7 +93,13 @@ const TokensList = () => {
               Export
             </Button>
             <RemoveButton disabled={!Object.keys(rowSelection).length} label="Delete" onClick={handleTokenDelete} />
-            <Button className="p-button--positive" onClick={() => setSidebar("createToken")} type="button">
+            <Button
+              className="p-button--positive"
+              onClick={() => {
+                setSidebar("createToken");
+              }}
+              type="button"
+            >
               Generate tokens
             </Button>
           </MainToolbar.Controls>

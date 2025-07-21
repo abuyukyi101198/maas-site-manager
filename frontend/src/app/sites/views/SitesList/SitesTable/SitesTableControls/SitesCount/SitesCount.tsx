@@ -6,9 +6,9 @@ import Placeholder from "@/app/base/components/Placeholder";
 const SitesCount = ({
   totalSites,
   isPending,
-}: {
+}: Pick<UseSitesResult, "isPending"> & {
   totalSites: number | null;
-} & Pick<UseSitesResult, "isPending">) =>
+}) =>
   isPending ? (
     <Placeholder isPending={isPending} text="xx" />
   ) : (

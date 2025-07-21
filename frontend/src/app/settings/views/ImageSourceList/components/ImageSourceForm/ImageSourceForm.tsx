@@ -75,8 +75,8 @@ const ImageSourceForm = ({ type }: { type: "add" | "edit" }) => {
 
   const handleSubmit = (values: ImageSourceFormValues) => {
     const body:
-      | PostBootSourcesV1BootassetSourcesPostData["body"]
-      | PatchBootSourceV1BootassetSourcesIdPatchData["body"] = {
+      | PatchBootSourceV1BootassetSourcesIdPatchData["body"]
+      | PostBootSourcesV1BootassetSourcesPostData["body"] = {
       url: values.url,
       keyring: values.keyring,
       priority: values.priority,

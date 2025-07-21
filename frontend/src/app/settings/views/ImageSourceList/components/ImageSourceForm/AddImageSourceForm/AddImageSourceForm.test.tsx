@@ -12,9 +12,15 @@ const mockServer = setupServer(
   imageSourceResolvers.createImageSource.handler(),
 );
 
-beforeAll(() => mockServer.listen());
-afterEach(() => mockServer.resetHandlers());
-afterAll(() => mockServer.close());
+beforeAll(() => {
+  mockServer.listen();
+});
+afterEach(() => {
+  mockServer.resetHandlers();
+});
+afterAll(() => {
+  mockServer.close();
+});
 
 it("requires the URL field when adding an image source", () => {
   render(<AddImageSourceForm />);

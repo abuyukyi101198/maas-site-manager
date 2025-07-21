@@ -48,7 +48,9 @@ it("displays loading state", () => {
 it("displays empty state if no images are available", async () => {
   mockServer.use(imagesResolvers.listImages.handler([]));
   renderWithMemoryRouter(<ImagesTableContainer />);
-  await waitFor(() => expect(screen.getByText("No images")).toBeInTheDocument());
+  await waitFor(() => {
+    expect(screen.getByText("No images")).toBeInTheDocument();
+  });
 });
 
 it("can display error message", async () => {
@@ -68,7 +70,9 @@ it("can display error message", async () => {
       sorting={[]}
     />,
   );
-  await waitFor(() => expect(screen.getByText("custom error")).toBeInTheDocument());
+  await waitFor(() => {
+    expect(screen.getByText("custom error")).toBeInTheDocument();
+  });
 });
 
 it("can display images", async () => {

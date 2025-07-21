@@ -1,7 +1,7 @@
 import { http, HttpResponse } from "msw";
 
 import { ExceptionCode, type User, type UsersPostRequest } from "@/app/api";
-import { type SortDirection, type UserSortKey } from "@/app/api/handlers";
+import type { SortDirection, UserSortKey } from "@/app/api/handlers";
 import type {
   DeleteV1UsersIdDeleteError,
   GetV1UsersGetError,

@@ -94,14 +94,15 @@ const SideNavigationItem = ({ item }: ItemProps) => {
   );
 };
 
-export type SecondaryNavContext = "settings" | "account";
+export type SecondaryNavContext = "account" | "settings";
 
-export type SecondaryNavInfoType = {
-  [key in SecondaryNavContext]: {
+export type SecondaryNavInfoType = Record<
+  SecondaryNavContext,
+  {
     title: RouteTitle;
     navItems: NavItem[];
-  };
-};
+  }
+>;
 
 type SecondaryNavigationProps = {
   isOpen?: boolean;

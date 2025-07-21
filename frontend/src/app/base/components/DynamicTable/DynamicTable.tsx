@@ -15,7 +15,7 @@ const DynamicTable = ({ className, children, ...props }: PropsWithChildren<{ cla
   );
 };
 
-const SkeletonRows = ({ columns }: { columns: Array<{ id: string }> }) => (
+const SkeletonRows = ({ columns }: { columns: { id: string }[] }) => (
   <>
     {Array.from({ length: 10 }, (_, index) => {
       return (
@@ -39,11 +39,9 @@ const DynamicTableLoading = <TData extends RowData>({
 }: {
   className?: string;
   table?: Table<TData>;
-  placeholderLengths?: { [_: string]: string };
+  placeholderLengths?: Record<string, string>;
 }) => {
-  const columns = table
-    ? table.getAllColumns()
-    : (Array.from({ length: 10 }).fill({ id: "" }) as Array<{ id: string }>);
+  const columns = table ? table.getAllColumns() : (Array.from({ length: 10 }).fill({ id: "" }) as { id: string }[]);
 
   return (
     <>
@@ -62,7 +60,7 @@ const DynamicTableBody = ({
   className,
   children,
   ...props
-}: PropsWithChildren<{ className?: string } & AriaAttributes>) => {
+}: PropsWithChildren<AriaAttributes & { className?: string }>) => {
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
   const [offset, setOffset] = useState<number | null>(null);
 
@@ -81,7 +79,9 @@ const DynamicTableBody = ({
 
   useEffect(() => {
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
   }, [handleResize]);
 
   return (

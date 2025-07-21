@@ -38,7 +38,9 @@ it("renders a populated user table", async () => {
   expect(screen.getByRole("table", { name: "users" })).toBeInTheDocument();
 
   await waitForLoadingToFinish();
-  await waitFor(() => expect(screen.getAllByRole("rowgroup")).toHaveLength(2));
+  await waitFor(() => {
+    expect(screen.getAllByRole("rowgroup")).toHaveLength(2);
+  });
   const tableBody = screen.getAllByRole("rowgroup")[1];
   expect(within(tableBody).getAllByRole("row")).toHaveLength(users.length);
   within(tableBody)
@@ -58,7 +60,9 @@ it("can switch between username and full name display", async () => {
   renderWithMemoryRouter(<UserList />);
 
   await waitForLoadingToFinish();
-  await waitFor(() => expect(screen.getAllByRole("rowgroup")).toHaveLength(2));
+  await waitFor(() => {
+    expect(screen.getAllByRole("rowgroup")).toHaveLength(2);
+  });
   let tableBody = screen.getAllByRole("rowgroup")[1];
   expect(within(tableBody).getAllByRole("row")).toHaveLength(users.length);
   within(tableBody)

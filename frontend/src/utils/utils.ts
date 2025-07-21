@@ -123,7 +123,7 @@ export const saveToFile = (data: BlobPart, filename: string, type: string): void
 };
 
 export const createAccessor =
-  <T, K extends keyof T>(keys: K[] | K) =>
+  <T, K extends keyof T>(keys: K | K[]) =>
   (obj: T) =>
     pick(keys, obj);
 

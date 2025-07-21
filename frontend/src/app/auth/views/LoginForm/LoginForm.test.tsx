@@ -29,7 +29,9 @@ it("displays an error if the password input is left empty", async () => {
   await userEvent.clear(passwordInput);
   await userEvent.tab();
 
-  await waitFor(() => expect(screen.getByText(/Please enter a password/)).toBeInTheDocument());
+  await waitFor(() => {
+    expect(screen.getByText(/Please enter a password/)).toBeInTheDocument();
+  });
 });
 
 it("disables the 'Login' button if a username and password are not present", async () => {

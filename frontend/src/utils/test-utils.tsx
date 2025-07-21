@@ -57,7 +57,7 @@ export const renderWithMemoryRouter = (ui: ReactElement, options?: MemoryRenderO
   return render(ui, { wrapper: Providers, ...options });
 };
 
-export const getByTextContent = (text: string | RegExp) => {
+export const getByTextContent = (text: RegExp | string) => {
   return screen.getByText((_, element) => {
     const hasText = (element: Element | null) => {
       if (element) {

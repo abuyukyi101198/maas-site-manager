@@ -66,6 +66,7 @@ it("displays open street map attribution", async () => {
 
   localStorage.setItem("hasAcceptedOsmTos", JSON.stringify({ admin: false }));
 
+  // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
   await unmount();
 
   render(<Map markers={null} />);
@@ -80,22 +81,24 @@ it("updates markers correctly when the markers prop changes", async () => {
   const markers = markerFactory.buildList(2, { position: [0, 0] });
   const { rerender } = render(<Map markers={markers} />);
 
-  await waitFor(() =>
-    expect(screen.getByRole("button", { name: `${markers.length} sites cluster` })).toBeInTheDocument(),
-  );
+  await waitFor(() => {
+    expect(screen.getByRole("button", { name: `${markers.length} sites cluster` })).toBeInTheDocument();
+  });
 
   const newMarkers = markerFactory.buildList(3, { position: [0, 0] });
   rerender(<Map markers={newMarkers} />);
 
-  await waitFor(() =>
-    expect(screen.getByRole("button", { name: `${newMarkers.length} sites cluster` })).toBeInTheDocument(),
-  );
+  await waitFor(() => {
+    expect(screen.getByRole("button", { name: `${newMarkers.length} sites cluster` })).toBeInTheDocument();
+  });
 });
 
 it("displays site details after clicking a marker", async () => {
   const markers = [{ ...markerFactory.build({ id: site.id, position: [0, 0] }) }];
   renderWithMemoryRouter(<Map markers={markers} />, { withMainLayout: true });
-  await waitFor(() => expect(screen.getByLabelText(/site location marker/)).toBeInTheDocument());
+  await waitFor(() => {
+    expect(screen.getByLabelText(/site location marker/)).toBeInTheDocument();
+  });
   const marker = screen.getByRole("button", { name: /site location marker/ });
   expect(screen.queryByLabelText("Site details")).not.toBeInTheDocument();
   await userEvent.click(marker);
@@ -106,19 +109,19 @@ it("updates highestClusterChildCount correctly when more markers are added", asy
   const markers = markerFactory.buildList(2, { position: [0, 0] });
   const { rerender } = render(<Map markers={markers} />);
 
-  await waitFor(() =>
-    expect(screen.getByRole("button", { name: `${markers.length} sites cluster` })).toBeInTheDocument(),
-  );
+  await waitFor(() => {
+    expect(screen.getByRole("button", { name: `${markers.length} sites cluster` })).toBeInTheDocument();
+  });
 
   const newMarkers = markerFactory.buildList(3, { position: [0, 0] });
   rerender(<Map markers={newMarkers} />);
 
-  await waitFor(() =>
-    expect(screen.queryByRole("button", { name: `${markers.length} sites cluster` })).not.toBeInTheDocument(),
-  );
-  await waitFor(() =>
-    expect(screen.getByRole("button", { name: `${newMarkers.length} sites cluster` })).toBeInTheDocument(),
-  );
+  await waitFor(() => {
+    expect(screen.queryByRole("button", { name: `${markers.length} sites cluster` })).not.toBeInTheDocument();
+  });
+  await waitFor(() => {
+    expect(screen.getByRole("button", { name: `${newMarkers.length} sites cluster` })).toBeInTheDocument();
+  });
 });
 
 it("sets cluster size relative to the biggest cluster currently in view", async () => {
@@ -126,7 +129,9 @@ it("sets cluster size relative to the biggest cluster currently in view", async 
   const markers = [...markerFactory.buildList(count, { position: [0, 0] })];
   render(<Map markers={markers} />);
 
-  await waitFor(() => expect(screen.getByRole("button", { name: /sites cluster/ })).toBeInTheDocument());
+  await waitFor(() => {
+    expect(screen.getByRole("button", { name: /sites cluster/ })).toBeInTheDocument();
+  });
   expect(screen.getByRole("button", { name: `${count} sites cluster` }).parentElement).toHaveStyle({
     width: `${getClusterSize(count, count)}px`,
     height: `${getClusterSize(count, count)}px`,

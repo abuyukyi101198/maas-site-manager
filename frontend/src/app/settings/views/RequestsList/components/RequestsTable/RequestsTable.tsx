@@ -15,7 +15,7 @@ import DateTime from "@/app/settings/views/RequestsList/components/DateTime";
 import { isDev } from "@/constants";
 
 export type EnrollmentRequestsColumnDef = ColumnDef<PendingSite, PendingSite[keyof PendingSite]>;
-export type EnrollmentRequestsColumn = Column<PendingSite, unknown>;
+export type EnrollmentRequestsColumn = Column<PendingSite>;
 
 const RequestsTable = ({
   currentPage,

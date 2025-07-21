@@ -9,7 +9,7 @@ import RemoveButton from "@/app/base/components/RemoveButton";
 import { useAppLayoutContext, useRowSelection } from "@/app/context";
 
 export type ImageColumnDef = ColumnDef<Image, Partial<Image>>;
-export type ImageColumn = Column<Image, unknown>;
+export type ImageColumn = Column<Image>;
 
 const ImagesList = ({
   isDeleteDisabled,
@@ -27,13 +27,25 @@ const ImagesList = ({
             <RemoveButton
               disabled={isDeleteDisabled}
               label="Delete"
-              onClick={() => setSidebar("deleteImages")}
+              onClick={() => {
+                setSidebar("deleteImages");
+              }}
               type="button"
             />
-            <Button onClick={() => setSidebar("downloadImages")} type="button">
+            <Button
+              onClick={() => {
+                setSidebar("downloadImages");
+              }}
+              type="button"
+            >
               Download images
             </Button>
-            <Button onClick={() => setSidebar("uploadImage")} type="button">
+            <Button
+              onClick={() => {
+                setSidebar("uploadImage");
+              }}
+              type="button"
+            >
               Upload Image
             </Button>
           </MainToolbar.Controls>

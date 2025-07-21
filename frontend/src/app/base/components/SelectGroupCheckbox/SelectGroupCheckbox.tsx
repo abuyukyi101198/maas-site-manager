@@ -18,10 +18,14 @@ const SelectGroupCheckbox: React.FC<SelectGroupCheckboxProps> = ({ row }) => {
           onChange: () => {
             if (row.getIsSelected() || row.getIsSomeSelected()) {
               row.toggleSelected(false);
-              row.subRows.forEach((subRow) => subRow.toggleSelected(false));
+              row.subRows.forEach((subRow) => {
+                subRow.toggleSelected(false);
+              });
             } else {
               row.toggleSelected(true);
-              row.subRows.forEach((subRow) => subRow.toggleSelected(true));
+              row.subRows.forEach((subRow) => {
+                subRow.toggleSelected(true);
+              });
             }
           },
         }}

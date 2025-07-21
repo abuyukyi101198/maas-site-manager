@@ -108,7 +108,9 @@ describe("useExportTokens", () => {
 
     expect(result.current.isError).toBe(false);
     expect(result.current.data).toBeDefined();
-    await waitFor(() => expect(result.current.data).not.toBeNull());
+    await waitFor(() => {
+      expect(result.current.data).not.toBeNull();
+    });
     expect(result.current.data).toEqual(expectedCSV);
   });
 
@@ -135,7 +137,9 @@ describe("useExportTokens", () => {
 
     expect(result.current.isError).toBe(false);
     expect(result.current.data).toBeDefined();
-    await waitFor(() => expect(result.current.data).not.toBeNull());
+    await waitFor(() => {
+      expect(result.current.data).not.toBeNull();
+    });
     expect(result.current.data).toEqual(expectedCSV);
   });
 });

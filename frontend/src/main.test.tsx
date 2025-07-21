@@ -21,5 +21,7 @@ afterAll(() => {
 it("renders the app in the root element", async () => {
   await act(() => import("./main"));
   const container = document.getElementById("root") as HTMLElement;
-  await waitFor(() => expect(container.querySelector(".l-application")).toBeInTheDocument());
+  await waitFor(() => {
+    expect(container.querySelector(".l-application")).toBeInTheDocument();
+  });
 });

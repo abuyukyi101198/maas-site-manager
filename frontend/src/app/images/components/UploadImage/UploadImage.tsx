@@ -29,7 +29,7 @@ const isValidFileType = (fileName: string) => {
     if (!extension) {
       return false;
     } else {
-      return VALID_IMAGE_FILE_TYPES.indexOf(extension) > -1;
+      return VALID_IMAGE_FILE_TYPES.includes(extension);
     }
   } else {
     return false;

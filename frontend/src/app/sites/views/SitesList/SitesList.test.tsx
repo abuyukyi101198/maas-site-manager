@@ -43,12 +43,16 @@ it("displays populated sites table", async () => {
   expect(screen.getByRole("table", { name: /sites/i })).toBeInTheDocument();
 
   await waitForLoadingToFinish();
-  await waitFor(() => expect(screen.getAllByRole("rowgroup")).toHaveLength(2));
+  await waitFor(() => {
+    expect(screen.getAllByRole("rowgroup")).toHaveLength(2);
+  });
   const tableBody = screen.getAllByRole("rowgroup")[1];
   expect(within(tableBody).getAllByRole("row")).toHaveLength(sites.length);
   within(tableBody)
     .getAllByRole("row")
-    .forEach((row, i) => expect(row).toHaveTextContent(new RegExp(sites[i].name, "i")));
+    .forEach((row, i) => {
+      expect(row).toHaveTextContent(new RegExp(sites[i].name, "i"));
+    });
 });
 
 it("disables the 'remove' button if no rows are selected", async () => {
@@ -59,7 +63,9 @@ it("disables the 'remove' button if no rows are selected", async () => {
 it("enables the 'remove' button if some rows are selected", async () => {
   renderWithMemoryRouter(<SitesList />);
   await userEvent.click(screen.getByRole("checkbox", { name: /select all/i }));
-  await waitFor(() => expect(screen.getByRole("button", { name: /Remove/i })).not.toBeAriaDisabled());
+  await waitFor(() => {
+    expect(screen.getByRole("button", { name: /Remove/i })).not.toBeAriaDisabled();
+  });
 });
 
 it("can hide and unhide columns", async () => {
@@ -129,21 +135,27 @@ it("adds search text to navigation url and narrows down search results", async (
   });
   await userEvent.type(searchBox, searchText);
 
-  await waitFor(() =>
+  await waitFor(() => {
     expect(
       screen.getByRole("tab", {
         name: /map/i,
       }),
-    ).toHaveAttribute("href", `/sites/map?q=${searchText}`),
-  );
+    ).toHaveAttribute("href", `/sites/map?q=${searchText}`);
+  });
   expect(
     screen.getByRole("tab", {
       name: /table/i,
     }),
   ).toHaveAttribute("href", `/sites/list?q=${searchText}`);
 
-  await waitFor(() => expect(screen.getAllByRole("rowgroup")).toHaveLength(2));
+  await waitFor(() => {
+    expect(screen.getAllByRole("rowgroup")).toHaveLength(2);
+  });
   const tableBody = screen.getAllByRole("rowgroup")[1];
-  expect(within(tableBody).getAllByRole("row")).toHaveLength(1);
-  expect(within(tableBody).getAllByRole("row")[0]).toHaveTextContent(searchSiteName);
+  await waitFor(() => {
+    expect(within(tableBody).getAllByRole("row")).toHaveLength(1);
+  });
+  await waitFor(() => {
+    expect(within(tableBody).getAllByRole("row")[0]).toHaveTextContent(searchSiteName);
+  });
 });

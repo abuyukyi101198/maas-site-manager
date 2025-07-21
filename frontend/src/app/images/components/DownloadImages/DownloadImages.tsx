@@ -10,15 +10,11 @@ import type { UpstreamImage } from "@/app/api";
 import { useSelectUpstreamImagesMutation, useUpstreamImagesQuery } from "@/app/base/hooks/react-query";
 import { useAppLayoutContext } from "@/app/context";
 
-type GroupedImages = {
-  [key: string]: ReleasesWithArches;
-};
+type GroupedImages = Record<string, ReleasesWithArches>;
 
-export type ReleasesWithArches = {
-  [key: string]: MultiSelectItem[];
-};
+export type ReleasesWithArches = Record<string, MultiSelectItem[]>;
 
-type ImagesByName = { [key: string]: UpstreamImage[] };
+type ImagesByName = Record<string, UpstreamImage[]>;
 
 const groupImagesByName = (images: UpstreamImage[]) => {
   if (!images) return {};
@@ -142,7 +138,9 @@ const DownloadImages = () => {
           <Formik
             enableReinitialize={true}
             initialValues={initialValues}
-            onSubmit={(values, helpers) => handleSubmit(values, data.items, helpers)}
+            onSubmit={(values, helpers) => {
+              handleSubmit(values, data.items, helpers);
+            }}
           >
             {({ isSubmitting, dirty, values, setFieldValue }) => (
               <Form aria-labelledby={headingId}>

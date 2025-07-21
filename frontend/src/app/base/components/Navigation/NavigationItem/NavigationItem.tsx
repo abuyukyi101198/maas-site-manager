@@ -25,7 +25,7 @@ const NavigationItem = ({ navLink, path, onClick }: Props): ReactElement => {
   const id = useId();
   const linkProps = {
     id: `${navLink.label}-${id}`,
-    onClick: (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    onClick: (event: React.MouseEvent<HTMLAnchorElement>) => {
       onClick();
       // removing the focus from the link element after click
       // this allows the side navigation to collapse on mouseleave

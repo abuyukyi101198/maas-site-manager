@@ -2,11 +2,9 @@ import { usePrevious } from "@canonical/react-components";
 import { useFormikContext } from "formik";
 import { isEqual } from "lodash";
 
-import { type MutationErrorResponse } from "@/app/api";
+import type { MutationErrorResponse } from "@/app/api";
 
-export type FieldErrors = {
-  [key: string]: string;
-};
+export type FieldErrors = Record<string, string>;
 
 /**
  * Extracts field-specific error messages from a mutation error response.

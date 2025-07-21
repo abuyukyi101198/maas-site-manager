@@ -65,7 +65,9 @@ it("enables the submit button once the form has been edited", async () => {
 
   await userEvent.click(screen.getByRole("tab", { name: "Ubuntu" }));
 
-  await waitFor(() => expect(screen.getByRole("combobox", { name: "Select architectures" })).toBeInTheDocument());
+  await waitFor(() => {
+    expect(screen.getByRole("combobox", { name: "Select architectures" })).toBeInTheDocument();
+  });
 
   await userEvent.click(screen.getByRole("combobox", { name: "Select architectures" }));
 
@@ -119,7 +121,9 @@ it("displays errors that ocurred after submitting image selection", async () => 
 
   await userEvent.click(screen.getByRole("tab", { name: "Ubuntu" }));
 
-  await waitFor(() => expect(screen.getByRole("combobox", { name: "Select architectures" })).toBeInTheDocument());
+  await waitFor(() => {
+    expect(screen.getByRole("combobox", { name: "Select architectures" })).toBeInTheDocument();
+  });
 
   await userEvent.click(screen.getByRole("combobox", { name: "Select architectures" }));
 

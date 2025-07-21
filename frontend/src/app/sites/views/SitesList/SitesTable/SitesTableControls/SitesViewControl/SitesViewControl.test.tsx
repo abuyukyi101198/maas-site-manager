@@ -1,7 +1,7 @@
 import SitesViewControl from "./SitesViewControl";
 
 import { routesConfig } from "@/app/base/routes";
-import { renderWithMemoryRouter, screen } from "@/utils/test-utils";
+import { renderWithMemoryRouter, screen, waitFor } from "@/utils/test-utils";
 
 describe("sites view control", () => {
   it("renders a sites view control tablist", () => {
@@ -19,7 +19,11 @@ describe("sites view control", () => {
   it("points to the appropriate route for each tab", async () => {
     renderWithMemoryRouter(<SitesViewControl />);
 
-    await expect(screen.getByRole("tab", { name: /map/i })).toHaveAttribute("href", routesConfig.sitesMap.path);
-    await expect(screen.getByRole("tab", { name: /table/i })).toHaveAttribute("href", routesConfig.sitesList.path);
+    await waitFor(() => {
+      expect(screen.getByRole("tab", { name: /map/i })).toHaveAttribute("href", routesConfig.sitesMap.path);
+    });
+    await waitFor(() => {
+      expect(screen.getByRole("tab", { name: /table/i })).toHaveAttribute("href", routesConfig.sitesList.path);
+    });
   });
 });

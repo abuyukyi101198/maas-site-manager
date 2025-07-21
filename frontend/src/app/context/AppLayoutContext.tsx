@@ -3,23 +3,23 @@ import { createContext, useContext, useState } from "react";
 import { usePrevious } from "@canonical/react-components";
 
 export type Sidebar =
-  | "removeSites"
-  | "createToken"
+  | "addBootSource"
   | "addUser"
-  | "editUser"
-  | "deleteUser"
-  | "siteDetails"
-  | "editSite"
-  | "siteSelect"
-  | "uploadImage"
-  | "downloadImages"
+  | "createToken"
+  | "deleteBootSource"
   | "deleteImages"
   | "deleteOrKeepImages"
-  | "sitesMissingData"
-  | "deleteBootSource"
-  | "addBootSource"
+  | "deleteUser"
+  | "downloadImages"
   | "editBootSource"
   | "editCustomImagesSource"
+  | "editSite"
+  | "editUser"
+  | "removeSites"
+  | "siteDetails"
+  | "siteSelect"
+  | "sitesMissingData"
+  | "uploadImage"
   | null;
 
 export const AppLayoutContext = createContext<{

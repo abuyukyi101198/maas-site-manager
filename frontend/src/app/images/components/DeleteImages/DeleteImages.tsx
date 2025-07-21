@@ -77,7 +77,9 @@ const DeleteImagesContainer = () => {
     <DeleteImages
       count={imagesCount}
       error={deleteImagesMutation.error}
-      onCancel={() => setSidebar(null)}
+      onCancel={() => {
+        setSidebar(null);
+      }}
       onDelete={handleDelete}
     />
   );

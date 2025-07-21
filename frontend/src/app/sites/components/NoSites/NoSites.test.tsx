@@ -39,32 +39,32 @@ it("should display link to enrollment docs", () => {
 
 it("should display a link to the request page if there are open requests", async () => {
   renderComponent();
-  await waitFor(() =>
+  await waitFor(() => {
     expect(
       screen.getByRole("link", {
         name: /go to requests page/i,
       }),
-    ).toBeInTheDocument(),
-  );
+    ).toBeInTheDocument();
+  });
 });
 
 it("should display the amount of open enrollment requests", async () => {
   renderComponent();
-  await waitFor(() =>
+  await waitFor(() => {
     expect(
       getByTextContent(new RegExp("You have 2 open enrollment requests, inspect them in the Requests page.", "i")),
-    ).toBeInTheDocument(),
-  );
+    ).toBeInTheDocument();
+  });
 });
 
 it("should display a link to the tokens page if no enrollment requests are open", async () => {
   mockServer.resetHandlers(enrollmentRequestsResolvers.listEnrollmentRequests.handler());
   renderComponent();
-  await waitFor(() =>
+  await waitFor(() => {
     expect(
       screen.getByRole("link", {
         name: /go to tokens page/i,
       }),
-    ).toBeInTheDocument(),
-  );
+    ).toBeInTheDocument();
+  });
 });

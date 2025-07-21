@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState } from "react";
 import { usePrevious } from "@canonical/react-components";
 import type { OnChangeFn, RowSelectionState } from "@tanstack/react-table";
 
-export type TableId = "sites" | "requests" | "tokens" | "images";
+export type TableId = "images" | "requests" | "sites" | "tokens";
 type RowSelectionContextValue = {
   rowSelection: RowSelectionState;
   setRowSelection: OnChangeFn<RowSelectionState>;
@@ -76,7 +76,9 @@ export const getRowSelectionContextProvider =
   ({ children }: PropsWithChildren) => {
     const RowSelectionContext = getRowSelectionContext(id);
     const [rowSelection, setRowSelection] = useState(value);
-    const clearRowSelection = () => setRowSelection({});
+    const clearRowSelection = () => {
+      setRowSelection({});
+    };
 
     return (
       <RowSelectionContext.Provider value={{ rowSelection, setRowSelection, clearRowSelection }}>

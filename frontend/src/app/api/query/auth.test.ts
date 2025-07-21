@@ -22,6 +22,8 @@ describe("useLogin", () => {
     const { result } = renderHook(() => useLogin(), { wrapper: Providers });
     const login = result.current.mutateAsync;
     const { access_token } = await login({ body: { username: "admin", password: "admin" } });
-    await waitFor(() => expect(access_token).toBeDefined());
+    await waitFor(() => {
+      expect(access_token).toBeDefined();
+    });
   });
 });

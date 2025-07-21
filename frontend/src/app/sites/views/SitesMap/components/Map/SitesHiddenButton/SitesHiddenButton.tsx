@@ -24,7 +24,9 @@ const SitesHiddenButton = () => {
           aria-label="show missing sites"
           className="sites-hidden-btn"
           hasIcon
-          onClick={() => setSidebar("sitesMissingData")}
+          onClick={() => {
+            setSidebar("sitesMissingData");
+          }}
         >
           <Icon name="warning" />
         </Button>

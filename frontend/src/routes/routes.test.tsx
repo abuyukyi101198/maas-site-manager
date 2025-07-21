@@ -22,19 +22,25 @@ it("redirects to the default route", async () => {
   render(<RouterProvider router={router} />);
 
   expect(router.state.location.pathname).toEqual("/");
-  await waitFor(() => expect(router.state.location.pathname).toEqual("/sites/list"));
+  await waitFor(() => {
+    expect(router.state.location.pathname).toEqual("/sites/list");
+  });
 });
 
 pages.forEach(({ title, path }) => {
   it(`displays a correct page for ${path} route`, async () => {
     const router = createMemoryRouter(routes, { initialEntries: [path], initialIndex: 0 });
     render(<RouterProvider router={router} />);
-    await waitFor(() => expect(router.state.location.pathname).toEqual(path));
+    await waitFor(() => {
+      expect(router.state.location.pathname).toEqual(path);
+    });
   });
   it(`displays correct document title and heading for ${title} page`, async () => {
     const router = createMemoryRouter(routes, { initialEntries: [path], initialIndex: 0 });
     render(<RouterProvider router={router} />);
-    await waitFor(() => expect(document.title).toBe(`${title} | MAAS Site Manager`));
+    await waitFor(() => {
+      expect(document.title).toBe(`${title} | MAAS Site Manager`);
+    });
     expect(screen.getByRole("heading", { level: 1, name: `${title} | MAAS Site Manager` })).toBeInTheDocument();
   });
 });

@@ -11,7 +11,7 @@ type Props = {
   selectedSites: Site[];
 };
 const createAccessor =
-  <T, K extends keyof T>(keys: K[] | K) =>
+  <T, K extends keyof T>(keys: K | K[]) =>
   (row: T) =>
     pick(keys, row);
 

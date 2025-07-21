@@ -6,10 +6,10 @@ import { apiUrls } from "@/utils/test-urls";
 export type SortDirection = "asc" | "desc";
 
 export type SitesSortKey = keyof Pick<Site, "name">;
-export type UserSortKey = keyof Pick<User, "username" | "full_name" | "email">;
+export type UserSortKey = keyof Pick<User, "email" | "full_name" | "username">;
 export type ImagesSortKey = keyof Pick<Image, "release">;
 
-export type SortBy<T extends SitesSortKey | UserSortKey | ImagesSortKey> = `${T}-${SortDirection}` | null;
+export type SortBy<T extends ImagesSortKey | SitesSortKey | UserSortKey> = `${T}-${SortDirection}` | null;
 
 // TODO: replace with api client once API supports it https://warthogs.atlassian.net/browse/MAASENG-2569
 export const getUpstreamImages = async () => {

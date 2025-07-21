@@ -11,9 +11,15 @@ const mockServer = setupServer(
   imageSourceResolvers.updateImageSource.handler(),
 );
 
-beforeAll(() => mockServer.listen());
-afterEach(() => mockServer.resetHandlers());
-afterAll(() => mockServer.close());
+beforeAll(() => {
+  mockServer.listen();
+});
+afterEach(() => {
+  mockServer.resetHandlers();
+});
+afterAll(() => {
+  mockServer.close();
+});
 
 const renderEditForm = () => {
   return render(
@@ -26,15 +32,17 @@ const renderEditForm = () => {
 it("shows the source's URL in the form title", async () => {
   renderEditForm();
 
-  await waitFor(() =>
-    expect(screen.getByRole("heading", { name: `Edit ${mockImageSources[1].url}` })).toBeInTheDocument(),
-  );
+  await waitFor(() => {
+    expect(screen.getByRole("heading", { name: `Edit ${mockImageSources[1].url}` })).toBeInTheDocument();
+  });
 });
 
 it("pre-fills the form with the source's details", async () => {
   renderEditForm();
 
-  await waitFor(() => expect(screen.getByRole("textbox", { name: "URL" })).toHaveValue(mockImageSources[1].url));
+  await waitFor(() => {
+    expect(screen.getByRole("textbox", { name: "URL" })).toHaveValue(mockImageSources[1].url);
+  });
   expect(screen.getByRole("textbox", { name: "GPG key" })).toHaveValue(mockImageSources[1].keyring);
   expect(screen.getByRole("checkbox", { name: "Automatically sync images" })).toBeChecked(); // sync interval is > 0 on this boot source
   expect(screen.getByRole("textbox", { name: "Priority" })).toHaveValue(mockImageSources[1].priority.toString());
@@ -43,19 +51,21 @@ it("pre-fills the form with the source's details", async () => {
 it("shows a caution for changing the URL", async () => {
   renderEditForm();
 
-  await waitFor(() =>
+  await waitFor(() => {
     expect(
       screen.getByText(
         "Changing to an image server with different images might remove some images from MAAS Site Manager and MAAS.",
       ),
-    ).toBeInTheDocument(),
-  );
+    ).toBeInTheDocument();
+  });
 });
 
 it("enables the submit button after a field has changed", async () => {
   renderEditForm();
 
-  await waitFor(() => expect(screen.getByRole("button", { name: "Save" })).toBeAriaDisabled());
+  await waitFor(() => {
+    expect(screen.getByRole("button", { name: "Save" })).toBeAriaDisabled();
+  });
 
   await userEvent.click(screen.getByRole("checkbox", { name: "Automatically sync images" }));
 

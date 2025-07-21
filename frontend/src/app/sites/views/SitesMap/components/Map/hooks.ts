@@ -79,7 +79,7 @@ export const useMarkers = ({ eventHandlers }: UseMarkers) => {
           zoom,
         });
       } catch (error) {
-        throw new Error("Failed to get cluster expansion zoom: " + error);
+        throw new Error(`Failed to get cluster expansion zoom: ${error}`);
       }
     },
     [map],
@@ -266,7 +266,9 @@ export const usePopup = () => {
 
   const showPopup = ({ id, coords }: { id: number; coords: MarkerProps["coords"] }) => {
     resetDelay();
-    withDelay(() => setPopup({ id, coords }));
+    withDelay(() => {
+      setPopup({ id, coords });
+    });
   };
 
   const hidePopup = ({ isImmediate = false }: { isImmediate?: boolean } = {}) => {
@@ -274,7 +276,9 @@ export const usePopup = () => {
     if (isImmediate) {
       setPopup(null);
     } else {
-      withDelay(() => setPopup(null));
+      withDelay(() => {
+        setPopup(null);
+      });
     }
   };
 
@@ -288,7 +292,9 @@ export const usePopup = () => {
 const MARKER_HOVER_DELAY = 750;
 export const useWithDelay = (delay = MARKER_HOVER_DELAY) => {
   const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
-  const resetDelay = () => clearTimeout(timeoutRef.current);
+  const resetDelay = () => {
+    clearTimeout(timeoutRef.current);
+  };
 
   const withDelay = (fn: () => unknown) => {
     resetDelay();

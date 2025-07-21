@@ -23,12 +23,12 @@ import {
 import type { RoutePath } from "@/app/base/routes";
 
 export type Path = Partial<Exclude<BasePath, "pathname"> & { pathname: RoutePath }>;
-export type To = RoutePath | Path;
+export type To = Path | RoutePath;
 export type Location = Exclude<BaseLocation, "pathname"> & { pathname: RoutePath };
 export type LinkProps = Exclude<BaseLinkProps, "to"> & {
   to: To;
 };
-export type InitialEntry = RoutePath | Partial<Location>;
+export type InitialEntry = Partial<Location> | RoutePath;
 export type MemoryRouterProps = BaseMemoryRouterProps & { initialEntries?: InitialEntry[] };
 
 export const Link: (props: LinkProps) => ReturnType<typeof BaseLink> = BaseLink;
@@ -46,11 +46,11 @@ export const useNavigate = baseUseNavigate;
 export const MemoryRouter = BaseMemoryRouter;
 export const useSearchParams = baseUseSearchParams;
 type MatchPath = (
-  pattern: PathPattern<string> | RoutePath | `${RoutePath}/*`,
+  pattern: PathPattern | RoutePath | `${RoutePath}/*`,
   pathname: string,
 ) => ReturnType<typeof baseMatchPath>;
 export const matchPath = baseMatchPath as MatchPath;
-export type RedirectFunction = (url: RoutePath, init?: number | ResponseInit) => ReturnType<BaseRedirectFunction>;
+export type RedirectFunction = (url: RoutePath, init?: ResponseInit | number) => ReturnType<BaseRedirectFunction>;
 export const redirect = baseRedirect as RedirectFunction;
 
 // eslint-disable-next-line no-restricted-imports

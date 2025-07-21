@@ -81,7 +81,9 @@ it("displays rows with details for each site", () => {
   expect(within(tableBody).getAllByRole("row")).toHaveLength(items.length);
   within(tableBody)
     .getAllByRole("row")
-    .forEach((row, i) => expect(row).toHaveTextContent(new RegExp(items[i].name, "i")));
+    .forEach((row, i) => {
+      expect(row).toHaveTextContent(new RegExp(items[i].name, "i"));
+    });
 });
 
 it("displays correctly paginated results", () => {

@@ -28,7 +28,9 @@ test("displays SyncedStatus when image is synced", async () => {
   });
 
   renderWithMemoryRouter(<SyncStatus image={image} />);
-  await waitFor(() => expect(screen.getByText("Synced to MAAS sites")).toBeInTheDocument());
+  await waitFor(() => {
+    expect(screen.getByText("Synced to MAAS sites")).toBeInTheDocument();
+  });
 });
 
 test("displays QueuedStatus when image is queued", () => {

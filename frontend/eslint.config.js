@@ -234,6 +234,32 @@ export default tseslint.config(
     },
   },
   {
+    files: ["src/**/*.ts?(x)"],
+    languageOptions: {
+      parserOptions: {
+        project: "./tsconfig.json",
+      },
+    },
+    rules: {
+      "@typescript-eslint/array-type": "error",
+      "@typescript-eslint/consistent-indexed-object-style": "error",
+      "@typescript-eslint/dot-notation": "error",
+      "@typescript-eslint/no-confusing-void-expression": "error",
+      "@typescript-eslint/no-duplicate-type-constituents": "error",
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-for-in-array": "error",
+      "@typescript-eslint/no-import-type-side-effects": "error",
+      "@typescript-eslint/no-inferrable-types": "error",
+      "@typescript-eslint/no-unnecessary-type-arguments": "error",
+      "@typescript-eslint/no-unused-expressions": "error",
+      "@typescript-eslint/prefer-includes": "error",
+      "@typescript-eslint/prefer-reduce-type-parameter": "error",
+      "@typescript-eslint/prefer-regexp-exec": "error",
+      "@typescript-eslint/restrict-plus-operands": "error",
+      "@typescript-eslint/sort-type-constituents": "error",
+    },
+  },
+  {
     files: ["src/**/*.tsx"],
     rules: {
       "react/no-multi-comp": ["error", { ignoreStateless: true }],

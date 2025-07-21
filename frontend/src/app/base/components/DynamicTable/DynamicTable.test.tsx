@@ -50,7 +50,9 @@ it("sets a fixed table body height based on top offset on large screens", async 
     fireEvent(window, new Event("resize"));
   });
 
-  await waitFor(() => expect(tbody).toHaveStyle(`height: calc(100vh - ${offset + 1}px)`));
+  await waitFor(() => {
+    expect(tbody).toHaveStyle(`height: calc(100vh - ${offset + 1}px)`);
+  });
 });
 
 it("displays loading state", () => {

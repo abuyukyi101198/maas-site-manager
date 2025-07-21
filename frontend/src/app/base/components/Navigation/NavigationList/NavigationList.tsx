@@ -18,7 +18,7 @@ type Props = {
   onClick: () => void;
 };
 
-const NavigationItemGroup = ({ group, path, onClick }: { group: NavGroup } & Pick<Props, "path" | "onClick">) => {
+const NavigationItemGroup = ({ group, path, onClick }: Pick<Props, "onClick" | "path"> & { group: NavGroup }) => {
   const id = useId();
   const hasActiveChild = useMemo(() => {
     for (const navLink of group.navLinks) {

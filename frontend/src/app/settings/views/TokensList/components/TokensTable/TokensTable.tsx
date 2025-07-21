@@ -14,7 +14,7 @@ import { useRowSelection } from "@/app/context";
 import { copyToClipboard, createAccessor, formatDistanceToNow, formatUTCDateString } from "@/utils";
 
 export type TokenColumnDef = ColumnDef<Token, Partial<Token>>;
-export type TokenColumn = Column<Token, unknown>;
+export type TokenColumn = Column<Token>;
 
 const TokensTable = ({
   data,
@@ -66,7 +66,12 @@ const TokensTable = ({
         cell: ({ getValue }) => {
           const { value } = getValue();
           return (
-            <div className="token-cell" onClick={() => handleTokenCopy(value!)}>
+            <div
+              className="token-cell"
+              onClick={() => {
+                handleTokenCopy(value!);
+              }}
+            >
               <span className="token-text">{value}</span>
               <CopyButton isCopied={isTokenCopied(value!)} value={value || ""} />
             </div>

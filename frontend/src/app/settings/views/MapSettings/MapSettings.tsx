@@ -13,9 +13,7 @@ type MapSettingsFormValues = {
   acceptedOsmTos: boolean;
 };
 
-export type MapSettingsStorageState = {
-  [username: string]: boolean;
-};
+export type MapSettingsStorageState = Record<string, boolean>;
 
 const MapSettingsSchema = Yup.object().shape({
   acceptedOsmTos: Yup.boolean(),

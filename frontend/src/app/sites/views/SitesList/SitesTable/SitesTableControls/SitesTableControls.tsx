@@ -16,12 +16,12 @@ const SitesTableControls = ({
   isPending,
   setSearchText,
   searchText,
-}: {
+}: Pick<UseSitesResult, "isPending"> & {
   totalSites: number | null;
   isPending: boolean;
   setSearchText?: (text: string) => void;
   searchText?: string;
-} & Pick<UseSitesResult, "isPending">) => {
+}) => {
   const { pathname } = useLocation();
   const { setSidebar } = useAppLayoutContext();
   const { rowSelection } = useRowSelection("sites");
@@ -48,7 +48,9 @@ const SitesTableControls = ({
           <span className="remove-button__wrapper">
             <RemoveButton
               disabled={isRemoveDisabled}
-              onClick={() => setSidebar("removeSites")}
+              onClick={() => {
+                setSidebar("removeSites");
+              }}
               showDeleteIcon
               type="button"
             />

@@ -27,8 +27,8 @@ const countryOptions = [
   })),
 ] as const;
 
-type EditSiteFormValues = Record<keyof Pick<Site, "country" | "state" | "address" | "city" | "postal_code">, string> &
-  Record<"coordinates", CoordinatesFormValue>;
+type EditSiteFormValues = Record<"coordinates", CoordinatesFormValue> &
+  Record<keyof Pick<Site, "address" | "city" | "country" | "postal_code" | "state">, string>;
 
 const baseInitialValues: EditSiteFormValues = {
   country: "",

@@ -1,6 +1,6 @@
 import useWindowSize from "./useWindowSize";
 
-import { renderHook, act } from "@/utils/test-utils";
+import { renderHook, act, waitFor } from "@/utils/test-utils";
 
 beforeAll(() => {
   vi.mock("global/window", () => ({
@@ -29,8 +29,10 @@ it("updates the width and height when the window is resized", async () => {
   const newHeight = 500;
   window.innerWidth = newWidth;
   window.innerHeight = newHeight;
-  await act(() => {
-    window.dispatchEvent(new Event("resize"));
+  await waitFor(() => {
+    act(() => {
+      window.dispatchEvent(new Event("resize"));
+    });
   });
   rerender();
 

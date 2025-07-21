@@ -1,7 +1,7 @@
 import { http, HttpResponse } from "msw";
 
 import type { Image, UpstreamImage, UpstreamImageSource } from "@/app/api";
-import { type ImagesSortKey, type SortDirection } from "@/app/api/handlers";
+import type { ImagesSortKey, SortDirection } from "@/app/api/handlers";
 import type {
   DeleteImagesV1BootassetItemsIdDeleteError,
   GetBootAssetsV1BootassetsGetError,

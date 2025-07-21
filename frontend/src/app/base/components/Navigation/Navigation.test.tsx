@@ -104,9 +104,9 @@ it("displays collapsible button when user is logged out", () => {
 it("does not display in-app navigation links when logged out", () => {
   renderWithMemoryRouter(<Navigation isLoggedIn={false} />);
 
-  navItems.map(({ label }) =>
-    expect(screen.queryByRole("link", { name: new RegExp(label, "i") })).not.toBeInTheDocument(),
-  );
+  navItems.map(({ label }) => {
+    expect(screen.queryByRole("link", { name: new RegExp(label, "i") })).not.toBeInTheDocument();
+  });
 });
 
 it("should be collapsed on user logout", async () => {
@@ -118,17 +118,17 @@ it("should be collapsed on user logout", async () => {
 it("does not display in-app navigation links when logged out", () => {
   renderWithMemoryRouter(<Navigation isLoggedIn={false} />);
 
-  navItems.map(({ label }) =>
-    expect(screen.queryByRole("link", { name: new RegExp(label, "i") })).not.toBeInTheDocument(),
-  );
+  navItems.map(({ label }) => {
+    expect(screen.queryByRole("link", { name: new RegExp(label, "i") })).not.toBeInTheDocument();
+  });
 });
 
 it("displays external links when user is logged out", () => {
   renderWithMemoryRouter(<Navigation isLoggedIn={false} />);
 
-  navItemsBottom.map(({ label }) =>
-    expect(screen.getByRole("link", { name: new RegExp(label, "i") })).toBeInTheDocument(),
-  );
+  navItemsBottom.map(({ label }) => {
+    expect(screen.getByRole("link", { name: new RegExp(label, "i") })).toBeInTheDocument();
+  });
 });
 
 it("displays the username of the logged in user", async () => {

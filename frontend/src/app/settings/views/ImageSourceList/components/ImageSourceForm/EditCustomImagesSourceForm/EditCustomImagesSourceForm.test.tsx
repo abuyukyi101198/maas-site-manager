@@ -12,9 +12,15 @@ const mockServer = setupServer(
   imageSourceResolvers.updateImageSource.handler(),
 );
 
-beforeAll(() => mockServer.listen());
-afterEach(() => mockServer.resetHandlers());
-afterAll(() => mockServer.close());
+beforeAll(() => {
+  mockServer.listen();
+});
+afterEach(() => {
+  mockServer.resetHandlers();
+});
+afterAll(() => {
+  mockServer.close();
+});
 
 const renderForm = () => {
   return render(
@@ -27,27 +33,33 @@ const renderForm = () => {
 it("pre-fills the priority field with the source's priority", async () => {
   renderForm();
 
-  await waitFor(() =>
-    expect(screen.getByRole("textbox", { name: "Priority" })).toHaveValue(mockImageSources[0].priority.toString()),
-  );
+  await waitFor(() => {
+    expect(screen.getByRole("textbox", { name: "Priority" })).toHaveValue(mockImageSources[0].priority.toString());
+  });
 });
 
 it("requires the priority field", async () => {
   renderForm();
 
-  await waitFor(() => expect(screen.getByRole("textbox", { name: "Priority" })).toBeRequired());
+  await waitFor(() => {
+    expect(screen.getByRole("textbox", { name: "Priority" })).toBeRequired();
+  });
 });
 
 it("enables the submit button when a valid priority is entered", async () => {
   renderForm();
 
-  await waitFor(() => expect(screen.getByRole("button", { name: "Save" })).toBeAriaDisabled());
+  await waitFor(() => {
+    expect(screen.getByRole("button", { name: "Save" })).toBeAriaDisabled();
+  });
 
   const priorityInput = screen.getByRole("textbox", { name: "Priority" });
   await userEvent.clear(priorityInput);
   await userEvent.type(priorityInput, "100");
 
-  await waitFor(() => expect(screen.getByRole("button", { name: "Save" })).not.toBeAriaDisabled());
+  await waitFor(() => {
+    expect(screen.getByRole("button", { name: "Save" })).not.toBeAriaDisabled();
+  });
 });
 
 it("closes the side panel and resets selected source when 'Cancel' is clicked", async () => {
@@ -62,11 +74,17 @@ it("closes the side panel and resets selected source when 'Cancel' is clicked", 
     </AppLayoutContext.Provider>,
   );
 
-  await waitFor(() => expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument());
+  await waitFor(() => {
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+  });
   await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
 
-  await waitFor(() => expect(setSelected).toHaveBeenCalledWith(null));
-  await waitFor(() => expect(setSidebar).toHaveBeenCalledWith(null));
+  await waitFor(() => {
+    expect(setSelected).toHaveBeenCalledWith(null);
+  });
+  await waitFor(() => {
+    expect(setSidebar).toHaveBeenCalledWith(null);
+  });
 });
 
 it.todo("shows an error message when submission fails");

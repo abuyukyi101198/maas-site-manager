@@ -12,7 +12,7 @@ const EnrollmentActions: React.FC = () => {
   const selectedIds = Object.keys(rowSelection).map((id) => Number(id));
   const enrollmentRequestsMutation = useEnrollmentRequestsAction();
   const isActionDisabled = Object.keys(rowSelection).length === 0 || enrollmentRequestsMutation.isPending;
-  const handleAccept = () =>
+  const handleAccept = () => {
     enrollmentRequestsMutation.mutate(
       {
         body: {
@@ -22,7 +22,8 @@ const EnrollmentActions: React.FC = () => {
       },
       { onSuccess: clearRowSelection },
     );
-  const handleDeny = () =>
+  };
+  const handleDeny = () => {
     enrollmentRequestsMutation.mutate(
       {
         body: {
@@ -32,6 +33,7 @@ const EnrollmentActions: React.FC = () => {
       },
       { onSuccess: clearRowSelection },
     );
+  };
 
   return (
     <>

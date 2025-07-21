@@ -54,7 +54,12 @@ const ImageSourceList = () => {
         <MainToolbar>
           <MainToolbar.Title>Source</MainToolbar.Title>
           <MainToolbar.Controls>
-            <Button appearance="positive" onClick={() => setSidebar("addBootSource")}>
+            <Button
+              appearance="positive"
+              onClick={() => {
+                setSidebar("addBootSource");
+              }}
+            >
               Add image source
             </Button>
           </MainToolbar.Controls>

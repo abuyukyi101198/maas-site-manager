@@ -7,10 +7,10 @@ import { useFormikErrors } from "./utils";
 
 import type { MutationErrorResponse } from "@/app/api";
 
-type Props = {
+type Props = FormikFormProps & {
   children: ReactNode;
   errors?: (MutationErrorResponse | null)[];
-} & FormikFormProps;
+};
 
 const FormikFormContent = <V extends object>({ children, errors, ...formProps }: Props) => {
   useFormikErrors<V>(errors);

@@ -21,14 +21,16 @@ export class FetchHttpRequestWithInterceptors extends BaseHttpRequest {
             interceptor(response, null);
           }
         }
-        return resolve(response);
+        resolve(response);
+        return;
       } catch (error) {
         if (this.responseInterceptors.length) {
           for (const interceptor of this.responseInterceptors) {
             interceptor(null, error as ApiError);
           }
         }
-        return reject(error);
+        reject(error);
+        return;
       }
     });
   }

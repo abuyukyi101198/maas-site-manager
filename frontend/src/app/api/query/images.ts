@@ -1,7 +1,7 @@
 import type { Options } from "@hey-api/client-axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { type PostImagesV1ImagesPostData } from "@/app/apiclient";
+import type { PostImagesV1ImagesPostData } from "@/app/apiclient";
 import {
   getBootAssetsV1BootassetsGetQueryKey,
   postImagesV1ImagesPostMutation,

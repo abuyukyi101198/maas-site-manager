@@ -33,7 +33,7 @@ import { useImagesInfiniteQuery } from "@/app/base/hooks/react-query";
 import { useAppLayoutContext, useRowSelection } from "@/app/context";
 import { getSortBy } from "@/utils";
 export type ImageColumnDef = ColumnDef<Image, Partial<Image>>;
-export type ImageColumn = Column<Image, unknown>;
+export type ImageColumn = Column<Image>;
 
 type UseImagesQueryResult = ReturnType<typeof useImagesInfiniteQuery>;
 export type ImagesTableProps = {
@@ -50,7 +50,7 @@ export type ImagesTableProps = {
 // Filter out the name column from the header
 const filterHeaders = (header: Header<Image, unknown>) => header.column.id !== "os";
 // Filter out the name column from individual cells
-const filterCells = (row: Row<Image>, column: Column<Image, unknown>) => {
+const filterCells = (row: Row<Image>, column: Column<Image>) => {
   if (row.getIsGrouped()) {
     return ["select", "os", "action"].includes(column.id);
   } else {
@@ -152,8 +152,20 @@ export const ImagesTable: React.FC<ImagesTableProps> = ({
             upstream image source to download images from.
           </TableCaption.Description>
           <TableCaption.Description>
-            <Button onClick={() => setSidebar("uploadImage")}>Upload image</Button>
-            <Button onClick={() => setSidebar("downloadImages")}>Download images</Button>
+            <Button
+              onClick={() => {
+                setSidebar("uploadImage");
+              }}
+            >
+              Upload image
+            </Button>
+            <Button
+              onClick={() => {
+                setSidebar("downloadImages");
+              }}
+            >
+              Download images
+            </Button>
           </TableCaption.Description>
         </TableCaption>
       ) : (

@@ -13,9 +13,15 @@ const mockServer = setupServer(
   imageSourceResolvers.updateImageSource.handler(),
 );
 
-beforeAll(() => mockServer.listen());
-afterEach(() => mockServer.resetHandlers());
-afterAll(() => mockServer.close());
+beforeAll(() => {
+  mockServer.listen();
+});
+afterEach(() => {
+  mockServer.resetHandlers();
+});
+afterAll(() => {
+  mockServer.close();
+});
 
 it("shows an error for invalid URLs", async () => {
   render(<ImageSourceForm type="add" />);
@@ -57,9 +63,15 @@ it("closes the side panel and resets selected source when 'Cancel' is clicked", 
     </AppLayoutContext.Provider>,
   );
 
-  await waitFor(() => expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument());
+  await waitFor(() => {
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+  });
   await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
 
-  await waitFor(() => expect(setSelected).toHaveBeenCalledWith(null));
-  await waitFor(() => expect(setSidebar).toHaveBeenCalledWith(null));
+  await waitFor(() => {
+    expect(setSelected).toHaveBeenCalledWith(null);
+  });
+  await waitFor(() => {
+    expect(setSidebar).toHaveBeenCalledWith(null);
+  });
 });
