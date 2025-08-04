@@ -42,6 +42,7 @@ from msm.schema import (
 )
 from msm.service import ServiceCollection
 from msm.settings import Settings
+from msm.time import now_utc
 
 logger = getLogger()
 
@@ -248,7 +249,9 @@ async def post_boot_sources(
     post_request: dm.BootSourcesPostRequest,
 ) -> dm.BootSourcesPostResponse:
     boot_source = await services.boot_sources.create(
-        models.BootSourceCreate(**post_request.model_dump())
+        models.BootSourceCreate(
+            last_sync=now_utc(), **post_request.model_dump()
+        )
     )
     await services.index_service.refresh()
     return dm.BootSourcesPostResponse(id=boot_source.id)
@@ -458,7 +461,9 @@ async def post_boot_asset_version(
     try:
         boot_asset_version = await services.boot_asset_versions.create(
             models.BootAssetVersionCreate(
-                boot_asset_id=id, version=post_request.version
+                boot_asset_id=id,
+                version=post_request.version,
+                last_seen=now_utc(),
             )
         )
         return dm.BootAssetVersionPostResponse(id=boot_asset_version.id)

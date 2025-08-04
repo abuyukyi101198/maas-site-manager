@@ -1,4 +1,3 @@
-from datetime import MAXYEAR, UTC, datetime
 from hashlib import sha256
 import json
 from logging import getLogger
@@ -42,8 +41,9 @@ from msm.schema import (
     SortParam,
 )
 from msm.service import ServiceCollection
-from msm.service.images import reverse_fqdn
+from msm.service.images import END_OF_TIME, reverse_fqdn
 from msm.settings import Settings
+from msm.time import now_utc
 
 logger = getLogger()
 
@@ -530,7 +530,7 @@ async def post_images(
     if s3_upload_target.current_chunk:
         await run_in_threadpool(s3_upload_target.upload_current_chunk)
 
-    asset = await services.boot_assets.get_or_create(
+    _, asset = await services.boot_assets.get_or_create(
         models.BootAssetCreate(
             boot_source_id=1,
             kind=models.BootAssetKind.OS,
@@ -544,13 +544,13 @@ async def post_images(
             compatibility=None,
             flavor=None,
             base_image=f"{os.value.decode()}/{release.value.decode()}",
-            eol=datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC),
-            esm_eol=datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC),
+            eol=END_OF_TIME,
+            esm_eol=END_OF_TIME,
             signed=False,
         )
     )
     version = await services.boot_asset_versions.create_next_revision(
-        asset.id, datetime.now()
+        asset.id, now_utc()
     )
     boot_asset_item = await services.boot_asset_items.update(
         tmp_item.id,

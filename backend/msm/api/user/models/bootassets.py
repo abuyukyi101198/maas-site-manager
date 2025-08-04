@@ -39,13 +39,13 @@ class BootAssetsGetResponse(PaginatedResults):
 class BootSourceGetResponse(models.BootSource):
     @classmethod
     def from_model(cls, model: models.BootSource) -> Self:
-        return cls(**model.dict())
+        return cls(**model.model_dump())
 
 
 class BootSourcePatchResponse(models.BootSource):
     @classmethod
     def from_model(cls, model: models.BootSource) -> Self:
-        return cls(**model.dict())
+        return cls(**model.model_dump())
 
 
 class BootSourcesGetResponse(PaginatedResults):
@@ -151,4 +151,4 @@ class BootAssetItemPatchRequest(BaseModel):
 class BootAssetItemPatchResponse(models.BootAssetItem):
     @classmethod
     def from_model(cls, model: models.BootAssetItem) -> Self:
-        return cls(**model.dict())
+        return cls(**model.model_dump())

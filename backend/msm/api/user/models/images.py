@@ -12,4 +12,4 @@ class GetAvailableImagesResponse(BaseModel):
 class ImagesPostResponse(models.BootAssetItem):
     @classmethod
     def from_model(cls, model: models.BootAssetItem) -> Self:
-        return cls(**model.dict())
+        return cls(**model.model_dump())

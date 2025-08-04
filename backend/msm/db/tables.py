@@ -20,7 +20,7 @@ from sqlalchemy.dialects.postgresql import (
 from sqlalchemy.types import DateTime
 
 from msm.db.types import Point
-from msm.time import now_utc
+from msm.time import now_utc, utc_from_timestamp
 
 METADATA = MetaData(
     naming_convention={
@@ -151,6 +151,12 @@ BootSource = Table(
     Column("keyring", Text, nullable=True),
     Column("sync_interval", Integer),
     Column("name", Text, nullable=False),
+    Column(
+        "last_sync",
+        DateTime(timezone=True),
+        nullable=False,
+        default=utc_from_timestamp(0.0),
+    ),
 )
 
 BootSourceSelection = Table(
@@ -209,6 +215,9 @@ BootAssetVersion = Table(
         nullable=False,
     ),
     Column("version", Text, nullable=False),
+    Column(
+        "last_seen", DateTime(timezone=True), nullable=False, default=now_utc
+    ),
     UniqueConstraint("boot_asset_id", "version"),
 )
 

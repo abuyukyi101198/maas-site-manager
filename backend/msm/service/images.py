@@ -1,5 +1,5 @@
 from collections.abc import Iterable
-from datetime import datetime
+from datetime import MAXYEAR, UTC, datetime
 from typing import Any
 
 from sqlalchemy import Select, and_, delete, insert, select, text, update
@@ -18,7 +18,9 @@ from msm.db.tables import (
 )
 from msm.schema import SortParam
 from msm.service.base import Service
-from msm.time import now_utc
+from msm.time import now_utc, utc_from_timestamp
+
+END_OF_TIME = datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC)
 
 
 class BootSourceService(Service):
@@ -37,6 +39,7 @@ class BootSourceService(Service):
                 BootSource.c.sync_interval,
                 BootSource.c.priority,
                 BootSource.c.name,
+                BootSource.c.last_sync,
             )
             .order_by(*order_by)
             .offset(offset)
@@ -56,6 +59,7 @@ class BootSourceService(Service):
             BootSource.c.sync_interval,
             BootSource.c.priority,
             BootSource.c.name,
+            BootSource.c.last_sync,
         ).where(BootSource.c.id == id)
         result = await self.conn.execute(stmt)
         if row := result.one_or_none():
@@ -77,6 +81,7 @@ class BootSourceService(Service):
                 BootSource.c.sync_interval,
                 BootSource.c.priority,
                 BootSource.c.name,
+                BootSource.c.last_sync,
             )
         )
         result = await self.conn.execute(stmt)
@@ -93,6 +98,7 @@ class BootSourceService(Service):
             BootSource.c.sync_interval,
             BootSource.c.priority,
             BootSource.c.name,
+            BootSource.c.last_sync,
         )
         result = await self.conn.execute(
             stmt,
@@ -128,6 +134,7 @@ class BootSourceService(Service):
             "name": "MSM Custom Images",
             "sync_interval": 0,
             "priority": 1,
+            "last_sync": utc_from_timestamp(0.0),
         }
         await self.conn.execute(insert(BootSource), [data])
 
@@ -379,7 +386,7 @@ class BootAssetService(Service):
 
     async def get_or_create(
         self, asset: models.BootAssetCreate
-    ) -> models.BootAsset:
+    ) -> tuple[bool, models.BootAsset]:
         count, assets = await self.get(
             [],
             boot_source_id=[asset.boot_source_id],
@@ -390,8 +397,8 @@ class BootAssetService(Service):
             release=[asset.release],
         )
         if count == 0:
-            return await self.create(asset)
-        return next(assets)  # type: ignore
+            return True, await self.create(asset)
+        return False, next(assets)  # type: ignore
 
     def _select_statement(self, *columns: Any) -> Select[Any]:
         return select(*columns).select_from(BootAsset)
@@ -418,6 +425,7 @@ class BootAssetVersionService(Service):
                 BootAssetVersion.c.id,
                 BootAssetVersion.c.boot_asset_id,
                 BootAssetVersion.c.version,
+                BootAssetVersion.c.last_seen,
             )
             .where(*filters)
             .order_by(*order_by)
@@ -445,6 +453,7 @@ class BootAssetVersionService(Service):
             BootAssetVersion.c.id,
             BootAssetVersion.c.boot_asset_id,
             BootAssetVersion.c.version,
+            BootAssetVersion.c.last_seen,
         ).where(BootAssetVersion.c.id == id)
         result = await self.conn.execute(stmt)
         if row := result.one_or_none():
@@ -460,6 +469,7 @@ class BootAssetVersionService(Service):
             BootAssetVersion.c.id,
             BootAssetVersion.c.boot_asset_id,
             BootAssetVersion.c.version,
+            BootAssetVersion.c.last_seen,
         )
         result = await self.conn.execute(stmt, [data])
         return models.BootAssetVersion(**result.one()._asdict())
@@ -478,12 +488,16 @@ class BootAssetVersionService(Service):
             new_rev = latest_rev + 1
             return await self.create(
                 models.BootAssetVersionCreate(
-                    boot_asset_id=asset_id, version=f"{date_str}{new_rev}"
+                    boot_asset_id=asset_id,
+                    version=f"{date_str}{new_rev}",
+                    last_seen=date,
                 )
             )
         return await self.create(
             models.BootAssetVersionCreate(
-                boot_asset_id=asset_id, version=f"{date_str}1"
+                boot_asset_id=asset_id,
+                version=f"{date_str}1",
+                last_seen=date,
             )
         )
 

@@ -467,6 +467,7 @@ class TestBootSourceService:
             keyring="test keyring",
             sync_interval=3600,
             name="Test Boot Source",
+            last_sync=factory.now,
         )
         boot_source = await factory.make_BootSource(
             priority=expected_boot_source.priority,
@@ -510,6 +511,7 @@ class TestBootSourceService:
             keyring="test keyring",
             sync_interval=3600,
             name="Test Boot Source",
+            last_sync=factory.now,
         )
         service = BootSourceService(db_connection)
         boot_source = await service.create(new_boot_source)
@@ -530,6 +532,7 @@ class TestBootSourceService:
             keyring="test keyring",
             sync_interval=3600,
             name="Test Boot Source",
+            last_sync=factory.now,
         )
         boot_source = await factory.make_BootSource(
             priority=expected_boot_source.priority,
@@ -564,6 +567,7 @@ class TestBootSourceService:
             keyring="test keyring",
             sync_interval=3600,
             name="Test Boot Source",
+            last_sync=factory.now,
         )
         boot_source = await factory.make_BootSource(
             priority=expected_boot_source.priority,
@@ -585,10 +589,14 @@ class TestBootAssetVersionService:
         boot_source = await factory.make_BootSource()
         boot_asset = await factory.make_BootAsset(boot_source.id)
         expected_boot_asset_version = BootAssetVersion(
-            id=0, boot_asset_id=boot_asset.id, version="20250227.1"
+            id=0,
+            boot_asset_id=boot_asset.id,
+            version="20250227.1",
+            last_seen=factory.now,
         )
         boot_asset_version = await factory.make_BootAssetVersion(
-            boot_asset.id, version=expected_boot_asset_version.version
+            boot_asset.id,
+            version=expected_boot_asset_version.version,
         )
         expected_boot_asset_version.id = boot_asset_version.id
 
@@ -632,6 +640,7 @@ class TestBootAssetVersionService:
         new_boot_asset_version = BootAssetVersionCreate(
             boot_asset_id=boot_asset.id,
             version="20250227.1",
+            last_seen=factory.now,
         )
         service = BootAssetVersionService(db_connection)
         boot_asset_version = await service.create(new_boot_asset_version)

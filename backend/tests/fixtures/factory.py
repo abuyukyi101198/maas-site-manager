@@ -55,6 +55,15 @@ class Factory:
 
     def __init__(self, conn: AsyncConnection):
         self.conn = conn
+        self._now = now_utc()
+
+    @property
+    def now(self) -> datetime:
+        return self._now
+
+    @property
+    def now_json(self) -> str:
+        return self._now.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
     async def next_id(self, table: str, pk_field: str = "id") -> int:
         """Return next ID for a table primary key."""
@@ -159,7 +168,6 @@ class Factory:
             key=key,
             duration=lifetime,
         )
-        now = now_utc()
         [row] = await self.create(
             "token",
             [
@@ -167,7 +175,7 @@ class Factory:
                     "id": id,
                     "auth_id": auth_id,
                     "value": token.encoded,
-                    "created": now,
+                    "created": self.now,
                     "expired": token.expiration,
                     "audience": audience,
                     "purpose": purpose,
@@ -225,7 +233,7 @@ class Factory:
                     "state": state,
                     "coordinates": coords_dict,
                     "accepted": accepted,
-                    "created": now_utc(),
+                    "created": self.now,
                     "cluster_uuid": cluster_uuid,
                 }
             ],
@@ -273,7 +281,7 @@ class Factory:
                 "name": name,
                 "url": url,
                 "accepted": False,
-                "created": now_utc(),
+                "created": self.now,
                 "cluster_uuid": cluster_uuid,
             },
         )
@@ -292,7 +300,7 @@ class Factory:
     ) -> SiteData:
         """Create SiteData for a Site."""
         if last_seen is None:
-            last_seen = now_utc()
+            last_seen = self.now
         [row] = await self.create(
             "site_data",
             [
@@ -331,6 +339,7 @@ class Factory:
         keyring: str | None = None,
         sync_interval: int = 0,
         name: str = "",
+        last_sync: datetime | None = None,
     ) -> BootSource:
         [row] = await self.create(
             "boot_source",
@@ -341,6 +350,7 @@ class Factory:
                     "keyring": keyring,
                     "sync_interval": sync_interval,
                     "name": name,
+                    "last_sync": last_sync or self.now,
                 }
             ],
         )
@@ -418,6 +428,7 @@ class Factory:
         self,
         boot_asset_id: int,
         version: str = "",
+        last_seen: datetime | None = None,
     ) -> BootAssetVersion:
         [row] = await self.create(
             "boot_asset_version",
@@ -425,6 +436,7 @@ class Factory:
                 {
                     "boot_asset_id": boot_asset_id,
                     "version": version,
+                    "last_seen": last_seen or self.now,
                 }
             ],
         )

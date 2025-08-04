@@ -107,11 +107,19 @@ class BootAssetVersion(BaseModel):
     id: int
     boot_asset_id: int
     version: str
+    last_seen: AwareDatetime
 
 
 class BootAssetVersionCreate(BaseModel):
     boot_asset_id: int
     version: str
+    last_seen: AwareDatetime
+
+
+class BootAssetVersionUpdate(BaseModel):
+    boot_asset_id: int
+    version: str
+    last_seen: AwareDatetime
 
 
 class BootAsset(BaseModel):
@@ -207,6 +215,7 @@ class BootSource(BaseModel):
     name: str
     keyring: str | None = None
     sync_interval: int = Field(ge=0)
+    last_sync: AwareDatetime
 
 
 class BootSourceCreate(BaseModel):
@@ -215,6 +224,7 @@ class BootSourceCreate(BaseModel):
     name: str
     keyring: str | None = None
     sync_interval: int = Field(ge=0)
+    last_sync: AwareDatetime
 
 
 class BootSourceUpdate(BaseModel):
@@ -225,6 +235,7 @@ class BootSourceUpdate(BaseModel):
     name: str | None = None
     keyring: str | None = None
     sync_interval: int | None = Field(default=None, ge=0)
+    last_sync: AwareDatetime | None = None
 
 
 class AvailableImage(BaseModel):

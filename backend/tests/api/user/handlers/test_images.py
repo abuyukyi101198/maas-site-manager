@@ -1,4 +1,3 @@
-from datetime import MAXYEAR, UTC, datetime
 from hashlib import sha256
 import json
 from pathlib import Path
@@ -12,6 +11,7 @@ from msm.db.models import (
     ItemFileType,
 )
 from msm.service import IndexService
+from msm.service.images import END_OF_TIME
 from tests.fixtures.client import Client
 from tests.fixtures.factory import Factory
 
@@ -26,6 +26,10 @@ class TestCustomImageUploadHandler:
         monkeypatch: pytest.MonkeyPatch,
         tmp_path: Path,
     ) -> None:
+        mock_now = mocker.patch(
+            "msm.api.user.handlers.images.now_utc",
+            return_value=factory.now,
+        )
         mock_resource = mocker.patch(
             "msm.api.user.handlers.images.boto3.resource"
         )
@@ -92,14 +96,15 @@ class TestCustomImageUploadHandler:
                 "flavor": None,
                 "base_image": "ubuntu/noble",
                 "bootloader_type": None,
-                "eol": datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC),
-                "esm_eol": datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC),
+                "eol": END_OF_TIME,
+                "esm_eol": END_OF_TIME,
                 "signed": False,
             }
             expected_version = {
                 "id": 1,
                 "boot_asset_id": stored_assets[0]["id"],
-                "version": datetime.now().strftime("%Y%m%d") + ".1",
+                "version": factory.now.strftime("%Y%m%d") + ".1",
+                "last_seen": factory.now,
             }
             expected_item = {
                 "id": resp.json()["id"],
@@ -125,6 +130,10 @@ class TestCustomImageUploadHandler:
         monkeypatch: pytest.MonkeyPatch,
         tmp_path: Path,
     ) -> None:
+        mock_now = mocker.patch(
+            "msm.api.user.handlers.images.now_utc",
+            return_value=factory.now,
+        )
         mock_resource = mocker.patch(
             "msm.api.user.handlers.images.boto3.resource"
         )
@@ -199,19 +208,21 @@ class TestCustomImageUploadHandler:
                 "flavor": None,
                 "base_image": "ubuntu/noble",
                 "bootloader_type": None,
-                "eol": datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC),
-                "esm_eol": datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC),
+                "eol": END_OF_TIME,
+                "esm_eol": END_OF_TIME,
                 "signed": False,
             }
             expected_first_version = {
                 "id": 1,
                 "boot_asset_id": stored_assets[0]["id"],
-                "version": datetime.now().strftime("%Y%m%d") + ".1",
+                "version": factory.now.strftime("%Y%m%d") + ".1",
+                "last_seen": factory.now,
             }
             expected_second_version = {
                 "id": 2,
                 "boot_asset_id": stored_assets[0]["id"],
-                "version": datetime.now().strftime("%Y%m%d") + ".2",
+                "version": factory.now.strftime("%Y%m%d") + ".2",
+                "last_seen": factory.now,
             }
             expected_first_item = {
                 "id": first_item_id,

@@ -109,15 +109,15 @@ class TestBootAssetsGetHandler:
         assert assets.status_code == 200
         resp_body = assets.json()
         assert resp_body["items"] == [
-            json.loads(boot_asset1.model_dump_json()),
-            json.loads(boot_asset2.model_dump_json()),
+            boot_asset1.model_dump(mode="json"),
+            boot_asset2.model_dump(mode="json"),
         ]
         assets = await user_client.get("/bootassets?sort_by=release")
         assert assets.status_code == 200
         resp_body = assets.json()
         assert resp_body["items"] == [
-            json.loads(boot_asset2.model_dump_json()),
-            json.loads(boot_asset1.model_dump_json()),
+            boot_asset2.model_dump(mode="json"),
+            boot_asset1.model_dump(mode="json"),
         ]
 
     async def test_get_with_page_and_size(
@@ -280,7 +280,7 @@ class TestBootSourcesGetHandler:
         assert resp_body["page"] == 1
         assert resp_body["size"] == 20
         assert resp_body["total"] == 1
-        assert resp_body["items"] == [boot_source.model_dump()]
+        assert resp_body["items"] == [boot_source.model_dump(mode="json")]
 
     async def test_get_by_id(
         self, user_client: Client, factory: Factory
@@ -365,8 +365,16 @@ class TestBootSourcesGetHandler:
 @pytest.mark.asyncio
 class TestBootSourcesPostHandler:
     async def test_post(
-        self, user_client: Client, factory: Factory, index_view: None
+        self,
+        user_client: Client,
+        factory: Factory,
+        index_view: None,
+        mocker: MockerFixture,
     ) -> None:
+        mock_now = mocker.patch(
+            "msm.api.user.handlers.bootassets.now_utc",
+            return_value=factory.now,
+        )
         data = {
             "priority": 1,
             "url": "http://some.image.server",
@@ -379,7 +387,7 @@ class TestBootSourcesPostHandler:
         assert resp.status_code == 200
         stored = await factory.get("boot_source")
         assert len(stored) == 1
-        assert stored[0] == data | {"id": new_id}
+        assert stored[0] == data | {"id": new_id, "last_sync": factory.now}
 
     @pytest.mark.parametrize(
         "field", ["priority", "url", "keyring", "sync_interval", "name"]
@@ -427,10 +435,12 @@ class TestBootSourcesUpdateHandler:
             f"/bootasset-sources/{bs.id}", json=data
         )
         assert resp.status_code == 200
-        assert resp.json() == {"id": bs.id} | data
+        assert (
+            resp.json() == {"id": bs.id, "last_sync": factory.now_json} | data
+        )
         sources = await factory.get("boot_source")
         assert len(sources) == 2
-        assert sources[1] == {"id": bs.id} | data
+        assert sources[1] == {"id": bs.id, "last_sync": factory.now} | data
 
     async def test_update_custom_source_fails(
         self, user_client: Client, factory: Factory
@@ -532,7 +542,7 @@ class TestBootSourceSelectionsGetHandler:
         assert resp_body["page"] == 1
         assert resp_body["size"] == 20
         assert resp_body["total"] == 1
-        assert resp_body["items"] == [selection.model_dump()]
+        assert resp_body["items"] == [selection.model_dump(mode="json")]
 
     async def test_get_with_sorting(
         self, user_client: Client, factory: Factory
@@ -720,7 +730,10 @@ class TestBootAssetVersionsGetHandler:
         assert resp_body["page"] == 1
         assert resp_body["size"] == 20
         assert resp_body["total"] == 2
-        assert resp_body["items"] == [v1.model_dump(), v2.model_dump()]
+        assert resp_body["items"] == [
+            v1.model_dump(mode="json"),
+            v2.model_dump(mode="json"),
+        ]
 
     @pytest.mark.parametrize(
         "filter_param",
@@ -743,7 +756,7 @@ class TestBootAssetVersionsGetHandler:
         assert resp.status_code == 200
         resp_body = resp.json()
         assert len(resp_body["items"]) == 1
-        assert resp_body["items"][0] == v1.model_dump()
+        assert resp_body["items"][0] == v1.model_dump(mode="json")
 
     async def test_get_with_sorting(
         self, user_client: Client, factory: Factory
@@ -757,8 +770,8 @@ class TestBootAssetVersionsGetHandler:
         assert resp.status_code == 200
         resp_body = resp.json()
         assert resp_body["items"] == [
-            v2.model_dump(),
-            v1.model_dump(),
+            v2.model_dump(mode="json"),
+            v1.model_dump(mode="json"),
         ]
 
         resp = await user_client.get(
@@ -767,8 +780,8 @@ class TestBootAssetVersionsGetHandler:
         assert resp.status_code == 200
         resp_body = resp.json()
         assert resp_body["items"] == [
-            v1.model_dump(),
-            v2.model_dump(),
+            v1.model_dump(mode="json"),
+            v2.model_dump(mode="json"),
         ]
 
     async def test_get_with_page_and_size(
@@ -816,7 +829,13 @@ class TestBootAssetVersionsGetHandler:
 
 @pytest.mark.asyncio
 class TestBootAssetVersionsPostHandler:
-    async def test_post(self, user_client: Client, factory: Factory) -> None:
+    async def test_post(
+        self, user_client: Client, factory: Factory, mocker: MockerFixture
+    ) -> None:
+        mock_now = mocker.patch(
+            "msm.api.user.handlers.bootassets.now_utc",
+            return_value=factory.now,
+        )
         bs = await factory.make_BootSource()
         boot_asset = await factory.make_BootAsset(bs.id)
         data = {
@@ -832,6 +851,7 @@ class TestBootAssetVersionsPostHandler:
         assert stored[0] == data | {
             "id": new_id,
             "boot_asset_id": boot_asset.id,
+            "last_seen": factory.now,
         }
 
     async def test_post_missing_details(

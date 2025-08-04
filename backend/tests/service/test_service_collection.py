@@ -60,7 +60,12 @@ class TestServiceCollection:
         await collection.delete_item_and_purge(item2.id)
         versions = await factory.get("boot_asset_version")
         assert versions == [
-            {"id": ver1.id, "version": ver1.version, "boot_asset_id": asset.id}
+            {
+                "id": ver1.id,
+                "version": ver1.version,
+                "boot_asset_id": asset.id,
+                "last_seen": factory.now,
+            }
         ]
         assets = await factory.get("boot_asset")
         assert len(assets) == 1
