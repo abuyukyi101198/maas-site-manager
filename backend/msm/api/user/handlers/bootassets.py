@@ -110,7 +110,7 @@ async def get_boot_assets(
     ],
 ) -> dm.BootAssetsGetResponse:
     """Return boot assets."""
-    total, results = await services.boot_assets.get(
+    total, results = await services.boot_assets.get_with_source_name(
         sort_params,
         offset=pagination_params.offset,
         limit=pagination_params.size,

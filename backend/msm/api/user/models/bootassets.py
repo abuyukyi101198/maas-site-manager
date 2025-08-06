@@ -33,7 +33,7 @@ class BootAssetsPostResponse(BaseModel):
 
 
 class BootAssetsGetResponse(PaginatedResults):
-    items: list[models.BootAsset]
+    items: list[models.BootAssetWithSourceName]
 
 
 class BootSourceGetResponse(models.BootSource):

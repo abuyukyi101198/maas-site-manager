@@ -142,6 +142,10 @@ class BootAsset(BaseModel):
     signed: bool = False
 
 
+class BootAssetWithSourceName(BootAsset):
+    source_name: str
+
+
 class BootAssetCreate(BaseModel):
     boot_source_id: int
     kind: BootAssetKind

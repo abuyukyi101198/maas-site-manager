@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import json
 from typing import Any
 from uuid import uuid4
 
@@ -22,7 +21,7 @@ from tests.fixtures.factory import Factory
 @pytest.mark.asyncio
 class TestBootAssetsGetHandler:
     async def test_get(self, user_client: Client, factory: Factory) -> None:
-        boot_source = await factory.make_BootSource()
+        boot_source = await factory.make_BootSource(name="Test Source")
         boot_asset = await factory.make_BootAsset(
             boot_source_id=boot_source.id,
             kind=BootAssetKind.BOOTLOADER,
@@ -48,10 +47,9 @@ class TestBootAssetsGetHandler:
         assert resp_body["size"] == 20
         assert resp_body["total"] == 1
         resp_body["items"][0]["id"] = boot_asset.id
-
-        # dumping to JSON then loading back to a dict converts types like datetime
-        # to string representations, which are returned by the API
-        assert resp_body["items"] == [json.loads(boot_asset.model_dump_json())]
+        assert resp_body["items"] == [
+            boot_asset.model_dump(mode="json") | {"source_name": "Test Source"}
+        ]
 
     @pytest.mark.parametrize(
         "filter_param",
@@ -67,8 +65,8 @@ class TestBootAssetsGetHandler:
     async def test_get_with_filters(
         self, user_client: Client, factory: Factory, filter_param: str
     ) -> None:
-        bs = await factory.make_BootSource()
-        bs2 = await factory.make_BootSource()
+        bs = await factory.make_BootSource(name="Test Source 1")
+        bs2 = await factory.make_BootSource(name="Test Source 2")
         ba1 = await factory.make_BootAsset(
             bs.id,
             kind=BootAssetKind.OS,
@@ -85,20 +83,19 @@ class TestBootAssetsGetHandler:
             arch="arm",
             release="uhh",
         )
-        # dumping to JSON and back converts the Enums to their string/int values
-        url = f"/bootassets?{filter_param}={json.loads(ba1.model_dump_json())[filter_param]}"
+        url = f"/bootassets?{filter_param}={ba1.model_dump(mode="json")[filter_param]}"
         resp = await user_client.get(url)
         assert resp.status_code == 200
         resp_body = resp.json()
         assert len(resp_body["items"]) == 1
-        # dumping to JSON then loading back to a dict converts types like datetime
-        # to string representations, which are returned by the API
-        assert resp_body["items"][0] == json.loads(ba1.model_dump_json())
+        assert resp_body["items"][0] == ba1.model_dump(mode="json") | {
+            "source_name": "Test Source 1"
+        }
 
     async def test_get_with_sorting(
         self, user_client: Client, factory: Factory
     ) -> None:
-        boot_source = await factory.make_BootSource()
+        boot_source = await factory.make_BootSource(name="Test Source")
         boot_asset1 = await factory.make_BootAsset(
             boot_source_id=boot_source.id, os="a", release="b"
         )
@@ -109,15 +106,19 @@ class TestBootAssetsGetHandler:
         assert assets.status_code == 200
         resp_body = assets.json()
         assert resp_body["items"] == [
-            boot_asset1.model_dump(mode="json"),
-            boot_asset2.model_dump(mode="json"),
+            boot_asset1.model_dump(mode="json")
+            | {"source_name": "Test Source"},
+            boot_asset2.model_dump(mode="json")
+            | {"source_name": "Test Source"},
         ]
         assets = await user_client.get("/bootassets?sort_by=release")
         assert assets.status_code == 200
         resp_body = assets.json()
         assert resp_body["items"] == [
-            boot_asset2.model_dump(mode="json"),
-            boot_asset1.model_dump(mode="json"),
+            boot_asset2.model_dump(mode="json")
+            | {"source_name": "Test Source"},
+            boot_asset1.model_dump(mode="json")
+            | {"source_name": "Test Source"},
         ]
 
     async def test_get_with_page_and_size(
@@ -312,15 +313,15 @@ class TestBootSourcesGetHandler:
         assert assets.status_code == 200
         resp_body = assets.json()
         assert resp_body["items"] == [
-            json.loads(boot_source1.model_dump_json()),
-            json.loads(boot_source2.model_dump_json()),
+            boot_source1.model_dump(mode="json"),
+            boot_source2.model_dump(mode="json"),
         ]
         assets = await user_client.get("/bootasset-sources?sort_by=keyring")
         assert assets.status_code == 200
         resp_body = assets.json()
         assert resp_body["items"] == [
-            json.loads(boot_source2.model_dump_json()),
-            json.loads(boot_source1.model_dump_json()),
+            boot_source2.model_dump(mode="json"),
+            boot_source1.model_dump(mode="json"),
         ]
 
     async def test_get_with_page_and_size(
@@ -560,8 +561,8 @@ class TestBootSourceSelectionsGetHandler:
         assert assets.status_code == 200
         resp_body = assets.json()
         assert resp_body["items"] == [
-            json.loads(selection1.model_dump_json()),
-            json.loads(selection2.model_dump_json()),
+            selection1.model_dump(mode="json"),
+            selection2.model_dump(mode="json"),
         ]
         assets = await user_client.get(
             f"/bootasset-sources/{boot_source.id}/selections?sort_by=release"
@@ -569,8 +570,8 @@ class TestBootSourceSelectionsGetHandler:
         assert assets.status_code == 200
         resp_body = assets.json()
         assert resp_body["items"] == [
-            json.loads(selection2.model_dump_json()),
-            json.loads(selection1.model_dump_json()),
+            selection2.model_dump(mode="json"),
+            selection1.model_dump(mode="json"),
         ]
 
     async def test_get_with_page_and_size(
@@ -949,13 +950,13 @@ class TestBootAssetItemsGetHandler:
         )
         resp = await user_client.get(
             "/bootasset-items",
-            params=f"{filter_param}={json.loads(bi.model_dump_json())[filter_param]}",
+            params=f"{filter_param}={bi.model_dump(mode="json")[filter_param]}",
         )
 
         assert resp.status_code == 200
         resp_data = resp.json()
         assert len(resp_data["items"]) == 1
-        assert resp_data["items"] == [json.loads(bi.model_dump_json())]
+        assert resp_data["items"] == [bi.model_dump(mode="json")]
 
     @pytest.mark.parametrize(
         "sort_param",
@@ -1004,8 +1005,8 @@ class TestBootAssetItemsGetHandler:
         assert resp.status_code == 200
         resp_body = resp.json()
         assert resp_body["items"] == [
-            json.loads(bi1.model_dump_json()),
-            json.loads(bi2.model_dump_json()),
+            bi1.model_dump(mode="json"),
+            bi2.model_dump(mode="json"),
         ]
 
     async def test_get_with_page_and_size(
