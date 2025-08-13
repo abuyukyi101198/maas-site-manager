@@ -433,34 +433,37 @@ class TestBootAssetItemsDownloadHandler:
     async def test_download(
         self,
         user_client: Client,
+        boot_source: BootSource,
         items_ubuntu_jammy_1: list[BootAssetItem],
         s3_resource: MockType,
     ) -> None:
         file_path = items_ubuntu_jammy_1[0].path
-        resp = await user_client.get(f"/images/latest/stable/{file_path}")
+        resp = await user_client.get(
+            f"/images/latest/stable/{boot_source.id}/{file_path}"
+        )
         assert resp.status_code == 200
 
     async def test_download_not_found(
-        self, user_client: Client, factory: Factory
+        self, user_client: Client, boot_source: BootSource
     ) -> None:
         resp = await user_client.get(
-            "/images/latest/stable/ubuntu/noble/unknown-file"
+            f"/images/latest/stable/{boot_source.id}/ubuntu/noble/unknown-file"
         )
         assert resp.status_code == 404
 
     async def test_invalid_track(
-        self, user_client: Client, factory: Factory
+        self, user_client: Client, boot_source: BootSource
     ) -> None:
         resp = await user_client.get(
-            "/images/1.0/stable/ubuntu/noble/boot-kernel"
+            f"/images/1.0/stable/{boot_source.id}/ubuntu/noble/boot-kernel"
         )
         assert resp.status_code == 400
 
     async def test_invalid_risk(
-        self, user_client: Client, factory: Factory
+        self, user_client: Client, boot_source: BootSource
     ) -> None:
         resp = await user_client.get(
-            "/images/latest/edge/ubuntu/noble/boot-kernel"
+            f"/images/latest/edge/{boot_source.id}/ubuntu/noble/boot-kernel"
         )
         assert resp.status_code == 400
 

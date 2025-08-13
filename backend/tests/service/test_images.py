@@ -482,15 +482,17 @@ class TestBootAssetItemService:
     async def test_get_by_path(
         self,
         boot_asset_item_service: BootAssetItemService,
+        ubuntu_noble: BootAsset,
         items_ubuntu_noble_1: list[BootAssetItem],
         exists: bool,
     ) -> None:
         details = items_ubuntu_noble_1[0].model_dump()
+        boot_source_id = ubuntu_noble.boot_source_id
         path = details["path"] if exists else "asdf/asdf"
 
-        assert await boot_asset_item_service.get_by_path(path) == (
-            BootAssetItem(**details) if exists else None
-        )
+        assert await boot_asset_item_service.get_by_path(
+            boot_source_id, path
+        ) == (BootAssetItem(**details) if exists else None)
 
     async def test_create(
         self,
@@ -698,26 +700,26 @@ class TestImagesIndexService:
                         "release": "jammy",
                         "release_title": "22.04 LTS",
                         "subarch": "ga-22.04",
-                        "support_eol": "2035-08-09",
-                        "support_esm_eol": "2044-10-10",
+                        "support_eol": "2027-04-21",
+                        "support_esm_eol": "2032-04-21",
                         "versions": {
                             "20250601": {
                                 "items": {
                                     "boot-initrd": {
                                         "ftype": "boot-initrd",
-                                        "path": "20250601/ga-22.04/boot-initrd",
+                                        "path": "2/20250601/ga-22.04/boot-initrd",
                                         "sha256": "abc456",
                                         "size": 465
                                     },
                                     "squashfs": {
                                         "ftype": "squashfs",
-                                        "path": "20250601/squashfs",
+                                        "path": "2/20250601/squashfs",
                                         "sha256": "12345555",
                                         "size": 12345555
                                     },
                                     "boot-kernel": {
                                         "ftype": "boot-kernel",
-                                        "path": "20250601/ga-22.04/boot-kernel",
+                                        "path": "2/20250601/ga-22.04/boot-kernel",
                                         "sha256": "abc123",
                                         "size": 123
                                     }
@@ -735,7 +737,7 @@ class TestImagesIndexService:
                                 "items": {
                                     "grub2-signed": {
                                         "ftype": "archive.tar.xz",
-                                        "path": "20250401/grub2-signed.tar.xz",
+                                        "path": "3/20250401/grub2-signed.tar.xz",
                                         "sha256": "deadbeef",
                                         "size": 8888,
                                         "src_package": "grub2-signed",
@@ -744,7 +746,7 @@ class TestImagesIndexService:
                                     },
                                     "shim-signed": {
                                         "ftype": "archive.tar.xz",
-                                        "path": "20250401/shim-signed.tar.xz",
+                                        "path": "3/20250401/shim-signed.tar.xz",
                                         "sha256": "deadbeef2",
                                         "size": 7777,
                                         "src_package": "shim-signed",
@@ -763,26 +765,26 @@ class TestImagesIndexService:
                         "release": "noble",
                         "release_title": "24.04 LTS",
                         "subarch": "hwe-24.04",
-                        "support_eol": "2035-08-09",
-                        "support_esm_eol": "2044-10-10",
+                        "support_eol": "2029-05-31",
+                        "support_esm_eol": "2034-04-25",
                         "versions": {
                             "20250701": {
                                 "items": {
                                     "squashfs": {
                                         "ftype": "squashfs",
-                                        "path": "20250701/squashfs",
+                                        "path": "2/20250701/squashfs",
                                         "sha256": "12345555",
                                         "size": 12345555
                                     },
                                     "boot-kernel": {
                                         "ftype": "boot-kernel",
-                                        "path": "20250701/hwe-24.04/boot-kernel",
+                                        "path": "2/20250701/hwe-24.04/boot-kernel",
                                         "sha256": "abc123",
                                         "size": 123
                                     },
                                     "boot-initrd": {
                                         "ftype": "boot-initrd",
-                                        "path": "20250701/hwe-24.04/boot-initrd",
+                                        "path": "2/20250701/hwe-24.04/boot-initrd",
                                         "sha256": "abc456",
                                         "size": 465
                                     }

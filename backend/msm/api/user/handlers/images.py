@@ -146,18 +146,18 @@ class IndexStreamResponse(StreamingResponse):
 
 
 @v1_router.get(
-    "/images/{track}/{risk}/{file_path:path}",
+    "/images/{track}/{risk}/streams/v1/{index_path:path}",
     responses={
         400: {"model": BadRequestErrorResponseModel},
         401: {"model": UnauthorizedErrorResponseModel},
         404: {"model": NotFoundErrorResponseModel},
     },
 )
-async def download(
+async def download_index(
     services: Annotated[ServiceCollection, Depends(services)],
     track: str,
     risk: str,
-    file_path: str,
+    index_path: str,
 ) -> StreamingResponse:
     errors: list[BaseExceptionDetail] = []
 
@@ -192,16 +192,77 @@ async def download(
     parsed = urlparse(service_url)
     fqdn = parsed.hostname if parsed.hostname else gethostname()
     reversed_fqdn = reverse_fqdn(fqdn)
-    if file_path == "streams/v1/index.json":
+
+    if index_path == "index.json":
         index = await services.index_service.get(models.IndexType.INDEX, fqdn)
         return IndexStreamResponse(None, index)
-    elif file_path == f"streams/v1/{reversed_fqdn}:stream:v1:download.json":
+    elif index_path == f"{reversed_fqdn}:stream:v1:download.json":
         index = await services.index_service.get(
             models.IndexType.DOWNLOAD, fqdn
         )
         return IndexStreamResponse(None, index)
+    else:
+        raise NotFoundException(
+            code=ExceptionCode.MISSING_RESOURCE,
+            message="Index file does not exist.",
+            details=[
+                BaseExceptionDetail(
+                    reason=ExceptionCode.MISSING_RESOURCE,
+                    messages=[f"Index file '{index_path}' does not exist"],
+                    field="index_path",
+                    location="path",
+                )
+            ],
+        )
 
-    boot_item = await services.boot_asset_items.get_by_path(file_path)
+
+@v1_router.get(
+    "/images/{track}/{risk}/{boot_source_id}/{file_path:path}",
+    responses={
+        400: {"model": BadRequestErrorResponseModel},
+        401: {"model": UnauthorizedErrorResponseModel},
+        404: {"model": NotFoundErrorResponseModel},
+    },
+)
+async def download(
+    services: Annotated[ServiceCollection, Depends(services)],
+    track: str,
+    risk: str,
+    boot_source_id: int,
+    file_path: str,
+) -> StreamingResponse:
+    errors: list[BaseExceptionDetail] = []
+
+    if track != "latest":
+        errors.append(
+            BaseExceptionDetail(
+                reason=ExceptionCode.INVALID_PARAMS,
+                messages=[f"Invalid track '{track}' requested"],
+                field="track",
+                location="path",
+            )
+        )
+
+    if risk != "stable":
+        errors.append(
+            BaseExceptionDetail(
+                reason=ExceptionCode.INVALID_PARAMS,
+                messages=[f"Invalid risk '{risk}' requested"],
+                field="risk",
+                location="path",
+            )
+        )
+
+    if errors:
+        raise BadRequestException(
+            code=ExceptionCode.INVALID_PARAMS,
+            message="Invalid track/risk requested.",
+            details=errors,
+        )
+
+    boot_item = await services.boot_asset_items.get_by_path(
+        boot_source_id, file_path
+    )
     if not boot_item:
         raise NotFoundException(
             code=ExceptionCode.MISSING_RESOURCE,

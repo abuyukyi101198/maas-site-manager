@@ -675,19 +675,34 @@ class BootAssetItemService(Service):
             return models.BootAssetItem(**row._asdict())
         return None
 
-    async def get_by_path(self, path: str) -> models.BootAssetItem | None:
-        stmt = self._select_statement(
-            BootAssetItem.c.id,
-            BootAssetItem.c.boot_asset_version_id,
-            BootAssetItem.c.ftype,
-            BootAssetItem.c.sha256,
-            BootAssetItem.c.path,
-            BootAssetItem.c.file_size,
-            BootAssetItem.c.source_package,
-            BootAssetItem.c.source_version,
-            BootAssetItem.c.source_release,
-            BootAssetItem.c.bytes_synced,
-        ).where(BootAssetItem.c.path == path)
+    async def get_by_path(
+        self, boot_source_id: int, path: str
+    ) -> models.BootAssetItem | None:
+        stmt = (
+            self._select_statement(
+                BootAssetItem.c.id,
+                BootAssetItem.c.boot_asset_version_id,
+                BootAssetItem.c.ftype,
+                BootAssetItem.c.sha256,
+                BootAssetItem.c.path,
+                BootAssetItem.c.file_size,
+                BootAssetItem.c.source_package,
+                BootAssetItem.c.source_version,
+                BootAssetItem.c.source_release,
+                BootAssetItem.c.bytes_synced,
+            )
+            .join(
+                BootAssetVersion,
+                BootAssetVersion.c.id == BootAssetItem.c.boot_asset_version_id,
+            )
+            .join(
+                BootAsset, BootAsset.c.id == BootAssetVersion.c.boot_asset_id
+            )
+            .where(
+                BootAsset.c.boot_source_id == boot_source_id,
+                BootAssetItem.c.path == path,
+            )
+        )
         result = await self.conn.execute(stmt)
         if row := result.one_or_none():
             return models.BootAssetItem(**row._asdict())
@@ -992,7 +1007,7 @@ ON ver_item.boot_asset_id = asset.id;"""
                 product_key = f"{reversed_fqdn}.stream:{product.os}:{product.bootloader_type}:{product.arch}"
                 item_json = {
                     "ftype": product.ftype.value,
-                    "path": product.path,
+                    "path": f"{product.boot_source_id}/{product.path}",
                     "sha256": product.sha256,
                     "size": product.file_size,
                     "src_package": product.source_package,
@@ -1006,7 +1021,7 @@ ON ver_item.boot_asset_id = asset.id;"""
                     product_key += f"-{product.flavor}"
                 item_json = {
                     "ftype": product.ftype.value,
-                    "path": product.path,
+                    "path": f"{product.boot_source_id}/{product.path}",
                     "sha256": product.sha256,
                     "size": product.file_size,
                 }

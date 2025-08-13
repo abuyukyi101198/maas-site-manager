@@ -64,7 +64,8 @@ AUTHENTICATED_ROUTES = (
 
 UNAUTHENTICATED_ROUTES = (
     ("POST", "/api/v1/login"),
-    ("GET", "/api/v1/images/{track}/{risk}/{file_path:path}"),
+    ("GET", "/api/v1/images/{track}/{risk}/{boot_source_id}/{file_path:path}"),
+    ("GET", "/api/v1/images/{track}/{risk}/streams/v1/{index_path:path}"),
 )
 
 ADMIN_ROUTES = (

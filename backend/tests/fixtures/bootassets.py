@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import pytest
 
@@ -84,8 +84,8 @@ async def ubuntu_noble(factory: Factory, boot_source: BootSource) -> BootAsset:
         arch="amd64",
         subarch="hwe-24.04",
         flavor="generic",
-        eol=factory.now + timedelta(days=3650),
-        esm_eol=factory.now + timedelta(days=7000),
+        eol=datetime(2029, 5, 31),
+        esm_eol=datetime(2034, 4, 25),
         signed=True,
     )
 
@@ -102,8 +102,8 @@ async def ubuntu_jammy(factory: Factory, boot_source: BootSource) -> BootAsset:
         arch="amd64",
         subarch="ga-22.04",
         flavor="generic",
-        eol=factory.now + timedelta(days=3650),
-        esm_eol=factory.now + timedelta(days=7000),
+        eol=datetime(2027, 4, 21),
+        esm_eol=datetime(2032, 4, 21),
         signed=True,
     )
 
@@ -119,7 +119,7 @@ async def centos(factory: Factory, boot_source_low: BootSource) -> BootAsset:
         title="CentOS 7",
         arch="amd64",
         subarch="generic",
-        eol=factory.now - timedelta(days=3650),
+        eol=datetime(2024, 6, 30),
         signed=False,
     )
 
