@@ -1,7 +1,7 @@
 from logging import getLogger
 from typing import Annotated
 
-import boto3  # type: ignore
+import boto3
 from fastapi import APIRouter, BackgroundTasks, Depends, Path
 from fastapi.concurrency import run_in_threadpool
 from sqlalchemy.exc import IntegrityError
@@ -735,6 +735,7 @@ async def delete_images(
             ],
         )
     settings = Settings()
+    assert settings.s3_bucket is not None
     s3 = boto3.resource(
         "s3",
         use_ssl=False,

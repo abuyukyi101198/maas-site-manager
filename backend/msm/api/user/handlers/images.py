@@ -4,10 +4,10 @@ from logging import getLogger
 from math import ceil
 from os.path import join
 from socket import gethostname
-from typing import Annotated, Any
+from typing import TYPE_CHECKING, Annotated, Any
 from urllib.parse import urlparse
 
-import boto3  # type: ignore
+import boto3
 from fastapi import APIRouter, Depends, Request
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import StreamingResponse
@@ -45,6 +45,9 @@ from msm.service.images import END_OF_TIME, reverse_fqdn
 from msm.settings import Settings
 from msm.time import now_utc
 
+if TYPE_CHECKING:
+    from mypy_boto3_s3.type_defs import CompletedPartTypeDef
+
 logger = getLogger()
 
 v1_router = APIRouter(prefix="/v1")
@@ -62,6 +65,7 @@ class S3StreamResponse(StreamingResponse):
     ) -> None:
         super().__init__(content, status_code, headers, media_type, background)
         settings = Settings()
+        assert settings.s3_bucket is not None
         self.file_path = join(
             settings.s3_path if settings.s3_path else "",
             file_id,
@@ -331,6 +335,7 @@ class S3MultipartUploadTarget(BaseTarget):  # type: ignore
             aws_access_key_id=settings.s3_access_key,
             aws_secret_access_key=settings.s3_secret_key,
         )
+        assert settings.s3_bucket is not None
         self.s3_bucket = settings.s3_bucket
         self.filename = join(
             settings.s3_path if settings.s3_path else "",
@@ -346,7 +351,7 @@ class S3MultipartUploadTarget(BaseTarget):  # type: ignore
         self.upload_id = multipart_upload["UploadId"]
         self.current_chunk = b""
         self.part_no = 1
-        self.parts: list[dict[str, Any]] = []
+        self.parts: list[CompletedPartTypeDef] = []
         self.bytes_sent = 0
         self.sha256 = sha256()
         super().__init__(

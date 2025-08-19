@@ -1,16 +1,17 @@
-from base64 import b64encode
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
-from hashlib import sha256
 from os.path import join
 import typing
 
-import boto3  # type: ignore
+import boto3
 from temporalio import activity
 from temporalio.exceptions import ApplicationError
 
 from .base import BaseActivity
+
+if typing.TYPE_CHECKING:
+    from mypy_boto3_s3.type_defs import CompletedPartTypeDef
 
 MIN_S3_PART_SIZE = 5 * 1024**2  # 5MiB
 
@@ -131,12 +132,13 @@ class S3ResourceManager:
         self,
         s3_params: S3Params,
         boot_asset_item_id: int,
-        multipart: bool = True,
+        use_ssl: bool = False,
+        verify: bool = False,
     ) -> None:
-        self.s3_resource = boto3.resource(
+        self._s3_client = boto3.client(
             "s3",
-            use_ssl=False,
-            verify=False,
+            use_ssl=use_ssl,
+            verify=verify,
             endpoint_url=s3_params.endpoint,
             aws_access_key_id=s3_params.access_key,
             aws_secret_access_key=s3_params.secret_key,
@@ -144,81 +146,60 @@ class S3ResourceManager:
         self.s3_path = s3_params.path
         self.s3_key = join(s3_params.path, str(boot_asset_item_id))
         self.bucket = s3_params.bucket
-        if multipart:
-            self.multipart = True
-            self.upload_id = self._create_multipart_upload()
-            self.part_no = 1
-            self.parts: list[dict[str, typing.Any]] = []
-            self.bytes_sent = 0
-        else:
-            self.multipart = False
+        self._upload_id: str | None = self._create_multipart_upload()
+        self._part_no = 1
+        self._parts: list[CompletedPartTypeDef] = []
+        self._bytes_sent = 0
+
+    @property
+    def bytes_sent(self) -> int:
+        return self._bytes_sent
 
     def _create_multipart_upload(self) -> str:
-        multipart_upload = (
-            self.s3_resource.meta.client.create_multipart_upload(
-                ACL="public-read",
-                Bucket=self.bucket,
-                Key=self.s3_key,
-                ChecksumAlgorithm="SHA256",
-            )
+        multipart_upload = self._s3_client.create_multipart_upload(
+            ACL="public-read",
+            Bucket=self.bucket,
+            Key=self.s3_key,
+            ChecksumAlgorithm="SHA256",
         )
-        return multipart_upload["UploadId"]  # type: ignore
+        return multipart_upload["UploadId"]
 
     def upload_part(self, chunk: bytes) -> None:
-        if not self.multipart:
-            raise RuntimeError(
-                "S3ResourceManager was initialized in non-multipart mode, but a call to upload a part was made."
-            )
-        multipart_upload_part = self.s3_resource.MultipartUploadPart(
-            self.bucket, self.s3_key, self.upload_id, self.part_no
-        )
-        part = multipart_upload_part.upload(
+        if self._upload_id is None:
+            raise RuntimeError("Multipart operation is not in progress")
+        part = self._s3_client.upload_part(
+            Bucket=self.bucket,
+            Key=self.s3_key,
+            UploadId=self._upload_id,
+            PartNumber=self._part_no,
             Body=chunk,
             ChecksumAlgorithm="SHA256",
         )
-
-        activity.heartbeat(f"Uploaded part {self.part_no}")
-        self.parts.append({"ETag": part["ETag"], "PartNumber": self.part_no})
-        self.part_no += 1
-        self.bytes_sent += len(chunk)
+        activity.heartbeat(f"Uploaded part {self._part_no}")
+        self._parts.append({"ETag": part["ETag"], "PartNumber": self._part_no})
+        self._part_no += 1
+        self._bytes_sent += len(chunk)
 
     def complete_upload(self) -> None:
-        if not self.multipart:
-            raise RuntimeError(
-                "S3ResourceManager was initialized in non-multipart mode."
-            )
-        self.s3_resource.meta.client.complete_multipart_upload(
+        if self._upload_id is None:
+            raise RuntimeError("Multipart operation is not in progress")
+        self._s3_client.complete_multipart_upload(
             Bucket=self.bucket,
             Key=self.s3_key,
-            UploadId=self.upload_id,
-            MultipartUpload={"Parts": self.parts},
+            UploadId=self._upload_id,
+            MultipartUpload={"Parts": self._parts},
         )
+        self._upload_id = None
 
     def abort_upload(self) -> None:
-        if not self.multipart:
-            raise RuntimeError(
-                "S3ResourceManager was initialized in non-multipart mode."
-            )
-        self.s3_resource.meta.client.abort_multipart_upload(
+        if self._upload_id is None:
+            raise RuntimeError("Multipart operation is not in progress")
+        self._s3_client.abort_multipart_upload(
             Bucket=self.bucket,
             Key=self.s3_key,
-            UploadId=self.upload_id,
+            UploadId=self._upload_id,
         )
-
-    def upload_file(
-        self, contents: str, key_override: str | None = None
-    ) -> None:
-        key = self.s3_key
-        if key_override:
-            key = join(self.s3_path, key_override)
-        object = self.s3_resource.Object(self.bucket, key)
-        checksum = sha256(contents.encode())
-        object.put(
-            Body=contents.encode(),
-            ACL="public-read",
-            ChecksumAlgorithm="SHA256",
-            ChecksumSHA256=b64encode(checksum.digest()).decode(),
-        )
+        self._upload_id = None
 
 
 def compose_url(prefix: str, path: str) -> str:
@@ -245,9 +226,8 @@ class ImageManagementActivities(BaseActivity):
         self,
         params: S3Params,
         item_id: int,
-        multipart: bool = True,
     ) -> S3ResourceManager:
-        return S3ResourceManager(params, item_id, multipart=multipart)
+        return S3ResourceManager(params, item_id)
 
     async def _get_or_create(
         self,
