@@ -85,7 +85,7 @@ boot_source_selection_sort_parameters = SortParamParser(
         "label",
         "os",
         "release",
-        "available",
+        "arch",
     ]
 )
 
@@ -394,37 +394,31 @@ async def put_boot_source_avail_selections(
         )
 
     _, existing = await services.boot_source_selections.get(id, [])
-    incoming_map = {(p.os, p.release): p for p in patch_request.available}
-    existing_map = {(p.os, p.release): p for p in existing}
+    incoming_map = {
+        (p.os, p.release, p.arch): p for p in patch_request.available
+    }
+    existing_map = {(p.os, p.release, p.arch): p for p in existing}
 
     stale_keys = set(existing_map.keys()) - set(incoming_map.keys())
-
-    for in_k, in_v in incoming_map.items():
-        if cur := existing_map.get(in_k, None):
-            await services.boot_source_selections.update(
-                boot_source_id=cur.boot_source_id,
-                selection_id=cur.id,
-                details=models.BootSourceSelectionUpdate(
-                    available=in_v.arches,
-                ),
+    new_keys = set(incoming_map.keys()) - set(existing_map.keys())
+    for in_k in new_keys:
+        in_v = incoming_map[in_k]
+        await services.boot_source_selections.create(
+            models.BootSourceSelectionCreate(
+                boot_source_id=id,
+                label=in_v.label,
+                os=in_v.os,
+                release=in_v.release,
+                arch=in_v.arch,
+                selected=False,
             )
-        else:
-            await services.boot_source_selections.create(
-                models.BootSourceSelectionCreate(
-                    boot_source_id=id,
-                    label=in_v.label,
-                    os=in_v.os,
-                    release=in_v.release,
-                    available=in_v.arches,
-                    selected=[],
-                )
-            )
+        )
 
     stale = []
     for cur_k, cur_v in existing_map.items():
         if cur_k in stale_keys:
             stale.append(cur_v)
-            if len(cur_v.selected) == 0:
+            if not cur_v.selected:
                 await services.boot_source_selections.delete(
                     cur_v.boot_source_id, cur_v.id
                 )

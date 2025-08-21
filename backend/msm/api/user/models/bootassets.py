@@ -88,10 +88,14 @@ class AvailableBootSourceSelection(NamedTuple):
     os: str
     release: str
     label: models.BootAssetLabel
-    arches: list[str]
+    arch: str
 
     def __eq__(self, other: Any) -> bool:
-        return (self.os, self.release) == (other.os, other.release)
+        return (self.os, self.release, self.arch) == (
+            other.os,
+            other.release,
+            other.arch,
+        )
 
 
 class BootSourceAvailSelectionsPutRequest(BaseModel):

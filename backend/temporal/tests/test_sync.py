@@ -73,15 +73,16 @@ def boot_source_data() -> dict[str, typing.Any]:
             "url": "http://upstream.example.com/streams/v1/index.sjson",
             "keyring": None,
         },
-        "selections": {"ubuntu---noble": ["amd64"]},
+        "selections": {"ubuntu---noble---amd64"},
     }
 
 
 @pytest.fixture
-def available_assets() -> list[tuple[str, str, str, list[str]]]:
+def available_assets() -> list[tuple[str, str, str, str]]:
     return [
-        ("ubuntu", "oracular", "candidate", ["amd64", "ppc64el"]),
-        ("ubuntu", "jammy", "candidate", ["s390x"]),
+        ("ubuntu", "oracular", "candidate", "amd64"),
+        ("ubuntu", "oracular", "candidate", "ppc64el"),
+        ("ubuntu", "jammy", "candidate", "s390x"),
     ]
 
 
@@ -277,7 +278,7 @@ class TestRefreshUpstreamSourceWorkflow:
         self,
         refresh_params: RefreshUpstreamSourceParams,
         boot_source_data: dict[str, typing.Any],
-        available_assets: list[tuple[str, str, str, list[str]]],
+        available_assets: list[tuple[str, str, str, str]],
     ) -> None:
         # Mock activities
         @activity.defn(name=GET_BOOT_SOURCE_ACTIVITY)

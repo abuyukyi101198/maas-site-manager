@@ -42,7 +42,7 @@ class TestSampleData:
         token = await factory.get("token")
         assert len(token) == 10
         boot_source_selection = await factory.get("boot_source_selection")
-        assert len(boot_source_selection) == 3
+        assert len(boot_source_selection) == 4
         boot_source = await factory.get("boot_source")
         assert len(boot_source) == 2
         boot_asset = await factory.get("boot_asset")

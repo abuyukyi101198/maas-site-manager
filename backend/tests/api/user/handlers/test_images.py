@@ -537,22 +537,50 @@ class TestGetSelectableImagesHandler:
             boot_source_low.id,
             os="ubuntu",
             release="noble",
-            available=["amd64", "arm64", "ppc64el"],
-            selected=["amd64", "arm64"],
+            arch="amd64",
+            selected=True,
+        )
+        await factory.make_BootSourceSelection(
+            boot_source_low.id,
+            os="ubuntu",
+            release="noble",
+            arch="arm64",
+            selected=True,
+        )
+        await factory.make_BootSourceSelection(
+            boot_source_low.id,
+            os="ubuntu",
+            release="noble",
+            arch="ppc64el",
+            selected=False,
         )
         await factory.make_BootSourceSelection(
             boot_source.id,
             os="ubuntu",
             release="noble",
-            available=["amd64", "arm64"],
-            selected=["amd64"],
+            arch="arm64",
+            selected=False,
+        )
+        await factory.make_BootSourceSelection(
+            boot_source.id,
+            os="ubuntu",
+            release="noble",
+            arch="amd64",
+            selected=True,
         )
         await factory.make_BootSourceSelection(
             boot_source.id,
             os="ubuntu",
             release="jammy",
-            available=["amd64", "arm64"],
-            selected=[],
+            arch="amd64",
+            selected=False,
+        )
+        await factory.make_BootSourceSelection(
+            boot_source.id,
+            os="ubuntu",
+            release="jammy",
+            arch="arm64",
+            selected=False,
         )
         resp = await user_client.get("/selectable-images")
         assert resp.status_code == 200
@@ -599,7 +627,7 @@ class TestGetSelectedImagesHandler:
         ubuntu_noble: BootAsset,
         items_ubuntu_noble_1: list[BootAssetItem],
         items_ubuntu_noble_2: list[BootAssetItem],
-        sel_ubuntu_noble: BootSourceSelection,
+        sel_ubuntu_noble: list[BootSourceSelection],
     ) -> None:
         resp = await user_client.get("/selected-images")
         assert resp.status_code == 200

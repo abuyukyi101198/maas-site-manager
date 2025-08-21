@@ -1,4 +1,3 @@
-from collections import defaultdict
 from dataclasses import dataclass, field
 import json
 import typing
@@ -45,7 +44,7 @@ class GetBootSourceParams:
 class GetBootSourceResult:
     index_url: str
     keyring: str | None = None
-    selections: dict[str, list[str]] = field(default_factory=dict)
+    selections: list[str] = field(default_factory=list)
 
     @classmethod
     def from_dict(cls, data: dict[str, typing.Any]) -> typing.Self:
@@ -73,7 +72,7 @@ class FetchSsIndexesResult:
 class LoadProductMapParams:
     index_url: str
     keyring: str | None = None
-    selections: dict[str, list[str]] = field(default_factory=dict)
+    selections: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -95,7 +94,7 @@ class AvailableAsset(typing.NamedTuple):
     os: str
     release: str
     label: str
-    arches: list[str]
+    arch: str
 
 
 @dataclass
@@ -115,8 +114,8 @@ class PatchAssetListParams:
     available: FetchAssetListResult
 
 
-def get_selection_key(os: str, release: str) -> str:
-    return f"{os}---{release}"
+def get_selection_key(os: str, release: str, arch: str) -> str:
+    return f"{os}---{release}---{arch}"
 
 
 class SimpleStreamActivities(BaseActivity):
@@ -175,12 +174,10 @@ class SimpleStreamActivities(BaseActivity):
             raise ApplicationError(
                 f"Failed to get asset selections: {response.status_code} {response.text}"
             )
-        selections = {
-            get_selection_key(sel["os"], sel["release"]): sel["arches"].split(
-                ","
-            )
+        selections = [
+            get_selection_key(sel["os"], sel["release"], sel["arch"])
             for sel in response.json()["items"]
-        }
+        ]
         activity.logger.debug(
             "Boot source %d has %d selections",
             params.boot_source_id,
@@ -238,12 +235,12 @@ class SimpleStreamActivities(BaseActivity):
         for product_data in content["products"].values():
             if "bootloader-type" not in product_data:
                 key = get_selection_key(
-                    product_data["os"], product_data["release"]
+                    product_data["os"],
+                    product_data["release"],
+                    product_data["arch"],
                 )
 
                 if key not in params.selections:
-                    continue
-                if product_data["arch"] not in params.selections[key]:
                     continue
 
             base_item = {
@@ -283,24 +280,20 @@ class SimpleStreamActivities(BaseActivity):
         )
         activity.heartbeat()
 
-        available: dict[tuple[str, str, str], list[str]] = defaultdict(list)
+        available: list[AvailableAsset] = []
         for product_data in content["products"].values():
             if "bootloader-type" in product_data:
                 continue
-            available[
-                (
+            available.append(
+                AvailableAsset(
                     product_data["os"],
                     product_data["release"],
                     product_data["label"],
+                    product_data["arch"],
                 )
-            ].append(product_data["arch"])
+            )
 
-        return FetchAssetListResult(
-            assets=[
-                AvailableAsset(k[0], k[1], k[2], v)
-                for k, v in available.items()
-            ]
-        )
+        return FetchAssetListResult(assets=available)
 
     @activity.defn(name=PATCH_AVAILABLE_ASSETS_ACTIVITY)
     async def patch_asset_list(self, params: PatchAssetListParams) -> bool:
@@ -317,7 +310,7 @@ class SimpleStreamActivities(BaseActivity):
                     "os": sel.os,
                     "release": sel.release,
                     "label": sel.label,
-                    "arches": sel.arches,
+                    "arch": sel.arch,
                 }
                 for sel in params.available.assets
             ]

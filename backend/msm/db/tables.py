@@ -172,8 +172,8 @@ BootSourceSelection = Table(
     Column("label", Text, nullable=False),
     Column("os", Text, nullable=False),
     Column("release", Text, nullable=False),
-    Column("available", ARRAY(Text), nullable=False),
-    Column("selected", ARRAY(Text), nullable=False),
+    Column("arch", Text, nullable=False),
+    Column("selected", Boolean, nullable=False),
 )
 
 BootAsset = Table(

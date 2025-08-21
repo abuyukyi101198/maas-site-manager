@@ -487,10 +487,10 @@ class TestBootSourceSelectionsGetHandler:
     async def test_get(
         self,
         user_client: Client,
-        sel_ubuntu_jammy: BootSourceSelection,
+        sel_ubuntu_jammy: list[BootSourceSelection],
         sel_centos: BootSourceSelection,
     ) -> None:
-        bs_id = sel_ubuntu_jammy.boot_source_id
+        bs_id = sel_ubuntu_jammy[0].boot_source_id
         selections = await user_client.get(
             f"/bootasset-sources/{bs_id}/selections"
         )
@@ -498,42 +498,48 @@ class TestBootSourceSelectionsGetHandler:
         resp_body = selections.json()
         assert resp_body["page"] == 1
         assert resp_body["size"] == 20
-        assert resp_body["total"] == 1
-        assert resp_body["items"] == [sel_ubuntu_jammy.model_dump(mode="json")]
+        assert resp_body["total"] == 2
+        assert resp_body["items"] == [
+            sel.model_dump(mode="json") for sel in sel_ubuntu_jammy
+        ]
 
     async def test_get_with_sorting(
         self,
         user_client: Client,
-        sel_ubuntu_jammy: BootSourceSelection,
-        sel_ubuntu_noble: BootSourceSelection,
+        sel_ubuntu_jammy: list[BootSourceSelection],
+        sel_ubuntu_noble: list[BootSourceSelection],
     ) -> None:
-        bs_id = sel_ubuntu_jammy.boot_source_id
+        bs_id = sel_ubuntu_jammy[0].boot_source_id
         assets = await user_client.get(
             f"/bootasset-sources/{bs_id}/selections?sort_by=release"
         )
         assert assets.status_code == 200
         resp_body = assets.json()
         assert resp_body["items"] == [
-            sel_ubuntu_jammy.model_dump(mode="json"),
-            sel_ubuntu_noble.model_dump(mode="json"),
+            sel_ubuntu_jammy[0].model_dump(mode="json"),
+            sel_ubuntu_jammy[1].model_dump(mode="json"),
+            sel_ubuntu_noble[0].model_dump(mode="json"),
+            sel_ubuntu_noble[1].model_dump(mode="json"),
         ]
         assets = await user_client.get(
-            f"/bootasset-sources/{bs_id}/selections?sort_by=available"
+            f"/bootasset-sources/{bs_id}/selections?sort_by=arch"
         )
         assert assets.status_code == 200
         resp_body = assets.json()
         assert resp_body["items"] == [
-            sel_ubuntu_noble.model_dump(mode="json"),
-            sel_ubuntu_jammy.model_dump(mode="json"),
+            sel_ubuntu_jammy[1].model_dump(mode="json"),
+            sel_ubuntu_noble[1].model_dump(mode="json"),
+            sel_ubuntu_noble[0].model_dump(mode="json"),
+            sel_ubuntu_jammy[0].model_dump(mode="json"),
         ]
 
     async def test_get_with_page_and_size(
         self,
         user_client: Client,
-        sel_ubuntu_jammy: BootSourceSelection,
-        sel_ubuntu_noble: BootSourceSelection,
+        sel_ubuntu_jammy: list[BootSourceSelection],
+        sel_ubuntu_noble: list[BootSourceSelection],
     ) -> None:
-        bs_id = sel_ubuntu_jammy.boot_source_id
+        bs_id = sel_ubuntu_jammy[0].boot_source_id
 
         resp = await user_client.get(
             f"/bootasset-sources/{bs_id}/selections?page=2&size=1&sort_by=release"
@@ -543,7 +549,7 @@ class TestBootSourceSelectionsGetHandler:
         assert resp_body["page"] == 2
         assert resp_body["size"] == 1
         assert len(resp_body["items"]) == 1
-        assert resp_body["items"][0]["release"] == sel_ubuntu_noble.release
+        assert resp_body["items"][0]["release"] == sel_ubuntu_jammy[1].release
 
     @pytest.mark.parametrize("sort_by", ["id", "kind,kind", "not_a_field"])
     async def test_invalid_sort_params(
@@ -580,22 +586,28 @@ class TestBootSourceAvailSelectionsPutHandler:
         user_client: Client,
         factory: Factory,
         boot_source: BootSource,
-        sel_ubuntu_noble: BootSourceSelection,
+        sel_ubuntu_noble: list[BootSourceSelection],
     ) -> None:
-        # update the existing one
-        up_sel = {
-            "os": sel_ubuntu_noble.os,
-            "release": sel_ubuntu_noble.release,
-            "label": sel_ubuntu_noble.label,
-            "arches": ["amd64", "arm64"],
+        # update the existing noble selections
+        up_sel_1 = {
+            "os": sel_ubuntu_noble[0].os,
+            "release": sel_ubuntu_noble[0].release,
+            "label": sel_ubuntu_noble[0].label,
+            "arch": "amd64",
+        }
+        up_sel_2 = {
+            "os": sel_ubuntu_noble[0].os,
+            "release": sel_ubuntu_noble[0].release,
+            "label": sel_ubuntu_noble[0].label,
+            "arch": "arm64",
         }
         new_sel = {
             "os": "centos",
             "release": "stream9",
             "label": "candidate",
-            "arches": ["amd64"],
+            "arch": "amd64",
         }
-        put_data = {"available": [up_sel, new_sel]}
+        put_data = {"available": [up_sel_1, up_sel_2, new_sel]}
         resp = await user_client.put(
             f"/bootasset-sources/{boot_source.id}/available-selections",
             json=put_data,
@@ -605,17 +617,25 @@ class TestBootSourceAvailSelectionsPutHandler:
         assert "stale" in data
         # The original selection should be updated, and a new one added
         stored = await factory.get("boot_source_selection")
-        assert len(stored) == 2
-        assert stored[0]["os"] == up_sel["os"]
-        assert stored[0]["available"] == up_sel["arches"]
-        assert stored[1]["os"] == new_sel["os"]
-        assert stored[1]["available"] == new_sel["arches"]
+        stored = [
+            {
+                "os": sel["os"],
+                "arch": sel["arch"],
+                "release": sel["release"],
+                "label": sel["label"],
+            }
+            for sel in stored
+        ]
+        assert len(stored) == 3
+        assert up_sel_1 in stored
+        assert up_sel_2 in stored
+        assert new_sel in stored
 
     async def test_put_removes_stale_selections(
         self,
         user_client: Client,
         boot_source: BootSource,
-        sel_ubuntu_noble: BootSourceSelection,
+        sel_ubuntu_noble: list[BootSourceSelection],
     ) -> None:
         # Remove all selections (should mark existing as stale)
         put_data: dict[str, Any] = {"available": []}
@@ -626,7 +646,10 @@ class TestBootSourceAvailSelectionsPutHandler:
         assert resp.status_code == 200
         data = resp.json()
         assert isinstance(data["stale"], list)
-        assert any(s["id"] == sel_ubuntu_noble.id for s in data["stale"])
+        assert all(
+            s["id"] in (sel.id for sel in sel_ubuntu_noble)
+            for s in data["stale"]
+        )
 
     async def test_put_boot_source_not_found(
         self,

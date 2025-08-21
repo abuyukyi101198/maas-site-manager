@@ -79,9 +79,14 @@ class TestGetBootSourceActivity:
                 {
                     "os": "ubuntu",
                     "release": "oracular",
-                    "arches": "amd64,arm64",
+                    "arch": "amd64",
                 },
-                {"os": "ubuntu", "release": "questing", "arches": "amd64"},
+                {
+                    "os": "ubuntu",
+                    "release": "oracular",
+                    "arch": "arm64",
+                },
+                {"os": "ubuntu", "release": "questing", "arch": "amd64"},
             ]
         }
 
@@ -99,8 +104,11 @@ class TestGetBootSourceActivity:
             result.index_url == "http://test.source.url/streams/v1/index.sjson"
         )
         assert result.keyring == "test-keyring"
-        assert result.selections["ubuntu---oracular"] == ["amd64", "arm64"]
-        assert result.selections["ubuntu---questing"] == ["amd64"]
+        assert result.selections == [
+            "ubuntu---oracular---amd64",
+            "ubuntu---oracular---arm64",
+            "ubuntu---questing---amd64",
+        ]
 
     @pytest.mark.asyncio
     async def test_get_boot_source_failure(
@@ -297,7 +305,7 @@ class TestLoadProductMapActivity:
         mocker.patch.object(
             ss_act, "_download_json", return_value=(products, False)
         )
-        selections = {"ubuntu---oracular": ["amd64"]}
+        selections = ["ubuntu---oracular---amd64"]
 
         params = LoadProductMapParams(
             index_url="http://example.com/streams/v1/index.sjson",
@@ -353,7 +361,7 @@ class TestLoadProductMapActivity:
             ss_act, "_download_json", return_value=(products, False)
         )
 
-        selections = {"ubuntu---noble": ["amd64"]}
+        selections = ["ubuntu---noble---amd64"]
 
         params = LoadProductMapParams(
             index_url="http://example.com/streams/v1/index.sjson",
@@ -419,15 +427,13 @@ class TestFetchAsAssetListActivity:
         result = await act_env.run(ss_act.fetch_ss_asset_list, params)
 
         # Assert
-        assert isinstance(result, dict)
-        assert len(result) == 2
-        assert ("ubuntu", "oracular", "candidate") in result
-        assert ("ubuntu", "jammy", "candidate") in result
-        assert result[("ubuntu", "oracular", "candidate")] == [
-            "amd64",
-            "s390x",
+        assert isinstance(result, list)
+        assert len(result) == 3
+        assert result == [
+            ("ubuntu", "oracular", "candidate", "amd64"),
+            ("ubuntu", "oracular", "candidate", "s390x"),
+            ("ubuntu", "jammy", "candidate", "amd64"),
         ]
-        assert result[("ubuntu", "jammy", "candidate")] == ["amd64"]
 
 
 @pytest.mark.asyncio

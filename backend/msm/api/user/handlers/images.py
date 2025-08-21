@@ -304,26 +304,23 @@ async def get_selectable_images(
             source.id, []
         )
         for selection in selections:
-            for arch in set(selection.available) - set(selection.selected):
+            key = (selection.os, selection.release, selection.arch)
+            if not selection.selected:
                 # ignore if os/release/arch already exists in a higher prio source
-                if (selection.os, selection.release, arch) not in images_found:
-                    selectable[(selection.os, selection.release, arch)] = (
-                        models.SelectableImage(
-                            os=selection.os,
-                            release=selection.release,
-                            arch=arch,
-                            boot_source_id=source.id,
-                            boot_source_name=source.name,
-                            boot_source_url=source.url,
-                        )
+                if key not in images_found:
+                    selectable[key] = models.SelectableImage(
+                        os=selection.os,
+                        release=selection.release,
+                        arch=selection.arch,
+                        boot_source_id=source.id,
+                        boot_source_name=source.name,
+                        boot_source_url=source.url,
                     )
-                images_found.add((selection.os, selection.release, arch))
+                images_found.add(key)
             # if something is not selected in a high prio source,
             # but is selected in a low prio source, we need to remove it later
-            for arch in selection.selected:
-                key = (selection.os, selection.release, arch)
-                if key in selectable:
-                    selected.add(key)
+            elif key in selectable:
+                selected.add(key)
     for key in selected:
         selectable.pop(key)
     items = list(selectable.values())
@@ -351,45 +348,50 @@ async def get_selected_images(
             source.id, []
         )
         for selection in selections:
-            for arch in selection.selected:
-                if (selection.os, selection.release, arch) not in images_found:
-                    images_found.add((selection.os, selection.release, arch))
-                    _, assets = await services.boot_assets.get(
-                        [],
-                        boot_source_id=[source.id],
-                        os=[selection.os],
-                        arch=[arch],
-                        release=[selection.release],
+            if (
+                selection.os,
+                selection.release,
+                selection.arch,
+            ) not in images_found and selection.selected:
+                images_found.add(
+                    (selection.os, selection.release, selection.arch)
+                )
+                _, assets = await services.boot_assets.get(
+                    [],
+                    boot_source_id=[source.id],
+                    os=[selection.os],
+                    arch=[selection.arch],
+                    release=[selection.release],
+                )
+                asset = next(iter(assets))
+                if (
+                    latest_ver
+                    := await services.boot_asset_versions.get_latest_version(
+                        asset.id
                     )
-                    asset = next(iter(assets))
-                    if (
-                        latest_ver
-                        := await services.boot_asset_versions.get_latest_version(
-                            asset.id
+                ):
+                    _, items = await services.boot_asset_items.get(
+                        [], boot_asset_version_id=[latest_ver.id]
+                    )
+                    total_size = 0
+                    total_downloaded = 0
+                    for item in items:
+                        total_size += item.file_size
+                        total_downloaded += item.bytes_synced
+                    selected.append(
+                        models.SelectedImage(
+                            id=asset.id,
+                            os=selection.os,
+                            release=selection.release,
+                            arch=selection.arch,
+                            boot_source_id=source.id,
+                            boot_source_name=source.name,
+                            boot_source_url=source.url,
+                            size=total_size,
+                            downloaded=total_downloaded,
+                            is_custom_image=asset.base_image is not None,
                         )
-                    ):
-                        _, items = await services.boot_asset_items.get(
-                            [], boot_asset_version_id=[latest_ver.id]
-                        )
-                        total_size = 0
-                        total_downloaded = 0
-                        for item in items:
-                            total_size += item.file_size
-                            total_downloaded += item.bytes_synced
-                        selected.append(
-                            models.SelectedImage(
-                                id=asset.id,
-                                os=selection.os,
-                                release=selection.release,
-                                arch=arch,
-                                boot_source_id=source.id,
-                                boot_source_name=source.name,
-                                boot_source_url=source.url,
-                                size=total_size,
-                                downloaded=total_downloaded,
-                                is_custom_image=asset.base_image is not None,
-                            )
-                        )
+                    )
     selected.sort(key=lambda x: (x.os, x.release, x.arch))
     return dm.GetSelectedImagesResponse(items=selected)
 

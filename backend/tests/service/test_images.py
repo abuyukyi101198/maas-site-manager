@@ -184,16 +184,17 @@ class TestBootSourceSelectionService:
     async def test_get(
         self,
         boot_source_selection_service: BootSourceSelectionService,
-        sel_ubuntu_noble: BootSourceSelection,
+        sel_ubuntu_noble: list[BootSourceSelection],
     ) -> None:
         (
             count,
-            [sel],
+            [sel1, sel2],
         ) = await boot_source_selection_service.get(
-            sel_ubuntu_noble.boot_source_id, []
+            sel_ubuntu_noble[0].boot_source_id, []
         )
-        assert count == 1
-        assert sel_ubuntu_noble == sel
+        assert count == 2
+        assert sel_ubuntu_noble[0] == sel1
+        assert sel_ubuntu_noble[1] == sel2
 
     async def test_create(
         self,
@@ -206,8 +207,8 @@ class TestBootSourceSelectionService:
             label=BootAssetLabel.CANDIDATE,
             os="test os",
             release="test release",
-            available=["test", "arches"],
-            selected=["test", "arches"],
+            arch="testarch",
+            selected=True,
         )
         boot_src_selection = await boot_source_selection_service.create(
             new_boot_src_selection
@@ -224,41 +225,42 @@ class TestBootSourceSelectionService:
         self,
         factory: Factory,
         boot_source_selection_service: BootSourceSelectionService,
-        sel_ubuntu_noble: BootSourceSelection,
+        sel_ubuntu_noble: list[BootSourceSelection],
     ) -> None:
         new_boot_src_selection = BootSourceSelectionUpdate(
             label=BootAssetLabel.STABLE,
             os="new os",
         )
         await boot_source_selection_service.update(
-            sel_ubuntu_noble.boot_source_id,
-            sel_ubuntu_noble.id,
+            sel_ubuntu_noble[0].boot_source_id,
+            sel_ubuntu_noble[0].id,
             new_boot_src_selection,
         )
         selections = await factory.get("boot_source_selection")
-        assert len(selections) == 1
+        assert len(selections) == 2
         assert selections[0]["os"] == "new os"
 
     async def test_delete(
         self,
         factory: Factory,
         boot_source_selection_service: BootSourceSelectionService,
-        sel_ubuntu_noble: BootSourceSelection,
+        sel_ubuntu_noble: list[BootSourceSelection],
     ) -> None:
         await boot_source_selection_service.delete(
-            sel_ubuntu_noble.boot_source_id, sel_ubuntu_noble.id
+            sel_ubuntu_noble[0].boot_source_id, sel_ubuntu_noble[0].id
         )
         selections = await factory.get("boot_source_selection")
-        assert len(selections) == 0
+        assert len(selections) == 1
+        assert selections[0] == sel_ubuntu_noble[1].model_dump()
 
     async def test_delete_by_source_id(
         self,
         factory: Factory,
         boot_source_selection_service: BootSourceSelectionService,
-        sel_ubuntu_noble: BootSourceSelection,
+        sel_ubuntu_noble: list[BootSourceSelection],
     ) -> None:
         await boot_source_selection_service.delete_by_source_id(
-            sel_ubuntu_noble.boot_source_id
+            sel_ubuntu_noble[0].boot_source_id
         )
         selections = await factory.get("boot_source_selection")
         assert len(selections) == 0

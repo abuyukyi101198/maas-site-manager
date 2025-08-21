@@ -361,8 +361,8 @@ class Factory:
         label: str = BootAssetLabel.STABLE,
         os: str = "",
         release: str = "",
-        available: list[str] = [],
-        selected: list[str] = [],
+        arch: str = "",
+        selected: bool = False,
     ) -> BootSourceSelection:
         [row] = await self.create(
             "boot_source_selection",
@@ -372,7 +372,7 @@ class Factory:
                     "label": label,
                     "os": os,
                     "release": release,
-                    "available": available,
+                    "arch": arch,
                     "selected": selected,
                 }
             ],

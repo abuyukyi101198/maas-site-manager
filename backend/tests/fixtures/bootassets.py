@@ -140,31 +140,49 @@ async def grub(factory: Factory, boot_source_grub: BootSource) -> BootAsset:
 @pytest.fixture
 async def sel_ubuntu_noble(
     factory: Factory, ubuntu_noble: BootAsset
-) -> BootSourceSelection:
+) -> list[BootSourceSelection]:
     assert ubuntu_noble.release is not None
-    return await factory.make_BootSourceSelection(
+    sel1 = await factory.make_BootSourceSelection(
         boot_source_id=ubuntu_noble.boot_source_id,
         label=ubuntu_noble.label,
         os=ubuntu_noble.os,
         release=ubuntu_noble.release,
-        available=[ubuntu_noble.arch, "ppc64el"],
-        selected=[ubuntu_noble.arch],
+        arch="ppc64el",
+        selected=False,
     )
+    sel2 = await factory.make_BootSourceSelection(
+        boot_source_id=ubuntu_noble.boot_source_id,
+        label=ubuntu_noble.label,
+        os=ubuntu_noble.os,
+        release=ubuntu_noble.release,
+        arch=ubuntu_noble.arch,
+        selected=True,
+    )
+    return [sel1, sel2]
 
 
 @pytest.fixture
 async def sel_ubuntu_jammy(
     factory: Factory, ubuntu_jammy: BootAsset
-) -> BootSourceSelection:
+) -> list[BootSourceSelection]:
     assert ubuntu_jammy.release is not None
-    return await factory.make_BootSourceSelection(
+    sel1 = await factory.make_BootSourceSelection(
         boot_source_id=ubuntu_jammy.boot_source_id,
         label=ubuntu_jammy.label,
         os=ubuntu_jammy.os,
         release=ubuntu_jammy.release,
-        available=[ubuntu_jammy.arch, "riscv"],
-        selected=[ubuntu_jammy.arch],
+        arch="riscv",
+        selected=False,
     )
+    sel2 = await factory.make_BootSourceSelection(
+        boot_source_id=ubuntu_jammy.boot_source_id,
+        label=ubuntu_jammy.label,
+        os=ubuntu_jammy.os,
+        release=ubuntu_jammy.release,
+        arch=ubuntu_jammy.arch,
+        selected=True,
+    )
+    return [sel1, sel2]
 
 
 @pytest.fixture
@@ -177,8 +195,8 @@ async def sel_centos(
         label=centos.label,
         os=centos.os,
         release=centos.release,
-        available=[centos.arch],
-        selected=[],
+        arch=centos.arch,
+        selected=False,
     )
 
 

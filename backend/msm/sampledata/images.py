@@ -63,24 +63,32 @@ DmFoRWTU6CpKtwIg/lb1ncbslH2xAFeUX6ASHXR8vBOnIXWss21FuAaNmWe4lmw=
         label="stable",
         os="Ubuntu",
         release="noble",
-        available=["amd64"],
-        selected=["amd64"],
+        arch="amd64",
+        selected=True,
     )
     collection.add(
         boot_source_id=boot_sources[1].id,
         label="candidate",
         os="Ubuntu",
         release="jammy",
-        available=["amd64", "arm64"],
-        selected=["amd64", "arm64"],
+        arch="amd64",
+        selected=True,
+    )
+    collection.add(
+        boot_source_id=boot_sources[1].id,
+        label="candidate",
+        os="Ubuntu",
+        release="jammy",
+        arch="arm64",
+        selected=True,
     )
     collection.add(
         boot_source_id=boot_sources[0].id,
         label="candidate",
         os="Ubuntu",
         release="jammy",
-        available=["amd64"],
-        selected=["amd64"],
+        arch="amd64",
+        selected=True,
     )
 
     await collection.create(conn)
