@@ -152,12 +152,22 @@ class BootSourceService(Service):
 class BootSourceSelectionService(Service):
     async def get(
         self,
-        boot_source_id: int,
         sort_params: list[SortParam],
         offset: int = 0,
         limit: int | None = None,
+        boot_source_id: list[int] | None = None,
+        os: list[str] | None = None,
+        release: list[str] | None = None,
+        arch: list[str] | None = None,
     ) -> tuple[int, Iterable[models.BootSourceSelection]]:
         order_by = queries.order_by_from_arguments(sort_params=sort_params)
+        filters = queries.filters_from_arguments(
+            BootSourceSelection,
+            boot_source_id=boot_source_id,
+            os=os,
+            release=release,
+            arch=arch,
+        )
         stmt = (
             self._select_statement(
                 BootSourceSelection.c.id,
@@ -168,7 +178,7 @@ class BootSourceSelectionService(Service):
                 BootSourceSelection.c.arch,
                 BootSourceSelection.c.selected,
             )
-            .where(BootSourceSelection.c.boot_source_id == boot_source_id)
+            .where(*filters)
             .order_by(*order_by)
             .offset(offset)
         )

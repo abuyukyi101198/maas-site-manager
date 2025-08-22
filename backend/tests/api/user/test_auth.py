@@ -36,6 +36,7 @@ AUTHENTICATED_ROUTES = (
     ("POST", "/api/v1/bootasset-versions/{id}/items"),
     ("GET", "/api/v1/bootasset-items"),
     ("POST", "/api/v1/images"),
+    ("GET", "/api/v1/image-sources"),
     ("PATCH", "/api/v1/bootasset-items/{id}"),
     ("DELETE", "/api/v1/bootasset-items/{id}"),
     ("GET", "/api/v1/selected-images"),

@@ -651,3 +651,47 @@ class TestGetSelectedImagesHandler:
             ]
         }
         assert data == expected
+
+
+@pytest.mark.asyncio
+class TestGetImageSourcesHandler:
+    async def test_get_image_sources(
+        self,
+        user_client: Client,
+        factory: Factory,
+        boot_source: BootSource,
+        boot_source_low: BootSource,
+        ubuntu_noble: BootAsset,
+        items_ubuntu_noble_1: list[BootAssetItem],
+        items_ubuntu_noble_2: list[BootAssetItem],
+        sel_ubuntu_noble: list[BootSourceSelection],
+    ) -> None:
+        alt_source = await factory.make_BootSource(
+            url="alt.boot.source", name="Alternative Source"
+        )
+        await factory.make_BootSourceSelection(
+            alt_source.id, os="ubuntu", release="noble", arch="amd64"
+        )
+        resp = await user_client.get(
+            "/image-sources?os=ubuntu&release=noble&arch=amd64"
+        )
+        expected = [
+            {
+                "id": sel_ubuntu_noble[0].boot_source_id,
+                "name": boot_source.name,
+                "url": boot_source.url,
+            },
+            {
+                "id": alt_source.id,
+                "name": alt_source.name,
+                "url": alt_source.url,
+            },
+        ]
+        assert resp.json()["items"] == expected
+
+    async def test_missing_params(
+        self,
+        user_client: Client,
+    ) -> None:
+        resp = await user_client.get("/image-sources")
+        assert resp.status_code == 422

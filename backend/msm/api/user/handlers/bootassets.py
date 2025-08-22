@@ -351,10 +351,10 @@ async def get_boot_source_selections(
 ) -> dm.BootSourceSelectionsGetResponse:
     """Return boot source selections."""
     total, results = await services.boot_source_selections.get(
-        id,
         sort_params,
         offset=pagination_params.offset,
         limit=pagination_params.size,
+        boot_source_id=[id],
     )
     return dm.BootSourceSelectionsGetResponse(
         total=total,
@@ -393,7 +393,9 @@ async def put_boot_source_avail_selections(
             ],
         )
 
-    _, existing = await services.boot_source_selections.get(id, [])
+    _, existing = await services.boot_source_selections.get(
+        [], boot_source_id=[id]
+    )
     incoming_map = {
         (p.os, p.release, p.arch): p for p in patch_request.available
     }

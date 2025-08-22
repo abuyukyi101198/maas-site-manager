@@ -301,7 +301,7 @@ async def get_selectable_images(
     )
     for source in sources:
         _, selections = await services.boot_source_selections.get(
-            source.id, []
+            [], boot_source_id=[source.id]
         )
         for selection in selections:
             key = (selection.os, selection.release, selection.arch)
@@ -345,7 +345,8 @@ async def get_selected_images(
     )
     for source in sources:
         _, selections = await services.boot_source_selections.get(
-            source.id, []
+            [],
+            boot_source_id=[source.id],
         )
         for selection in selections:
             if (
@@ -394,6 +395,37 @@ async def get_selected_images(
                     )
     selected.sort(key=lambda x: (x.os, x.release, x.arch))
     return dm.GetSelectedImagesResponse(items=selected)
+
+
+@v1_router.get(
+    "/image-sources",
+    responses={
+        401: {"model": UnauthorizedErrorResponseModel},
+        422: {"model": ValidationErrorResponseModel},
+    },
+)
+async def get_image_sources(
+    services: Annotated[ServiceCollection, Depends(services)],
+    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
+    os: str,
+    release: str,
+    arch: str,
+) -> dm.GetImageSourcesResponse:
+    available_sources = []
+    _, sources = await services.boot_sources.get([])
+    for source in sources:
+        count, _ = await services.boot_source_selections.get(
+            [],
+            boot_source_id=[source.id],
+            os=[os],
+            release=[release],
+            arch=[arch],
+        )
+        if count:
+            available_sources.append(
+                dm.SimpleSource(id=source.id, name=source.name, url=source.url)
+            )
+    return dm.GetImageSourcesResponse(items=available_sources)
 
 
 class S3MultipartUploadTarget(BaseTarget):  # type: ignore

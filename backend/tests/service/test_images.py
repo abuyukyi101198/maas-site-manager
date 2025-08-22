@@ -190,11 +190,51 @@ class TestBootSourceSelectionService:
             count,
             [sel1, sel2],
         ) = await boot_source_selection_service.get(
-            sel_ubuntu_noble[0].boot_source_id, []
+            [],
+            boot_source_id=[sel_ubuntu_noble[0].boot_source_id],
         )
         assert count == 2
         assert sel_ubuntu_noble[0] == sel1
         assert sel_ubuntu_noble[1] == sel2
+
+    @pytest.mark.parametrize(
+        "filter_param",
+        [
+            ("boot_source_id"),
+            ("os"),
+            ("arch"),
+            ("release"),
+        ],
+    )
+    async def test_get_with_filters(
+        self,
+        boot_source_selection_service: BootSourceSelectionService,
+        ubuntu_noble: BootAsset,
+        centos: BootAsset,
+        factory: Factory,
+        filter_param: str,
+    ) -> None:
+        noble_sel = await factory.make_BootSourceSelection(
+            ubuntu_noble.boot_source_id,
+            os="ubuntu",
+            release="noble",
+            arch="amd64",
+        )
+        await factory.make_BootSourceSelection(
+            centos.boot_source_id,
+            os="centos",
+            release="centos70",
+            arch="arm64",
+        )
+        filters = {filter_param: [ubuntu_noble.model_dump()[filter_param]]}
+        count, [sel] = await boot_source_selection_service.get(
+            [],
+            0,
+            None,
+            **filters,
+        )
+        assert count == 1
+        assert sel == noble_sel
 
     async def test_create(
         self,

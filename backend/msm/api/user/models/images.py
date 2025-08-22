@@ -17,3 +17,13 @@ class ImagesPostResponse(models.BootAssetItem):
     @classmethod
     def from_model(cls, model: models.BootAssetItem) -> Self:
         return cls(**model.model_dump())
+
+
+class SimpleSource(BaseModel):
+    id: int
+    name: str
+    url: str
+
+
+class GetImageSourcesResponse(BaseModel):
+    items: list[SimpleSource]
