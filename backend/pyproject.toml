@@ -120,6 +120,11 @@ omit = [
   "msm/db/alembic/env.py",
   "msm/sampledata/*",
   "msm/cmd/sampledata/*",
+  "temporal/tests/*",
+]
+concurrency = [
+  "greenlet",
+  "thread",
 ]
 
 [tool.mypy]
