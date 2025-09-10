@@ -19,19 +19,20 @@ class ImagesPostResponse(models.BootAssetItem):
         return cls(**model.model_dump())
 
 
-class SimpleSource(BaseModel):
+class ImageSource(BaseModel):
+    selection_id: int
     id: int
     name: str
     url: str
 
 
 class GetImageSourcesResponse(BaseModel):
-    items: list[SimpleSource]
+    items: list[ImageSource]
 
 
 class SelectImagesPostRequest(BaseModel):
-    asset_ids: list[int]
+    selection_ids: list[int]
 
 
 class RemoveSelectedImagesPostRequest(BaseModel):
-    asset_ids: list[int]
+    selection_ids: list[int]

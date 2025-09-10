@@ -16,6 +16,7 @@ from sqlalchemy import (
 from sqlalchemy.exc import ProgrammingError
 
 from msm.db import (
+    CUSTOM_IMAGE_SOURCE_ID,
     models,
     queries,
 )
@@ -131,14 +132,17 @@ class BootSourceService(Service):
         stmt = self._select_statement(
             BootSource.c.id,
             BootSource.c.url,
-        ).where(BootSource.c.id == 1)
+        ).where(BootSource.c.id == CUSTOM_IMAGE_SOURCE_ID)
         result = await self.conn.execute(stmt)
         if result.one_or_none():
             # update the custom source url in case the MSM url has changed
-            await self.update(1, models.BootSourceUpdate(url=service_url))
+            await self.update(
+                CUSTOM_IMAGE_SOURCE_ID,
+                models.BootSourceUpdate(url=service_url),
+            )
             return
         data = {
-            "id": 1,
+            "id": CUSTOM_IMAGE_SOURCE_ID,
             "url": service_url,
             "keyring": "",
             "name": "MSM Custom Images",
@@ -188,6 +192,40 @@ class BootSourceSelectionService(Service):
         return result.rowcount, self.objects_from_result(
             models.BootSourceSelection, result
         )
+
+    async def get_many_by_id(
+        self,
+        ids: list[int],
+    ) -> tuple[int, Iterable[models.BootSourceSelection]]:
+        filters = [BootSourceSelection.c.id.in_(ids)]
+        count = await queries.row_count(
+            self.conn, BootSourceSelection, *filters
+        )
+        stmt = self._select_statement(
+            BootSourceSelection.c.id,
+            BootSourceSelection.c.boot_source_id,
+            BootSourceSelection.c.label,
+            BootSourceSelection.c.os,
+            BootSourceSelection.c.release,
+            BootSourceSelection.c.arch,
+            BootSourceSelection.c.selected,
+        ).where(*filters)
+        result = await self.conn.execute(stmt)
+        return count, self.objects_from_result(
+            models.BootSourceSelection, result
+        )
+
+    async def update_many(
+        self,
+        ids: list[int],
+        select: bool,
+    ) -> None:
+        stmt = (
+            update(BootSourceSelection)
+            .where(BootSourceSelection.c.id.in_(ids))
+            .values({"selected": select})
+        )
+        result = await self.conn.execute(stmt)
 
     async def update(
         self,

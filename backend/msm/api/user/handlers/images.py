@@ -36,7 +36,7 @@ from msm.api.user.auth import (
     verify_authenticated_user_or_worker,
 )
 import msm.api.user.models.images as dm
-from msm.db import models
+from msm.db import CUSTOM_IMAGE_SOURCE_ID, models
 from msm.schema import (
     SortParam,
 )
@@ -297,39 +297,30 @@ async def select_images(
     authenticated_user: Annotated[models.User, Depends(authenticated_user)],
     post_request: dm.SelectImagesPostRequest,
 ) -> None:
-    count, assets = await services.boot_assets.get_many_by_id(
-        post_request.asset_ids, kind=[models.BootAssetKind.OS]
+    count, selections = await services.boot_source_selections.get_many_by_id(
+        post_request.selection_ids
     )
-    if count != len(post_request.asset_ids):
-        missing_ids = set(post_request.asset_ids) - set([a.id for a in assets])
+    if count != len(post_request.selection_ids):
+        missing_ids = set(post_request.selection_ids) - set(
+            [s.id for s in selections]
+        )
         raise NotFoundException(
             code=ExceptionCode.MISSING_RESOURCE,
-            message="Some Boot Assets were not found.",
+            message="Some selections were not found.",
             details=[
                 BaseExceptionDetail(
                     reason=ExceptionCode.MISSING_RESOURCE,
                     messages=[
-                        f"Boot Assets with IDs {list(missing_ids)} could not be found"
+                        f"Boot Source Selections with IDs {list(missing_ids)} could not be found"
                     ],
-                    field="asset_ids",
+                    field="selection_ids",
                     location="body",
                 )
             ],
         )
-    for asset in assets:
-        assert asset.release is not None
-        _, selections = await services.boot_source_selections.get(
-            [],
-            boot_source_id=[asset.boot_source_id],
-            os=[asset.os],
-            release=[asset.release],
-            arch=[asset.arch],
-        )
-        sel = next(iter(selections))
-        update = models.BootSourceSelectionUpdate(selected=True)
-        await services.boot_source_selections.update(
-            asset.boot_source_id, sel.id, update
-        )
+    await services.boot_source_selections.update_many(
+        post_request.selection_ids, select=True
+    )
 
 
 @v1_router.get(
@@ -358,6 +349,7 @@ async def get_selectable_images(
                 # ignore if os/release/arch already exists in a higher prio source
                 if key not in images_found:
                     selectable[key] = models.SelectableImage(
+                        selection_id=selection.id,
                         os=selection.os,
                         release=selection.release,
                         arch=selection.arch,
@@ -365,13 +357,13 @@ async def get_selectable_images(
                         boot_source_name=source.name,
                         boot_source_url=source.url,
                     )
-                images_found.add(key)
             # if something is not selected in a high prio source,
             # but is selected in a low prio source, we need to remove it later
             elif key in selectable:
                 selected.add(key)
+            images_found.add(key)
     for key in selected:
-        selectable.pop(key)
+        selectable.pop(key, None)
     items = list(selectable.values())
     items.sort(key=lambda x: (x.os, x.release, x.arch))
     return dm.GetSelectableImagesResponse(items=items)
@@ -392,6 +384,22 @@ async def get_selected_images(
     _, sources = await services.boot_sources.get(
         [SortParam("priority", asc=False)]
     )
+
+    async def get_total_size_and_downloaded(asset_id: int) -> tuple[int, int]:
+        if latest_ver := await services.boot_asset_versions.get_latest_version(
+            asset_id
+        ):
+            _, items = await services.boot_asset_items.get(
+                [], boot_asset_version_id=[latest_ver.id]
+            )
+            total_size = 0
+            total_downloaded = 0
+            for item in items:
+                total_size += item.file_size
+                total_downloaded += item.bytes_synced
+            return total_size, total_downloaded
+        return 0, 0
+
     for source in sources:
         _, selections = await services.boot_source_selections.get(
             [],
@@ -414,34 +422,49 @@ async def get_selected_images(
                     release=[selection.release],
                 )
                 asset = next(iter(assets))
-                if (
-                    latest_ver
-                    := await services.boot_asset_versions.get_latest_version(
-                        asset.id
+                (
+                    total_size,
+                    total_downloaded,
+                ) = await get_total_size_and_downloaded(asset.id)
+                selected.append(
+                    models.SelectedImage(
+                        os=selection.os,
+                        release=selection.release,
+                        arch=selection.arch,
+                        boot_source_id=source.id,
+                        boot_source_name=source.name,
+                        boot_source_url=source.url,
+                        size=total_size,
+                        downloaded=total_downloaded,
+                        is_custom_image=asset.base_image is not None,
+                        selection_id=selection.id,
                     )
-                ):
-                    _, items = await services.boot_asset_items.get(
-                        [], boot_asset_version_id=[latest_ver.id]
-                    )
-                    total_size = 0
-                    total_downloaded = 0
-                    for item in items:
-                        total_size += item.file_size
-                        total_downloaded += item.bytes_synced
-                    selected.append(
-                        models.SelectedImage(
-                            id=asset.id,
-                            os=selection.os,
-                            release=selection.release,
-                            arch=selection.arch,
-                            boot_source_id=source.id,
-                            boot_source_name=source.name,
-                            boot_source_url=source.url,
-                            size=total_size,
-                            downloaded=total_downloaded,
-                            is_custom_image=asset.base_image is not None,
-                        )
-                    )
+                )
+    # Selections don't exist for custom images, add them manually
+    custom_source = await services.boot_sources.get_by_id(
+        CUSTOM_IMAGE_SOURCE_ID
+    )
+    assert custom_source is not None
+    _, assets = await services.boot_assets.get(
+        [], boot_source_id=[custom_source.id]
+    )
+    for asset in assets:
+        total_size, total_downloaded = await get_total_size_and_downloaded(
+            asset.id
+        )
+        selected.append(
+            models.SelectedImage(
+                os=asset.os,
+                release=asset.release,
+                arch=asset.arch,
+                boot_source_id=custom_source.id,
+                boot_source_name=custom_source.name,
+                boot_source_url=custom_source.url,
+                size=total_size,
+                downloaded=total_downloaded,
+                is_custom_image=True,
+            )
+        )
     selected.sort(key=lambda x: (x.os, x.release, x.arch))
     return dm.GetSelectedImagesResponse(items=selected)
 
@@ -463,7 +486,7 @@ async def get_image_sources(
     available_sources = []
     _, sources = await services.boot_sources.get([])
     for source in sources:
-        count, _ = await services.boot_source_selections.get(
+        count, selections = await services.boot_source_selections.get(
             [],
             boot_source_id=[source.id],
             os=[os],
@@ -471,8 +494,14 @@ async def get_image_sources(
             arch=[arch],
         )
         if count:
+            selection = next(iter(selections))
             available_sources.append(
-                dm.SimpleSource(id=source.id, name=source.name, url=source.url)
+                dm.ImageSource(
+                    selection_id=selection.id,
+                    id=source.id,
+                    name=source.name,
+                    url=source.url,
+                )
             )
     return dm.GetImageSourcesResponse(items=available_sources)
 
@@ -492,39 +521,43 @@ async def remove_selections(
     background_tasks: BackgroundTasks,
     post_request: dm.RemoveSelectedImagesPostRequest,
 ) -> None:
-    count, assets = await services.boot_assets.get_many_by_id(
-        post_request.asset_ids, kind=[models.BootAssetKind.OS]
+    count, selections = await services.boot_source_selections.get_many_by_id(
+        post_request.selection_ids
     )
-    if count != len(post_request.asset_ids):
-        missing_ids = set(post_request.asset_ids) - set([a.id for a in assets])
+    if count != len(post_request.selection_ids):
+        missing_ids = set(post_request.selection_ids) - set(
+            [s.id for s in selections]
+        )
         raise NotFoundException(
             code=ExceptionCode.MISSING_RESOURCE,
-            message="Some Boot Assets were not found.",
+            message="Some selections were not found.",
             details=[
                 BaseExceptionDetail(
                     reason=ExceptionCode.MISSING_RESOURCE,
                     messages=[
-                        f"Boot Assets with IDs {list(missing_ids)} could not be found"
+                        f"Boot Source Selections with IDs {list(missing_ids)} could not be found"
                     ],
-                    field="asset_ids",
+                    field="selection_ids",
                     location="body",
                 )
             ],
         )
-    for asset in assets:
-        assert asset.release is not None
-        _, selections = await services.boot_source_selections.get(
+    await services.boot_source_selections.update_many(
+        post_request.selection_ids, False
+    )
+
+    asset_ids = []
+    for selection in selections:
+        _, assets = await services.boot_assets.get(
             [],
-            boot_source_id=[asset.boot_source_id],
-            os=[asset.os],
-            release=[asset.release],
-            arch=[asset.arch],
+            boot_source_id=[selection.boot_source_id],
+            label=[selection.label],
+            os=[selection.os],
+            release=[selection.release],
+            arch=[selection.arch],
         )
-        sel = next(iter(selections))
-        update = models.BootSourceSelectionUpdate(selected=False)
-        await services.boot_source_selections.update(
-            asset.boot_source_id, sel.id, update
-        )
+        asset_ids += [a.id for a in assets]
+
     settings = Settings()
     assert settings.s3_endpoint is not None
     assert settings.s3_bucket is not None
@@ -533,7 +566,7 @@ async def remove_selections(
     assert settings.s3_secret_key is not None
     background_tasks.add_task(
         services.purge_assets,
-        post_request.asset_ids,
+        asset_ids,
         settings.s3_endpoint,
         settings.s3_bucket,
         settings.s3_path,
@@ -621,9 +654,10 @@ class S3MultipartUploadTarget(BaseTarget):  # type: ignore
 
 
 class BootAssetItemValueValidator:
-    def __init__(self, type: type, name: str):
+    def __init__(self, type: type, name: str, invalid_values: list[Any] = []):
         self._type = type
         self._name = name
+        self._invalid_values = invalid_values
 
     def __call__(self, chunk: bytes) -> None:
         try:
@@ -636,6 +670,22 @@ class BootAssetItemValueValidator:
                     BaseExceptionDetail(
                         reason=ExceptionCode.INVALID_PARAMS,
                         messages=[f"Invalid type for {self._name}"],
+                        field=self._name,
+                        location="body",
+                    )
+                ],
+            )
+        value = self._type(chunk.decode())
+        if value in self._invalid_values:
+            raise BadRequestException(
+                message=f"Invalid value for {self._name}: {value}",
+                code=ExceptionCode.INVALID_PARAMS,
+                details=[
+                    BaseExceptionDetail(
+                        reason=ExceptionCode.INVALID_PARAMS,
+                        messages=[
+                            f"{self._name} cannot be any of {self._invalid_values}"
+                        ],
                         field=self._name,
                         location="body",
                     )
@@ -764,7 +814,11 @@ async def post_images(
         settings.s3_endpoint = f"http://{settings.s3_endpoint}"
 
     parser = StreamingFormDataParser(headers=request.headers)
-    os = ValueTarget(validator=BootAssetItemValueValidator(str, "os"))
+    os = ValueTarget(
+        validator=BootAssetItemValueValidator(
+            str, "os", invalid_values=["ubuntu"]
+        )
+    )
     parser.register("os", os)
     release = ValueTarget(
         validator=BootAssetItemValueValidator(str, "release")
@@ -819,7 +873,7 @@ async def post_images(
 
     _, asset = await services.boot_assets.get_or_create(
         models.BootAssetCreate(
-            boot_source_id=1,
+            boot_source_id=CUSTOM_IMAGE_SOURCE_ID,
             kind=models.BootAssetKind.OS,
             label=models.BootAssetLabel.STABLE,
             os=os.value.decode(),
@@ -839,11 +893,13 @@ async def post_images(
     version = await services.boot_asset_versions.create_next_revision(
         asset.id, now_utc()
     )
+    clean_filename = filename.value.decode().replace(" ", "")
     boot_asset_item = await services.boot_asset_items.update(
         tmp_item.id,
         models.BootAssetItemUpdate(
             boot_asset_version_id=version.id,
-            ftype=get_file_type_from_filename(filename.value.decode()),
+            ftype=get_file_type_from_filename(clean_filename),
+            path=f"{asset.release}/{asset.arch}/{version.version}/{clean_filename}",
             file_size=int(file_size.value),
             sha256=s3_upload_target.sha256.hexdigest(),
         ),

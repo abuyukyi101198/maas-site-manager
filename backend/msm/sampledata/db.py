@@ -5,6 +5,7 @@ from typing import Any
 from sqlalchemy import Table
 from sqlalchemy.ext.asyncio import AsyncConnection
 
+from msm.db import CUSTOM_IMAGE_SOURCE_ID
 from msm.db.tables import METADATA
 
 
@@ -36,9 +37,16 @@ class ModelCollection:
         """Add an entry to the collection."""
         self._entries.append(details)
 
-    async def purge(self, conn: AsyncConnection) -> None:
-        """Purge (empty) a table"""
-        await conn.execute(METADATA.tables[self.table_name].delete())
+    async def purge(
+        self, conn: AsyncConnection, retain_custom_source: bool = False
+    ) -> None:
+        """Purge (empty) a table, optionally keeping the custom images source"""
+        stmt = METADATA.tables[self.table_name].delete()
+        if retain_custom_source:
+            stmt = stmt.where(
+                METADATA.tables[self.table_name].c.id != CUSTOM_IMAGE_SOURCE_ID
+            )
+        await conn.execute(stmt)
 
     async def create(self, conn: AsyncConnection) -> list[SampleDataModel]:
         """Create current entries in the database.

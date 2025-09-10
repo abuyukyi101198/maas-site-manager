@@ -12,16 +12,45 @@ from msm.sampledata.db import (
 async def make_fixture_images(conn: AsyncConnection) -> list[SampleDataModel]:
     collection = ModelCollection("boot_source")
     collection.add(
-        priority=1,
-        url="http://msm",
-        name="MAAS Site Manager",
-        keyring="",
-        sync_interval=0,
+        priority=3,
+        url="http://primary.image.server",
+        name="Public Image Server",
+        keyring="""-----BEGIN PGP PUBLIC KEY BLOCK-----
+
+mQENBFxEQeMBCACtgu58j4RuE34OW3Xoy4PIXlLv/8P+FUUFs8Dk4WO5zUJN2NfN
+45fIASdKcH8cV2wbCVwjKEP0h4p5IE+lrwQK7bwYx7Qt+qmrm5eLMUM8IvXA18wf
+AOPS7XeKTzxa4/jWagJupmmYL+MuV9o5haqYplOYCcVR135KAZfx743YuWcNqvcr
+3Em0+gh4F2TXsefjniwuJRGY3Kbb/MAM2zC2f7FfCJVb1C30OLB+KwCddZP/23ll
+nOqmzaVF0qQrHQ5EZGK3j3S4fzHNq14TMS3c21YkPOO/DV6BkgIHtG5NIIdVEdQh
+wV8clpj0ZP7ShIE8cDhTy8k+xrIByPUVfpMpABEBAAG0J0JpbGwgQnVjaGFuYW4g
+PHcuYnVjaGFuYW5AbmFwaWVyLmFjLnVrPokBVAQTAQgAPhYhBK9cqX/wEcCpQ6+5
+TFPDJcqRPXoQBQJcREHjAhsDBQkDwmcABQsJCAcCBhUKCQgLAgQWAgMBAh4BAheA
+AAoJEFPDJcqRPXoQ2KIH/2sRAsqbrqCMNMRsiBo9XtCFzQ052odbzubIScnwzrDF
+Y9z+qPSAwaWGO+1R3LPDH5sMLQ2YOsNqg8VvTJBtOjR9YGNX9/bqqVFRKKSQ0HiD
+Sb2M7phBdk4WLkqLZ/AfgHaLKpfNX0bq7WhqZ+Pez0nqjN08JkIog7LhaQZh/Chf
+0pl+wHV0rEFuaDQn83yF5DWB1Dt4fbzfVUrEJb92tSrReHALQQA3h5WkTA0qxhDd
+9XyEWknDrYCWIWoj0XWjiVUre2fw3SKn8KHvJDeDYVKzYy18oA+da+xgs9b+n+Tq
+mMlfslWhw9wRyp0jbVLEs3yxLgE4elbCCmgiTNpnmMW5AQ0EXERB4wEIAKCPJqmM
+o8m6Xm163XtAZnx3t02EJSAV6u0yINIC8aEudNWg+/ptKKanUDm38dPnOl1mgOyC
+FEu4qFJHbMidkEEac5J0lgvhRK7jv94KF3vxqKr/bYnxltghqCfXesga9jfAHV8J
+M6sx4exOoc+/52YskpvDUs/eTPnWoQnbgjP+wsZpNq0owS6yO5urDfD6lvefgK5A
+TfB9lQUE0lpb6IMKkcBZZvpZWOchbwPWCB9JZMuirDSyksuTLdqgEsW7MyKBjCae
+E/THuTazumad/PyEb0RCbODdMb55L6CD2W2DUquVBLI9FN6KTYWk5L/JzNAIWBV9
+TKfevup933j1m+sAEQEAAYkBPAQYAQgAJhYhBK9cqX/wEcCpQ6+5TFPDJcqRPXoQ
+BQJcREHjAhsMBQkDwmcAAAoJEFPDJcqRPXoQGRgH/3592g1F4+WRaPbuCgfEMihd
+ma5gplU2J7NjNbV9IcY8VZsGw7UAT7FfmTPqlvwFM3w3gQCDXCKGztieUkzMTPqb
+LujBR4y55d5xDY6mP40zwRgdRlen2XsgHLPajRQpAhZq8ZvOdGe/ANCyXVdFHbGy
+aFAMUfAhxkbITQKXH+EIkCHXDtDUHUxmAQvsZ8Z+Jm+ZwdhWkMsK43tw8UXLIynp
+AeOoATdohke3EVK5+0Dc/jezcUWz2IKfw7LB3sQ4c6H8Ey8PThlNAIgwMCDp5WTB
+DmFoRWTU6CpKtwIg/lb1ncbslH2xAFeUX6ASHXR8vBOnIXWss21FuAaNmWe4lmw=
+=S+hs
+-----END PGP PUBLIC KEY BLOCK-----""",
+        sync_interval=7200,
     )
     collection.add(
         priority=2,
-        url="http://another.image.server",
-        name="Public Image Server",
+        url="http://alt.image.server",
+        name="Alternative Image Server",
         keyring="""-----BEGIN PGP PUBLIC KEY BLOCK-----
 
 mQENBFxEQeMBCACtgu58j4RuE34OW3Xoy4PIXlLv/8P+FUUFs8Dk4WO5zUJN2NfN
@@ -106,6 +135,7 @@ DmFoRWTU6CpKtwIg/lb1ncbslH2xAFeUX6ASHXR8vBOnIXWss21FuAaNmWe4lmw=
         subarch="ga-24.04",
         compatibility=["ga-24.04"],
         flavor="generic",
+        base_image=None,
         eol=datetime(2029, 4, 1, tzinfo=UTC),
         esm_eol=datetime(2036, 4, 1, tzinfo=UTC),
         bootloader_type=None,
@@ -124,6 +154,7 @@ DmFoRWTU6CpKtwIg/lb1ncbslH2xAFeUX6ASHXR8vBOnIXWss21FuAaNmWe4lmw=
         subarch="generic",
         compatibility=["generic"],
         flavor="generic",
+        base_image=None,
         eol=datetime(2027, 4, 1, tzinfo=UTC),
         esm_eol=datetime(2034, 4, 1, tzinfo=UTC),
         bootloader_type=None,
@@ -141,6 +172,7 @@ DmFoRWTU6CpKtwIg/lb1ncbslH2xAFeUX6ASHXR8vBOnIXWss21FuAaNmWe4lmw=
         subarch="generic",
         compatibility=["generic"],
         flavor="generic",
+        base_image=None,
         eol=datetime(2027, 4, 1, tzinfo=UTC),
         esm_eol=datetime(2034, 4, 1, tzinfo=UTC),
         bootloader_type=None,
@@ -158,6 +190,7 @@ DmFoRWTU6CpKtwIg/lb1ncbslH2xAFeUX6ASHXR8vBOnIXWss21FuAaNmWe4lmw=
         subarch=None,
         compatibility=None,
         flavor=None,
+        base_image=None,
         eol=None,
         esm_eol=None,
         bootloader_type="uefi",
@@ -175,10 +208,31 @@ DmFoRWTU6CpKtwIg/lb1ncbslH2xAFeUX6ASHXR8vBOnIXWss21FuAaNmWe4lmw=
         subarch="generic",
         compatibility=["generic"],
         flavor="generic",
+        base_image=None,
         eol=datetime(2027, 4, 1, tzinfo=UTC),
         esm_eol=datetime(2034, 4, 1, tzinfo=UTC),
         bootloader_type=None,
         signed=True,
+    )
+
+    # custom image
+    collection.add(
+        boot_source_id=1,
+        kind=0,
+        label="candidate",
+        os="custom",
+        release="plucky",
+        codename=None,
+        title="25.04",
+        arch="amd64",
+        subarch=None,
+        compatibility=None,
+        flavor=None,
+        base_image="custom/plucky",
+        eol=datetime(3000, 1, 1, tzinfo=UTC),
+        esm_eol=datetime(3000, 1, 1, tzinfo=UTC),
+        bootloader_type=None,
+        signed=False,
     )
 
     boot_assets = await collection.create(conn)
@@ -200,6 +254,9 @@ DmFoRWTU6CpKtwIg/lb1ncbslH2xAFeUX6ASHXR8vBOnIXWss21FuAaNmWe4lmw=
     # duplicate jammy (8-9)
     collection.add(boot_asset_id=boot_assets[4].id, version="20220401.1")
     collection.add(boot_asset_id=boot_assets[4].id, version="20230401.1")
+
+    # custom plucky
+    collection.add(boot_asset_id=boot_assets[5].id, version="20251212.1")
 
     boot_asset_versions = await collection.create(conn)
 
@@ -366,6 +423,18 @@ DmFoRWTU6CpKtwIg/lb1ncbslH2xAFeUX6ASHXR8vBOnIXWss21FuAaNmWe4lmw=
             source_release="focal",
             source_version="1.40.7+15.4-0ubuntu9",
         )
+    # custom plucky
+    collection.add(
+        boot_asset_version_id=boot_asset_versions[10].id,
+        ftype=ItemFileType.ROOT_TGZ,
+        sha256="07b42d0aa2540b6999c726eacf383e2c8f172378c964bdefab6d71410e2b72db",
+        path=f"plucky/amd64/{boot_asset_versions[10].version}/plucky-custom.tgz",
+        file_size=123456,
+        bytes_synced=123456,
+        source_package=None,
+        source_release=None,
+        source_version=None,
+    )
     await collection.create(conn)
     return boot_assets
 
@@ -376,4 +445,4 @@ async def purge_images(conn: AsyncConnection) -> None:
     await ModelCollection("boot_asset_version").purge(conn)
     await ModelCollection("boot_asset").purge(conn)
     await ModelCollection("boot_source_selection").purge(conn)
-    await ModelCollection("boot_source").purge(conn)
+    await ModelCollection("boot_source").purge(conn, retain_custom_source=True)

@@ -76,7 +76,7 @@ class TestCustomImageUploadHandler:
     ) -> None:
         test_file_content = "This is a test file."
         data = {
-            "os": "ubuntu",
+            "os": "custom",
             "release": "noble",
             "arch": "amd64",
             "file_size": len(test_file_content),
@@ -114,7 +114,7 @@ class TestCustomImageUploadHandler:
                 "boot_source_id": boot_source_custom.id,
                 "kind": 0,
                 "label": "stable",
-                "os": "ubuntu",
+                "os": "custom",
                 "release": "noble",
                 "arch": "amd64",
                 "title": "My Custom Image",
@@ -122,7 +122,7 @@ class TestCustomImageUploadHandler:
                 "subarch": None,
                 "compatibility": None,
                 "flavor": None,
-                "base_image": "ubuntu/noble",
+                "base_image": "custom/noble",
                 "bootloader_type": None,
                 "eol": END_OF_TIME,
                 "esm_eol": END_OF_TIME,
@@ -141,7 +141,7 @@ class TestCustomImageUploadHandler:
                 "sha256": sha256(test_file_content.encode()).hexdigest(),
                 "ftype": ItemFileType.ROOT_TGZ,
                 "bytes_synced": len(test_file_content),
-                "path": "",
+                "path": f"noble/amd64/{stored_versions[0]['version']}/test.tgz",
                 "source_package": None,
                 "source_release": None,
                 "source_version": None,
@@ -162,7 +162,7 @@ class TestCustomImageUploadHandler:
     ) -> None:
         test_file_content = "This is a test file."
         data = {
-            "os": "ubuntu",
+            "os": "custom",
             "release": "noble",
             "arch": "amd64",
             "file_size": len(test_file_content),
@@ -208,7 +208,7 @@ class TestCustomImageUploadHandler:
                 "boot_source_id": boot_source_custom.id,
                 "kind": 0,
                 "label": "stable",
-                "os": "ubuntu",
+                "os": "custom",
                 "release": "noble",
                 "arch": "amd64",
                 "title": "My Custom Image",
@@ -216,7 +216,7 @@ class TestCustomImageUploadHandler:
                 "subarch": None,
                 "compatibility": None,
                 "flavor": None,
-                "base_image": "ubuntu/noble",
+                "base_image": "custom/noble",
                 "bootloader_type": None,
                 "eol": END_OF_TIME,
                 "esm_eol": END_OF_TIME,
@@ -241,7 +241,7 @@ class TestCustomImageUploadHandler:
                 "sha256": sha256(test_file_content.encode()).hexdigest(),
                 "ftype": ItemFileType.ROOT_TGZ,
                 "bytes_synced": len(test_file_content),
-                "path": "",
+                "path": f"noble/amd64/{stored_versions[0]['version']}/test.tgz",
                 "source_package": None,
                 "source_release": None,
                 "source_version": None,
@@ -253,7 +253,7 @@ class TestCustomImageUploadHandler:
                 "sha256": sha256(test_file_content.encode()).hexdigest(),
                 "ftype": ItemFileType.ROOT_TGZ,
                 "bytes_synced": len(test_file_content),
-                "path": "",
+                "path": f"noble/amd64/{stored_versions[1]['version']}/test.tgz",
                 "source_package": None,
                 "source_release": None,
                 "source_version": None,
@@ -278,7 +278,7 @@ class TestCustomImageUploadHandler:
     ) -> None:
         test_file_content = "This is a test file."
         data = {
-            "os": "ubuntu",
+            "os": "custom",
             "release": "noble",
             "arch": "amd64",
             "file_size": len(test_file_content),
@@ -313,7 +313,7 @@ class TestCustomImageUploadHandler:
     ) -> None:
         test_file_content = "This is a test file."
         data = {
-            "os": "ubuntu",
+            "os": "custom",
             "release": "noble",
             "arch": "amd64",
             "file_size": len(test_file_content) + 1,
@@ -353,7 +353,7 @@ class TestCustomImageUploadHandler:
     ) -> None:
         test_file_content = "This is a test file."
         data = {
-            "os": "ubuntu",
+            "os": "custom",
             "release": "noble",
             "arch": "amd64",
             "file_size": "this should have been an integer",
@@ -393,7 +393,7 @@ class TestCustomImageUploadHandler:
     ) -> None:
         test_file_content = "This is a test file."
         data = {
-            "os": "ubuntu",
+            "os": "custom",
             "release": "noble",
             "arch": "amd64",
             "file_size": len(test_file_content),
@@ -413,6 +413,46 @@ class TestCustomImageUploadHandler:
             assert (
                 json.loads(resp.text)["error"]["message"]
                 == "Unsupported file type"
+            )
+            stored_assets = await factory.get("boot_asset")
+            assert len(stored_assets) == 0
+            stored_versions = await factory.get("boot_asset_version")
+            assert len(stored_versions) == 0
+            stored_images = await factory.get("boot_asset_item")
+            assert len(stored_images) == 0
+
+    async def test_post_ubuntu_os(
+        self,
+        user_client: Client,
+        factory: Factory,
+        boot_source_custom: BootSource,
+        s3_resource: MockType,
+        s3_upload: MockType,
+        s3_complete_upload: MockType,
+        tmp_path: Path,
+    ) -> None:
+        test_file_content = "This is a test file."
+        data = {
+            "os": "ubuntu",
+            "release": "noble",
+            "arch": "amd64",
+            "file_size": len(test_file_content),
+            "title": "My Custom Image",
+            "filename": "test.tgz",
+        }
+        test_file = tmp_path / "testfile"
+        test_file.write_text(test_file_content)
+        with test_file.open("rb") as f:
+            file_data = {"file": f}
+            resp = await user_client.post(
+                "/images",
+                data=data,
+                files=file_data,
+            )
+            assert resp.status_code == 400
+            assert (
+                json.loads(resp.text)["error"]["message"]
+                == "Invalid value for os: ubuntu"
             )
             stored_assets = await factory.get("boot_asset")
             assert len(stored_assets) == 0
@@ -538,7 +578,7 @@ class TestGetSelectableImagesHandler:
             os="ubuntu",
             release="noble",
             arch="amd64",
-            selected=True,
+            selected=False,
         )
         await factory.make_BootSourceSelection(
             boot_source_low.id,
@@ -547,14 +587,14 @@ class TestGetSelectableImagesHandler:
             arch="arm64",
             selected=True,
         )
-        await factory.make_BootSourceSelection(
+        noble_ppc_sel_low = await factory.make_BootSourceSelection(
             boot_source_low.id,
             os="ubuntu",
             release="noble",
             arch="ppc64el",
             selected=False,
         )
-        await factory.make_BootSourceSelection(
+        noble_arm_sel_high = await factory.make_BootSourceSelection(
             boot_source.id,
             os="ubuntu",
             release="noble",
@@ -568,14 +608,14 @@ class TestGetSelectableImagesHandler:
             arch="amd64",
             selected=True,
         )
-        await factory.make_BootSourceSelection(
+        jammy_amd_sel_high = await factory.make_BootSourceSelection(
             boot_source.id,
             os="ubuntu",
             release="jammy",
             arch="amd64",
             selected=False,
         )
-        await factory.make_BootSourceSelection(
+        jammy_arm_sel_high = await factory.make_BootSourceSelection(
             boot_source.id,
             os="ubuntu",
             release="jammy",
@@ -588,6 +628,7 @@ class TestGetSelectableImagesHandler:
         expected = {
             "items": [
                 {
+                    "selection_id": jammy_amd_sel_high.id,
                     "os": "ubuntu",
                     "release": "jammy",
                     "arch": "amd64",
@@ -596,6 +637,7 @@ class TestGetSelectableImagesHandler:
                     "boot_source_url": boot_source.url,
                 },
                 {
+                    "selection_id": jammy_arm_sel_high.id,
                     "os": "ubuntu",
                     "release": "jammy",
                     "arch": "arm64",
@@ -604,6 +646,7 @@ class TestGetSelectableImagesHandler:
                     "boot_source_url": boot_source.url,
                 },
                 {
+                    "selection_id": noble_ppc_sel_low.id,
                     "os": "ubuntu",
                     "release": "noble",
                     "arch": "ppc64el",
@@ -622,6 +665,7 @@ class TestGetSelectedImagesHandler:
         self,
         user_client: Client,
         factory: Factory,
+        boot_source_custom: BootSource,
         boot_source: BootSource,
         boot_source_low: BootSource,
         ubuntu_noble: BootAsset,
@@ -629,6 +673,22 @@ class TestGetSelectedImagesHandler:
         items_ubuntu_noble_2: list[BootAssetItem],
         sel_ubuntu_noble: list[BootSourceSelection],
     ) -> None:
+        # create a custom image in the DB
+        custom_asset = await factory.make_BootAsset(
+            boot_source_custom.id,
+            os="custom",
+            release="plucky",
+            title="My Custom Plucky Image",
+            arch="amd64",
+            base_image="ubuntu/plucky",
+        )
+        custom_ver = await factory.make_BootAssetVersion(custom_asset.id)
+        custom_item = await factory.make_BootAssetItem(
+            custom_ver.id,
+            file_size=1000,
+            bytes_synced=1000,
+        )
+
         resp = await user_client.get("/selected-images")
         assert resp.status_code == 200
         data = resp.json()
@@ -637,7 +697,19 @@ class TestGetSelectedImagesHandler:
         expected = {
             "items": [
                 {
-                    "id": ubuntu_noble.id,
+                    "selection_id": None,
+                    "os": custom_asset.os,
+                    "release": custom_asset.release,
+                    "arch": custom_asset.arch,
+                    "boot_source_id": boot_source_custom.id,
+                    "boot_source_name": boot_source_custom.name,
+                    "boot_source_url": boot_source_custom.url,
+                    "size": custom_item.file_size,
+                    "downloaded": custom_item.bytes_synced,
+                    "is_custom_image": True,
+                },
+                {
+                    "selection_id": sel_ubuntu_noble[1].id,
                     "os": ubuntu_noble.os,
                     "release": ubuntu_noble.release,
                     "arch": ubuntu_noble.arch,
@@ -647,7 +719,7 @@ class TestGetSelectedImagesHandler:
                     "size": size,
                     "downloaded": downloaded,
                     "is_custom_image": False,
-                }
+                },
             ]
         }
         assert data == expected
@@ -669,7 +741,7 @@ class TestGetImageSourcesHandler:
         alt_source = await factory.make_BootSource(
             url="alt.boot.source", name="Alternative Source"
         )
-        await factory.make_BootSourceSelection(
+        alt_selection = await factory.make_BootSourceSelection(
             alt_source.id, os="ubuntu", release="noble", arch="amd64"
         )
         resp = await user_client.get(
@@ -677,11 +749,13 @@ class TestGetImageSourcesHandler:
         )
         expected = [
             {
-                "id": sel_ubuntu_noble[0].boot_source_id,
+                "selection_id": sel_ubuntu_noble[1].id,
+                "id": sel_ubuntu_noble[1].boot_source_id,
                 "name": boot_source.name,
                 "url": boot_source.url,
             },
             {
+                "selection_id": alt_selection.id,
                 "id": alt_source.id,
                 "name": alt_source.name,
                 "url": alt_source.url,
@@ -710,7 +784,7 @@ class TestPostSelectableImagesSelectHandler:
         sel_ubuntu_noble: list[BootSourceSelection],
     ) -> None:
         # don't use jammy selection fixutre since it is selected already
-        await factory.make_BootSourceSelection(
+        jammy_sel = await factory.make_BootSourceSelection(
             ubuntu_jammy.boot_source_id,
             label=ubuntu_jammy.label,
             os=ubuntu_jammy.os,
@@ -719,9 +793,9 @@ class TestPostSelectableImagesSelectHandler:
             selected=False,
         )
         data = {
-            "asset_ids": [
-                ubuntu_jammy.id,
-                centos.id,
+            "selection_ids": [
+                jammy_sel.id,
+                sel_centos.id,
             ]
         }
         resp = await user_client.post("/selectable-images:select", json=data)
@@ -739,14 +813,14 @@ class TestPostSelectableImagesSelectHandler:
             }
             for sel in selections
         ]
-        jammy_sel = {
+        expected_jammy_sel = {
             "os": ubuntu_jammy.os,
             "release": ubuntu_jammy.release,
             "arch": ubuntu_jammy.arch,
             "label": ubuntu_jammy.label,
             "selected": True,
         }
-        centos_sel = {
+        expected_centos_sel = {
             "os": centos.os,
             "release": centos.release,
             "arch": centos.arch,
@@ -755,15 +829,15 @@ class TestPostSelectableImagesSelectHandler:
         }
         assert sel_ubuntu_noble[0].model_dump() in selections
         assert sel_ubuntu_noble[1].model_dump() in selections
-        assert jammy_sel in selections_no_id
-        assert centos_sel in selections_no_id
+        assert expected_jammy_sel in selections_no_id
+        assert expected_centos_sel in selections_no_id
 
     async def test_post_missing_ids(
         self,
         user_client: Client,
     ) -> None:
         resp = await user_client.post(
-            "/selectable-images:select", json={"asset_ids": [999]}
+            "/selectable-images:select", json={"selection_ids": [999]}
         )
         assert resp.status_code == 404
 
@@ -801,14 +875,14 @@ class TestPostSelectedImagesRemoveHandler:
         )
         resp = await user_client.post(
             "/selected-images:remove",
-            json={"asset_ids": [ubuntu_noble.id, ubuntu_jammy.id]},
+            json={"selection_ids": [noble_sel.id, jammy_sel.id]},
         )
         assert resp.status_code == 204
         # We can't get the exact method call from the ServiceCollection
         # object in memory, so just use mocker.ANY
         mock_background.assert_called_once_with(
             mocker.ANY,
-            [ubuntu_noble.id, ubuntu_jammy.id],
+            [noble_sel.id, jammy_sel.id],
             "test-endpoint",
             "test-bucket",
             "test/path",
@@ -828,6 +902,6 @@ class TestPostSelectedImagesRemoveHandler:
         user_client: Client,
     ) -> None:
         resp = await user_client.post(
-            "/selected-images:remove", json={"asset_ids": [999]}
+            "/selected-images:remove", json={"selection_ids": [999]}
         )
         assert resp.status_code == 404

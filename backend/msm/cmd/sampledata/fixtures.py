@@ -64,7 +64,7 @@ class FixturesAction(DatabaseAction):
         )
         self._print_fixtures("tokens", ["id", "value", "expired"], tokens)
         images = await make_fixture_images(conn)
-        self._print_fixtures("images", ["id", "codename", "release"], images)
+        self._print_fixtures("images", ["id", "os", "release", "arch"], images)
 
     def _print_fixtures(
         self, entity: str, attribs: list[str], fixtures: list[SampleDataModel]

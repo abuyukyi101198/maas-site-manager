@@ -20,6 +20,7 @@ from msm.db.alembic import migrate_db
 from msm.db.tables import METADATA
 
 MIN_POSTGRES_VERSION = (14, 0)
+CUSTOM_IMAGE_SOURCE_ID = 1
 
 FuncResult = TypeVar("FuncResult")
 

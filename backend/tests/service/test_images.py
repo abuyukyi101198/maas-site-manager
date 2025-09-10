@@ -336,6 +336,49 @@ class TestBootSourceSelectionService:
         selections = await factory.get("boot_source_selection")
         assert len(selections) == 0
 
+    async def test_select_many(
+        self,
+        factory: Factory,
+        boot_source_selection_service: BootSourceSelectionService,
+        sel_ubuntu_noble: list[BootSourceSelection],
+        sel_ubuntu_jammy: list[BootSourceSelection],
+    ) -> None:
+        await boot_source_selection_service.update_many(
+            [
+                s.id
+                for s in sel_ubuntu_jammy + sel_ubuntu_noble
+                if not s.selected
+            ],
+            True,
+        )
+        selections = await factory.get("boot_source_selection")
+        assert all([s["selected"] for s in selections])
+
+    async def test_deselect_many(
+        self,
+        factory: Factory,
+        boot_source_selection_service: BootSourceSelectionService,
+        sel_ubuntu_noble: list[BootSourceSelection],
+        sel_ubuntu_jammy: list[BootSourceSelection],
+    ) -> None:
+        await boot_source_selection_service.update_many(
+            [s.id for s in sel_ubuntu_jammy + sel_ubuntu_noble if s.selected],
+            False,
+        )
+        selections = await factory.get("boot_source_selection")
+        assert all([not s["selected"] for s in selections])
+
+    async def test_get_many_by_id(
+        self,
+        boot_source_selection_service: BootSourceSelectionService,
+        sel_ubuntu_noble: list[BootSourceSelection],
+        sel_ubuntu_jammy: list[BootSourceSelection],
+    ) -> None:
+        _, selections = await boot_source_selection_service.get_many_by_id(
+            [s.id for s in sel_ubuntu_noble]
+        )
+        assert [s for s in selections] == sel_ubuntu_noble
+
 
 @pytest.mark.asyncio
 class TestBootSourceService:

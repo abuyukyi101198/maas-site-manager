@@ -243,6 +243,7 @@ class BootSourceUpdate(BaseModel):
 
 
 class SelectableImage(BaseModel):
+    selection_id: int
     os: str
     release: str
     arch: str
@@ -252,7 +253,6 @@ class SelectableImage(BaseModel):
 
 
 class SelectedImage(BaseModel):
-    id: int
     boot_source_id: int
     boot_source_name: str
     boot_source_url: str
@@ -262,6 +262,7 @@ class SelectedImage(BaseModel):
     size: int
     downloaded: int
     is_custom_image: bool
+    selection_id: int | None = None
 
 
 class IndexProduct(BaseModel):

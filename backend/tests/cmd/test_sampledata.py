@@ -46,11 +46,11 @@ class TestSampleData:
         boot_source = await factory.get("boot_source")
         assert len(boot_source) == 2
         boot_asset = await factory.get("boot_asset")
-        assert len(boot_asset) == 5
+        assert len(boot_asset) == 6
         boot_asset_version = await factory.get("boot_asset_version")
-        assert len(boot_asset_version) == 10
+        assert len(boot_asset_version) == 11
         boot_asset_item = await factory.get("boot_asset_item")
-        assert len(boot_asset_item) == 36
+        assert len(boot_asset_item) == 37
 
         await purge_sampledata_action._delete_fixtures(db_connection)
         site = await factory.get("site")
@@ -62,7 +62,8 @@ class TestSampleData:
         boot_source_selection = await factory.get("boot_source_selection")
         assert len(boot_source_selection) == 0
         boot_source = await factory.get("boot_source")
-        assert len(boot_source) == 0
+        # the custom boot source shouldn't be deleted
+        assert len(boot_source) == 1
         boot_asset = await factory.get("boot_asset")
         assert len(boot_asset) == 0
         boot_asset_version = await factory.get("boot_asset_version")
