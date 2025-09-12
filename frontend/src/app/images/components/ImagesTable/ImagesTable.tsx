@@ -1,0 +1,51 @@
+import type { ReactElement } from "react";
+
+import { GenericTable } from "@canonical/maas-react-components";
+
+import useImagesTableColumns from "./useImagesTableColumns";
+import { filterCells, filterHeaders } from "./useImagesTableColumns/useImagesTableColumns";
+
+import { useSelectedImages } from "@/app/api/query/images";
+import type { SelectedImage } from "@/app/apiclient";
+import { useRowSelection } from "@/app/context";
+
+export type ImageWithId = SelectedImage & { id: number | string };
+
+const generateData = (selectedImages: SelectedImage[]): ImageWithId[] => {
+  return selectedImages.map(
+    (image, index): ImageWithId => ({
+      ...image,
+      id: image.selection_id ?? `custom-${index}`,
+    }),
+  );
+};
+
+export const ImagesTable = (): ReactElement => {
+  const { rowSelection, setRowSelection } = useRowSelection("images", { clearOnUnmount: true });
+  const selectedImages = useSelectedImages();
+
+  const columns = useImagesTableColumns();
+  const data = selectedImages.data?.items ? generateData(selectedImages.data.items) : [];
+
+  return (
+    <GenericTable
+      aria-label="images"
+      // TODO: custom images should be removable with a separate endpoint
+      canSelect={(row) => !row.original.is_custom_image}
+      className="images-table"
+      columns={columns}
+      data={data}
+      filterCells={filterCells}
+      filterHeaders={filterHeaders}
+      groupBy={["os"]}
+      isLoading={selectedImages.isPending}
+      noData="No images found."
+      pinGroup={[{ value: "ubuntu", isTop: true }]}
+      rowSelection={rowSelection}
+      setRowSelection={setRowSelection}
+      sortBy={[{ id: "release", desc: true }]}
+    />
+  );
+};
+
+export default ImagesTable;

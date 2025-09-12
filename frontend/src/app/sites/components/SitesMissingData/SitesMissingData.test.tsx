@@ -2,8 +2,8 @@ import { http, HttpResponse } from "msw";
 
 import SitesMissingData from "./SitesMissingData";
 
-import { ExceptionCode } from "@/app/api";
 import type { MutationErrorResponse } from "@/app/api";
+import { ExceptionCode } from "@/app/apiclient";
 import { siteFactory } from "@/mocks/factories";
 import { sitesResolvers } from "@/testing/resolvers/sites";
 import { apiUrls } from "@/utils/test-urls";

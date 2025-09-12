@@ -1,13 +1,15 @@
 import { http, HttpResponse } from "msw";
 
-import { ExceptionCode, type User, type UsersPostRequest } from "@/app/api";
 import type { SortDirection, UserSortKey } from "@/app/api/handlers";
 import type {
   DeleteV1UsersIdDeleteError,
   GetV1UsersGetError,
   PatchV1UsersIdPatchError,
   PostV1UsersPostError,
+  User,
+  UsersPostRequest,
 } from "@/app/apiclient";
+import { ExceptionCode } from "@/app/apiclient";
 import { userFactory } from "@/mocks/factories";
 import { apiUrls } from "@/utils/test-urls";
 
@@ -111,11 +113,11 @@ const usersResolvers = {
   getCurrentUser: {
     resolved: false,
     handler: (data: User = mockUsers[0]) => {
-      usersResolvers.getCurrentUser.resolved = true;
       return http.get(apiUrls.currentUser, () => {
         const user = userFactory.build(
           data ? data : { username: "admin", full_name: "MAAS Admin", email: "admin@example.com" },
         );
+        usersResolvers.getCurrentUser.resolved = true;
         return HttpResponse.json(user);
       });
     },

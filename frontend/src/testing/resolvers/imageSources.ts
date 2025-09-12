@@ -1,6 +1,5 @@
 import { http, HttpResponse } from "msw";
 
-import { ExceptionCode } from "@/app/api";
 import type { SortDirection } from "@/app/api/handlers";
 import type {
   PostBootSourcesV1BootassetSourcesPostError,
@@ -12,6 +11,7 @@ import type {
   PatchBootSourceV1BootassetSourcesIdPatchError,
   DeleteBootSourceV1BootassetSourcesIdDeleteError,
 } from "@/app/apiclient";
+import { ExceptionCode } from "@/app/apiclient";
 import { imageSourceFactory } from "@/mocks/factories";
 import { apiUrls } from "@/utils/test-urls";
 

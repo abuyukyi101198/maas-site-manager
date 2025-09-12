@@ -2,24 +2,25 @@
 
 import {
   type Options,
-  getBootAssetsV1BootassetsGet,
-  postBootAssetsV1BootassetsPost,
   getBootSourcesV1BootassetSourcesGet,
   postBootSourcesV1BootassetSourcesPost,
   deleteBootSourceV1BootassetSourcesIdDelete,
   getBootSourceByIdV1BootassetSourcesIdGet,
   patchBootSourceV1BootassetSourcesIdPatch,
   getBootSourceSelectionsV1BootassetSourcesIdSelectionsGet,
-  patchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatch,
-  postBootAssetVersionV1BootassetsIdVersionsPost,
-  getBootAssetVersionsV1BootassetVersionsGet,
-  postBootAssetItemV1BootassetVersionsIdItemsPost,
-  getBootAssetItemsV1BootassetItemsGet,
-  deleteImagesV1BootassetItemsIdDelete,
+  putBootSourceAvailSelectionsV1BootassetSourcesIdAvailableSelectionsPut,
+  putBootSourceAssetsV1BootassetSourcesIdAssetsPut,
+  getBootAssetItemV1BootassetItemsIdGet,
   patchBootAssetItemsV1BootassetItemsIdPatch,
+  downloadIndexV1ImagesTrackRiskStreamsV1IndexPathGet,
+  downloadV1ImagesTrackRiskBootSourceIdFilePathGet,
+  selectImagesV1SelectableImagesSelectPost,
+  getSelectableImagesV1SelectableImagesGet,
+  getSelectedImagesV1SelectedImagesGet,
+  getImageSourcesV1ImageSourcesGet,
+  removeSelectionsV1SelectedImagesRemovePost,
   postImagesV1ImagesPost,
-  downloadV1ImagesTrackRiskFilePathGet,
-  getAvailableImagesV1AvailableImagesGet,
+  refreshIndexV1RefreshIndexGet,
   postV1LoginPost,
   getV1SettingsGet,
   patchV1SettingsPatch,
@@ -47,12 +48,6 @@ import {
 } from "../sdk.gen";
 import { queryOptions, infiniteQueryOptions, type InfiniteData, type UseMutationOptions } from "@tanstack/react-query";
 import type {
-  GetBootAssetsV1BootassetsGetData,
-  GetBootAssetsV1BootassetsGetError,
-  GetBootAssetsV1BootassetsGetResponse,
-  PostBootAssetsV1BootassetsPostData,
-  PostBootAssetsV1BootassetsPostError,
-  PostBootAssetsV1BootassetsPostResponse,
   GetBootSourcesV1BootassetSourcesGetData,
   GetBootSourcesV1BootassetSourcesGetError,
   GetBootSourcesV1BootassetSourcesGetResponse,
@@ -68,31 +63,30 @@ import type {
   GetBootSourceSelectionsV1BootassetSourcesIdSelectionsGetData,
   GetBootSourceSelectionsV1BootassetSourcesIdSelectionsGetError,
   GetBootSourceSelectionsV1BootassetSourcesIdSelectionsGetResponse,
-  PatchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatchData,
-  PatchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatchError,
-  PatchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatchResponse,
-  PostBootAssetVersionV1BootassetsIdVersionsPostData,
-  PostBootAssetVersionV1BootassetsIdVersionsPostError,
-  PostBootAssetVersionV1BootassetsIdVersionsPostResponse,
-  GetBootAssetVersionsV1BootassetVersionsGetData,
-  GetBootAssetVersionsV1BootassetVersionsGetError,
-  GetBootAssetVersionsV1BootassetVersionsGetResponse,
-  PostBootAssetItemV1BootassetVersionsIdItemsPostData,
-  PostBootAssetItemV1BootassetVersionsIdItemsPostError,
-  PostBootAssetItemV1BootassetVersionsIdItemsPostResponse,
-  GetBootAssetItemsV1BootassetItemsGetData,
-  GetBootAssetItemsV1BootassetItemsGetError,
-  GetBootAssetItemsV1BootassetItemsGetResponse,
-  DeleteImagesV1BootassetItemsIdDeleteData,
-  DeleteImagesV1BootassetItemsIdDeleteError,
+  PutBootSourceAvailSelectionsV1BootassetSourcesIdAvailableSelectionsPutData,
+  PutBootSourceAvailSelectionsV1BootassetSourcesIdAvailableSelectionsPutError,
+  PutBootSourceAvailSelectionsV1BootassetSourcesIdAvailableSelectionsPutResponse,
+  PutBootSourceAssetsV1BootassetSourcesIdAssetsPutData,
+  PutBootSourceAssetsV1BootassetSourcesIdAssetsPutError,
+  PutBootSourceAssetsV1BootassetSourcesIdAssetsPutResponse,
+  GetBootAssetItemV1BootassetItemsIdGetData,
   PatchBootAssetItemsV1BootassetItemsIdPatchData,
   PatchBootAssetItemsV1BootassetItemsIdPatchError,
   PatchBootAssetItemsV1BootassetItemsIdPatchResponse,
+  DownloadIndexV1ImagesTrackRiskStreamsV1IndexPathGetData,
+  DownloadV1ImagesTrackRiskBootSourceIdFilePathGetData,
+  SelectImagesV1SelectableImagesSelectPostData,
+  SelectImagesV1SelectableImagesSelectPostError,
+  GetSelectableImagesV1SelectableImagesGetData,
+  GetSelectedImagesV1SelectedImagesGetData,
+  GetImageSourcesV1ImageSourcesGetData,
+  RemoveSelectionsV1SelectedImagesRemovePostData,
+  RemoveSelectionsV1SelectedImagesRemovePostError,
+  RemoveSelectionsV1SelectedImagesRemovePostResponse,
   PostImagesV1ImagesPostData,
   PostImagesV1ImagesPostError,
   PostImagesV1ImagesPostResponse,
-  DownloadV1ImagesTrackRiskFilePathGetData,
-  GetAvailableImagesV1AvailableImagesGetData,
+  RefreshIndexV1RefreshIndexGetData,
   PostV1LoginPostData,
   PostV1LoginPostError,
   PostV1LoginPostResponse,
@@ -190,17 +184,20 @@ const createQueryKey = <TOptions extends Options>(
   return [params];
 };
 
-export const getBootAssetsV1BootassetsGetQueryKey = (options?: Options<GetBootAssetsV1BootassetsGetData>) =>
-  createQueryKey("getBootAssetsV1BootassetsGet", options);
+export const getBootSourcesV1BootassetSourcesGetQueryKey = (
+  options?: Options<GetBootSourcesV1BootassetSourcesGetData>,
+) => createQueryKey("getBootSourcesV1BootassetSourcesGet", options);
 
 /**
- * Get Boot Assets
- * Return boot assets.
+ * Get Boot Sources
+ * Return boot sources.
  */
-export const getBootAssetsV1BootassetsGetOptions = (options?: Options<GetBootAssetsV1BootassetsGetData>) => {
+export const getBootSourcesV1BootassetSourcesGetOptions = (
+  options?: Options<GetBootSourcesV1BootassetSourcesGetData>,
+) => {
   return queryOptions({
     queryFn: async ({ queryKey, signal }) => {
-      const { data } = await getBootAssetsV1BootassetsGet({
+      const { data } = await getBootSourcesV1BootassetSourcesGet({
         ...options,
         ...queryKey[0],
         signal,
@@ -208,7 +205,7 @@ export const getBootAssetsV1BootassetsGetOptions = (options?: Options<GetBootAss
       });
       return data;
     },
-    queryKey: getBootAssetsV1BootassetsGetQueryKey(options),
+    queryKey: getBootSourcesV1BootassetSourcesGetQueryKey(options),
   });
 };
 
@@ -244,124 +241,6 @@ const createInfiniteParams = <K extends Pick<QueryKey<Options>[0], "body" | "hea
     };
   }
   return params as unknown as typeof page;
-};
-
-export const getBootAssetsV1BootassetsGetInfiniteQueryKey = (
-  options?: Options<GetBootAssetsV1BootassetsGetData>,
-): QueryKey<Options<GetBootAssetsV1BootassetsGetData>> => createQueryKey("getBootAssetsV1BootassetsGet", options, true);
-
-/**
- * Get Boot Assets
- * Return boot assets.
- */
-export const getBootAssetsV1BootassetsGetInfiniteOptions = (options?: Options<GetBootAssetsV1BootassetsGetData>) => {
-  return infiniteQueryOptions<
-    GetBootAssetsV1BootassetsGetResponse,
-    AxiosError<GetBootAssetsV1BootassetsGetError>,
-    InfiniteData<GetBootAssetsV1BootassetsGetResponse>,
-    QueryKey<Options<GetBootAssetsV1BootassetsGetData>>,
-    number | Pick<QueryKey<Options<GetBootAssetsV1BootassetsGetData>>[0], "body" | "headers" | "path" | "query">
-  >(
-    // @ts-ignore
-    {
-      queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<
-          QueryKey<Options<GetBootAssetsV1BootassetsGetData>>[0],
-          "body" | "headers" | "path" | "query"
-        > =
-          typeof pageParam === "object"
-            ? pageParam
-            : {
-                query: {
-                  page: pageParam,
-                },
-              };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getBootAssetsV1BootassetsGet({
-          ...options,
-          ...params,
-          signal,
-          throwOnError: true,
-        });
-        return data;
-      },
-      queryKey: getBootAssetsV1BootassetsGetInfiniteQueryKey(options),
-    },
-  );
-};
-
-export const postBootAssetsV1BootassetsPostQueryKey = (options: Options<PostBootAssetsV1BootassetsPostData>) =>
-  createQueryKey("postBootAssetsV1BootassetsPost", options);
-
-/**
- * Post Boot Assets
- */
-export const postBootAssetsV1BootassetsPostOptions = (options: Options<PostBootAssetsV1BootassetsPostData>) => {
-  return queryOptions({
-    queryFn: async ({ queryKey, signal }) => {
-      const { data } = await postBootAssetsV1BootassetsPost({
-        ...options,
-        ...queryKey[0],
-        signal,
-        throwOnError: true,
-      });
-      return data;
-    },
-    queryKey: postBootAssetsV1BootassetsPostQueryKey(options),
-  });
-};
-
-/**
- * Post Boot Assets
- */
-export const postBootAssetsV1BootassetsPostMutation = (
-  options?: Partial<Options<PostBootAssetsV1BootassetsPostData>>,
-): UseMutationOptions<
-  PostBootAssetsV1BootassetsPostResponse,
-  AxiosError<PostBootAssetsV1BootassetsPostError>,
-  Options<PostBootAssetsV1BootassetsPostData>
-> => {
-  const mutationOptions: UseMutationOptions<
-    PostBootAssetsV1BootassetsPostResponse,
-    AxiosError<PostBootAssetsV1BootassetsPostError>,
-    Options<PostBootAssetsV1BootassetsPostData>
-  > = {
-    mutationFn: async (localOptions) => {
-      const { data } = await postBootAssetsV1BootassetsPost({
-        ...options,
-        ...localOptions,
-        throwOnError: true,
-      });
-      return data;
-    },
-  };
-  return mutationOptions;
-};
-
-export const getBootSourcesV1BootassetSourcesGetQueryKey = (
-  options?: Options<GetBootSourcesV1BootassetSourcesGetData>,
-) => createQueryKey("getBootSourcesV1BootassetSourcesGet", options);
-
-/**
- * Get Boot Sources
- * Return boot sources.
- */
-export const getBootSourcesV1BootassetSourcesGetOptions = (
-  options?: Options<GetBootSourcesV1BootassetSourcesGetData>,
-) => {
-  return queryOptions({
-    queryFn: async ({ queryKey, signal }) => {
-      const { data } = await getBootSourcesV1BootassetSourcesGet({
-        ...options,
-        ...queryKey[0],
-        signal,
-        throwOnError: true,
-      });
-      return data;
-    },
-    queryKey: getBootSourcesV1BootassetSourcesGetQueryKey(options),
-  });
 };
 
 export const getBootSourcesV1BootassetSourcesGetInfiniteQueryKey = (
@@ -619,22 +498,22 @@ export const getBootSourceSelectionsV1BootassetSourcesIdSelectionsGetInfiniteOpt
 };
 
 /**
- * Patch Boot Source Selections
+ * Put Boot Source Avail Selections
  */
-export const patchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatchMutation = (
-  options?: Partial<Options<PatchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatchData>>,
+export const putBootSourceAvailSelectionsV1BootassetSourcesIdAvailableSelectionsPutMutation = (
+  options?: Partial<Options<PutBootSourceAvailSelectionsV1BootassetSourcesIdAvailableSelectionsPutData>>,
 ): UseMutationOptions<
-  PatchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatchResponse,
-  AxiosError<PatchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatchError>,
-  Options<PatchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatchData>
+  PutBootSourceAvailSelectionsV1BootassetSourcesIdAvailableSelectionsPutResponse,
+  AxiosError<PutBootSourceAvailSelectionsV1BootassetSourcesIdAvailableSelectionsPutError>,
+  Options<PutBootSourceAvailSelectionsV1BootassetSourcesIdAvailableSelectionsPutData>
 > => {
   const mutationOptions: UseMutationOptions<
-    PatchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatchResponse,
-    AxiosError<PatchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatchError>,
-    Options<PatchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatchData>
+    PutBootSourceAvailSelectionsV1BootassetSourcesIdAvailableSelectionsPutResponse,
+    AxiosError<PutBootSourceAvailSelectionsV1BootassetSourcesIdAvailableSelectionsPutError>,
+    Options<PutBootSourceAvailSelectionsV1BootassetSourcesIdAvailableSelectionsPutData>
   > = {
     mutationFn: async (localOptions) => {
-      const { data } = await patchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatch({
+      const { data } = await putBootSourceAvailSelectionsV1BootassetSourcesIdAvailableSelectionsPut({
         ...options,
         ...localOptions,
         throwOnError: true,
@@ -645,47 +524,23 @@ export const patchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatchMutatio
   return mutationOptions;
 };
 
-export const postBootAssetVersionV1BootassetsIdVersionsPostQueryKey = (
-  options: Options<PostBootAssetVersionV1BootassetsIdVersionsPostData>,
-) => createQueryKey("postBootAssetVersionV1BootassetsIdVersionsPost", options);
-
 /**
- * Post Boot Asset Version
+ * Put Boot Source Assets
  */
-export const postBootAssetVersionV1BootassetsIdVersionsPostOptions = (
-  options: Options<PostBootAssetVersionV1BootassetsIdVersionsPostData>,
-) => {
-  return queryOptions({
-    queryFn: async ({ queryKey, signal }) => {
-      const { data } = await postBootAssetVersionV1BootassetsIdVersionsPost({
-        ...options,
-        ...queryKey[0],
-        signal,
-        throwOnError: true,
-      });
-      return data;
-    },
-    queryKey: postBootAssetVersionV1BootassetsIdVersionsPostQueryKey(options),
-  });
-};
-
-/**
- * Post Boot Asset Version
- */
-export const postBootAssetVersionV1BootassetsIdVersionsPostMutation = (
-  options?: Partial<Options<PostBootAssetVersionV1BootassetsIdVersionsPostData>>,
+export const putBootSourceAssetsV1BootassetSourcesIdAssetsPutMutation = (
+  options?: Partial<Options<PutBootSourceAssetsV1BootassetSourcesIdAssetsPutData>>,
 ): UseMutationOptions<
-  PostBootAssetVersionV1BootassetsIdVersionsPostResponse,
-  AxiosError<PostBootAssetVersionV1BootassetsIdVersionsPostError>,
-  Options<PostBootAssetVersionV1BootassetsIdVersionsPostData>
+  PutBootSourceAssetsV1BootassetSourcesIdAssetsPutResponse,
+  AxiosError<PutBootSourceAssetsV1BootassetSourcesIdAssetsPutError>,
+  Options<PutBootSourceAssetsV1BootassetSourcesIdAssetsPutData>
 > => {
   const mutationOptions: UseMutationOptions<
-    PostBootAssetVersionV1BootassetsIdVersionsPostResponse,
-    AxiosError<PostBootAssetVersionV1BootassetsIdVersionsPostError>,
-    Options<PostBootAssetVersionV1BootassetsIdVersionsPostData>
+    PutBootSourceAssetsV1BootassetSourcesIdAssetsPutResponse,
+    AxiosError<PutBootSourceAssetsV1BootassetSourcesIdAssetsPutError>,
+    Options<PutBootSourceAssetsV1BootassetSourcesIdAssetsPutData>
   > = {
     mutationFn: async (localOptions) => {
-      const { data } = await postBootAssetVersionV1BootassetsIdVersionsPost({
+      const { data } = await putBootSourceAssetsV1BootassetSourcesIdAssetsPut({
         ...options,
         ...localOptions,
         throwOnError: true,
@@ -696,20 +551,19 @@ export const postBootAssetVersionV1BootassetsIdVersionsPostMutation = (
   return mutationOptions;
 };
 
-export const getBootAssetVersionsV1BootassetVersionsGetQueryKey = (
-  options?: Options<GetBootAssetVersionsV1BootassetVersionsGetData>,
-) => createQueryKey("getBootAssetVersionsV1BootassetVersionsGet", options);
+export const getBootAssetItemV1BootassetItemsIdGetQueryKey = (
+  options: Options<GetBootAssetItemV1BootassetItemsIdGetData>,
+) => createQueryKey("getBootAssetItemV1BootassetItemsIdGet", options);
 
 /**
- * Get Boot Asset Versions
- * Return Boot Asset Versions
+ * Get Boot Asset Item
  */
-export const getBootAssetVersionsV1BootassetVersionsGetOptions = (
-  options?: Options<GetBootAssetVersionsV1BootassetVersionsGetData>,
+export const getBootAssetItemV1BootassetItemsIdGetOptions = (
+  options: Options<GetBootAssetItemV1BootassetItemsIdGetData>,
 ) => {
   return queryOptions({
     queryFn: async ({ queryKey, signal }) => {
-      const { data } = await getBootAssetVersionsV1BootassetVersionsGet({
+      const { data } = await getBootAssetItemV1BootassetItemsIdGet({
         ...options,
         ...queryKey[0],
         signal,
@@ -717,206 +571,8 @@ export const getBootAssetVersionsV1BootassetVersionsGetOptions = (
       });
       return data;
     },
-    queryKey: getBootAssetVersionsV1BootassetVersionsGetQueryKey(options),
+    queryKey: getBootAssetItemV1BootassetItemsIdGetQueryKey(options),
   });
-};
-
-export const getBootAssetVersionsV1BootassetVersionsGetInfiniteQueryKey = (
-  options?: Options<GetBootAssetVersionsV1BootassetVersionsGetData>,
-): QueryKey<Options<GetBootAssetVersionsV1BootassetVersionsGetData>> =>
-  createQueryKey("getBootAssetVersionsV1BootassetVersionsGet", options, true);
-
-/**
- * Get Boot Asset Versions
- * Return Boot Asset Versions
- */
-export const getBootAssetVersionsV1BootassetVersionsGetInfiniteOptions = (
-  options?: Options<GetBootAssetVersionsV1BootassetVersionsGetData>,
-) => {
-  return infiniteQueryOptions<
-    GetBootAssetVersionsV1BootassetVersionsGetResponse,
-    AxiosError<GetBootAssetVersionsV1BootassetVersionsGetError>,
-    InfiniteData<GetBootAssetVersionsV1BootassetVersionsGetResponse>,
-    QueryKey<Options<GetBootAssetVersionsV1BootassetVersionsGetData>>,
-    | number
-    | Pick<QueryKey<Options<GetBootAssetVersionsV1BootassetVersionsGetData>>[0], "body" | "headers" | "path" | "query">
-  >(
-    // @ts-ignore
-    {
-      queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<
-          QueryKey<Options<GetBootAssetVersionsV1BootassetVersionsGetData>>[0],
-          "body" | "headers" | "path" | "query"
-        > =
-          typeof pageParam === "object"
-            ? pageParam
-            : {
-                query: {
-                  page: pageParam,
-                },
-              };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getBootAssetVersionsV1BootassetVersionsGet({
-          ...options,
-          ...params,
-          signal,
-          throwOnError: true,
-        });
-        return data;
-      },
-      queryKey: getBootAssetVersionsV1BootassetVersionsGetInfiniteQueryKey(options),
-    },
-  );
-};
-
-export const postBootAssetItemV1BootassetVersionsIdItemsPostQueryKey = (
-  options: Options<PostBootAssetItemV1BootassetVersionsIdItemsPostData>,
-) => createQueryKey("postBootAssetItemV1BootassetVersionsIdItemsPost", options);
-
-/**
- * Post Boot Asset Item
- */
-export const postBootAssetItemV1BootassetVersionsIdItemsPostOptions = (
-  options: Options<PostBootAssetItemV1BootassetVersionsIdItemsPostData>,
-) => {
-  return queryOptions({
-    queryFn: async ({ queryKey, signal }) => {
-      const { data } = await postBootAssetItemV1BootassetVersionsIdItemsPost({
-        ...options,
-        ...queryKey[0],
-        signal,
-        throwOnError: true,
-      });
-      return data;
-    },
-    queryKey: postBootAssetItemV1BootassetVersionsIdItemsPostQueryKey(options),
-  });
-};
-
-/**
- * Post Boot Asset Item
- */
-export const postBootAssetItemV1BootassetVersionsIdItemsPostMutation = (
-  options?: Partial<Options<PostBootAssetItemV1BootassetVersionsIdItemsPostData>>,
-): UseMutationOptions<
-  PostBootAssetItemV1BootassetVersionsIdItemsPostResponse,
-  AxiosError<PostBootAssetItemV1BootassetVersionsIdItemsPostError>,
-  Options<PostBootAssetItemV1BootassetVersionsIdItemsPostData>
-> => {
-  const mutationOptions: UseMutationOptions<
-    PostBootAssetItemV1BootassetVersionsIdItemsPostResponse,
-    AxiosError<PostBootAssetItemV1BootassetVersionsIdItemsPostError>,
-    Options<PostBootAssetItemV1BootassetVersionsIdItemsPostData>
-  > = {
-    mutationFn: async (localOptions) => {
-      const { data } = await postBootAssetItemV1BootassetVersionsIdItemsPost({
-        ...options,
-        ...localOptions,
-        throwOnError: true,
-      });
-      return data;
-    },
-  };
-  return mutationOptions;
-};
-
-export const getBootAssetItemsV1BootassetItemsGetQueryKey = (
-  options?: Options<GetBootAssetItemsV1BootassetItemsGetData>,
-) => createQueryKey("getBootAssetItemsV1BootassetItemsGet", options);
-
-/**
- * Get Boot Asset Items
- */
-export const getBootAssetItemsV1BootassetItemsGetOptions = (
-  options?: Options<GetBootAssetItemsV1BootassetItemsGetData>,
-) => {
-  return queryOptions({
-    queryFn: async ({ queryKey, signal }) => {
-      const { data } = await getBootAssetItemsV1BootassetItemsGet({
-        ...options,
-        ...queryKey[0],
-        signal,
-        throwOnError: true,
-      });
-      return data;
-    },
-    queryKey: getBootAssetItemsV1BootassetItemsGetQueryKey(options),
-  });
-};
-
-export const getBootAssetItemsV1BootassetItemsGetInfiniteQueryKey = (
-  options?: Options<GetBootAssetItemsV1BootassetItemsGetData>,
-): QueryKey<Options<GetBootAssetItemsV1BootassetItemsGetData>> =>
-  createQueryKey("getBootAssetItemsV1BootassetItemsGet", options, true);
-
-/**
- * Get Boot Asset Items
- */
-export const getBootAssetItemsV1BootassetItemsGetInfiniteOptions = (
-  options?: Options<GetBootAssetItemsV1BootassetItemsGetData>,
-) => {
-  return infiniteQueryOptions<
-    GetBootAssetItemsV1BootassetItemsGetResponse,
-    AxiosError<GetBootAssetItemsV1BootassetItemsGetError>,
-    InfiniteData<GetBootAssetItemsV1BootassetItemsGetResponse>,
-    QueryKey<Options<GetBootAssetItemsV1BootassetItemsGetData>>,
-    number | Pick<QueryKey<Options<GetBootAssetItemsV1BootassetItemsGetData>>[0], "body" | "headers" | "path" | "query">
-  >(
-    // @ts-ignore
-    {
-      queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<
-          QueryKey<Options<GetBootAssetItemsV1BootassetItemsGetData>>[0],
-          "body" | "headers" | "path" | "query"
-        > =
-          typeof pageParam === "object"
-            ? pageParam
-            : {
-                query: {
-                  page: pageParam,
-                },
-              };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getBootAssetItemsV1BootassetItemsGet({
-          ...options,
-          ...params,
-          signal,
-          throwOnError: true,
-        });
-        return data;
-      },
-      queryKey: getBootAssetItemsV1BootassetItemsGetInfiniteQueryKey(options),
-    },
-  );
-};
-
-/**
- * Delete Images
- */
-export const deleteImagesV1BootassetItemsIdDeleteMutation = (
-  options?: Partial<Options<DeleteImagesV1BootassetItemsIdDeleteData>>,
-): UseMutationOptions<
-  unknown,
-  AxiosError<DeleteImagesV1BootassetItemsIdDeleteError>,
-  Options<DeleteImagesV1BootassetItemsIdDeleteData>
-> => {
-  const mutationOptions: UseMutationOptions<
-    unknown,
-    AxiosError<DeleteImagesV1BootassetItemsIdDeleteError>,
-    Options<DeleteImagesV1BootassetItemsIdDeleteData>
-  > = {
-    mutationFn: async (localOptions) => {
-      const { data } = await deleteImagesV1BootassetItemsIdDelete({
-        ...options,
-        ...localOptions,
-        throwOnError: true,
-      });
-      return data;
-    },
-  };
-  return mutationOptions;
 };
 
 /**
@@ -936,6 +592,225 @@ export const patchBootAssetItemsV1BootassetItemsIdPatchMutation = (
   > = {
     mutationFn: async (localOptions) => {
       const { data } = await patchBootAssetItemsV1BootassetItemsIdPatch({
+        ...options,
+        ...localOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const downloadIndexV1ImagesTrackRiskStreamsV1IndexPathGetQueryKey = (
+  options: Options<DownloadIndexV1ImagesTrackRiskStreamsV1IndexPathGetData>,
+) => createQueryKey("downloadIndexV1ImagesTrackRiskStreamsV1IndexPathGet", options);
+
+/**
+ * Download Index
+ */
+export const downloadIndexV1ImagesTrackRiskStreamsV1IndexPathGetOptions = (
+  options: Options<DownloadIndexV1ImagesTrackRiskStreamsV1IndexPathGetData>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await downloadIndexV1ImagesTrackRiskStreamsV1IndexPathGet({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: downloadIndexV1ImagesTrackRiskStreamsV1IndexPathGetQueryKey(options),
+  });
+};
+
+export const downloadV1ImagesTrackRiskBootSourceIdFilePathGetQueryKey = (
+  options: Options<DownloadV1ImagesTrackRiskBootSourceIdFilePathGetData>,
+) => createQueryKey("downloadV1ImagesTrackRiskBootSourceIdFilePathGet", options);
+
+/**
+ * Download
+ */
+export const downloadV1ImagesTrackRiskBootSourceIdFilePathGetOptions = (
+  options: Options<DownloadV1ImagesTrackRiskBootSourceIdFilePathGetData>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await downloadV1ImagesTrackRiskBootSourceIdFilePathGet({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: downloadV1ImagesTrackRiskBootSourceIdFilePathGetQueryKey(options),
+  });
+};
+
+export const selectImagesV1SelectableImagesSelectPostQueryKey = (
+  options: Options<SelectImagesV1SelectableImagesSelectPostData>,
+) => createQueryKey("selectImagesV1SelectableImagesSelectPost", options);
+
+/**
+ * Select Images
+ */
+export const selectImagesV1SelectableImagesSelectPostOptions = (
+  options: Options<SelectImagesV1SelectableImagesSelectPostData>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await selectImagesV1SelectableImagesSelectPost({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: selectImagesV1SelectableImagesSelectPostQueryKey(options),
+  });
+};
+
+/**
+ * Select Images
+ */
+export const selectImagesV1SelectableImagesSelectPostMutation = (
+  options?: Partial<Options<SelectImagesV1SelectableImagesSelectPostData>>,
+): UseMutationOptions<
+  unknown,
+  AxiosError<SelectImagesV1SelectableImagesSelectPostError>,
+  Options<SelectImagesV1SelectableImagesSelectPostData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    unknown,
+    AxiosError<SelectImagesV1SelectableImagesSelectPostError>,
+    Options<SelectImagesV1SelectableImagesSelectPostData>
+  > = {
+    mutationFn: async (localOptions) => {
+      const { data } = await selectImagesV1SelectableImagesSelectPost({
+        ...options,
+        ...localOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getSelectableImagesV1SelectableImagesGetQueryKey = (
+  options?: Options<GetSelectableImagesV1SelectableImagesGetData>,
+) => createQueryKey("getSelectableImagesV1SelectableImagesGet", options);
+
+/**
+ * Get Selectable Images
+ */
+export const getSelectableImagesV1SelectableImagesGetOptions = (
+  options?: Options<GetSelectableImagesV1SelectableImagesGetData>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getSelectableImagesV1SelectableImagesGet({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getSelectableImagesV1SelectableImagesGetQueryKey(options),
+  });
+};
+
+export const getSelectedImagesV1SelectedImagesGetQueryKey = (
+  options?: Options<GetSelectedImagesV1SelectedImagesGetData>,
+) => createQueryKey("getSelectedImagesV1SelectedImagesGet", options);
+
+/**
+ * Get Selected Images
+ */
+export const getSelectedImagesV1SelectedImagesGetOptions = (
+  options?: Options<GetSelectedImagesV1SelectedImagesGetData>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getSelectedImagesV1SelectedImagesGet({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getSelectedImagesV1SelectedImagesGetQueryKey(options),
+  });
+};
+
+export const getImageSourcesV1ImageSourcesGetQueryKey = (options: Options<GetImageSourcesV1ImageSourcesGetData>) =>
+  createQueryKey("getImageSourcesV1ImageSourcesGet", options);
+
+/**
+ * Get Image Sources
+ */
+export const getImageSourcesV1ImageSourcesGetOptions = (options: Options<GetImageSourcesV1ImageSourcesGetData>) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getImageSourcesV1ImageSourcesGet({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getImageSourcesV1ImageSourcesGetQueryKey(options),
+  });
+};
+
+export const removeSelectionsV1SelectedImagesRemovePostQueryKey = (
+  options: Options<RemoveSelectionsV1SelectedImagesRemovePostData>,
+) => createQueryKey("removeSelectionsV1SelectedImagesRemovePost", options);
+
+/**
+ * Remove Selections
+ */
+export const removeSelectionsV1SelectedImagesRemovePostOptions = (
+  options: Options<RemoveSelectionsV1SelectedImagesRemovePostData>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await removeSelectionsV1SelectedImagesRemovePost({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: removeSelectionsV1SelectedImagesRemovePostQueryKey(options),
+  });
+};
+
+/**
+ * Remove Selections
+ */
+export const removeSelectionsV1SelectedImagesRemovePostMutation = (
+  options?: Partial<Options<RemoveSelectionsV1SelectedImagesRemovePostData>>,
+): UseMutationOptions<
+  RemoveSelectionsV1SelectedImagesRemovePostResponse,
+  AxiosError<RemoveSelectionsV1SelectedImagesRemovePostError>,
+  Options<RemoveSelectionsV1SelectedImagesRemovePostData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    RemoveSelectionsV1SelectedImagesRemovePostResponse,
+    AxiosError<RemoveSelectionsV1SelectedImagesRemovePostError>,
+    Options<RemoveSelectionsV1SelectedImagesRemovePostData>
+  > = {
+    mutationFn: async (localOptions) => {
+      const { data } = await removeSelectionsV1SelectedImagesRemovePost({
         ...options,
         ...localOptions,
         throwOnError: true,
@@ -994,19 +869,16 @@ export const postImagesV1ImagesPostMutation = (
   return mutationOptions;
 };
 
-export const downloadV1ImagesTrackRiskFilePathGetQueryKey = (
-  options: Options<DownloadV1ImagesTrackRiskFilePathGetData>,
-) => createQueryKey("downloadV1ImagesTrackRiskFilePathGet", options);
+export const refreshIndexV1RefreshIndexGetQueryKey = (options?: Options<RefreshIndexV1RefreshIndexGetData>) =>
+  createQueryKey("refreshIndexV1RefreshIndexGet", options);
 
 /**
- * Download
+ * Refresh Index
  */
-export const downloadV1ImagesTrackRiskFilePathGetOptions = (
-  options: Options<DownloadV1ImagesTrackRiskFilePathGetData>,
-) => {
+export const refreshIndexV1RefreshIndexGetOptions = (options?: Options<RefreshIndexV1RefreshIndexGetData>) => {
   return queryOptions({
     queryFn: async ({ queryKey, signal }) => {
-      const { data } = await downloadV1ImagesTrackRiskFilePathGet({
+      const { data } = await refreshIndexV1RefreshIndexGet({
         ...options,
         ...queryKey[0],
         signal,
@@ -1014,31 +886,7 @@ export const downloadV1ImagesTrackRiskFilePathGetOptions = (
       });
       return data;
     },
-    queryKey: downloadV1ImagesTrackRiskFilePathGetQueryKey(options),
-  });
-};
-
-export const getAvailableImagesV1AvailableImagesGetQueryKey = (
-  options?: Options<GetAvailableImagesV1AvailableImagesGetData>,
-) => createQueryKey("getAvailableImagesV1AvailableImagesGet", options);
-
-/**
- * Get Available Images
- */
-export const getAvailableImagesV1AvailableImagesGetOptions = (
-  options?: Options<GetAvailableImagesV1AvailableImagesGetData>,
-) => {
-  return queryOptions({
-    queryFn: async ({ queryKey, signal }) => {
-      const { data } = await getAvailableImagesV1AvailableImagesGet({
-        ...options,
-        ...queryKey[0],
-        signal,
-        throwOnError: true,
-      });
-      return data;
-    },
-    queryKey: getAvailableImagesV1AvailableImagesGetQueryKey(options),
+    queryKey: refreshIndexV1RefreshIndexGetQueryKey(options),
   });
 };
 

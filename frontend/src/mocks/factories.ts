@@ -3,17 +3,23 @@ import { add, sub } from "date-fns";
 import { Factory } from "fishery";
 import { adjectives, animals, colors, starWars, uniqueNamesGenerator } from "unique-names-generator";
 
-import type { Settings, Image, UpstreamImage, UpstreamImageSource } from "@/app/api";
-import { BootAssetKind, BootAssetLabel } from "@/app/api";
-import type {
-  PendingSite,
-  AccessTokenResponse,
-  UsersGetResponse,
-  PendingSitesGetResponse,
-  Token,
-} from "@/app/api/client";
 import { TimeZone, ConnectionStatus } from "@/app/apiclient";
-import type { GetV1SitesGetResponse, Site, SiteData, User, BootSource } from "@/app/apiclient";
+import type {
+  GetV1SitesGetResponse,
+  Site,
+  SiteData,
+  User,
+  BootSource,
+  SelectableImage,
+  SelectedImage,
+  ImageSource,
+  PendingSitesGetResponse,
+  UsersGetResponse,
+  AccessTokenResponse,
+  PendingSite,
+  Settings,
+  Token,
+} from "@/app/apiclient";
 import type { SiteMarkerType } from "@/app/sites/views/SitesMap/components/Map/types";
 
 export const connections: ConnectionStatus[] = [
@@ -198,28 +204,48 @@ const osFactory = Factory.define<{ name: string; release: string }>(({ sequence 
   ]);
 });
 
-export const imageFactory = Factory.define<Image>(({ sequence }) => {
+export const selectedImageFactory = Factory.define<SelectedImage>(({ sequence }) => {
   const chance = new Chance(`maas-${sequence}`);
   const OS = osFactory.build();
+  const bootSource = imageSourceFactory.build();
+  const size = chance.integer({ min: 300 * 1024, max: 4 * 1024 * 1024 }) * 1024;
+  const isCustom = chance.bool();
   return {
     id: sequence,
-    boot_source_id: chance.integer(),
-    kind: chance.pickone([BootAssetKind._0, BootAssetKind._1]),
-    label: chance.pickone([BootAssetLabel.STABLE, BootAssetLabel.CANDIDATE]),
+    selection_id: !isCustom ? sequence : null,
+    boot_source_id: bootSource.id,
+    boot_source_name: bootSource.name,
+    boot_source_url: bootSource.url,
+    os: OS.name,
+    arch: archFactory.build(),
+    release: OS.release,
+    size: size,
+    downloaded: Math.floor(Math.random() * size),
+    is_custom_image: isCustom,
+  };
+});
+
+export const selectableImageFactory = Factory.define<SelectableImage>(({ sequence }) => {
+  const OS = osFactory.build();
+  const bootSource = imageSourceFactory.build();
+  return {
+    selection_id: sequence,
     os: OS.name,
     release: OS.release,
-    codename: OS.release,
-    title: `${OS.name} ${OS.release}`,
     arch: archFactory.build(),
-    subarch: "generic",
-    compatibility: ["generic"],
-    flavor: "generic",
-    base_image: OS.name,
-    eol: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(),
-    esm_eol: new Date(new Date().setFullYear(new Date().getFullYear() + 10)).toISOString(),
-    size: chance.integer({ min: 300 * 1024, max: 4 * 1024 * 1024 }) * 1024,
-    downloaded: Math.floor(Math.random() * 3),
-    is_custom_image: chance.bool(),
+    boot_source_id: bootSource.id,
+    boot_source_name: bootSource.name,
+    boot_source_url: bootSource.url,
+  };
+});
+
+export const alternativeImageFactory = Factory.define<ImageSource>(({ sequence }) => {
+  const bootSource = imageSourceFactory.build();
+  return {
+    selection_id: sequence,
+    id: bootSource.id,
+    name: bootSource.name,
+    url: bootSource.url,
   };
 });
 
@@ -237,27 +263,6 @@ export const imageSourceFactory = Factory.define<BootSource>(({ sequence }) => {
     name: chance.pickone(["Windows", "Ubuntu", "CentOS"]),
     sync_interval: chance.pickone([0, 60, 120, 300, 600]),
     priority: chance.integer({ min: 1, max: 10 }),
-  };
-});
-
-export const upstreamImageFactory = Factory.define<UpstreamImage>(({ sequence }) => {
-  const chance = new Chance(`maas-${sequence}`);
-  const OS = osFactory.build();
-  return {
-    id: sequence,
-    release: OS.release,
-    arch: archFactory.build(),
-    os: OS.name,
-    size: Math.floor(chance.floating({ min: 0, max: 1 }) * 10000),
-    source_name: `${chance.pickone(["maas", "canonical", "ubuntu"])}.${chance.pickone(["io", "com"])} (${chance.pickone(["stable", "candidate", "beta", "edge"])})`,
-  };
-});
-
-export const upstreamImageSourceFactory = Factory.define<Omit<UpstreamImageSource, "credentials">>(({ sequence }) => {
-  const chance = new Chance(`maas-${sequence}`);
-
-  return {
-    keepUpdated: chance.bool(),
-    upstreamSource: `https://images.${chance.domain()}.com`,
+    last_sync: new Date(chance.date({ year: 2023 })).toISOString(),
   };
 });

@@ -1,6 +1,6 @@
 import { authResolvers } from "./auth";
 import { enrollmentRequestsResolvers } from "./enrollmentRequests";
-import { imagesResolvers } from "./images";
+import { imageResolvers } from "./images";
 import { sitesResolvers } from "./sites";
 import { tileHandler } from "./tiles";
 import { tokensResolvers } from "./tokens";
@@ -11,13 +11,12 @@ export const allResolvers = [
   authResolvers.login.handler(),
   enrollmentRequestsResolvers.listEnrollmentRequests.handler(),
   enrollmentRequestsResolvers.postEnrollmentRequests.handler(),
-  imagesResolvers.listUpstreamImages.handler(),
-  imagesResolvers.getImageSource.handler(),
-  imagesResolvers.updateUpstreamImageSource.handler(),
-  imagesResolvers.selectUpstreamImages.handler(),
-  imagesResolvers.deleteImages.handler(),
-  imagesResolvers.uploadImage.handler(),
-  imagesResolvers.listImages.handler(),
+  imageResolvers.selectedImages.handler(),
+  imageResolvers.selectableImages.handler(),
+  imageResolvers.getAlternativesForImage.handler(),
+  imageResolvers.addImageToSelection.handler(),
+  imageResolvers.removeImageFromSelection.handler(),
+  imageResolvers.uploadImage.handler(),
   sitesResolvers.listSites.handler(),
   sitesResolvers.sitesCoordinates.handler(),
   sitesResolvers.getSite.handler(),

@@ -3,7 +3,8 @@ import { Field, Formik } from "formik";
 
 import FormikFormContent from "./FormikFormContent";
 
-import { ExceptionCode, type MutationErrorResponse } from "@/app/api";
+import type { MutationErrorResponse } from "@/app/api";
+import { ExceptionCode } from "@/app/apiclient";
 import { render, screen, waitFor } from "@/utils/test-utils";
 
 const renderForm = ({ apiErrors }: { apiErrors: MutationErrorResponse[] }) => {

@@ -7,12 +7,12 @@ import {
   useImageSources,
   useUpdateImageSource,
 } from "@/app/api/query/imageSources";
-import type { BootSourcesPatchRequest, BootSourcesPostRequest } from "@/app/apiclient";
+import type { BootSource, BootSourcesPatchRequest, BootSourcesPostRequest } from "@/app/apiclient";
 import { imageSourceFactory } from "@/mocks/factories";
 import { imageSourceResolvers } from "@/testing/resolvers/imageSources";
 import { Providers, renderHook, waitFor } from "@/utils/test-utils";
 
-const imageSources = imageSourceFactory.buildList(15);
+const imageSources: BootSource[] = imageSourceFactory.buildList(15);
 const mockServer = setupServer(
   imageSourceResolvers.listImageSources.handler(imageSources),
   imageSourceResolvers.getImageSource.handler(imageSources),

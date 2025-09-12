@@ -1,4 +1,6 @@
 .l-navigation {
+  position: relative !important;
+
   .p-panel__controls {
     @media only screen and (min-width: ($breakpoint-xx-large)) {
       display: none;

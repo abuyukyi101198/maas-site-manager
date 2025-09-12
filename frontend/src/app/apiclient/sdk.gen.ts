@@ -6,14 +6,8 @@ import {
   type Client,
   formDataBodySerializer,
   urlSearchParamsBodySerializer,
-} from "@hey-api/client-axios";
+} from "./client";
 import type {
-  GetBootAssetsV1BootassetsGetData,
-  GetBootAssetsV1BootassetsGetResponses,
-  GetBootAssetsV1BootassetsGetErrors,
-  PostBootAssetsV1BootassetsPostData,
-  PostBootAssetsV1BootassetsPostResponses,
-  PostBootAssetsV1BootassetsPostErrors,
   GetBootSourcesV1BootassetSourcesGetData,
   GetBootSourcesV1BootassetSourcesGetResponses,
   GetBootSourcesV1BootassetSourcesGetErrors,
@@ -32,36 +26,44 @@ import type {
   GetBootSourceSelectionsV1BootassetSourcesIdSelectionsGetData,
   GetBootSourceSelectionsV1BootassetSourcesIdSelectionsGetResponses,
   GetBootSourceSelectionsV1BootassetSourcesIdSelectionsGetErrors,
-  PatchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatchData,
-  PatchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatchResponses,
-  PatchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatchErrors,
-  PostBootAssetVersionV1BootassetsIdVersionsPostData,
-  PostBootAssetVersionV1BootassetsIdVersionsPostResponses,
-  PostBootAssetVersionV1BootassetsIdVersionsPostErrors,
-  GetBootAssetVersionsV1BootassetVersionsGetData,
-  GetBootAssetVersionsV1BootassetVersionsGetResponses,
-  GetBootAssetVersionsV1BootassetVersionsGetErrors,
-  PostBootAssetItemV1BootassetVersionsIdItemsPostData,
-  PostBootAssetItemV1BootassetVersionsIdItemsPostResponses,
-  PostBootAssetItemV1BootassetVersionsIdItemsPostErrors,
-  GetBootAssetItemsV1BootassetItemsGetData,
-  GetBootAssetItemsV1BootassetItemsGetResponses,
-  GetBootAssetItemsV1BootassetItemsGetErrors,
-  DeleteImagesV1BootassetItemsIdDeleteData,
-  DeleteImagesV1BootassetItemsIdDeleteResponses,
-  DeleteImagesV1BootassetItemsIdDeleteErrors,
+  PutBootSourceAvailSelectionsV1BootassetSourcesIdAvailableSelectionsPutData,
+  PutBootSourceAvailSelectionsV1BootassetSourcesIdAvailableSelectionsPutResponses,
+  PutBootSourceAvailSelectionsV1BootassetSourcesIdAvailableSelectionsPutErrors,
+  PutBootSourceAssetsV1BootassetSourcesIdAssetsPutData,
+  PutBootSourceAssetsV1BootassetSourcesIdAssetsPutResponses,
+  PutBootSourceAssetsV1BootassetSourcesIdAssetsPutErrors,
+  GetBootAssetItemV1BootassetItemsIdGetData,
+  GetBootAssetItemV1BootassetItemsIdGetResponses,
+  GetBootAssetItemV1BootassetItemsIdGetErrors,
   PatchBootAssetItemsV1BootassetItemsIdPatchData,
   PatchBootAssetItemsV1BootassetItemsIdPatchResponses,
   PatchBootAssetItemsV1BootassetItemsIdPatchErrors,
+  DownloadIndexV1ImagesTrackRiskStreamsV1IndexPathGetData,
+  DownloadIndexV1ImagesTrackRiskStreamsV1IndexPathGetResponses,
+  DownloadIndexV1ImagesTrackRiskStreamsV1IndexPathGetErrors,
+  DownloadV1ImagesTrackRiskBootSourceIdFilePathGetData,
+  DownloadV1ImagesTrackRiskBootSourceIdFilePathGetResponses,
+  DownloadV1ImagesTrackRiskBootSourceIdFilePathGetErrors,
+  SelectImagesV1SelectableImagesSelectPostData,
+  SelectImagesV1SelectableImagesSelectPostResponses,
+  SelectImagesV1SelectableImagesSelectPostErrors,
+  GetSelectableImagesV1SelectableImagesGetData,
+  GetSelectableImagesV1SelectableImagesGetResponses,
+  GetSelectableImagesV1SelectableImagesGetErrors,
+  GetSelectedImagesV1SelectedImagesGetData,
+  GetSelectedImagesV1SelectedImagesGetResponses,
+  GetSelectedImagesV1SelectedImagesGetErrors,
+  GetImageSourcesV1ImageSourcesGetData,
+  GetImageSourcesV1ImageSourcesGetResponses,
+  GetImageSourcesV1ImageSourcesGetErrors,
+  RemoveSelectionsV1SelectedImagesRemovePostData,
+  RemoveSelectionsV1SelectedImagesRemovePostResponses,
+  RemoveSelectionsV1SelectedImagesRemovePostErrors,
   PostImagesV1ImagesPostData,
   PostImagesV1ImagesPostResponses,
   PostImagesV1ImagesPostErrors,
-  DownloadV1ImagesTrackRiskFilePathGetData,
-  DownloadV1ImagesTrackRiskFilePathGetResponses,
-  DownloadV1ImagesTrackRiskFilePathGetErrors,
-  GetAvailableImagesV1AvailableImagesGetData,
-  GetAvailableImagesV1AvailableImagesGetResponses,
-  GetAvailableImagesV1AvailableImagesGetErrors,
+  RefreshIndexV1RefreshIndexGetData,
+  RefreshIndexV1RefreshIndexGetResponses,
   PostV1LoginPostData,
   PostV1LoginPostResponses,
   PostV1LoginPostErrors,
@@ -152,57 +154,6 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
    * used to access values that aren't defined as part of the SDK function.
    */
   meta?: Record<string, unknown>;
-};
-
-/**
- * Get Boot Assets
- * Return boot assets.
- */
-export const getBootAssetsV1BootassetsGet = <ThrowOnError extends boolean = false>(
-  options?: Options<GetBootAssetsV1BootassetsGetData, ThrowOnError>,
-) => {
-  return (options?.client ?? _heyApiClient).get<
-    GetBootAssetsV1BootassetsGetResponses,
-    GetBootAssetsV1BootassetsGetErrors,
-    ThrowOnError
-  >({
-    responseType: "json",
-    security: [
-      {
-        scheme: "bearer",
-        type: "http",
-      },
-    ],
-    url: "/v1/bootassets",
-    ...options,
-  });
-};
-
-/**
- * Post Boot Assets
- */
-export const postBootAssetsV1BootassetsPost = <ThrowOnError extends boolean = false>(
-  options: Options<PostBootAssetsV1BootassetsPostData, ThrowOnError>,
-) => {
-  return (options.client ?? _heyApiClient).post<
-    PostBootAssetsV1BootassetsPostResponses,
-    PostBootAssetsV1BootassetsPostErrors,
-    ThrowOnError
-  >({
-    responseType: "json",
-    security: [
-      {
-        scheme: "bearer",
-        type: "http",
-      },
-    ],
-    url: "/v1/bootassets",
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
 };
 
 /**
@@ -354,14 +305,16 @@ export const getBootSourceSelectionsV1BootassetSourcesIdSelectionsGet = <ThrowOn
 };
 
 /**
- * Patch Boot Source Selections
+ * Put Boot Source Avail Selections
  */
-export const patchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatch = <ThrowOnError extends boolean = false>(
-  options: Options<PatchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatchData, ThrowOnError>,
+export const putBootSourceAvailSelectionsV1BootassetSourcesIdAvailableSelectionsPut = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<PutBootSourceAvailSelectionsV1BootassetSourcesIdAvailableSelectionsPutData, ThrowOnError>,
 ) => {
-  return (options.client ?? _heyApiClient).patch<
-    PatchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatchResponses,
-    PatchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatchErrors,
+  return (options.client ?? _heyApiClient).put<
+    PutBootSourceAvailSelectionsV1BootassetSourcesIdAvailableSelectionsPutResponses,
+    PutBootSourceAvailSelectionsV1BootassetSourcesIdAvailableSelectionsPutErrors,
     ThrowOnError
   >({
     responseType: "json",
@@ -371,7 +324,7 @@ export const patchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatch = <Thr
         type: "http",
       },
     ],
-    url: "/v1/bootasset-sources/{id}/selections",
+    url: "/v1/bootasset-sources/{id}/available-selections",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -381,14 +334,14 @@ export const patchBootSourceSelectionsV1BootassetSourcesIdSelectionsPatch = <Thr
 };
 
 /**
- * Post Boot Asset Version
+ * Put Boot Source Assets
  */
-export const postBootAssetVersionV1BootassetsIdVersionsPost = <ThrowOnError extends boolean = false>(
-  options: Options<PostBootAssetVersionV1BootassetsIdVersionsPostData, ThrowOnError>,
+export const putBootSourceAssetsV1BootassetSourcesIdAssetsPut = <ThrowOnError extends boolean = false>(
+  options: Options<PutBootSourceAssetsV1BootassetSourcesIdAssetsPutData, ThrowOnError>,
 ) => {
-  return (options.client ?? _heyApiClient).post<
-    PostBootAssetVersionV1BootassetsIdVersionsPostResponses,
-    PostBootAssetVersionV1BootassetsIdVersionsPostErrors,
+  return (options.client ?? _heyApiClient).put<
+    PutBootSourceAssetsV1BootassetSourcesIdAssetsPutResponses,
+    PutBootSourceAssetsV1BootassetSourcesIdAssetsPutErrors,
     ThrowOnError
   >({
     responseType: "json",
@@ -398,7 +351,7 @@ export const postBootAssetVersionV1BootassetsIdVersionsPost = <ThrowOnError exte
         type: "http",
       },
     ],
-    url: "/v1/bootassets/{id}/versions",
+    url: "/v1/bootasset-sources/{id}/assets",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -408,88 +361,14 @@ export const postBootAssetVersionV1BootassetsIdVersionsPost = <ThrowOnError exte
 };
 
 /**
- * Get Boot Asset Versions
- * Return Boot Asset Versions
+ * Get Boot Asset Item
  */
-export const getBootAssetVersionsV1BootassetVersionsGet = <ThrowOnError extends boolean = false>(
-  options?: Options<GetBootAssetVersionsV1BootassetVersionsGetData, ThrowOnError>,
+export const getBootAssetItemV1BootassetItemsIdGet = <ThrowOnError extends boolean = false>(
+  options: Options<GetBootAssetItemV1BootassetItemsIdGetData, ThrowOnError>,
 ) => {
-  return (options?.client ?? _heyApiClient).get<
-    GetBootAssetVersionsV1BootassetVersionsGetResponses,
-    GetBootAssetVersionsV1BootassetVersionsGetErrors,
-    ThrowOnError
-  >({
-    responseType: "json",
-    security: [
-      {
-        scheme: "bearer",
-        type: "http",
-      },
-    ],
-    url: "/v1/bootasset-versions",
-    ...options,
-  });
-};
-
-/**
- * Post Boot Asset Item
- */
-export const postBootAssetItemV1BootassetVersionsIdItemsPost = <ThrowOnError extends boolean = false>(
-  options: Options<PostBootAssetItemV1BootassetVersionsIdItemsPostData, ThrowOnError>,
-) => {
-  return (options.client ?? _heyApiClient).post<
-    PostBootAssetItemV1BootassetVersionsIdItemsPostResponses,
-    PostBootAssetItemV1BootassetVersionsIdItemsPostErrors,
-    ThrowOnError
-  >({
-    responseType: "json",
-    security: [
-      {
-        scheme: "bearer",
-        type: "http",
-      },
-    ],
-    url: "/v1/bootasset-versions/{id}/items",
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
-};
-
-/**
- * Get Boot Asset Items
- */
-export const getBootAssetItemsV1BootassetItemsGet = <ThrowOnError extends boolean = false>(
-  options?: Options<GetBootAssetItemsV1BootassetItemsGetData, ThrowOnError>,
-) => {
-  return (options?.client ?? _heyApiClient).get<
-    GetBootAssetItemsV1BootassetItemsGetResponses,
-    GetBootAssetItemsV1BootassetItemsGetErrors,
-    ThrowOnError
-  >({
-    responseType: "json",
-    security: [
-      {
-        scheme: "bearer",
-        type: "http",
-      },
-    ],
-    url: "/v1/bootasset-items",
-    ...options,
-  });
-};
-
-/**
- * Delete Images
- */
-export const deleteImagesV1BootassetItemsIdDelete = <ThrowOnError extends boolean = false>(
-  options: Options<DeleteImagesV1BootassetItemsIdDeleteData, ThrowOnError>,
-) => {
-  return (options.client ?? _heyApiClient).delete<
-    DeleteImagesV1BootassetItemsIdDeleteResponses,
-    DeleteImagesV1BootassetItemsIdDeleteErrors,
+  return (options.client ?? _heyApiClient).get<
+    GetBootAssetItemV1BootassetItemsIdGetResponses,
+    GetBootAssetItemV1BootassetItemsIdGetErrors,
     ThrowOnError
   >({
     responseType: "json",
@@ -532,6 +411,162 @@ export const patchBootAssetItemsV1BootassetItemsIdPatch = <ThrowOnError extends 
 };
 
 /**
+ * Download Index
+ */
+export const downloadIndexV1ImagesTrackRiskStreamsV1IndexPathGet = <ThrowOnError extends boolean = false>(
+  options: Options<DownloadIndexV1ImagesTrackRiskStreamsV1IndexPathGetData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).get<
+    DownloadIndexV1ImagesTrackRiskStreamsV1IndexPathGetResponses,
+    DownloadIndexV1ImagesTrackRiskStreamsV1IndexPathGetErrors,
+    ThrowOnError
+  >({
+    responseType: "json",
+    url: "/v1/images/{track}/{risk}/streams/v1/{index_path}",
+    ...options,
+  });
+};
+
+/**
+ * Download
+ */
+export const downloadV1ImagesTrackRiskBootSourceIdFilePathGet = <ThrowOnError extends boolean = false>(
+  options: Options<DownloadV1ImagesTrackRiskBootSourceIdFilePathGetData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).get<
+    DownloadV1ImagesTrackRiskBootSourceIdFilePathGetResponses,
+    DownloadV1ImagesTrackRiskBootSourceIdFilePathGetErrors,
+    ThrowOnError
+  >({
+    responseType: "json",
+    url: "/v1/images/{track}/{risk}/{boot_source_id}/{file_path}",
+    ...options,
+  });
+};
+
+/**
+ * Select Images
+ */
+export const selectImagesV1SelectableImagesSelectPost = <ThrowOnError extends boolean = false>(
+  options: Options<SelectImagesV1SelectableImagesSelectPostData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).post<
+    SelectImagesV1SelectableImagesSelectPostResponses,
+    SelectImagesV1SelectableImagesSelectPostErrors,
+    ThrowOnError
+  >({
+    responseType: "json",
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
+    url: "/v1/selectable-images:select",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+};
+
+/**
+ * Get Selectable Images
+ */
+export const getSelectableImagesV1SelectableImagesGet = <ThrowOnError extends boolean = false>(
+  options?: Options<GetSelectableImagesV1SelectableImagesGetData, ThrowOnError>,
+) => {
+  return (options?.client ?? _heyApiClient).get<
+    GetSelectableImagesV1SelectableImagesGetResponses,
+    GetSelectableImagesV1SelectableImagesGetErrors,
+    ThrowOnError
+  >({
+    responseType: "json",
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
+    url: "/v1/selectable-images",
+    ...options,
+  });
+};
+
+/**
+ * Get Selected Images
+ */
+export const getSelectedImagesV1SelectedImagesGet = <ThrowOnError extends boolean = false>(
+  options?: Options<GetSelectedImagesV1SelectedImagesGetData, ThrowOnError>,
+) => {
+  return (options?.client ?? _heyApiClient).get<
+    GetSelectedImagesV1SelectedImagesGetResponses,
+    GetSelectedImagesV1SelectedImagesGetErrors,
+    ThrowOnError
+  >({
+    responseType: "json",
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
+    url: "/v1/selected-images",
+    ...options,
+  });
+};
+
+/**
+ * Get Image Sources
+ */
+export const getImageSourcesV1ImageSourcesGet = <ThrowOnError extends boolean = false>(
+  options: Options<GetImageSourcesV1ImageSourcesGetData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).get<
+    GetImageSourcesV1ImageSourcesGetResponses,
+    GetImageSourcesV1ImageSourcesGetErrors,
+    ThrowOnError
+  >({
+    responseType: "json",
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
+    url: "/v1/image-sources",
+    ...options,
+  });
+};
+
+/**
+ * Remove Selections
+ */
+export const removeSelectionsV1SelectedImagesRemovePost = <ThrowOnError extends boolean = false>(
+  options: Options<RemoveSelectionsV1SelectedImagesRemovePostData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).post<
+    RemoveSelectionsV1SelectedImagesRemovePostResponses,
+    RemoveSelectionsV1SelectedImagesRemovePostErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
+    url: "/v1/selected-images:remove",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+};
+
+/**
  * Post Images
  */
 export const postImagesV1ImagesPost = <ThrowOnError extends boolean = false>(
@@ -560,33 +595,12 @@ export const postImagesV1ImagesPost = <ThrowOnError extends boolean = false>(
 };
 
 /**
- * Download
+ * Refresh Index
  */
-export const downloadV1ImagesTrackRiskFilePathGet = <ThrowOnError extends boolean = false>(
-  options: Options<DownloadV1ImagesTrackRiskFilePathGetData, ThrowOnError>,
+export const refreshIndexV1RefreshIndexGet = <ThrowOnError extends boolean = false>(
+  options?: Options<RefreshIndexV1RefreshIndexGetData, ThrowOnError>,
 ) => {
-  return (options.client ?? _heyApiClient).get<
-    DownloadV1ImagesTrackRiskFilePathGetResponses,
-    DownloadV1ImagesTrackRiskFilePathGetErrors,
-    ThrowOnError
-  >({
-    responseType: "json",
-    url: "/v1/images/{track}/{risk}/{file_path}",
-    ...options,
-  });
-};
-
-/**
- * Get Available Images
- */
-export const getAvailableImagesV1AvailableImagesGet = <ThrowOnError extends boolean = false>(
-  options?: Options<GetAvailableImagesV1AvailableImagesGetData, ThrowOnError>,
-) => {
-  return (options?.client ?? _heyApiClient).get<
-    GetAvailableImagesV1AvailableImagesGetResponses,
-    GetAvailableImagesV1AvailableImagesGetErrors,
-    ThrowOnError
-  >({
+  return (options?.client ?? _heyApiClient).get<RefreshIndexV1RefreshIndexGetResponses, unknown, ThrowOnError>({
     responseType: "json",
     security: [
       {
@@ -594,7 +608,7 @@ export const getAvailableImagesV1AvailableImagesGet = <ThrowOnError extends bool
         type: "http",
       },
     ],
-    url: "/v1/available-images",
+    url: "/v1/refresh-index",
     ...options,
   });
 };

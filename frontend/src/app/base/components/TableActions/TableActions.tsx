@@ -11,6 +11,7 @@ type Props = {
   deleteTooltip?: string;
   editDisabled?: boolean;
   deleteDisabled?: boolean;
+  isDense?: boolean;
 };
 
 const TableActions = ({
@@ -23,6 +24,7 @@ const TableActions = ({
   onExpand,
   editDisabled,
   deleteDisabled,
+  isDense = true,
 }: Props) => {
   return (
     <div className={classNames("table-actions u-flex", { "table-actions-bordered": hasBorder }, className)}>
@@ -30,7 +32,7 @@ const TableActions = ({
         <Tooltip message={editTooltip} position="left">
           <Button
             appearance="base"
-            className="is-dense u-table-cell-padding-overlap table-actions-btn"
+            className={classNames("is-dense table-actions-btn", { "u-table-cell-padding-overlap": isDense })}
             disabled={editDisabled}
             hasIcon
             onClick={onEdit}
@@ -51,7 +53,7 @@ const TableActions = ({
             <Tooltip message={deleteTooltip} position="left">
               <Button
                 appearance="base"
-                className="is-dense u-table-cell-padding-overlap table-actions-btn"
+                className={classNames("is-dense table-actions-btn", { "u-table-cell-padding-overlap": isDense })}
                 disabled={deleteDisabled}
                 hasIcon
                 onClick={onDelete}

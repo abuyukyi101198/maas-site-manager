@@ -37,7 +37,7 @@ const EnrollmentActions: React.FC = () => {
 
   return (
     <>
-      <div className="u-fixed-width enrollment-actions">
+      <div className="enrollment-actions">
         {enrollmentRequestsMutation.isSuccess ? (
           <EnrollmentNotification {...enrollmentRequestsMutation.variables.body} />
         ) : null}

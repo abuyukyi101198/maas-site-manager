@@ -66,7 +66,7 @@
 @include vf-l-site;
 
 // MAAS React Components
-@import "@canonical/maas-react-components/dist/style.css";
+@import "../../node_modules/@canonical/maas-react-components/dist/maas-react-components.css";
 
 // MapLibre Map base styles
 @import "maplibre-gl/dist/maplibre-gl.css";
@@ -103,5 +103,6 @@
 @import "@/app/base/components/TableActions/TableActions";
 @import "@/app/sites/components/SiteSelection/SiteSelectionTable/SiteSelectionTable";
 @import "@/app/base/components/PaginationBar/PaginationBar";
-@import "@/app/images/components/DownloadImages/DownloadImages";
 @import "@/app/settings/views/ImageSourceList/ImageSourceList";
+@import "@/app/images/components/ImagesTable/ImagesTable";
+@include maas-contextual-menu;

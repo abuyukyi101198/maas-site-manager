@@ -1,23 +1,18 @@
+import type { ReactElement } from "react";
+
 import { MainToolbar, ContentSection } from "@canonical/maas-react-components";
 import { Button } from "@canonical/react-components";
-import type { ColumnDef, Column } from "@tanstack/react-table";
 
-import ImagesTable from "./ImagesTable";
+import ImagesTable from "../../components/ImagesTable";
 
-import type { Image } from "@/app/api";
 import RemoveButton from "@/app/base/components/RemoveButton";
 import { useAppLayoutContext, useRowSelection } from "@/app/context";
 
-export type ImageColumnDef = ColumnDef<Image, Partial<Image>>;
-export type ImageColumn = Column<Image>;
+const ImagesList = (): ReactElement => {
+  const { rowSelection } = useRowSelection("images");
+  const isDeleteDisabled = Object.keys(rowSelection).length <= 0;
+  const { setSidebar } = useAppLayoutContext();
 
-const ImagesList = ({
-  isDeleteDisabled,
-  setSidebar,
-}: {
-  isDeleteDisabled: boolean;
-  setSidebar: ReturnType<typeof useAppLayoutContext>["setSidebar"];
-}) => {
   return (
     <ContentSection>
       <ContentSection.Header>
@@ -26,27 +21,27 @@ const ImagesList = ({
           <MainToolbar.Controls>
             <RemoveButton
               disabled={isDeleteDisabled}
-              label="Delete"
+              label="Remove available images"
               onClick={() => {
-                setSidebar("deleteImages");
+                setSidebar("removeAvailableImages");
               }}
               type="button"
             />
             <Button
               onClick={() => {
-                setSidebar("downloadImages");
+                setSidebar("addToAvailableImages");
               }}
               type="button"
             >
-              Download images
+              Add to available images
             </Button>
             <Button
               onClick={() => {
-                setSidebar("uploadImage");
+                setSidebar("uploadCustomImage");
               }}
               type="button"
             >
-              Upload Image
+              Upload custom image
             </Button>
           </MainToolbar.Controls>
         </MainToolbar>
@@ -58,12 +53,4 @@ const ImagesList = ({
   );
 };
 
-const ImagesListContainer = () => {
-  const { rowSelection } = useRowSelection("images");
-  const isDeleteDisabled = Object.keys(rowSelection).length <= 0;
-  const { setSidebar } = useAppLayoutContext();
-
-  return <ImagesList isDeleteDisabled={isDeleteDisabled} setSidebar={setSidebar} />;
-};
-
-export default ImagesListContainer;
+export default ImagesList;

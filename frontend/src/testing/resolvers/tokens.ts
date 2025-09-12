@@ -1,11 +1,13 @@
 import { http, HttpResponse } from "msw";
 
-import type { Token, TokensPostRequest, TokensPostResponse } from "@/app/api";
 import type {
   DeleteV1TokensIdDeleteError,
   GetExportV1TokensExportGetError,
   GetV1TokensGetError,
   PostV1TokensPostError,
+  Token,
+  TokensPostRequest,
+  TokensPostResponse,
 } from "@/app/apiclient";
 import { ExceptionCode } from "@/app/apiclient";
 import { tokenFactory } from "@/mocks/factories";

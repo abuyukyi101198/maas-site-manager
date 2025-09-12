@@ -4,22 +4,21 @@ import { usePrevious } from "@canonical/react-components";
 
 export type Sidebar =
   | "addBootSource"
+  | "addToAvailableImages"
   | "addUser"
   | "createToken"
   | "deleteBootSource"
-  | "deleteImages"
-  | "deleteOrKeepImages"
   | "deleteUser"
-  | "downloadImages"
   | "editBootSource"
   | "editCustomImagesSource"
   | "editSite"
   | "editUser"
+  | "removeAvailableImages"
   | "removeSites"
   | "siteDetails"
   | "siteSelect"
   | "sitesMissingData"
-  | "uploadImage"
+  | "uploadCustomImage"
   | null;
 
 export const AppLayoutContext = createContext<{

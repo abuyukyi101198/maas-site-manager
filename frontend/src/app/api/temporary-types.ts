@@ -1,19 +1,4 @@
-import type { BootAsset, ValidationErrorResponseModel } from "@/app/apiclient";
-
-// TODO: replace with auto-generated type BootAsset when the missing fields are added
-export type Image = BootAsset & {
-  size: number;
-  downloaded: number;
-  is_custom_image: boolean;
-};
-
-// TODO: replace with auto-generated types from the API client https://warthogs.atlassian.net/browse/MAASENG-2569
-export type UpstreamImage = Pick<Image, "arch" | "id" | "os" | "release" | "size"> & { source_name: string };
-export type UpstreamImageSource = {
-  upstreamSource: string;
-  keepUpdated: boolean;
-  credentials: string;
-};
+import type { ValidationErrorResponseModel } from "@/app/apiclient";
 
 export type MutationErrorResponse = {
   body: ValidationErrorResponseModel;

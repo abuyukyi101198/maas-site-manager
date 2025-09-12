@@ -1,12 +1,16 @@
-import ImagesList from "./ImagesList";
-
-import { imageFactory } from "@/mocks/factories";
-import { imagesResolvers } from "@/testing/resolvers/images";
+import ImagesList from "@/app/images/views/ImagesList/ImagesList";
+import { selectedImageFactory } from "@/mocks/factories";
+import { imageResolvers } from "@/testing/resolvers/images";
 import { sitesResolvers } from "@/testing/resolvers/sites";
-import { renderWithMemoryRouter, screen, setupServer } from "@/utils/test-utils";
+import { renderWithMemoryRouter, screen, setupServer, userEvent, waitFor } from "@/utils/test-utils";
 
-const images = imageFactory.buildList(2);
-const mockServer = setupServer(imagesResolvers.listImages.handler(images), sitesResolvers.listSites.handler());
+const images = selectedImageFactory.buildList(2);
+const mockServer = setupServer(
+  imageResolvers.selectedImages.handler(images),
+  imageResolvers.selectableImages.handler(),
+  imageResolvers.addImageToSelection.handler(),
+  sitesResolvers.listSites.handler(),
+);
 
 beforeAll(() => {
   mockServer.listen();
@@ -21,22 +25,36 @@ afterAll(() => {
   mockServer.close();
 });
 
-it("displays the images list", () => {
-  renderWithMemoryRouter(<ImagesList />);
+describe("ImagesList", () => {
+  it("renders add selection form", async () => {
+    renderWithMemoryRouter(<ImagesList />, { withMainLayout: true });
+    await userEvent.click(screen.getByRole("button", { name: "Add to available images" }));
+    expect(screen.getByRole("complementary", { name: "Add to available images" })).toBeInTheDocument();
+  });
 
-  expect(screen.getByText("Images")).toBeInTheDocument();
-});
+  it("renders upload form", async () => {
+    renderWithMemoryRouter(<ImagesList />, { withMainLayout: true });
+    await userEvent.click(screen.getByRole("button", { name: "Upload custom image" }));
+    expect(screen.getByRole("complementary", { name: "Upload custom image" })).toBeInTheDocument();
+  });
 
-it("displays 'Delete', 'Download images', and 'Upload Image' buttons", () => {
-  renderWithMemoryRouter(<ImagesList />);
+  it("renders delete form", async () => {
+    renderWithMemoryRouter(<ImagesList />, { withMainLayout: true });
+    await waitFor(() => {
+      expect(screen.getAllByRole("button", { name: "Delete" }).length).toBeGreaterThan(0);
+    });
+    await userEvent.click(screen.getAllByRole("button", { name: "Delete" })[0]);
+    expect(screen.getByRole("complementary", { name: "Remove available images" })).toBeInTheDocument();
+  });
 
-  expect(screen.getByRole("button", { name: /Delete/i })).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: /Download images/i })).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: /Upload Image/i })).toBeInTheDocument();
-});
-
-it("delete button is disabled when no images are selected", () => {
-  renderWithMemoryRouter(<ImagesList />);
-
-  expect(screen.getByRole("button", { name: /Delete/i })).toBeAriaDisabled();
+  it("closes side panel form when canceled", async () => {
+    renderWithMemoryRouter(<ImagesList />, { withMainLayout: true });
+    await userEvent.click(screen.getByRole("button", { name: "Add to available images" }));
+    expect(screen.getByRole("complementary", { name: "Add to available images" })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+    });
+    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByRole("complementary", { name: "Add to available images" })).not.toBeInTheDocument();
+  });
 });

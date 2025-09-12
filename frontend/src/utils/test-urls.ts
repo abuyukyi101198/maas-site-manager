@@ -1,7 +1,5 @@
-import { baseURL } from "@/app/api/config";
-
 export const getApiUrl = (path: string): string => {
-  return `${baseURL}/v1${path}`;
+  return `*/api/v1${path}`;
 };
 
 export const apiUrls = {
@@ -15,6 +13,11 @@ export const apiUrls = {
   enrollmentRequests: getApiUrl("/sites/pending"),
   currentUser: getApiUrl("/users/me"),
   imageSources: getApiUrl("/bootasset-sources"),
+  selectedImages: getApiUrl("/selected-images"),
+  selectableImages: getApiUrl("/selectable-images"),
+  alternativeImages: getApiUrl("/image-sources"),
+  addImageToSelection: getApiUrl("/selectable-images:select"),
+  removeImageFromSelection: getApiUrl("/selected-images:remove"),
   bootAssets: getApiUrl("/bootassets"),
   images: getApiUrl("/images"),
   upstreamImages: getApiUrl("/images/upstream"),

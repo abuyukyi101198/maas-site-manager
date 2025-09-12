@@ -1,9 +1,10 @@
-import { fakeBootSources } from "../ImageSourceList";
-
 import ImageSourceListTable from "./ImageSourceListTable";
 
 import type { BootSource } from "@/app/apiclient";
+import { imageSourceFactory } from "@/mocks/factories";
 import { renderWithMemoryRouter, screen, within } from "@/utils/test-utils";
+
+const mockImageSources = imageSourceFactory.buildList(4);
 
 it("renders an empty image source table", () => {
   renderWithMemoryRouter(<ImageSourceListTable data={[]} error={null} isPending={false} />);
@@ -26,37 +27,53 @@ it("shows errors if present", () => {
 });
 
 it("renders rows with details for each image source", () => {
-  renderWithMemoryRouter(<ImageSourceListTable data={fakeBootSources.items} error={null} isPending={false} />);
+  renderWithMemoryRouter(<ImageSourceListTable data={mockImageSources} error={null} isPending={false} />);
 
   expect(screen.getByRole("table", { name: "Image source list" })).toBeInTheDocument();
 
   const tableBody = screen.getAllByRole("rowgroup")[1];
-  expect(within(tableBody).getAllByRole("row")).toHaveLength(fakeBootSources.items.length);
+  expect(within(tableBody).getAllByRole("row")).toHaveLength(mockImageSources.length);
 
   // Remove "custom" row - we test this later
   const rows = within(tableBody).getAllByRole("row").slice(1);
   rows.forEach((row, index) => {
     const cells = within(row).getAllByRole("cell");
-    expect(cells[0]).toHaveTextContent(fakeBootSources.items[index + 1].name);
-    expect(cells[1]).toHaveTextContent(fakeBootSources.items[index + 1].url);
+    expect(cells[0]).toHaveTextContent(mockImageSources[index + 1].name);
+    expect(cells[1]).toHaveTextContent(mockImageSources[index + 1].url);
     expect(
       within(cells[2]).getByLabelText(
-        fakeBootSources.items[index + 1].sync_interval > 0 ? "Source is syncing" : "Source is not syncing",
+        mockImageSources[index + 1].sync_interval > 0 ? "Source is syncing" : "Source is not syncing",
       ),
     ).toBeInTheDocument();
     expect(
       within(cells[3]).getByLabelText(
-        !fakeBootSources.items[index + 1].keyring ? "Not signed with GPG key" : "Signed with GPG key",
+        !mockImageSources[index + 1].keyring ? "Not signed with GPG key" : "Signed with GPG key",
       ),
     ).toBeInTheDocument();
-    expect(cells[4]).toHaveTextContent(fakeBootSources.items[index + 1].priority.toString());
+    expect(cells[4]).toHaveTextContent(mockImageSources[index + 1].priority.toString());
     expect(within(cells[5]).getByRole("button", { name: "Edit image source" })).toBeInTheDocument();
     expect(within(cells[5]).getByRole("button", { name: "Delete image source" })).toBeInTheDocument();
   });
 });
 
 it("doesn't show status, syncing, signature or delete button for custom image source", () => {
-  renderWithMemoryRouter(<ImageSourceListTable data={fakeBootSources.items} error={null} isPending={false} />);
+  renderWithMemoryRouter(
+    <ImageSourceListTable
+      data={[
+        {
+          id: 0,
+          url: "custom",
+          keyring: "",
+          name: "Ubuntu",
+          sync_interval: 0,
+          priority: 1,
+          last_sync: "",
+        },
+      ]}
+      error={null}
+      isPending={false}
+    />,
+  );
 
   const tableBody = screen.getAllByRole("rowgroup")[1];
   const customRow = within(tableBody).getAllByRole("row")[0];
@@ -65,7 +82,7 @@ it("doesn't show status, syncing, signature or delete button for custom image so
   expect(cells[1]).toHaveTextContent("Custom images");
   expect(cells[2]).toHaveTextContent("");
   expect(cells[3]).toHaveTextContent("");
-  expect(cells[4]).toHaveTextContent(fakeBootSources.items[0].priority.toString());
+  expect(cells[4]).toHaveTextContent(mockImageSources[0].priority.toString());
   expect(within(cells[5]).getByRole("button", { name: "Edit image source" })).toBeInTheDocument();
   expect(within(cells[5]).queryByRole("button", { name: "Delete image source" })).not.toBeInTheDocument();
 });
@@ -81,6 +98,7 @@ it.skip("shows a tick icon for syncing sources, and a cross for non-syncing sour
         name: "Ubuntu",
         sync_interval: 150,
         priority: 1,
+        last_sync: "",
       },
       {
         id: 1,
@@ -89,6 +107,7 @@ it.skip("shows a tick icon for syncing sources, and a cross for non-syncing sour
         name: "Ubuntu",
         sync_interval: 0,
         priority: 1,
+        last_sync: "",
       },
     ],
   };

@@ -3,10 +3,9 @@ import React, { createContext, useContext, useReducer } from "react";
 
 import useLocalStorageState from "use-local-storage-state";
 
-import type { AccessTokenResponse, MutationErrorResponse } from "@/app/api";
-import { OpenAPI } from "@/app/api/client";
+import type { MutationErrorResponse } from "@/app/api";
 import { useLogin } from "@/app/api/query/auth";
-import type { PostV1LoginPostData } from "@/app/apiclient";
+import type { AccessTokenResponse, PostV1LoginPostData } from "@/app/apiclient";
 import { client } from "@/app/apiclient/client.gen";
 type AuthStatus = "authenticated" | "initial" | "unauthorised";
 
@@ -76,7 +75,6 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
   };
 
   const clearAuthToken = useCallback(() => {
-    OpenAPI.TOKEN = undefined;
     removePersistedAuthToken();
   }, [removePersistedAuthToken]);
 
@@ -84,7 +82,6 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
     (authToken: AuthToken) => {
       if (authToken) {
         setPersistedAuthToken(authToken);
-        OpenAPI.TOKEN = authToken;
       }
     },
     [setPersistedAuthToken],

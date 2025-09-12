@@ -1,6 +1,6 @@
 import type { CoordinatesFormValue } from "./types";
 
-import type { Coordinates } from "@/app/api";
+import type { Coordinates } from "@/app/apiclient";
 
 /**
  * Converts a string containing coordinates into an object with latitude and longitude.
