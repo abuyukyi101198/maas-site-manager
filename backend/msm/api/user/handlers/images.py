@@ -20,11 +20,13 @@ from msm.api.exceptions.catalog import (
     BadRequestException,
     BaseExceptionDetail,
     FileTooLargeException,
+    ForbiddenException,
     NotFoundException,
 )
 from msm.api.exceptions.constants import ExceptionCode
 from msm.api.exceptions.responses import (
     BadRequestErrorResponseModel,
+    ForbiddenErrorResponseModel,
     NotFoundErrorResponseModel,
     UnauthorizedErrorResponseModel,
     ValidationErrorResponseModel,
@@ -592,6 +594,53 @@ async def post_images(
     )
     await run_in_threadpool(s3_upload_target.complete_upload)
     return dm.ImagesPostResponse.from_model(boot_asset_item)
+
+
+@v1_router.delete(
+    "/images/{id}",
+    responses={
+        401: {"model": UnauthorizedErrorResponseModel},
+        403: {"model": ForbiddenErrorResponseModel},
+        404: {"model": NotFoundErrorResponseModel},
+        422: {"model": ValidationErrorResponseModel},
+    },
+    status_code=204,
+)
+async def delete_image(
+    services: Annotated[ServiceCollection, Depends(services)],
+    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
+    id: int,
+) -> None:
+    asset = await services.boot_assets.get_by_id(id)
+    if asset is None:
+        raise NotFoundException(
+            code=ExceptionCode.MISSING_RESOURCE,
+            message="Boot Asset does not exist.",
+            details=[
+                BaseExceptionDetail(
+                    reason=ExceptionCode.MISSING_RESOURCE,
+                    messages=[f"Boot Asset with ID {id} does not exist"],
+                    field="id",
+                    location="path",
+                )
+            ],
+        )
+    elif asset.boot_source_id != CUSTOM_IMAGE_SOURCE_ID:
+        raise ForbiddenException(
+            code=ExceptionCode.MISSING_PERMISSIONS,
+            message="Non-custom images cannot be deleted",
+            details=[
+                BaseExceptionDetail(
+                    reason=ExceptionCode.MISSING_PERMISSIONS,
+                    messages=[
+                        f"Boot asset with ID {id} is not a custom image."
+                    ],
+                    field="id",
+                    location="path",
+                )
+            ],
+        )
+    await services.boot_assets.purge_assets([id])
 
 
 @v1_router.get(

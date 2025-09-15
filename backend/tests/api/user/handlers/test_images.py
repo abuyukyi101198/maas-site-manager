@@ -385,6 +385,52 @@ class TestCustomImageUploadHandler:
 
 
 @pytest.mark.asyncio
+class TestCustomImageDeleteHandler:
+    async def test_delete(
+        self,
+        user_client: Client,
+        boot_source_custom: BootSource,
+        factory: Factory,
+        mock_s3_service: MockType,
+    ) -> None:
+        asset = await factory.make_BootAsset(
+            boot_source_custom.id,
+            os="custom",
+            release="noble",
+            arch="amd64",
+            base_image="custom/noble",
+        )
+        version = await factory.make_BootAssetVersion(asset.id)
+        item = await factory.make_BootAssetItem(version.id)
+        resp = await user_client.delete(f"/images/{asset.id}")
+        assert resp.status_code == 204
+        assets = await factory.get("boot_asset")
+        versions = await factory.get("boot_asset_version")
+        items = await factory.get("boot_asset_item")
+        assert len(assets) == 0
+        assert len(versions) == 0
+        assert len(items) == 0
+        mock_s3_service.delete_object.assert_called_once_with(str(item.id))
+
+    async def test_delete_non_custom(
+        self,
+        user_client: Client,
+        ubuntu_noble: BootAsset,
+        items_ubuntu_noble_1: list[BootAssetItem],
+        factory: Factory,
+    ) -> None:
+        resp = await user_client.delete(f"/images/{ubuntu_noble.id}")
+        assert resp.status_code == 403
+
+    async def test_delete_not_found(
+        self,
+        user_client: Client,
+    ) -> None:
+        resp = await user_client.delete(f"/images/999")
+        assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
 class TestBootAssetItemsDownloadHandler:
     @pytest.fixture
     async def index_service(
