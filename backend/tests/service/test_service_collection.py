@@ -20,7 +20,7 @@ class TestServiceCollection:
         """Test that services property returns all service instances."""
         services = list(collection.services)
 
-        assert len(services) == 13
+        assert len(services) == 14
         assert collection.boot_asset_items in services
         assert collection.boot_asset_versions in services
         assert collection.boot_assets in services
@@ -34,6 +34,7 @@ class TestServiceCollection:
         assert collection.temporal_service in services
         assert collection.tokens in services
         assert collection.users in services
+        assert collection.workflow_service in services
 
     async def test_collect_metrics_calls_all_services(
         self, collection: ServiceCollection, mocker: MockerFixture

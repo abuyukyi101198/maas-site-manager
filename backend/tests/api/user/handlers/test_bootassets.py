@@ -1,8 +1,9 @@
 from typing import Any
+from unittest.mock import call
 from uuid import uuid4
 
 import pytest
-from pytest_mock import MockerFixture
+from pytest_mock import MockerFixture, MockType
 
 from msm.api.user.handlers.bootassets import purge_and_refresh
 from msm.api.user.models.bootassets import (
@@ -126,6 +127,7 @@ class TestBootSourcesPostHandler:
         factory: Factory,
         mocker: MockerFixture,
         boot_source_custom: BootSource,
+        mock_workflow_service: MockType,
     ) -> None:
         mock_now = mocker.patch(
             "msm.api.user.handlers.bootassets.now_utc",
@@ -144,6 +146,8 @@ class TestBootSourcesPostHandler:
         stored = await factory.get("boot_source")
         assert len(stored) == 2
         assert stored[1] == data | {"id": new_id, "last_sync": factory.now}
+        mock_workflow_service.enable_sync.assert_called_once_with(new_id, 1000)
+        mock_workflow_service.trigger_sync.assert_called_once_with(new_id)
 
     @pytest.mark.parametrize(
         "field", ["priority", "url", "keyring", "sync_interval", "name"]
@@ -172,6 +176,7 @@ class TestBootSourcesUpdateHandler:
         user_client: Client,
         factory: Factory,
         boot_source: BootSource,
+        mock_workflow_service: MockType,
     ) -> None:
         orig_last_sync = boot_source.last_sync
         data = {
@@ -191,6 +196,25 @@ class TestBootSourcesUpdateHandler:
         assert len(sources) == 2
         assert all([sources[1][k] == data[k] for k in data.keys()])
         assert sources[1]["last_sync"] == orig_last_sync
+        expected_disable_calls = [
+            call(
+                boot_source.id,
+            ),
+        ]
+        expected_enable_calls = [
+            call(
+                boot_source.id,
+                200,
+            ),
+        ]
+        assert (
+            mock_workflow_service.disable_sync.call_args_list
+            == expected_disable_calls
+        )
+        assert (
+            mock_workflow_service.enable_sync.call_args_list
+            == expected_enable_calls
+        )
 
     async def test_update_custom_source_fails(
         self,

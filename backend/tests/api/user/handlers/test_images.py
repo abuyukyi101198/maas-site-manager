@@ -750,6 +750,7 @@ class TestPostSelectableImagesSelectHandler:
         centos: BootAsset,
         sel_centos: BootSourceSelection,
         sel_ubuntu_noble: list[BootSourceSelection],
+        mock_workflow_service: MockType,
     ) -> None:
         # don't use jammy selection fixutre since it is selected already
         jammy_sel = await factory.make_BootSourceSelection(
@@ -799,6 +800,17 @@ class TestPostSelectableImagesSelectHandler:
         assert sel_ubuntu_noble[1].model_dump() in selections
         assert expected_jammy_sel in selections_no_id
         assert expected_centos_sel in selections_no_id
+        expected_calls = [
+            call(
+                jammy_sel.boot_source_id,
+            ),
+            call(
+                sel_centos.boot_source_id,
+            ),
+        ]
+        assert (
+            mock_workflow_service.trigger_sync.call_args_list == expected_calls
+        )
 
     async def test_post_missing_ids(
         self,
@@ -819,6 +831,7 @@ class TestPostSelectedImagesRemoveHandler:
         factory: Factory,
         user_client: Client,
         mocker: MockerFixture,
+        mock_workflow_service: MockType,
     ) -> None:
         assert ubuntu_noble.release is not None
         assert ubuntu_jammy.release is not None
@@ -851,6 +864,14 @@ class TestPostSelectedImagesRemoveHandler:
         mock_background.assert_called_once_with(
             mocker.ANY,
             [noble_sel.id, jammy_sel.id],
+        )
+        expected_calls = [
+            call(
+                ubuntu_noble.boot_source_id,
+            ),
+        ]
+        assert (
+            mock_workflow_service.trigger_sync.call_args_list == expected_calls
         )
         selections = await factory.get("boot_source_selection")
         new_noble_selection = noble_sel.model_dump()

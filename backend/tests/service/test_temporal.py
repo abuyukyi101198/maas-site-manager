@@ -1,11 +1,17 @@
 from typing import Any
+from unittest.mock import call
 
 import pytest
 from pytest_mock import MockerFixture
 from temporalio.client import Client as TemporalClient
 
+from msm.db.models import BootSource
 from msm.jwt import TokenAudience, TokenPurpose
-from msm.service.temporal import WORKER_TOKEN_DURATION, TemporalService
+from msm.service.temporal import (
+    WORKER_TOKEN_DURATION,
+    BootSourceWorkflowService,
+    TemporalService,
+)
 
 
 @pytest.fixture
@@ -388,3 +394,96 @@ class TestTemporalService:
             purpose=TokenPurpose.ACCESS,
             duration=WORKER_TOKEN_DURATION,
         )
+
+
+@pytest.mark.asyncio
+class TestBootSourceWorkflowService:
+    async def test_enable_sync(
+        self,
+        mocker: MockerFixture,
+        workflow_service: BootSourceWorkflowService,
+        boot_source: BootSource,
+    ) -> None:
+        s3_params = mocker.sentinel
+        _ = mocker.patch.object(
+            workflow_service.s3,
+            "s3_params",
+            new_callable=mocker.PropertyMock(return_value=s3_params),
+        )
+        mock_schedule_create = mocker.patch.object(
+            workflow_service.temporal, "schedule_create", autospec=True
+        )
+        mock_schedule_create.return_value = "test-schedule-id"
+
+        mock_get_worker_credentials = mocker.patch.object(
+            workflow_service.temporal,
+            "get_worker_credentials",
+            autospec=True,
+        )
+        mock_get_worker_credentials.return_value = (
+            "https://test.service.url",
+            "test-jwt-token",
+        )
+
+        await workflow_service.enable_sync(
+            boot_source.id, boot_source.sync_interval
+        )
+
+        mock_get_worker_credentials.assert_called_once()
+        mock_schedule_create.assert_called()
+
+        # Check the workflow parameters
+        expected_calls = [
+            call(
+                scheduler_id=f"sched-boot-select-{boot_source.id}",
+                workflow="RefreshUpstreamSource",
+                workflow_id=f"wf-refresh-bootsel-{boot_source.id}",
+                param=mocker.ANY,
+                interval=boot_source.sync_interval // 2,
+            ),
+            call(
+                scheduler_id=f"sched-boot-source-{boot_source.id}",
+                workflow="SyncUpstreamSource",
+                workflow_id=f"wf-sync-upstream-{boot_source.id}",
+                param=mocker.ANY,
+                interval=boot_source.sync_interval,
+            ),
+        ]
+        assert mock_schedule_create.call_args_list == expected_calls
+
+    async def test_disable_sync(
+        self,
+        mocker: MockerFixture,
+        workflow_service: BootSourceWorkflowService,
+        boot_source: BootSource,
+    ) -> None:
+        mock_schedule_cancel = mocker.patch.object(
+            workflow_service.temporal, "schedule_cancel", autospec=True
+        )
+        await workflow_service.disable_sync(boot_source.id)
+        mock_schedule_cancel.assert_called()
+
+        # Check the workflow parameters
+        expected_calls = [
+            call(f"sched-boot-select-{boot_source.id}"),
+            call(f"sched-boot-source-{boot_source.id}"),
+        ]
+        assert mock_schedule_cancel.call_args_list == expected_calls
+
+    async def test_trigger_sync(
+        self,
+        mocker: MockerFixture,
+        workflow_service: BootSourceWorkflowService,
+        boot_source: BootSource,
+    ) -> None:
+        mock_schedule_fire = mocker.patch.object(
+            workflow_service.temporal, "schedule_fire", autospec=True
+        )
+        await workflow_service.trigger_sync(boot_source.id)
+        mock_schedule_fire.assert_called()
+
+        # Check the workflow parameters
+        expected_calls = [
+            call(f"sched-boot-source-{boot_source.id}"),
+        ]
+        assert mock_schedule_fire.call_args_list == expected_calls

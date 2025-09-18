@@ -19,9 +19,10 @@ from temporallib.encryption import EncryptionOptions  # type: ignore
 from msm.jwt import TokenAudience, TokenPurpose
 from msm.service.base import Service
 from msm.service.config import ConfigService
-from msm.service.s3 import S3Params
+from msm.service.s3 import S3Params, S3Service
 from msm.service.settings import SettingsService
 from msm.service.token import TokenService
+from msm.settings import Settings
 
 
 @dataclass
@@ -42,6 +43,7 @@ class RefreshUpstreamSourceParams(MsmApiWorkflowParams):
 
 
 WORKER_TOKEN_DURATION = timedelta(days=365 * 5)
+BOOT_SELECTION_REFRESH_INTVAL = 5
 
 
 class TemporalService(Service):
@@ -66,10 +68,16 @@ class TemporalService(Service):
         self.tokens = tokens
         self.config = config
         self.settings = settings
+        self.application_settings = Settings()
 
     @cached_property
     def options(self) -> Options:
-        return Options(encryption=EncryptionOptions())
+        return Options(
+            host=self.application_settings.temporal_server_address,
+            queue=self.application_settings.temporal_task_queue,
+            namespace=self.application_settings.temporal_namespace,
+            encryption=EncryptionOptions(),
+        )
 
     async def get_client(self) -> TemporalClient:
         """Connect to Temporal client.
@@ -212,4 +220,77 @@ class TemporalService(Service):
             audience=TokenAudience.WORKER,
             purpose=TokenPurpose.ACCESS,
             duration=WORKER_TOKEN_DURATION,
+        )
+
+
+class BootSourceWorkflowService(Service):
+    def __init__(
+        self,
+        connection: AsyncConnection,
+        s3: S3Service,
+        temporal: TemporalService,
+    ):
+        super().__init__(connection)
+        self.s3 = s3
+        self.temporal = temporal
+
+    async def enable_sync(
+        self,
+        boot_source_id: int,
+        sync_interval: int,
+    ) -> None:
+        """
+        Enable upstream synchronization for a boot source.
+
+        This method sets up scheduled workflows for synchronizing boot source selections
+        and images from upstream sources at specified intervals.
+
+        Args:
+            boot_source_id: The ID of the boot source to enable sync for.
+            sync_interval: The interval in seconds between synchronization runs.
+            msm_url: The API URL for workers. If empty, will be retrieved automatically.
+            msm_jwt: The API JWT credentials for workers. If empty, will be retrieved automatically.
+        """
+        msm_url, msm_jwt = await self.temporal.get_worker_credentials()
+
+        # sync selections
+        await self.temporal.schedule_create(
+            scheduler_id=f"sched-boot-select-{boot_source_id}",
+            workflow=self.temporal.REFRESH_UPSTREAM_SOURCE_WF_NAME,
+            workflow_id=f"wf-refresh-bootsel-{boot_source_id}",
+            param=RefreshUpstreamSourceParams(
+                msm_url=msm_url,
+                msm_jwt=msm_jwt,
+                boot_source_id=boot_source_id,
+            ),
+            interval=max(sync_interval // 2, BOOT_SELECTION_REFRESH_INTVAL),
+        )
+
+        # sync images
+        await self.temporal.schedule_create(
+            scheduler_id=f"sched-boot-source-{boot_source_id}",
+            workflow=self.temporal.SYNC_UPSTREAM_SOURCE_WF_NAME,
+            workflow_id=f"wf-sync-upstream-{boot_source_id}",
+            param=SyncUpstreamSourceParams(
+                msm_url=msm_url,
+                msm_jwt=msm_jwt,
+                boot_source_id=boot_source_id,
+                s3_params=self.s3.s3_params,
+            ),
+            interval=sync_interval,
+        )
+
+    async def disable_sync(self, boot_source_id: int) -> None:
+        """Disable upstream synchronization for a boot source."""
+        await self.temporal.schedule_cancel(
+            f"sched-boot-select-{boot_source_id}"
+        )
+        await self.temporal.schedule_cancel(
+            f"sched-boot-source-{boot_source_id}"
+        )
+
+    async def trigger_sync(self, boot_source_id: int) -> None:
+        """Trigger synchronization for a boot source."""
+        await self.temporal.schedule_fire(
+            f"sched-boot-source-{boot_source_id}"
         )

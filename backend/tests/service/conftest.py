@@ -9,6 +9,7 @@ from msm.service import (
     BootAssetVersionService,
     BootSourceSelectionService,
     BootSourceService,
+    BootSourceWorkflowService,
     IndexService,
     ServiceCollection,
     TemporalService,
@@ -72,6 +73,13 @@ def temporal_service(
     service_collection: ServiceCollection,
 ) -> Iterator[TemporalService]:
     yield service_collection.temporal_service
+
+
+@pytest.fixture
+def workflow_service(
+    service_collection: ServiceCollection,
+) -> Iterator[BootSourceWorkflowService]:
+    yield service_collection.workflow_service
 
 
 @pytest.fixture

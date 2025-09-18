@@ -15,6 +15,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.ext.asyncio import AsyncConnection
+from temporalio.service import RPCError
 
 from msm.db import (
     CUSTOM_IMAGE_SOURCE_ID,
@@ -33,9 +34,7 @@ from msm.service.base import Service
 from msm.service.s3 import S3Service
 from msm.service.settings import SettingsService
 from msm.service.temporal import (
-    RefreshUpstreamSourceParams,
-    SyncUpstreamSourceParams,
-    TemporalService,
+    BootSourceWorkflowService,
 )
 from msm.time import now_utc, utc_from_timestamp
 
@@ -51,15 +50,13 @@ class BootSourceService(Service):
         boot_assets: "BootAssetService",
         boot_source_selections: "BootSourceSelectionService",
         settings: SettingsService,
-        temporal: TemporalService,
-        s3: S3Service,
+        workflows: BootSourceWorkflowService,
     ):
         super().__init__(connection)
         self.boot_assets = boot_assets
         self.boot_source_selections = boot_source_selections
         self.settings = settings
-        self.temporal = temporal
-        self.s3 = s3
+        self.workflows = workflows
 
     async def get(
         self,
@@ -122,7 +119,19 @@ class BootSourceService(Service):
             )
         )
         result = await self.conn.execute(stmt)
-        return models.BootSource(**result.one()._asdict())
+        boot_source = models.BootSource(**result.one()._asdict())
+        if details.sync_interval is not None:
+            try:
+                await self.workflows.disable_sync(boot_source.id)
+            except RPCError:
+                # If the previous sync_interval was 0, the schedule won't exist
+                # so ignore error thrown trying to disable it
+                pass
+            if boot_source.sync_interval:
+                await self.workflows.enable_sync(
+                    boot_source_id, boot_source.sync_interval
+                )
+        return boot_source
 
     async def create(
         self, details: models.BootSourceCreate
@@ -141,8 +150,13 @@ class BootSourceService(Service):
             stmt,
             [data],
         )
-        boot_source = result.one()
-        return models.BootSource(**boot_source._asdict())
+        boot_source = models.BootSource(**result.one()._asdict())
+        if boot_source.sync_interval:
+            await self.workflows.enable_sync(
+                boot_source.id, boot_source.sync_interval
+            )
+            await self.workflows.trigger_sync(boot_source.id)
+        return boot_source
 
     async def delete(self, boot_source_id: int) -> None:
         stmt = delete(BootSource).where(BootSource.c.id == boot_source_id)
@@ -180,84 +194,17 @@ class BootSourceService(Service):
         }
         await self.conn.execute(insert(BootSource), [data])
 
-    async def enable_sync(
-        self,
-        boot_source_id: int,
-        sync_interval: int,
-        msm_url: str = "",
-        msm_jwt: str = "",
-    ) -> None:
-        """
-        Enable upstream synchronization for a boot source.
-
-        This method sets up scheduled workflows for synchronizing boot source selections
-        and images from upstream sources at specified intervals.
-
-        Args:
-            boot_source_id: The ID of the boot source to enable sync for.
-            sync_interval: The interval in seconds between synchronization runs.
-            msm_url: The API URL for workers. If empty, will be retrieved automatically.
-            msm_jwt: The API JWT credentials for workers. If empty, will be retrieved automatically.
-        """
-        if not all([msm_jwt, msm_url]):
-            msm_url, msm_jwt = await self.temporal.get_worker_credentials()
-
-        # sync selections
-        await self.temporal.schedule_create(
-            scheduler_id=f"sched-boot-select-{boot_source_id}",
-            workflow=self.temporal.REFRESH_UPSTREAM_SOURCE_WF_NAME,
-            workflow_id=f"wf-refresh-bootsel-{boot_source_id}",
-            param=RefreshUpstreamSourceParams(
-                msm_url=msm_url,
-                msm_jwt=msm_jwt,
-                boot_source_id=boot_source_id,
-            ),
-            interval=max(sync_interval // 2, BOOT_SELECTION_REFRESH_INTVAL),
-        )
-
-        # sync images
-        await self.temporal.schedule_create(
-            scheduler_id=f"sched-boot-source-{boot_source_id}",
-            workflow=self.temporal.SYNC_UPSTREAM_SOURCE_WF_NAME,
-            workflow_id=f"wf-sync-upstream-{boot_source_id}",
-            param=SyncUpstreamSourceParams(
-                msm_url=msm_url,
-                msm_jwt=msm_jwt,
-                boot_source_id=boot_source_id,
-                s3_params=self.s3.s3_params,
-            ),
-            interval=sync_interval,
-        )
-
-    async def disable_sync(self, boot_source_id: int) -> None:
-        """Disable upstream synchronization for a boot source."""
-        await self.temporal.schedule_cancel(
-            f"sched-boot-select-{boot_source_id}"
-        )
-        await self.temporal.schedule_cancel(
-            f"sched-boot-source-{boot_source_id}"
-        )
-
-    async def trigger_sync(self, boot_source_id: int) -> None:
-        """Trigger synchronization for a boot source."""
-        await self.temporal.schedule_fire(
-            f"sched-boot-source-{boot_source_id}"
-        )
-
     async def _ensure_sync(self) -> None:
         """Start synchronization workflows for enabled boot sources."""
         count, sources = await self.get([])
         if count <= 1:  # ignore custom images source
             return
 
-        msm_url, msm_jwt = await self.temporal.get_worker_credentials()
         active = filter(lambda x: x.sync_interval > 0, sources)
         for source in active:
-            await self.enable_sync(
+            await self.workflows.enable_sync(
                 source.id,
                 source.sync_interval,
-                msm_url=msm_url,
-                msm_jwt=msm_jwt,
             )
 
     async def ensure(self) -> None:
@@ -282,7 +229,7 @@ class BootSourceService(Service):
         Args:
             id: The ID of the boot source to purge.
         """
-        await self.disable_sync(id)
+        await self.workflows.disable_sync(id)
         _, assets = await self.boot_assets.get([], boot_source_id=[id])
         await self.boot_assets.purge_assets([a.id for a in assets])
         await self.boot_source_selections.delete_by_source_id(id)
@@ -290,6 +237,14 @@ class BootSourceService(Service):
 
 
 class BootSourceSelectionService(Service):
+    def __init__(
+        self,
+        connection: AsyncConnection,
+        workflows: BootSourceWorkflowService,
+    ):
+        super().__init__(connection)
+        self.workflows = workflows
+
     async def get(
         self,
         sort_params: list[SortParam],
@@ -360,8 +315,14 @@ class BootSourceSelectionService(Service):
             update(BootSourceSelection)
             .where(BootSourceSelection.c.id.in_(ids))
             .values({"selected": select})
+            .returning(BootSourceSelection.c.boot_source_id)
         )
         result = await self.conn.execute(stmt)
+        unique_ids = set(
+            int(r._asdict()["boot_source_id"]) for r in result.all()
+        )
+        for id in unique_ids:
+            await self.workflows.trigger_sync(id)
 
     async def update(
         self,

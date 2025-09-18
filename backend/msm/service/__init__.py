@@ -17,7 +17,7 @@ from msm.service.images import (
 from msm.service.s3 import S3Service
 from msm.service.settings import SettingsService
 from msm.service.site import InvalidPendingSites, SiteService
-from msm.service.temporal import TemporalService
+from msm.service.temporal import BootSourceWorkflowService, TemporalService
 from msm.service.token import TokenService
 from msm.service.user import UserService
 
@@ -38,6 +38,9 @@ class ServiceCollection:
             settings=self.settings,
         )
         self.s3 = S3Service(connection)
+        self.workflow_service = BootSourceWorkflowService(
+            connection, s3=self.s3, temporal=self.temporal_service
+        )
         self.index_service = IndexService(connection)
         self.boot_asset_versions = BootAssetVersionService(connection)
         self.boot_asset_items = BootAssetItemService(connection)
@@ -48,14 +51,16 @@ class ServiceCollection:
             boot_asset_items=self.boot_asset_items,
             index_service=self.index_service,
         )
-        self.boot_source_selections = BootSourceSelectionService(connection)
+        self.boot_source_selections = BootSourceSelectionService(
+            connection,
+            workflows=self.workflow_service,
+        )
         self.boot_sources = BootSourceService(
             connection,
             boot_assets=self.boot_assets,
             boot_source_selections=self.boot_source_selections,
             settings=self.settings,
-            temporal=self.temporal_service,
-            s3=self.s3,
+            workflows=self.workflow_service,
         )
 
     @property
@@ -69,6 +74,7 @@ class ServiceCollection:
             self.settings,
             self.s3,
             self.temporal_service,
+            self.workflow_service,
             self.tokens,
             self.users,
             self.sites,
@@ -97,6 +103,7 @@ __all__ = [
     "BootAssetVersionService",
     "BootSourceSelectionService",
     "BootSourceService",
+    "BootSourceWorkflowService",
     "ConfigService",
     "IndexNotFound",
     "IndexService",

@@ -1,11 +1,12 @@
 from collections.abc import AsyncIterator
+from typing import cast
 from uuid import (
     uuid4,
 )
 
 from fastapi import FastAPI
 import pytest
-from pytest_mock import MockerFixture
+from pytest_mock import MockerFixture, MockType
 
 from msm.db.models import (
     Config,
@@ -13,6 +14,7 @@ from msm.db.models import (
     Worker,
 )
 from msm.jwt import TokenAudience, TokenPurpose
+from msm.service import BootSourceWorkflowService
 from tests.api.conftest import make_api_client
 from tests.fixtures.client import Client
 from tests.fixtures.factory import Factory
@@ -73,3 +75,12 @@ async def admin_client(
     ) as client:
         client.authenticate(api_admin.auth_id)
         yield client
+
+
+@pytest.fixture
+def mock_workflow_service(mocker: MockerFixture) -> MockType:
+    mock_workflows = mocker.patch(
+        "msm.service.BootSourceWorkflowService", spec=BootSourceWorkflowService
+    )
+    mock = mock_workflows.return_value
+    return cast(MockType, mock)
