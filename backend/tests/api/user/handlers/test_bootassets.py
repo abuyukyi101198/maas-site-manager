@@ -68,8 +68,8 @@ class TestBootSourcesGetHandler:
         assert assets.status_code == 200
         resp_body = assets.json()
         assert resp_body["items"] == [
-            boot_source.model_dump(mode="json"),
             boot_source_custom.model_dump(mode="json"),
+            boot_source.model_dump(mode="json"),
         ]
         assets = await user_client.get("/bootasset-sources?sort_by=name")
         assert assets.status_code == 200

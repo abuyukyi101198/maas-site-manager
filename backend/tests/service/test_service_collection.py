@@ -20,17 +20,20 @@ class TestServiceCollection:
         """Test that services property returns all service instances."""
         services = list(collection.services)
 
-        assert len(services) == 10
-        assert collection.sites in services
-        assert collection.tokens in services
-        assert collection.users in services
-        assert collection.settings in services
-        assert collection.boot_assets in services
+        assert len(services) == 13
         assert collection.boot_asset_items in services
         assert collection.boot_asset_versions in services
-        assert collection.boot_sources in services
+        assert collection.boot_assets in services
         assert collection.boot_source_selections in services
+        assert collection.boot_sources in services
+        assert collection.config in services
         assert collection.index_service in services
+        assert collection.s3 in services
+        assert collection.settings in services
+        assert collection.sites in services
+        assert collection.temporal_service in services
+        assert collection.tokens in services
+        assert collection.users in services
 
     async def test_collect_metrics_calls_all_services(
         self, collection: ServiceCollection, mocker: MockerFixture

@@ -100,6 +100,10 @@ class Factory:
         tbl = METADATA.tables[table]
         await self.conn.execute(tbl.delete().where(tbl.c.id == id))
 
+    async def flush(self, table: str) -> None:
+        tbl = METADATA.tables[table]
+        await self.conn.execute(tbl.delete())
+
     async def count(
         self,
         table: str,

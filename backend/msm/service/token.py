@@ -94,6 +94,7 @@ class TokenService(Service):
         id: list[int] | None = None,
         value: list[str] | None = None,
         site_id: list[int] | None = None,
+        audience: list[TokenAudience] | None = None,
     ) -> tuple[int, Iterable[models.Token]]:
         """Return active tokens."""
         filters = queries.filters_from_arguments(
@@ -101,12 +102,12 @@ class TokenService(Service):
             id=id,
             value=value,
             site_id=site_id,
+            audience=audience or [TokenAudience.SITE],
         )
         filters.extend(
             [
                 Token.c.site_id == None,
                 Token.c.expired > now_utc(),
-                Token.c.audience == TokenAudience.SITE,
                 Token.c.purpose == TokenPurpose.ENROLMENT,
             ]
         )

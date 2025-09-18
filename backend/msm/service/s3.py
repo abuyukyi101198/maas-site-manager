@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from functools import cached_property
 from os.path import join
 import typing
@@ -16,7 +17,26 @@ if typing.TYPE_CHECKING:
     )
 
 
+@dataclass
+class S3Params:
+    endpoint: str
+    access_key: str
+    secret_key: str
+    bucket: str
+    path: str
+
+
+class S3ParametersError(Exception):
+    """Raised when S3 configuration is incomplete."""
+
+
 class S3Service(Service):
+    """Service for interacting with S3-compatible storage.
+
+    Provides methods for multipart uploads, object retrieval, deletion,
+    and other S3 operations using boto3.
+    """
+
     def __init__(
         self,
         connection: AsyncConnection,
@@ -30,31 +50,49 @@ class S3Service(Service):
 
     @property
     def s3_endpoint(self) -> str:
-        assert self.settings.s3_endpoint is not None
-        return self.settings.s3_endpoint
+        return self.settings.s3_endpoint or ""
 
     @property
     def s3_bucket(self) -> str:
-        assert self.settings.s3_bucket is not None
-        return self.settings.s3_bucket
+        return self.settings.s3_bucket or ""
 
     @property
     def s3_path(self) -> str:
-        assert self.settings.s3_path is not None
-        return self.settings.s3_path
+        return self.settings.s3_path or ""
 
     @property
     def s3_access_key(self) -> str:
-        assert self.settings.s3_access_key is not None
-        return self.settings.s3_access_key
+        return self.settings.s3_access_key or ""
 
     @property
     def s3_secret_key(self) -> str:
-        assert self.settings.s3_secret_key is not None
-        return self.settings.s3_secret_key
+        return self.settings.s3_secret_key or ""
+
+    @cached_property
+    def s3_params(self) -> S3Params:
+        """S3 parameters for workflows."""
+        if not all(
+            [
+                self.s3_endpoint,
+                self.s3_bucket,
+                self.s3_access_key,
+                self.s3_secret_key,
+                self.s3_path,
+            ]
+        ):
+            raise S3ParametersError()
+
+        return S3Params(
+            endpoint=self.s3_endpoint,
+            bucket=self.s3_bucket,
+            access_key=self.s3_access_key,
+            secret_key=self.s3_secret_key,
+            path=self.s3_path,
+        )
 
     @cached_property
     def s3_client(self) -> "S3Client":
+        """Get S3 client."""
         return boto3.client(
             "s3",
             use_ssl=self.use_ssl,
@@ -65,6 +103,14 @@ class S3Service(Service):
         )
 
     def create_multipart_upload(self, path: str) -> tuple[str, str]:
+        """Create a multipart upload for the given path.
+
+        Args:
+            path: The file path within the S3 bucket
+
+        Returns:
+            A tuple containing the S3 key and upload ID
+        """
         s3_key = join(self.s3_path, path)
         multipart_upload = self.s3_client.create_multipart_upload(
             ACL="public-read",
@@ -77,6 +123,17 @@ class S3Service(Service):
     def upload_part(
         self, s3_key: str, upload_id: str, part_no: int, chunk: bytes
     ) -> str:
+        """Upload a part for a multipart upload.
+
+        Args:
+            s3_key: The S3 key for the object
+            upload_id: The multipart upload ID
+            part_no: The part number (1-based)
+            chunk: The data chunk to upload
+
+        Returns:
+            The ETag of the uploaded part
+        """
         part = self.s3_client.upload_part(
             Bucket=self.s3_bucket,
             Key=s3_key,
@@ -93,6 +150,13 @@ class S3Service(Service):
         upload_id: str,
         parts: typing.Sequence["CompletedPartTypeDef"],
     ) -> None:
+        """Complete a multipart upload.
+
+        Args:
+            s3_key: The S3 key for the object
+            upload_id: The multipart upload ID
+            parts: Sequence of completed parts with PartNumber and ETag
+        """
         self.s3_client.complete_multipart_upload(
             Bucket=self.s3_bucket,
             Key=s3_key,
@@ -105,6 +169,12 @@ class S3Service(Service):
         s3_key: str,
         upload_id: str,
     ) -> None:
+        """Abort a multipart upload.
+
+        Args:
+            s3_key: The S3 key for the object
+            upload_id: The multipart upload ID to abort
+        """
         self.s3_client.abort_multipart_upload(
             Bucket=self.s3_bucket,
             Key=s3_key,
@@ -112,9 +182,22 @@ class S3Service(Service):
         )
 
     def delete_object(self, path: str) -> None:
+        """Delete an object from S3.
+
+        Args:
+            path: The file path within the S3 bucket to delete
+        """
         s3_key = join(self.s3_path, path)
         self.s3_client.delete_object(Bucket=self.s3_bucket, Key=s3_key)
 
     def get_object(self, path: str) -> "GetObjectOutputTypeDef":
+        """Get an object from S3.
+
+        Args:
+            path: The file path within the S3 bucket to retrieve
+
+        Returns:
+            The S3 GetObject response containing the object data and metadata
+        """
         s3_key = join(self.s3_path, path)
         return self.s3_client.get_object(Bucket=self.s3_bucket, Key=s3_key)

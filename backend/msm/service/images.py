@@ -32,9 +32,16 @@ from msm.schema import SortParam
 from msm.service.base import Service
 from msm.service.s3 import S3Service
 from msm.service.settings import SettingsService
+from msm.service.temporal import (
+    RefreshUpstreamSourceParams,
+    SyncUpstreamSourceParams,
+    TemporalService,
+)
 from msm.time import now_utc, utc_from_timestamp
 
 END_OF_TIME = datetime(MAXYEAR, 12, 31, 23, tzinfo=UTC)
+
+BOOT_SELECTION_REFRESH_INTVAL = 5
 
 
 class BootSourceService(Service):
@@ -44,11 +51,15 @@ class BootSourceService(Service):
         boot_assets: "BootAssetService",
         boot_source_selections: "BootSourceSelectionService",
         settings: SettingsService,
+        temporal: TemporalService,
+        s3: S3Service,
     ):
         super().__init__(connection)
         self.boot_assets = boot_assets
         self.boot_source_selections = boot_source_selections
         self.settings = settings
+        self.temporal = temporal
+        self.s3 = s3
 
     async def get(
         self,
@@ -140,7 +151,7 @@ class BootSourceService(Service):
     def _select_statement(self, *columns: Any) -> Select[Any]:
         return select(*columns).select_from(BootSource)
 
-    async def ensure(self) -> None:
+    async def _ensure_custom(self) -> None:
         """
         Ensure that the custom image boot source is present in the database.
         """
@@ -169,7 +180,109 @@ class BootSourceService(Service):
         }
         await self.conn.execute(insert(BootSource), [data])
 
+    async def enable_sync(
+        self,
+        boot_source_id: int,
+        sync_interval: int,
+        msm_url: str = "",
+        msm_jwt: str = "",
+    ) -> None:
+        """
+        Enable upstream synchronization for a boot source.
+
+        This method sets up scheduled workflows for synchronizing boot source selections
+        and images from upstream sources at specified intervals.
+
+        Args:
+            boot_source_id: The ID of the boot source to enable sync for.
+            sync_interval: The interval in seconds between synchronization runs.
+            msm_url: The API URL for workers. If empty, will be retrieved automatically.
+            msm_jwt: The API JWT credentials for workers. If empty, will be retrieved automatically.
+        """
+        if not all([msm_jwt, msm_url]):
+            msm_url, msm_jwt = await self.temporal.get_worker_credentials()
+
+        # sync selections
+        await self.temporal.schedule_create(
+            scheduler_id=f"sched-boot-select-{boot_source_id}",
+            workflow=self.temporal.REFRESH_UPSTREAM_SOURCE_WF_NAME,
+            workflow_id=f"wf-refresh-bootsel-{boot_source_id}",
+            param=RefreshUpstreamSourceParams(
+                msm_url=msm_url,
+                msm_jwt=msm_jwt,
+                boot_source_id=boot_source_id,
+            ),
+            interval=max(sync_interval // 2, BOOT_SELECTION_REFRESH_INTVAL),
+        )
+
+        # sync images
+        await self.temporal.schedule_create(
+            scheduler_id=f"sched-boot-source-{boot_source_id}",
+            workflow=self.temporal.SYNC_UPSTREAM_SOURCE_WF_NAME,
+            workflow_id=f"wf-sync-upstream-{boot_source_id}",
+            param=SyncUpstreamSourceParams(
+                msm_url=msm_url,
+                msm_jwt=msm_jwt,
+                boot_source_id=boot_source_id,
+                s3_params=self.s3.s3_params,
+            ),
+            interval=sync_interval,
+        )
+
+    async def disable_sync(self, boot_source_id: int) -> None:
+        """Disable upstream synchronization for a boot source."""
+        await self.temporal.schedule_cancel(
+            f"sched-boot-select-{boot_source_id}"
+        )
+        await self.temporal.schedule_cancel(
+            f"sched-boot-source-{boot_source_id}"
+        )
+
+    async def trigger_sync(self, boot_source_id: int) -> None:
+        """Trigger synchronization for a boot source."""
+        await self.temporal.schedule_fire(
+            f"sched-boot-source-{boot_source_id}"
+        )
+
+    async def _ensure_sync(self) -> None:
+        """Start synchronization workflows for enabled boot sources."""
+        count, sources = await self.get([])
+        if count <= 1:  # ignore custom images source
+            return
+
+        msm_url, msm_jwt = await self.temporal.get_worker_credentials()
+        active = filter(lambda x: x.sync_interval > 0, sources)
+        for source in active:
+            await self.enable_sync(
+                source.id,
+                source.sync_interval,
+                msm_url=msm_url,
+                msm_jwt=msm_jwt,
+            )
+
+    async def ensure(self) -> None:
+        """
+        Ensure that the boot source service is properly initialized.
+
+        This method performs initialization tasks including setting up the custom
+        image source and enabling synchronization workflows for boot sources.
+        """
+        await super().ensure()
+        await self._ensure_custom()
+        await self._ensure_sync()
+
     async def purge_source(self, id: int) -> None:
+        """
+        Purge all data associated with a boot source.
+
+        This method completely removes a boot source and all its associated data,
+        including disabling synchronization, purging all boot assets, removing
+        boot source selections, and finally deleting the boot source itself.
+
+        Args:
+            id: The ID of the boot source to purge.
+        """
+        await self.disable_sync(id)
         _, assets = await self.boot_assets.get([], boot_source_id=[id])
         await self.boot_assets.purge_assets([a.id for a in assets])
         await self.boot_source_selections.delete_by_source_id(id)
@@ -526,7 +639,7 @@ class BootAssetService(Service):
         )
         if count == 0:
             return True, await self.create(asset)
-        return False, next(assets)  # type: ignore
+        return False, next(iter(assets))
 
     def _select_statement(self, *columns: Any) -> Select[Any]:
         return select(*columns).select_from(BootAsset)

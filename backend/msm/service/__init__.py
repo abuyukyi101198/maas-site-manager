@@ -17,6 +17,7 @@ from msm.service.images import (
 from msm.service.s3 import S3Service
 from msm.service.settings import SettingsService
 from msm.service.site import InvalidPendingSites, SiteService
+from msm.service.temporal import TemporalService
 from msm.service.token import TokenService
 from msm.service.user import UserService
 
@@ -25,10 +26,17 @@ class ServiceCollection:
     """Provide all services."""
 
     def __init__(self, connection: AsyncConnection):
+        self.config = ConfigService(connection)
         self.sites = SiteService(connection)
         self.tokens = TokenService(connection)
         self.users = UserService(connection)
         self.settings = SettingsService(connection)
+        self.temporal_service = TemporalService(
+            connection,
+            tokens=self.tokens,
+            config=self.config,
+            settings=self.settings,
+        )
         self.s3 = S3Service(connection)
         self.index_service = IndexService(connection)
         self.boot_asset_versions = BootAssetVersionService(connection)
@@ -46,21 +54,29 @@ class ServiceCollection:
             boot_assets=self.boot_assets,
             boot_source_selections=self.boot_source_selections,
             settings=self.settings,
+            temporal=self.temporal_service,
+            s3=self.s3,
         )
 
     @property
     def services(self) -> Iterable[Service]:
-        """Service collection."""
+        """Service collection.
+
+        Keep this sorted by dependency order.
+        """
         return [
-            self.sites,
+            self.config,
+            self.settings,
+            self.s3,
+            self.temporal_service,
             self.tokens,
             self.users,
-            self.settings,
-            self.boot_assets,
-            self.boot_asset_items,
-            self.boot_asset_versions,
+            self.sites,
             self.boot_sources,
             self.boot_source_selections,
+            self.boot_assets,
+            self.boot_asset_versions,
+            self.boot_asset_items,
             self.index_service,
         ]
 
@@ -89,6 +105,7 @@ __all__ = [
     "ServiceCollection",
     "SettingsService",
     "SiteService",
+    "TemporalService",
     "TokenService",
     "UserService",
 ]

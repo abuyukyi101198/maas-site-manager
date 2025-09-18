@@ -53,7 +53,9 @@ async def run_worker() -> None:
             ss_act.load_product_map,
             ss_act.parse_ss_index,
         ],
-        worker_opt=WorkerOptions(sentry=SentryOptions()),
+        worker_opt=WorkerOptions(
+            sentry=SentryOptions(dsn=None, release=None, environment=None)
+        ),
     )
 
     await worker.run()

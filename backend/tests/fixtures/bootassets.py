@@ -31,7 +31,7 @@ async def boot_source_custom(
 ) -> BootSource:
     return await factory.make_BootSource(
         name="MSM Custom Images",
-        url="https://msm.com",
+        url="http://msm:8000",
         last_sync=prev_sync,
     )
 
@@ -45,6 +45,20 @@ async def boot_source(
         url="https://high.prio.source.com",
         last_sync=prev_sync,
         priority=100,
+        sync_interval=30,
+    )
+
+
+@pytest.fixture
+async def boot_source_disabled(
+    factory: Factory, boot_source_custom: BootSource, prev_sync: datetime
+) -> BootSource:
+    return await factory.make_BootSource(
+        name="disabled",
+        url="https://not-now.source.com",
+        last_sync=prev_sync,
+        priority=100,
+        sync_interval=0,
     )
 
 

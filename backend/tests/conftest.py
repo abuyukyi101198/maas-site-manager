@@ -3,6 +3,7 @@ import pytest
 from tests.fixtures.bootassets import (
     boot_source,
     boot_source_custom,
+    boot_source_disabled,
     boot_source_grub,
     boot_source_low,
     centos,
@@ -38,6 +39,7 @@ from tests.fixtures.factory import factory
 
 __all__ = [
     "boot_source_custom",
+    "boot_source_disabled",
     "boot_source_grub",
     "boot_source_low",
     "boot_source",

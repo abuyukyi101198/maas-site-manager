@@ -551,6 +551,7 @@ class TestBootSourceService:
     async def test_purge_source(
         self,
         factory: Factory,
+        mocker: MockerFixture,
         mock_s3_service: MockType,
         boot_source_service: BootSourceService,
         boot_source_custom: BootSource,
@@ -558,7 +559,11 @@ class TestBootSourceService:
         sel_ubuntu_noble: BootSourceSelection,
         single_item: BootAssetItem,
     ) -> None:
+        mock_disable_sync = mocker.patch.object(
+            boot_source_service, "disable_sync", autospec=True
+        )
         await boot_source_service.purge_source(boot_source.id)
+        mock_disable_sync.assert_called_once()
         sources = await factory.get("boot_source")
         assets = await factory.get("boot_asset")
         versions = await factory.get("boot_asset_version")
@@ -570,7 +575,197 @@ class TestBootSourceService:
         assert items == []
         assert selections == []
 
+    async def test_ensure_custom(
+        self,
+        factory: Factory,
+        boot_source_service: BootSourceService,
+    ) -> None:
+        sources = await factory.get("boot_source")
+        assert len(sources) == 0
+        await boot_source_service._ensure_custom()
 
+        sources = await factory.get("boot_source")
+        assert len(sources) == 1
+        assert sources[0]["keyring"] == ""
+        assert sources[0]["name"] == "MSM Custom Images"
+        assert sources[0]["priority"] == 1
+        assert sources[0]["sync_interval"] == 0
+
+    async def test_ensure_custom_exists(
+        self,
+        factory: Factory,
+        boot_source_service: BootSourceService,
+        boot_source_custom: BootSource,
+    ) -> None:
+        sources_before = await factory.get("boot_source")
+        assert len(sources_before) == 1
+
+        await boot_source_service._ensure_custom()
+        sources_after = await factory.get("boot_source")
+        assert len(sources_before) == len(sources_after)
+        assert sources_after[0]["id"] == boot_source_custom.id
+        assert sources_after[0]["name"] == boot_source_custom.name
+
+    async def test_enable_sync(
+        self,
+        mocker: MockerFixture,
+        boot_source_service: BootSourceService,
+        boot_source: BootSource,
+    ) -> None:
+        s3_params = mocker.sentinel
+        _ = mocker.patch.object(
+            boot_source_service.s3,
+            "s3_params",
+            new_callable=mocker.PropertyMock(return_value=s3_params),
+        )
+        mock_schedule_create = mocker.patch.object(
+            boot_source_service.temporal, "schedule_create", autospec=True
+        )
+        mock_schedule_create.return_value = "test-schedule-id"
+
+        mock_get_worker_credentials = mocker.patch.object(
+            boot_source_service.temporal,
+            "get_worker_credentials",
+            autospec=True,
+        )
+        mock_get_worker_credentials.return_value = (
+            "https://test.service.url",
+            "test-jwt-token",
+        )
+
+        await boot_source_service.enable_sync(
+            boot_source.id, boot_source.sync_interval
+        )
+
+        mock_get_worker_credentials.assert_called_once()
+        mock_schedule_create.assert_called()
+
+        # Check the workflow parameters
+        expected_calls = [
+            call(
+                scheduler_id=f"sched-boot-select-{boot_source.id}",
+                workflow="RefreshUpstreamSource",
+                workflow_id=f"wf-refresh-bootsel-{boot_source.id}",
+                param=mocker.ANY,
+                interval=boot_source.sync_interval // 2,
+            ),
+            call(
+                scheduler_id=f"sched-boot-source-{boot_source.id}",
+                workflow="SyncUpstreamSource",
+                workflow_id=f"wf-sync-upstream-{boot_source.id}",
+                param=mocker.ANY,
+                interval=boot_source.sync_interval,
+            ),
+        ]
+        assert mock_schedule_create.call_args_list == expected_calls
+
+    async def test_disable_sync(
+        self,
+        mocker: MockerFixture,
+        boot_source_service: BootSourceService,
+        boot_source: BootSource,
+    ) -> None:
+        mock_schedule_cancel = mocker.patch.object(
+            boot_source_service.temporal, "schedule_cancel", autospec=True
+        )
+        await boot_source_service.disable_sync(boot_source.id)
+        mock_schedule_cancel.assert_called()
+
+        # Check the workflow parameters
+        expected_calls = [
+            call(f"sched-boot-select-{boot_source.id}"),
+            call(f"sched-boot-source-{boot_source.id}"),
+        ]
+        assert mock_schedule_cancel.call_args_list == expected_calls
+
+    async def test_trigger_sync(
+        self,
+        mocker: MockerFixture,
+        boot_source_service: BootSourceService,
+        boot_source: BootSource,
+    ) -> None:
+        mock_schedule_fire = mocker.patch.object(
+            boot_source_service.temporal, "schedule_fire", autospec=True
+        )
+        await boot_source_service.trigger_sync(boot_source.id)
+        mock_schedule_fire.assert_called()
+
+        # Check the workflow parameters
+        expected_calls = [
+            call(f"sched-boot-source-{boot_source.id}"),
+        ]
+        assert mock_schedule_fire.call_args_list == expected_calls
+
+    async def test_ensure_sync(
+        self,
+        mocker: MockerFixture,
+        boot_source_service: BootSourceService,
+        boot_source: BootSource,
+        boot_source_custom: BootSource,
+        boot_source_disabled: BootSource,
+    ) -> None:
+        mock_enable_sync = mocker.patch.object(
+            boot_source_service, "enable_sync", autospec=True
+        )
+        mock_get_worker_credentials = mocker.patch.object(
+            boot_source_service.temporal,
+            "get_worker_credentials",
+            autospec=True,
+        )
+        mock_get_worker_credentials.return_value = (
+            "https://test.service.url",
+            "test-jwt-token",
+        )
+
+        await boot_source_service._ensure_sync()
+
+        mock_enable_sync.assert_called()
+        mock_get_worker_credentials.assert_called_once()
+
+        # Check the workflow parameters
+        expected_calls = [
+            call(
+                boot_source.id,
+                boot_source.sync_interval,
+                msm_url=mocker.ANY,
+                msm_jwt=mocker.ANY,
+            ),
+        ]
+        assert mock_enable_sync.call_args_list == expected_calls
+
+    async def test_ensure_sync_ignore_custom_source(
+        self,
+        mocker: MockerFixture,
+        boot_source_service: BootSourceService,
+        boot_source_custom: BootSource,
+    ) -> None:
+        mock_enable_sync = mocker.patch.object(
+            boot_source_service, "enable_sync", autospec=True
+        )
+
+        await boot_source_service._ensure_sync()
+
+        mock_enable_sync.assert_not_called()
+
+    async def test_ensure(
+        self,
+        mocker: MockerFixture,
+        boot_source_service: BootSourceService,
+    ) -> None:
+        mock__ensure_custom = mocker.patch.object(
+            boot_source_service, "_ensure_custom", autospec=True
+        )
+        mock__ensure_sync = mocker.patch.object(
+            boot_source_service, "_ensure_sync", autospec=True
+        )
+
+        await boot_source_service.ensure()
+
+        mock__ensure_custom.assert_called_once()
+        mock__ensure_sync.assert_called_once()
+
+
+@pytest.mark.asyncio
 class TestBootAssetVersionService:
     async def test_get(
         self,
@@ -581,6 +776,18 @@ class TestBootAssetVersionService:
         count, [rbav] = await boot_asset_version_service.get([])
         assert count == 1
         assert rbav == ver_ubuntu_jammy_1
+
+    async def test_get_by_id(
+        self,
+        factory: Factory,
+        boot_asset_version_service: BootAssetVersionService,
+        ver_ubuntu_noble_1: BootAssetVersion,
+        ver_ubuntu_noble_2: BootAssetVersion,
+    ) -> None:
+        rbav = await boot_asset_version_service.get_by_id(
+            ver_ubuntu_noble_2.id
+        )
+        assert rbav == ver_ubuntu_noble_2
 
     async def test_get_latest_version(
         self,
@@ -778,6 +985,16 @@ class TestBootAssetItemService:
         assert await boot_asset_item_service.get_by_path(
             boot_source_id, path
         ) == (BootAssetItem(**details) if exists else None)
+
+    async def test_row_count(
+        self,
+        boot_asset_item_service: BootAssetItemService,
+        ver_ubuntu_noble_1: BootAssetVersion,
+        items_ubuntu_noble_1: list[BootAssetItem],
+    ) -> None:
+        assert await boot_asset_item_service.row_count(
+            boot_asset_version_id=[ver_ubuntu_noble_1.id]
+        ) == len(items_ubuntu_noble_1)
 
     async def test_create(
         self,

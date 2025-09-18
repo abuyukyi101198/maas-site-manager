@@ -34,7 +34,7 @@ class Service:
         """Collect metrics for this service."""
 
     async def ensure(self) -> None:
-        """Ensure required DB entries exist."""
+        """Ensure initial state is correct."""
 
 
 class DBBackedModelService(Service, Generic[Model]):

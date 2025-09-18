@@ -11,6 +11,7 @@ from msm.service import (
     BootSourceService,
     IndexService,
     ServiceCollection,
+    TemporalService,
 )
 from msm.service.s3 import S3Service
 
@@ -64,6 +65,13 @@ def boot_asset_item_service(
     service_collection: ServiceCollection,
 ) -> Iterator[BootAssetItemService]:
     yield service_collection.boot_asset_items
+
+
+@pytest.fixture
+def temporal_service(
+    service_collection: ServiceCollection,
+) -> Iterator[TemporalService]:
+    yield service_collection.temporal_service
 
 
 @pytest.fixture

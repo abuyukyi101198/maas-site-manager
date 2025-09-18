@@ -11,7 +11,6 @@ from sqlalchemy.ext.asyncio import AsyncConnection
 
 from msm.db.models import Config
 from msm.service import (
-    ConfigService,
     ServiceCollection,
 )
 
@@ -32,8 +31,7 @@ def services(
 
 
 async def config(
-    connection: Annotated[AsyncConnection, Depends(db_connection)],
+    services: Annotated[ServiceCollection, Depends(services)],
 ) -> AsyncIterator[Config]:
     """Return the application configuration."""
-    service = ConfigService(connection)
-    yield await service.get()
+    yield await services.config.get()
