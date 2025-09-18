@@ -5,7 +5,7 @@
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 
-import Navigation, { navItemsBottom, navItems, settingsNavItems } from "./Navigation";
+import Navigation, { navItems, navItemsBottom, settingsNavItems } from "./Navigation";
 
 import { userFactory } from "@/mocks/factories";
 import { usersResolvers } from "@/testing/resolvers/users";
@@ -20,7 +20,6 @@ const mockServer = setupServer(
 );
 
 beforeAll(() => {
-  vi.stubGlobal("location", { origin: "http://localhost:8000" });
   vi.stubGlobal("navigation", vi.fn());
   mockServer.listen();
 });
@@ -133,7 +132,7 @@ it("displays external links when user is logged out", () => {
 
 // This test is failing, however, the functionality obviously works per manual testing.
 // Nested components calling the query must be taking too long.
-it.skip("displays the username of the logged in user", async () => {
+it("displays the username of the logged in user", async () => {
   renderWithMemoryRouter(<Navigation isLoggedIn />);
 
   await waitFor(() => {
