@@ -97,7 +97,9 @@ class TemporalService(Service):
             tuple[str, str]: A tuple containing the service URL and worker token value.
         """
         service_url = await self.settings.get_service_url()
-        _, tokens = await self.tokens.get(audience=[TokenAudience.WORKER])
+        _, tokens = await self.tokens.get(
+            audience=[TokenAudience.WORKER], purpose=[TokenPurpose.ACCESS]
+        )
         token = next(iter(tokens))
         return service_url, token.value
 
@@ -207,7 +209,9 @@ class TemporalService(Service):
             await hdl.delete()
 
         # renew JWT credentials for the workers
-        cnt, tokens = await self.tokens.get(audience=[TokenAudience.WORKER])
+        cnt, tokens = await self.tokens.get(
+            audience=[TokenAudience.WORKER], purpose=[TokenPurpose.ACCESS]
+        )
         if cnt:
             _ = await self.tokens.delete_many([t.id for t in tokens])
 

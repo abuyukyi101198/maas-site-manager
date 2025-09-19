@@ -95,6 +95,7 @@ class TokenService(Service):
         value: list[str] | None = None,
         site_id: list[int] | None = None,
         audience: list[TokenAudience] | None = None,
+        purpose: list[TokenPurpose] | None = None,
     ) -> tuple[int, Iterable[models.Token]]:
         """Return active tokens."""
         filters = queries.filters_from_arguments(
@@ -103,12 +104,12 @@ class TokenService(Service):
             value=value,
             site_id=site_id,
             audience=audience or [TokenAudience.SITE],
+            purpose=purpose or [TokenPurpose.ENROLMENT],
         )
         filters.extend(
             [
                 Token.c.site_id == None,
                 Token.c.expired > now_utc(),
-                Token.c.purpose == TokenPurpose.ENROLMENT,
             ]
         )
         count = await queries.row_count(self.conn, Token, *filters)
@@ -133,9 +134,11 @@ class TokenService(Service):
 
         The token is returned even if it's expired.
         """
-        stmt = self._select_statement(
-            audience=audience, purpose=purpose
-        ).where(Token.c.auth_id == auth_id)
+        stmt = self._select_statement().where(
+            Token.c.auth_id == auth_id,
+            Token.c.audience == audience,
+            Token.c.purpose == purpose,
+        )
         result = await self.conn.execute(stmt)
         if row := result.one_or_none():
             return models.Token(**row._asdict())
@@ -156,19 +159,12 @@ class TokenService(Service):
         audience: TokenAudience = TokenAudience.SITE,
         purpose: TokenPurpose = TokenPurpose.ENROLMENT,
     ) -> Select[Any]:
-        return (
-            select(
-                Token.c.id,
-                Token.c.value,
-                Token.c.audience,
-                Token.c.purpose,
-                Token.c.expired,
-                Token.c.created,
-                Token.c.site_id,
-            )
-            .select_from(Token)
-            .where(
-                Token.c.audience == audience,
-                Token.c.purpose == purpose,
-            )
-        )
+        return select(
+            Token.c.id,
+            Token.c.value,
+            Token.c.audience,
+            Token.c.purpose,
+            Token.c.expired,
+            Token.c.created,
+            Token.c.site_id,
+        ).select_from(Token)

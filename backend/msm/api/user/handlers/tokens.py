@@ -30,6 +30,7 @@ from msm.db.models import (
     Token,
     User,
 )
+from msm.jwt import TokenAudience, TokenPurpose
 from msm.schema import (
     PaginatedResults,
     PaginationParams,
@@ -60,7 +61,11 @@ async def get(
 ) -> TokensGetResponse:
     """Return all tokens."""
     total, results = await services.tokens.get(
-        pagination_params.offset, pagination_params.size, *filter_params
+        pagination_params.offset,
+        pagination_params.size,
+        *filter_params,
+        audience=[TokenAudience.SITE],
+        purpose=[TokenPurpose.ENROLMENT],
     )
     return TokensGetResponse(
         total=total,
@@ -129,7 +134,11 @@ async def get_export(
 ) -> CSVResponse:
     """Return the list of active tokens in CSV format."""
     _, tokens = await services.tokens.get(
-        pagination_params.offset, pagination_params.size, *filter_params
+        pagination_params.offset,
+        pagination_params.size,
+        *filter_params,
+        audience=[TokenAudience.SITE],
+        purpose=[TokenPurpose.ENROLMENT],
     )
     return CSVResponse(content=tokens)
 

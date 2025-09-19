@@ -86,7 +86,7 @@ class TestTemporalService:
         assert token_value == mock_token_value
         mock_settings_get_service_url.assert_called_once()
         mock_tokens_get.assert_called_once_with(
-            audience=[TokenAudience.WORKER]
+            audience=[TokenAudience.WORKER], purpose=[TokenPurpose.ACCESS]
         )
 
     @pytest.mark.asyncio
@@ -375,7 +375,8 @@ class TestTemporalService:
 
         # Verify tokens were renewed
         mock_tokens_get.assert_called_once_with(
-            audience=[TokenAudience.WORKER]
+            audience=[TokenAudience.WORKER],
+            purpose=[TokenPurpose.ACCESS],
         )
         mock_tokens_delete_many.assert_called_once_with(
             [mock_existing_token.id]

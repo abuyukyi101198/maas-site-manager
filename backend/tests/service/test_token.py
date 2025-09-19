@@ -144,3 +144,26 @@ class TestTokenService:
         assert len(db_tokens) == 8
         assert tokens[0].value not in {token["value"] for token in db_tokens}
         assert tokens[1].value not in {token["value"] for token in db_tokens}
+
+    async def test_get_worker_token(
+        self, factory: Factory, db_connection: AsyncConnection
+    ) -> None:
+        uid = uuid.uuid4()
+        await factory.make_Token(
+            auth_id=uid,
+            lifetime=timedelta(hours=1),
+            audience=TokenAudience.WORKER,
+            purpose=TokenPurpose.ACCESS,
+        )
+
+        service = TokenService(db_connection)
+        count, tokens = await service.get(
+            audience=[TokenAudience.WORKER], purpose=[TokenPurpose.ACCESS]
+        )
+        assert count == 1
+        token = next(iter(tokens))
+        assert JWT.decode(
+            token.value,
+            issuer="issuer",
+            audience=TokenAudience.WORKER,
+        ).subject == str(uid)
