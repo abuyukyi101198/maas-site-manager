@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 
 from temporalio import activity
 from temporalio.exceptions import ApplicationError
@@ -175,7 +175,7 @@ class BootAssetActivities(BaseActivity):
             f"api/v1/bootasset-sources/{params.boot_source_id}/assets",
         )
 
-        put_req = {"products": params.items}
+        put_req = {"products": [asdict(p) for p in params.items]}
 
         response = await self.client.put(url, headers=headers, json=put_req)
 
