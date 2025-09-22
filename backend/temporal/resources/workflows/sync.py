@@ -23,6 +23,7 @@ from ..activities.simplestream import (
     FETCH_SS_ASSETS_ACTIVITY,
     FETCH_SS_INDEXES,
     LOAD_PRODUCT_MAP_ACTIVITY,
+    AvailableAsset,
     FetchAssetListParams,
     FetchAssetListResult,
     FetchSsIndexesParams,
@@ -195,16 +196,31 @@ class RefreshUpstreamSourceWorkflow:
             result_type=GetBootSourceResult,
             start_to_close_timeout=timedelta(seconds=30),
         )
-        # download upstream Index file and extract the available products
-        assets: FetchAssetListResult = await workflow.execute_activity(
-            FETCH_SS_ASSETS_ACTIVITY,
-            FetchAssetListParams(
+
+        # download upstream Index file and extract the products indexes
+        indexes: FetchSsIndexesResult = await workflow.execute_activity(
+            FETCH_SS_INDEXES,
+            FetchSsIndexesParams(
                 index_url=source.index_url,
                 keyring=source.keyring,
             ),
-            result_type=FetchAssetListResult,
+            result_type=FetchSsIndexesResult,
             start_to_close_timeout=SS_DOWNLOAD_TIMEOUT,
         )
+
+        available_assets: list[AvailableAsset] = []
+        for product_url in indexes.products:
+            workflow.logger.info("Processing product index: %s", product_url)
+            assets: FetchAssetListResult = await workflow.execute_activity(
+                FETCH_SS_ASSETS_ACTIVITY,
+                FetchAssetListParams(
+                    index_url=product_url,
+                    keyring=source.keyring,
+                ),
+                result_type=FetchAssetListResult,
+                start_to_close_timeout=SS_DOWNLOAD_TIMEOUT,
+            )
+            available_assets.extend(assets.assets)
 
         # patch the available assets list
         await workflow.execute_activity(
@@ -213,7 +229,7 @@ class RefreshUpstreamSourceWorkflow:
                 msm_base_url=params.msm_url,
                 msm_jwt=params.msm_jwt,
                 boot_source_id=params.boot_source_id,
-                available=assets.assets,
+                available=available_assets,
             ),
             start_to_close_timeout=SS_DOWNLOAD_TIMEOUT,
         )
@@ -221,7 +237,7 @@ class RefreshUpstreamSourceWorkflow:
         workflow.logger.info(
             "Refreshed boot-source %d with %d items",
             params.boot_source_id,
-            len(assets.assets),
+            len(available_assets),
         )
 
         return True

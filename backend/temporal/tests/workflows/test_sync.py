@@ -2,7 +2,14 @@ from datetime import timedelta
 import typing
 import uuid
 
-from activities.bootasset import (  # type: ignore
+import pytest
+from pytest_mock import MockerFixture
+from temporalio import activity
+from temporalio.exceptions import ApplicationError, WorkflowAlreadyStartedError
+from temporalio.testing import WorkflowEnvironment
+from temporalio.worker import Worker
+
+from temporal.resources.activities.bootasset import (
     GET_BOOT_SOURCE_ACTIVITY,
     PUT_AVAILABLE_ASSETS_ACTIVITY,
     PUT_NEW_ASSETS_ACTIVITY,
@@ -12,8 +19,8 @@ from activities.bootasset import (  # type: ignore
     PutAssetListResult,
     PutAvailableAssetListParams,
 )
-from activities.images import S3Params  # type: ignore
-from activities.simplestream import (  # type: ignore
+from temporal.resources.activities.images import S3Params
+from temporal.resources.activities.simplestream import (
     FETCH_SS_ASSETS_ACTIVITY,
     FETCH_SS_INDEXES,
     LOAD_PRODUCT_MAP_ACTIVITY,
@@ -28,13 +35,6 @@ from activities.simplestream import (  # type: ignore
     LoadProductMapResult,
     Product,
 )
-import pytest
-from pytest_mock import MockerFixture
-from temporalio import activity
-from temporalio.exceptions import ApplicationError, WorkflowAlreadyStartedError
-from temporalio.testing import WorkflowEnvironment
-from temporalio.worker import Worker
-
 from temporal.resources.workflows.sync import (
     RefreshUpstreamSourceParams,
     RefreshUpstreamSourceWorkflow,
@@ -92,6 +92,14 @@ def available_assets() -> list[AvailableAsset]:
         AvailableAsset("ubuntu", "oracular", "candidate", "amd64"),
         AvailableAsset("ubuntu", "oracular", "candidate", "ppc64el"),
         AvailableAsset("ubuntu", "jammy", "candidate", "s390x"),
+    ]
+
+
+@pytest.fixture
+def available_assets2() -> list[AvailableAsset]:
+    return [
+        AvailableAsset("ubuntu", "oracular", "stable", "amd64"),
+        AvailableAsset("ubuntu", "oracular", "stable", "ppc64el"),
     ]
 
 
@@ -277,28 +285,57 @@ class TestRefreshUpstreamSourceWorkflow:
         refresh_params: RefreshUpstreamSourceParams,
         boot_source_data: dict[str, typing.Any],
         available_assets: list[AvailableAsset],
+        available_assets2: list[AvailableAsset],
     ) -> None:
+        got_called: dict[str, bool] = {}
+        total_assets = 0
+
         # Mock activities
         @activity.defn(name=GET_BOOT_SOURCE_ACTIVITY)
         async def get_boot_source_data(
             params: GetBootSourceParams,
         ) -> GetBootSourceResult:
+            got_called[GET_BOOT_SOURCE_ACTIVITY] = True
             return GetBootSourceResult(
                 index_url=boot_source_data["boot-source"]["url"],
                 keyring=boot_source_data["boot-source"]["keyring"],
+            )
+
+        @activity.defn(name=FETCH_SS_INDEXES)
+        async def parse_ss_index_mock(
+            params: FetchSsIndexesParams,
+        ) -> FetchSsIndexesResult:
+            got_called[FETCH_SS_INDEXES] = True
+            assert params.index_url.endswith("streams/v1/index.sjson")
+            return FetchSsIndexesResult(
+                "http://upstream.example.com/",
+                True,
+                [
+                    "http://upstream.example.com/streams/v1/prod1.json",
+                    "http://upstream.example.com/streams/v1/prod2.json",
+                ],
             )
 
         @activity.defn(name=FETCH_SS_ASSETS_ACTIVITY)
         async def fetch_ss_asset_list(
             params: FetchAssetListParams,
         ) -> FetchAssetListResult:
-            return FetchAssetListResult(assets=available_assets)
+            got_called[FETCH_SS_ASSETS_ACTIVITY] = True
+            if params.index_url.endswith("/prod1.json"):
+                return FetchAssetListResult(assets=available_assets)
+            elif params.index_url.endswith("/prod2.json"):
+                return FetchAssetListResult(assets=available_assets2)
+            else:
+                raise ApplicationError("Unexpected URL", non_retryable=True)
 
         @activity.defn(name=PUT_AVAILABLE_ASSETS_ACTIVITY)
         async def put_available_asset_list(
             params: PutAvailableAssetListParams,
         ) -> bool:
-            return bool(params.available == available_assets)
+            nonlocal total_assets
+            got_called[PUT_AVAILABLE_ASSETS_ACTIVITY] = True
+            total_assets += len(params.available)
+            return True
 
         # Act
         async with await WorkflowEnvironment.start_time_skipping() as env:
@@ -309,6 +346,7 @@ class TestRefreshUpstreamSourceWorkflow:
                 workflows=[RefreshUpstreamSourceWorkflow],
                 activities=[
                     get_boot_source_data,
+                    parse_ss_index_mock,
                     fetch_ss_asset_list,
                     put_available_asset_list,
                 ],
@@ -323,3 +361,11 @@ class TestRefreshUpstreamSourceWorkflow:
 
         # Assert
         assert result is True
+        assert total_assets == (len(available_assets) + len(available_assets2))
+        for act in [
+            GET_BOOT_SOURCE_ACTIVITY,
+            FETCH_SS_INDEXES,
+            FETCH_SS_ASSETS_ACTIVITY,
+            PUT_AVAILABLE_ASSETS_ACTIVITY,
+        ]:
+            assert act in got_called
