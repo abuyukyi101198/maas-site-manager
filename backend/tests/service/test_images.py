@@ -108,6 +108,24 @@ class TestBootAssetService:
         assert count == 1
         assert ubuntu_noble == rba
 
+    async def test_get_null_filter(
+        self,
+        boot_asset_service: BootAssetService,
+        boot_source_grub: BootSource,
+        grub: BootAsset,
+    ) -> None:
+        count, assets = await boot_asset_service.get(
+            [],
+            boot_source_id=[boot_source_grub.id],
+            kind=[grub.kind],
+            label=[grub.label],
+            os=[grub.os],
+            arch=[grub.arch],
+            release=[None],  # grub.release is None, but be explicit in test
+        )
+        assert count == 1
+        assert next(iter(assets)) == grub
+
     @pytest.mark.parametrize(
         "filter_param",
         [

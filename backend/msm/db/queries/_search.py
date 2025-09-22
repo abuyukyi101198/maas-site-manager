@@ -22,7 +22,7 @@ def compare_expr(
     and an "column_name == value" clause otherwise
     """
     column = table.c[column_name]
-    if isinstance(column.type, Text | String):
+    if isinstance(column.type, Text | String) and value is not None:
         return column.icontains(value, autoescape=True)
     else:
         return column.__eq__(value)
