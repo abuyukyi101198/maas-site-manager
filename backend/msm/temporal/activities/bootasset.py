@@ -168,7 +168,9 @@ class BootAssetActivities(BaseActivity):
             ]
         )
 
-        response = await self.client.put(url, headers=headers, json=put_req)
+        response = await self.client.put(
+            url, headers=headers, json=put_req.model_dump()
+        )
 
         if response.status_code != 200:
             raise ApplicationError(
@@ -192,7 +194,9 @@ class BootAssetActivities(BaseActivity):
             products=[p for p in params.items]
         )
 
-        response = await self.client.put(url, headers=headers, json=put_req)
+        response = await self.client.put(
+            url, headers=headers, json=put_req.model_dump()
+        )
 
         if response.status_code != 200:
             raise ApplicationError(

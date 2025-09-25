@@ -180,7 +180,7 @@ class TestPatchAvailableAssetsActivity:
         call_args = mock_client.put.call_args
         assert call_args is not None
         _, kwargs = call_args
-        assert kwargs["json"].available[0].os == "ubuntu"
+        assert kwargs["json"]["available"][0][0] == "ubuntu"
 
     async def test_patch_asset_list_failure(
         self,
