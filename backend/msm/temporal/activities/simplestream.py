@@ -104,7 +104,8 @@ class FetchAssetListParams:
     keyring: str | None = None
 
 
-class AvailableAsset(typing.NamedTuple):
+@dataclass(order=True)
+class AvailableAsset:
     os: str
     release: str
     label: str
@@ -234,10 +235,10 @@ class SimpleStreamActivities(BaseActivity):
                 continue
             available.append(
                 AvailableAsset(
-                    product_data["os"],
-                    product_data["release"],
-                    product_data["label"],
-                    product_data["arch"],
+                    os=product_data["os"],
+                    release=product_data["release"],
+                    label=product_data["label"],
+                    arch=product_data["arch"],
                 )
             )
 

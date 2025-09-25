@@ -90,17 +90,27 @@ def boot_source_data() -> dict[str, typing.Any]:
 @pytest.fixture
 def available_assets() -> list[AvailableAsset]:
     return [
-        AvailableAsset("ubuntu", "oracular", "candidate", "amd64"),
-        AvailableAsset("ubuntu", "oracular", "candidate", "ppc64el"),
-        AvailableAsset("ubuntu", "jammy", "candidate", "s390x"),
+        AvailableAsset(
+            os="ubuntu", release="oracular", label="candidate", arch="amd64"
+        ),
+        AvailableAsset(
+            os="ubuntu", release="oracular", label="candidate", arch="ppc64el"
+        ),
+        AvailableAsset(
+            os="ubuntu", release="jammy", label="candidate", arch="s390x"
+        ),
     ]
 
 
 @pytest.fixture
 def available_assets2() -> list[AvailableAsset]:
     return [
-        AvailableAsset("ubuntu", "oracular", "stable", "amd64"),
-        AvailableAsset("ubuntu", "oracular", "stable", "ppc64el"),
+        AvailableAsset(
+            os="ubuntu", release="oracular", label="stable", arch="amd64"
+        ),
+        AvailableAsset(
+            os="ubuntu", release="oracular", label="stable", arch="ppc64el"
+        ),
     ]
 
 

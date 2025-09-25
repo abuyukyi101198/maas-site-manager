@@ -163,8 +163,18 @@ class TestPatchAvailableAssetsActivity:
             msm_jwt="jwt-token",
             boot_source_id=1,
             available=[
-                AvailableAsset("ubuntu", "oracular", "candidate", "amd64"),
-                AvailableAsset("ubuntu", "jammy", "candidate", "amd64"),
+                AvailableAsset(
+                    os="ubuntu",
+                    release="oracular",
+                    label="candidate",
+                    arch="amd64",
+                ),
+                AvailableAsset(
+                    os="ubuntu",
+                    release="jammy",
+                    label="candidate",
+                    arch="amd64",
+                ),
             ],
         )
         mock_response = mocker.Mock(spec=Response)
@@ -180,7 +190,7 @@ class TestPatchAvailableAssetsActivity:
         call_args = mock_client.put.call_args
         assert call_args is not None
         _, kwargs = call_args
-        assert kwargs["json"]["available"][0][0] == "ubuntu"
+        assert kwargs["json"]["available"][0]["os"] == "ubuntu"
 
     async def test_patch_asset_list_failure(
         self,
@@ -195,7 +205,12 @@ class TestPatchAvailableAssetsActivity:
             msm_jwt="jwt-token",
             boot_source_id=1,
             available=[
-                AvailableAsset("ubuntu", "oracular", "candidate", "amd64"),
+                AvailableAsset(
+                    os="ubuntu",
+                    release="oracular",
+                    label="candidate",
+                    arch="amd64",
+                ),
             ],
         )
         mock_response = mocker.Mock(spec=Response)

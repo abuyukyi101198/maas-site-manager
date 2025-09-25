@@ -1,4 +1,4 @@
-from typing import Any, NamedTuple, Self
+from typing import Any, Self
 
 from pydantic import AwareDatetime, BaseModel, Field, model_validator
 
@@ -62,7 +62,7 @@ class BootSourcesPatchRequest(BaseModel):
         return self
 
 
-class AvailableBootSourceSelection(NamedTuple):
+class AvailableBootSourceSelection(BaseModel):
     os: str
     release: str
     label: BootAssetLabel
