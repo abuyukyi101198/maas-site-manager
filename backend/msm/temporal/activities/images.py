@@ -33,13 +33,10 @@ class S3ResourceManager:
         self,
         s3_params: S3Params,
         boot_asset_item_id: int,
-        use_ssl: bool = False,
-        verify: bool = False,
     ) -> None:
         self._s3_client: S3Client = boto3.client(
             "s3",
-            use_ssl=use_ssl,
-            verify=verify,
+            verify="/etc/ssl/certs/ca-certificates.crt",
             endpoint_url=s3_params.endpoint,
             aws_access_key_id=s3_params.access_key,
             aws_secret_access_key=s3_params.secret_key,

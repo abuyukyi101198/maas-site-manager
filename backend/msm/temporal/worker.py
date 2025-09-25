@@ -1,6 +1,7 @@
 import asyncio
 import logging
 
+from temporalio.contrib.pydantic import pydantic_data_converter
 from temporallib.client import Client, Options  # type: ignore
 from temporallib.encryption import EncryptionOptions  # type: ignore
 from temporallib.worker import (  # type: ignore
@@ -18,6 +19,7 @@ logger = logging.getLogger(__name__)
 async def run_worker() -> None:
     """Connect Temporal worker to Temporal server."""
     client = await Client.connect(
+        data_converter=pydantic_data_converter,
         client_opt=Options(encryption=EncryptionOptions()),
     )
     ba_act = msm_act.BootAssetActivities()

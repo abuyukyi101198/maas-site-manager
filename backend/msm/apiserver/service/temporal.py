@@ -13,6 +13,7 @@ from temporalio.client import (
     ScheduleSpec,
 )
 from temporalio.common import RetryPolicy
+from temporalio.contrib.pydantic import pydantic_data_converter
 from temporallib.client import Client, Options  # type: ignore
 from temporallib.encryption import EncryptionOptions  # type: ignore
 
@@ -71,6 +72,7 @@ class TemporalService(Service):
             TemporalClient: An authenticated Temporal client instance.
         """
         client: TemporalClient = await Client.connect(
+            data_converter=pydantic_data_converter,
             client_opt=self.options,
         )
         return client

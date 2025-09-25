@@ -107,6 +107,7 @@ class BootAssetActivities(BaseActivity):
         selections = [
             get_selection_key(sel.os, sel.release, sel.arch)
             for sel in selection_response.items
+            if sel.selected
         ]
         activity.logger.debug(
             "Boot source %d has %d selections",
@@ -169,7 +170,7 @@ class BootAssetActivities(BaseActivity):
         )
 
         response = await self.client.put(
-            url, headers=headers, json=put_req.model_dump()
+            url, headers=headers, json=put_req.model_dump(mode="json")
         )
 
         if response.status_code != 200:
@@ -195,7 +196,7 @@ class BootAssetActivities(BaseActivity):
         )
 
         response = await self.client.put(
-            url, headers=headers, json=put_req.model_dump()
+            url, headers=headers, json=put_req.model_dump(mode="json")
         )
 
         if response.status_code != 200:
