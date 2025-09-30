@@ -100,7 +100,7 @@ class TestWorker:
             assert "worker_opt" in call_args.kwargs
 
             # Check workflows list length
-            assert len(call_args.kwargs["workflows"]) == 3
+            assert len(call_args.kwargs["workflows"]) == 4
 
             # Check activities list length
-            assert len(call_args.kwargs["activities"]) == 8
+            assert len(call_args.kwargs["activities"]) == 9

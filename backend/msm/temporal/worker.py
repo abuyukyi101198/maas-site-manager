@@ -28,6 +28,7 @@ async def run_worker() -> None:
     worker = Worker(
         client=client,
         workflows=[
+            msm_wf.DeleteItemsWorkflow,
             msm_wf.DownloadUpstreamImageWorkflow,
             msm_wf.RefreshUpstreamSourceWorkflow,
             msm_wf.SyncUpstreamSourceWorkflow,
@@ -38,6 +39,7 @@ async def run_worker() -> None:
             ba_act.put_asset_list,
             ba_act.put_available_asset_list,
             img_act.download_asset,
+            img_act.delete_item,
             ss_act.fetch_ss_asset_list,
             ss_act.load_product_map,
             ss_act.parse_ss_index,

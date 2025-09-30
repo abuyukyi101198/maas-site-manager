@@ -1,3 +1,4 @@
+from os.path import join
 import typing
 from unittest.mock import PropertyMock
 
@@ -9,6 +10,7 @@ from temporalio.testing import ActivityEnvironment
 
 from msm.common.workflows.sync import S3Params
 from msm.temporal.activities.images import (
+    DeleteItemParams,
     DownloadAssetParams,
     ImageManagementActivities,
     S3ResourceManager,
@@ -58,7 +60,7 @@ async def im_act(
     return ImageManagementActivities()
 
 
-class TestDownloadUpstreamActivities:
+class TestImageManagementActivities:
     async def test_download_asset(
         self,
         mocker: MockerFixture,
@@ -180,3 +182,29 @@ class TestDownloadUpstreamActivities:
         s3_client.create_multipart_upload.assert_called_once()
         s3_client.complete_multipart_upload.assert_not_called()
         s3_client.abort_multipart_upload.assert_called_once()
+
+    async def test_delete_item(
+        self,
+        mocker: MockerFixture,
+        im_act: typing.Any,
+        s3_client: MockType,
+        s3_params: S3Params,
+    ) -> None:
+        item_id = 1
+        s3_manager = S3ResourceManager(s3_params, item_id, multipart=False)
+        mocker.patch.object(
+            im_act, "_create_s3_manager", return_value=s3_manager
+        )
+        act_env = ActivityEnvironment()
+        params = DeleteItemParams(
+            s3_params=s3_params,
+            boot_asset_item_id=item_id,
+        )
+        await act_env.run(im_act.delete_item, params)
+        im_act._create_s3_manager.assert_called_with(
+            params.s3_params, 1, multipart=False
+        )
+        s3_client.create_multipart_upload.assert_not_called()
+        s3_client.delete_object.assert_called_once_with(
+            Bucket=s3_params.bucket, Key=join(s3_params.path, str(item_id))
+        )

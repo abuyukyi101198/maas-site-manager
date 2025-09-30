@@ -4,6 +4,7 @@
 
 """Temporal workflows."""
 
+from .delete import DeleteItemsWorkflow
 from .download_upstream import (
     DownloadUpstreamImageWorkflow,
 )
@@ -13,6 +14,7 @@ from .sync import (
 )
 
 __all__ = [
+    "DeleteItemsWorkflow",
     "DownloadUpstreamImageWorkflow",
     "RefreshUpstreamSourceWorkflow",
     "SyncUpstreamSourceWorkflow",

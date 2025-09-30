@@ -5,6 +5,8 @@ REFRESH_UPSTREAM_SOURCE_WF_NAME = "RefreshUpstreamSource"
 
 DOWNLOAD_UPSTREAM_IMAGE_WF_NAME = "DownloadUpstreamImage"
 
+DELETE_ITEMS_WF_NAME = "DeleteItems"
+
 
 @dataclass
 class S3Params:
@@ -38,3 +40,9 @@ class RefreshUpstreamSourceParams:
     msm_url: str
     msm_jwt: str
     boot_source_id: int
+
+
+@dataclass
+class DeleteItemsParams:
+    s3_params: S3Params
+    item_ids: list[int]

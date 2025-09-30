@@ -17,6 +17,7 @@ if typing.TYPE_CHECKING:
 MIN_S3_PART_SIZE = 5 * 1024**2  # 5MiB
 
 DOWNLOAD_ASSET_ACTIVITY = "download-asset"
+DELETE_ITEM_ACTIVITY = "delete-item"
 
 
 @dataclass
@@ -28,11 +29,18 @@ class DownloadAssetParams:
     s3_params: S3Params
 
 
+@dataclass
+class DeleteItemParams:
+    s3_params: S3Params
+    boot_asset_item_id: int
+
+
 class S3ResourceManager:
     def __init__(
         self,
         s3_params: S3Params,
         boot_asset_item_id: int,
+        multipart: bool = True,
     ) -> None:
         self._s3_client: S3Client = boto3.client(
             "s3",
@@ -44,7 +52,9 @@ class S3ResourceManager:
         self.s3_path: str = s3_params.path
         self.s3_key: str = join(s3_params.path, str(boot_asset_item_id))
         self.bucket: str = s3_params.bucket
-        self._upload_id: str | None = self._create_multipart_upload()
+        self._upload_id: str | None = None
+        if multipart:
+            self._upload_id = self._create_multipart_upload()
         self._part_no: int = 1
         self._parts: list[CompletedPartTypeDef] = []
         self._bytes_sent: int = 0
@@ -103,6 +113,9 @@ class S3ResourceManager:
         )
         self._upload_id = None
 
+    def delete_item(self) -> None:
+        self.s3_client.delete_object(Bucket=self.bucket, Key=self.s3_key)
+
 
 class ImageManagementActivities(BaseActivity):
     """
@@ -113,8 +126,9 @@ class ImageManagementActivities(BaseActivity):
         self,
         params: S3Params,
         item_id: int,
+        multipart: bool = True,
     ) -> S3ResourceManager:
-        return S3ResourceManager(params, item_id)
+        return S3ResourceManager(params, item_id, multipart=multipart)
 
     async def _update_bytes_synced(
         self,
@@ -172,3 +186,12 @@ class ImageManagementActivities(BaseActivity):
             s3_manager.abort_upload()
             raise
         return s3_manager.bytes_sent
+
+    @activity.defn(name=DELETE_ITEM_ACTIVITY)
+    async def delete_item(self, params: DeleteItemParams) -> None:
+        s3_manager = self._create_s3_manager(
+            params.s3_params,
+            params.boot_asset_item_id,
+            multipart=False,
+        )
+        s3_manager.delete_item()

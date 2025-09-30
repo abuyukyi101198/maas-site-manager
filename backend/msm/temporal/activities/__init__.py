@@ -13,7 +13,9 @@ from .bootasset import (
     PutAvailableAssetListParams,
 )
 from .images import (
+    DELETE_ITEM_ACTIVITY,
     DOWNLOAD_ASSET_ACTIVITY,
+    DeleteItemParams,
     DownloadAssetParams,
     ImageManagementActivities,
 )
@@ -35,7 +37,9 @@ from .simplestream import (
 __all__ = [
     "AvailableAsset",
     "BootAssetActivities",
+    "DELETE_ITEM_ACTIVITY",
     "DOWNLOAD_ASSET_ACTIVITY",
+    "DeleteItemParams",
     "DownloadAssetParams",
     "FETCH_SS_ASSETS_ACTIVITY",
     "FETCH_SS_INDEXES",
