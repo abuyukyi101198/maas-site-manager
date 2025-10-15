@@ -64,11 +64,7 @@ AUTHENTICATED_ROUTES = (
     ("DELETE", "/api/v1/users/{id}"),
 )
 
-UNAUTHENTICATED_ROUTES = (
-    ("POST", "/api/v1/login"),
-    ("GET", "/api/v1/images/{track}/{risk}/{boot_source_id}/{file_path:path}"),
-    ("GET", "/api/v1/images/{track}/{risk}/streams/v1/{index_path:path}"),
-)
+UNAUTHENTICATED_ROUTES = (("POST", "/api/v1/login"),)
 
 ADMIN_ROUTES = (
     ("GET", "/api/v1/settings"),

@@ -1,4 +1,3 @@
-from collections.abc import AsyncIterator
 from hashlib import sha256
 import json
 from pathlib import Path
@@ -7,7 +6,6 @@ from unittest.mock import call
 
 import pytest
 from pytest_mock import MockerFixture, MockType
-from sqlalchemy.ext.asyncio import AsyncConnection
 
 from msm.apiserver.db.models import (
     BootAsset,
@@ -15,7 +13,7 @@ from msm.apiserver.db.models import (
     BootSource,
     BootSourceSelection,
 )
-from msm.apiserver.service import IndexService, S3Service
+from msm.apiserver.service import S3Service
 from msm.apiserver.service.images import END_OF_TIME
 from msm.common.enums import ItemFileType
 from tests.fixtures.client import Client
@@ -434,108 +432,6 @@ class TestCustomImageDeleteHandler:
             "/images:remove", json={"asset_ids": [999]}
         )
         assert resp.status_code == 404
-
-
-@pytest.mark.asyncio
-class TestBootAssetItemsDownloadHandler:
-    @pytest.fixture
-    async def index_service(
-        self, db_connection: AsyncConnection
-    ) -> AsyncIterator[IndexService]:
-        index_service = IndexService(db_connection)
-        await index_service.create()
-        yield index_service
-
-    async def test_download(
-        self,
-        user_client: Client,
-        boot_source: BootSource,
-        items_ubuntu_jammy_1: list[BootAssetItem],
-        mock_s3_service: MockType,
-    ) -> None:
-        file_path = items_ubuntu_jammy_1[0].path
-        resp = await user_client.get(
-            f"/images/latest/stable/{boot_source.id}/{file_path}"
-        )
-        assert resp.status_code == 200
-
-    async def test_download_not_found(
-        self, user_client: Client, boot_source: BootSource
-    ) -> None:
-        resp = await user_client.get(
-            f"/images/latest/stable/{boot_source.id}/ubuntu/noble/unknown-file"
-        )
-        assert resp.status_code == 404
-
-    async def test_invalid_track(
-        self, user_client: Client, boot_source: BootSource
-    ) -> None:
-        resp = await user_client.get(
-            f"/images/1.0/stable/{boot_source.id}/ubuntu/noble/boot-kernel"
-        )
-        assert resp.status_code == 400
-
-    async def test_invalid_risk(
-        self, user_client: Client, boot_source: BootSource
-    ) -> None:
-        resp = await user_client.get(
-            f"/images/latest/edge/{boot_source.id}/ubuntu/noble/boot-kernel"
-        )
-        assert resp.status_code == 400
-
-    async def test_download_index(
-        self,
-        user_client: Client,
-        factory: Factory,
-        index_service: IndexService,
-    ) -> None:
-        await factory.make_Setting(
-            "service_url",
-            value="https://maas.site.manager",
-        )
-        resp = await user_client.get(
-            "/images/latest/stable/streams/v1/index.json"
-        )
-        assert resp.status_code == 200
-        index = resp.json()
-        expected_index = {
-            "format": "index:1.0",
-            "index": {
-                "manager.site.maas:stream:v1:download": {
-                    "datatype": "image-ids",
-                    "format": "products:1.0",
-                    "path": "streams/v1/manager.site.maas:stream:v1:download.json",
-                    "updated": index["updated"],
-                    "products": [],
-                }
-            },
-            "updated": index["updated"],
-        }
-        assert index == expected_index
-
-    async def test_download_download_index(
-        self,
-        user_client: Client,
-        factory: Factory,
-        index_service: IndexService,
-    ) -> None:
-        await factory.make_Setting(
-            "service_url",
-            value="https://maas.site.manager",
-        )
-        resp = await user_client.get(
-            "/images/latest/stable/streams/v1/manager.site.maas:stream:v1:download.json"
-        )
-        assert resp.status_code == 200
-        dl_index = resp.json()
-        expected_index = {
-            "content_id": "manager.site.maas:stream:v1:download",
-            "datatype": "image-ids",
-            "format": "products:1.0",
-            "products": {},
-            "updated": dl_index["updated"],
-        }
-        assert dl_index == expected_index
 
 
 @pytest.mark.asyncio

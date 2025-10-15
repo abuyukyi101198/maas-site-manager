@@ -19,6 +19,11 @@ AUTHENTICATED_ROUTES = (
     ("POST", "/site/v1/enroll"),
     ("GET", "/site/v1/enroll/refresh"),
     ("GET", "/site/v1/enroll/verify"),
+    (
+        "GET",
+        "/site/v1/images/{track}/{risk}/{boot_source_id}/{file_path:path}",
+    ),
+    ("GET", "/site/v1/images/{track}/{risk}/streams/v1/{index_path:path}"),
 )
 
 
