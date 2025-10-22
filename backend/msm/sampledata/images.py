@@ -2,7 +2,9 @@ from datetime import UTC, datetime
 
 from sqlalchemy.ext.asyncio import AsyncConnection
 
+from msm.apiserver.db import CUSTOM_IMAGE_SOURCE_ID
 from msm.common.enums import ItemFileType
+from msm.common.time import utc_from_timestamp
 from msm.sampledata.db import (
     ModelCollection,
     SampleDataModel,
@@ -11,6 +13,19 @@ from msm.sampledata.db import (
 
 async def make_fixture_images(conn: AsyncConnection) -> list[SampleDataModel]:
     collection = ModelCollection("boot_source")
+    collection.add(
+        id=CUSTOM_IMAGE_SOURCE_ID,
+        priority=1,
+        url="http://maas.site.manager",
+        keyring="",
+        name="MSM Custom Images",
+        sync_interval=0,
+        last_sync=utc_from_timestamp(0.0),
+    )
+    # create the custom source separately, since we're not specifying
+    # ID for the other sources.
+    await collection.create(conn)
+
     collection.add(
         priority=3,
         url="http://primary.image.server",
@@ -217,7 +232,7 @@ DmFoRWTU6CpKtwIg/lb1ncbslH2xAFeUX6ASHXR8vBOnIXWss21FuAaNmWe4lmw=
 
     # custom image
     collection.add(
-        boot_source_id=1,
+        boot_source_id=CUSTOM_IMAGE_SOURCE_ID,
         kind=0,
         label="candidate",
         os="custom",

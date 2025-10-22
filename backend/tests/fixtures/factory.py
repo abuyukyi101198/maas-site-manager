@@ -361,6 +361,31 @@ class Factory:
         )
         return BootSource(**row)
 
+    async def make_custom_BootSource(
+        self,
+        priority: int = 1,
+        url: str = "",
+        keyring: str | None = None,
+        sync_interval: int = 0,
+        name: str = "",
+        last_sync: datetime | None = None,
+    ) -> BootSource:
+        [row] = await self.create(
+            "boot_source",
+            [
+                {
+                    "id": 1,
+                    "priority": priority,
+                    "url": url,
+                    "keyring": keyring,
+                    "sync_interval": sync_interval,
+                    "name": name,
+                    "last_sync": last_sync or self.now,
+                }
+            ],
+        )
+        return BootSource(**row)
+
     async def make_BootSourceSelection(
         self,
         boot_source_id: int,

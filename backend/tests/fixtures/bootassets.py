@@ -31,7 +31,7 @@ def last_sync(factory: Factory) -> datetime:
 async def boot_source_custom(
     factory: Factory, prev_sync: datetime
 ) -> BootSource:
-    return await factory.make_BootSource(
+    return await factory.make_custom_BootSource(
         name="MSM Custom Images",
         url="http://msm:8000",
         last_sync=prev_sync,

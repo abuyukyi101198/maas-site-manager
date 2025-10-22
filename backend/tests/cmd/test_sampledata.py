@@ -44,7 +44,7 @@ class TestSampleData:
         boot_source_selection = await factory.get("boot_source_selection")
         assert len(boot_source_selection) == 4
         boot_source = await factory.get("boot_source")
-        assert len(boot_source) == 2
+        assert len(boot_source) == 3
         boot_asset = await factory.get("boot_asset")
         assert len(boot_asset) == 6
         boot_asset_version = await factory.get("boot_asset_version")

@@ -17,6 +17,7 @@ from sqlalchemy.dialects.postgresql import (
     JSONB,
     UUID,
 )
+from sqlalchemy.schema import Sequence
 from sqlalchemy.types import DateTime
 
 from msm.apiserver.db.types import Point
@@ -145,7 +146,12 @@ SiteData = Table(
 BootSource = Table(
     "boot_source",
     METADATA,
-    Column("id", Integer, primary_key=True),
+    Column(
+        "id",
+        Integer,
+        Sequence("source_id_sequence", start=2, increment=1),
+        primary_key=True,
+    ),
     Column("priority", Integer, nullable=False, default=1),
     Column("url", Text, nullable=False),
     Column("keyring", Text, nullable=True),
