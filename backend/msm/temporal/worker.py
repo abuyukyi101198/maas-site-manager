@@ -1,3 +1,9 @@
+# Copyright 2025 Canonical Ltd.
+# See LICENSE file for licensing details.
+"""
+MSM Temporal worker definition.
+"""
+
 import asyncio
 import logging
 
@@ -57,6 +63,7 @@ async def run_worker() -> None:
 
 
 def main() -> None:
+    """Entrypoint"""
     asyncio.run(run_worker())
 
 

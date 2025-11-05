@@ -1,3 +1,9 @@
+# Copyright 2025 Canonical Ltd.
+# See LICENSE file for licensing details.
+"""
+Simplestream interaction activities.
+"""
+
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 import json
@@ -21,8 +27,22 @@ INDEX_REGEX = re.compile(r"(?P<base>.*)/streams/v1/.*\.s?json$")
 
 
 class ProductItem(api_models.ProductItem):
+    """Product item representing a specific file in a SimpleStream.
+
+    Extends the base ProductItem model to include conversion from SimpleStream format.
+    """
+
     @classmethod
     def from_simplestream(cls, prod: dict[str, typing.Any]) -> typing.Self:
+        """Create a ProductItem from SimpleStream product data.
+
+        Args:
+            prod: Dictionary containing SimpleStream product data with keys like
+                 'ftype', 'sha256', 'path', 'size', and optional source info.
+
+        Returns:
+            ProductItem instance populated from the SimpleStream data.
+        """
         return cls(
             ftype=prod["ftype"],
             sha256=prod["sha256"],
@@ -35,8 +55,28 @@ class ProductItem(api_models.ProductItem):
 
 
 class Product(api_models.Product):
+    """Product representing an OS or bootloader asset collection.
+
+    Extends the base Product model to include conversion from SimpleStream format
+    with automatic detection of asset kind and proper timezone handling.
+    """
+
     @classmethod
     def from_simplestream(cls, prod: dict[str, typing.Any]) -> typing.Self:
+        """Create a Product from SimpleStream product data.
+
+        Automatically determines if the product is an OS image or bootloader based on
+        the presence of 'bootloader-type' field. Handles timezone conversion for
+        end-of-life dates.
+
+        Args:
+            prod: Dictionary containing SimpleStream product data with required fields
+                 like 'label', 'os', 'arch' and optional fields for release info,
+                 compatibility, and support dates.
+
+        Returns:
+            Product instance populated from the SimpleStream data with empty versions dict.
+        """
         if "bootloader-type" not in prod:
             kind = BootAssetKind.OS
             compatibility = prod.get("subarches", "").split(",")
@@ -74,12 +114,27 @@ class Product(api_models.Product):
 
 @dataclass
 class FetchSsIndexesParams:
+    """Parameters for fetching SimpleStream indexes.
+
+    Args:
+        index_url: URL to the SimpleStream index file.
+        keyring: Optional keyring file for signature verification.
+    """
+
     index_url: str
     keyring: str | None = None
 
 
 @dataclass
 class FetchSsIndexesResult:
+    """Result from fetching SimpleStream indexes.
+
+    Args:
+        base_url: Base URL extracted from the index URL.
+        signed: Whether the index content was cryptographically signed.
+        products: List of product URLs found in the index.
+    """
+
     base_url: str
     signed: bool
     products: list[str]
@@ -87,6 +142,15 @@ class FetchSsIndexesResult:
 
 @dataclass
 class LoadProductMapParams:
+    """Parameters for loading a SimpleStream product map.
+
+    Args:
+        index_url: URL to the SimpleStream product index file.
+        keyring: Optional keyring file for signature verification.
+        versions_to_keep: Maximum number of versions to retain per product (default: 1).
+        selections: List of selection keys to filter products by.
+    """
+
     index_url: str
     keyring: str | None = None
     versions_to_keep: int = 1
@@ -95,17 +159,39 @@ class LoadProductMapParams:
 
 @dataclass
 class LoadProductMapResult:
+    """Result from loading a SimpleStream product map.
+
+    Args:
+        items: List of Product objects with their versions populated.
+    """
+
     items: list[Product]
 
 
 @dataclass
 class FetchAssetListParams:
+    """Parameters for fetching available asset list.
+
+    Args:
+        index_url: URL to the SimpleStream product index file.
+        keyring: Optional keyring file for signature verification.
+    """
+
     index_url: str
     keyring: str | None = None
 
 
 @dataclass(order=True)
 class AvailableAsset:
+    """Represents an asset available for download.
+
+    Args:
+        os: Operating system name.
+        release: Release version or codename.
+        label: Asset label or type.
+        arch: Architecture (e.g., amd64, arm64).
+    """
+
     os: str
     release: str
     label: str
@@ -114,21 +200,63 @@ class AvailableAsset:
 
 @dataclass
 class FetchAssetListResult:
+    """Result from fetching available asset list.
+
+    Args:
+        assets: List of AvailableAsset objects sorted by their fields.
+    """
+
     assets: list[AvailableAsset]
 
 
 def extract_base_url(index_url: str) -> str:
+    """Extract base URL from a SimpleStream index URL.
+
+    Uses regex to extract the base URL portion from a full SimpleStream index URL
+    by matching against the expected path pattern.
+
+    Args:
+        index_url: Full URL to a SimpleStream index file.
+
+    Returns:
+        Base URL portion if the URL matches the expected pattern, empty string otherwise.
+
+    Example:
+        >>> extract_base_url("https://images.maas.io/ephemeral-v3/daily/streams/v1/index.json")
+        'https://images.maas.io/ephemeral-v3/daily'
+    """
     if m := INDEX_REGEX.match(index_url):
         return m.group("base")
     return ""
 
 
 class SimpleStreamActivities(BaseActivity):
+    """Temporal activities for handling SimpleStream operations.
+
+    Provides activities for fetching and parsing SimpleStream indexes and products,
+    including support for signed content verification.
+    """
+
     async def _download_json(
         self,
         url: str,
         keyring: str | None = None,
     ) -> tuple[typing.Any, bool]:
+        """Download and parse JSON content from a URL.
+
+        Supports both regular JSON files and signed JSON files (.sjson) with
+        optional signature verification using a keyring.
+
+        Args:
+            url: URL to download JSON content from.
+            keyring: Optional keyring file for verifying signed content.
+
+        Returns:
+            Tuple of (parsed_json_content, was_signed_by_cpc).
+
+        Raises:
+            ApplicationError: If the download fails or returns non-200 status.
+        """
         response = await self.client.get(
             url,
             timeout=7200,
@@ -155,6 +283,18 @@ class SimpleStreamActivities(BaseActivity):
     async def parse_ss_index(
         self, params: FetchSsIndexesParams
     ) -> FetchSsIndexesResult:
+        """Parse a SimpleStream index to extract product index URLs.
+
+        Args:
+            params: Parameters containing the index URL and optional keyring.
+
+        Returns:
+            FetchSsIndexesResult containing the base URL, signature status,
+            and list of product index URLs.
+
+        Raises:
+            ApplicationError: If download fails or content format is invalid.
+        """
         content, signed = await self._download_json(
             params.index_url, params.keyring
         )
@@ -179,6 +319,23 @@ class SimpleStreamActivities(BaseActivity):
     async def load_product_map(
         self, params: LoadProductMapParams
     ) -> LoadProductMapResult:
+        """Load and process a SimpleStream product map.
+
+        Downloads a SimpleStream product file, filters products based on selections,
+        and builds Product objects with their versions and items limited to the
+        specified number of versions to keep. Bootloader products are always included.
+
+        Args:
+            params: Parameters containing the product URL, selections filter,
+                   versions limit, and optional keyring.
+
+        Returns:
+            LoadProductMapResult containing filtered and processed Product objects
+            sorted by OS, release, and architecture.
+
+        Raises:
+            ApplicationError: If download fails or content format is invalid.
+        """
         content, signed = await self._download_json(
             params.index_url, params.keyring
         )
@@ -219,6 +376,20 @@ class SimpleStreamActivities(BaseActivity):
     async def fetch_ss_asset_list(
         self, params: FetchAssetListParams
     ) -> FetchAssetListResult:
+        """Fetch list of available OS assets from SimpleStream.
+
+        Downloads a SimpleStream product file and extracts available OS assets
+        (excluding bootloader assets) to provide a list of what's available for selection.
+
+        Args:
+            params: Parameters containing the product URL and optional keyring.
+
+        Returns:
+            FetchAssetListResult containing sorted list of available OS assets.
+
+        Raises:
+            ApplicationError: If download fails or content format is invalid.
+        """
         content, signed = await self._download_json(
             params.index_url, params.keyring
         )

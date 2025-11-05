@@ -1,3 +1,9 @@
+# Copyright 2025 Canonical Ltd.
+# See LICENSE file for licensing details.
+"""
+Boot asset management activities.
+"""
+
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -30,6 +36,14 @@ GET_SOURCE_LAST_SYNC_ACTIVITY = "get-source-last-sync"
 
 @dataclass
 class GetBootSourceParams:
+    """Parameters for retrieving boot source configuration.
+
+    Args:
+        msm_base_url: Base URL of the MSM API server.
+        msm_jwt: JWT token for API authentication.
+        boot_source_id: Unique identifier of the boot source to retrieve.
+    """
+
     msm_base_url: str
     msm_jwt: str
     boot_source_id: int
@@ -37,6 +51,14 @@ class GetBootSourceParams:
 
 @dataclass
 class GetBootSourceResult:
+    """Result containing boot source configuration and selections.
+
+    Args:
+        index_url: URL to the SimpleStream index for this boot source.
+        keyring: Optional keyring file path for signature verification.
+        selections: List of selection keys for enabled OS/release/arch combinations.
+    """
+
     index_url: str
     keyring: str | None = None
     selections: list[str] = field(default_factory=list)
@@ -44,6 +66,15 @@ class GetBootSourceResult:
 
 @dataclass
 class PutAvailableAssetListParams:
+    """Parameters for updating available assets in a boot source.
+
+    Args:
+        msm_base_url: Base URL of the MSM API server.
+        msm_jwt: JWT token for API authentication.
+        boot_source_id: Unique identifier of the boot source to update.
+        available: List of available assets to publish to the boot source.
+    """
+
     msm_base_url: str
     msm_jwt: str
     boot_source_id: int
@@ -52,6 +83,15 @@ class PutAvailableAssetListParams:
 
 @dataclass
 class PutAssetListParams:
+    """Parameters for updating existing or to-be-downloaded assets for a boot source.
+
+    Args:
+        msm_base_url: Base URL of the MSM API server.
+        msm_jwt: JWT token for API authentication.
+        boot_source_id: Unique identifier of the boot source to update.
+        items: List of Product objects containing asset information and versions.
+    """
+
     msm_base_url: str
     msm_jwt: str
     boot_source_id: int
@@ -60,6 +100,14 @@ class PutAssetListParams:
 
 @dataclass
 class GetSourceVersionsParams:
+    """Parameters for retrieving all assets and their versions for a boot source.
+
+    Args:
+        msm_base_url: Base URL of the MSM API server.
+        msm_jwt: JWT token for API authentication.
+        boot_source_id: Unique identifier of the boot source to query.
+    """
+
     msm_base_url: str
     msm_jwt: str
     boot_source_id: int
@@ -67,11 +115,28 @@ class GetSourceVersionsParams:
 
 @dataclass
 class GetSourceVersionsResult:
+    """Result containing all assets and their versions for a boot source.
+
+    Args:
+        versions: List of AssetVersions.
+    """
+
     versions: list[AssetVersions]
 
 
 @dataclass
 class RemoveStaleVersionsParams:
+    """Parameters for cleaning up stale versions.
+
+    Args:
+        msm_base_url: Base URL of the MSM API server.
+        msm_jwt: JWT token for API authentication.
+        versions: List of AssetVersions to evaluate for staleness.
+        versions_to_keep: Maximum number of complete versions to retain per asset.
+        source_last_sync: Timestamp of the last successful sync from upstream,
+                         used to determine if versions were removed from source.
+    """
+
     msm_base_url: str
     msm_jwt: str
     versions: list[AssetVersions]
@@ -81,11 +146,26 @@ class RemoveStaleVersionsParams:
 
 @dataclass
 class PutAssetListResult:
+    """Result from uploading asset list indicating which items need downloading.
+
+    Args:
+        to_download: List of boot asset item IDs that need to be downloaded
+                    to complete the asset synchronization process.
+    """
+
     to_download: list[int]
 
 
 @dataclass
 class GetBootAssetItemParams:
+    """Parameters for retrieving individual boot asset item details.
+
+    Args:
+        msm_base_url: Base URL of the MSM API server.
+        msm_jwt: JWT token for API authentication.
+        boot_asset_item_id: Unique identifier of the specific asset item.
+    """
+
     msm_base_url: str
     msm_jwt: str
     boot_asset_item_id: int
@@ -93,6 +173,15 @@ class GetBootAssetItemParams:
 
 @dataclass
 class GetBootAssetItemResult:
+    """Result containing boot asset item metadata and sync status.
+
+    Args:
+        path: Relative path to the asset file within the SimpleStream.
+        sha256: SHA256 hash for integrity verification.
+        file_size: Total size of the asset file in bytes.
+        bytes_synced: Number of bytes already downloaded/synced.
+    """
+
     path: str
     sha256: str
     file_size: int
@@ -101,15 +190,46 @@ class GetBootAssetItemResult:
 
 @dataclass
 class GetSourceLastSyncParams:
+    """Parameters for retrieving a boot source's last synchronization timestamp.
+
+    Args:
+        msm_base_url: Base URL of the MSM API server.
+        msm_jwt: JWT token for API authentication.
+        boot_source_id: Unique identifier of the boot source to query.
+    """
+
     msm_base_url: str
     msm_jwt: str
     boot_source_id: int
 
 
 class BootAssetActivities(BaseActivity):
+    """Temporal activities for managing boot asset sources and synchronization.
+
+    Provides comprehensive functionality for boot asset lifecycle management including
+    source configuration retrieval, asset discovery, version management, and cleanup
+    operations. Handles both OS images and bootloader assets from SimpleStream sources.
+    """
+
     async def _get_boot_source(
         self, msm_base_url: str, headers: dict[str, str], boot_source_id: int
     ) -> BootSourceGetResponse:
+        """Retrieve boot source configuration from MSM API.
+
+        Internal helper method for fetching boot source details including URL,
+        keyring, and other configuration parameters.
+
+        Args:
+            msm_base_url: Base URL of the MSM API server.
+            headers: HTTP headers including authentication.
+            boot_source_id: Unique identifier of the boot source.
+
+        Returns:
+            BootSourceGetResponse containing the source configuration.
+
+        Raises:
+            ApplicationError: If the API request fails or returns non-200 status.
+        """
         url = compose_url(
             msm_base_url,
             f"api/v1/bootasset-sources/{boot_source_id}",
@@ -125,6 +245,21 @@ class BootAssetActivities(BaseActivity):
     async def get_boot_source(
         self, params: GetBootSourceParams
     ) -> GetBootSourceResult:
+        """Retrieve boot source configuration and active selections.
+
+        Fetches the boot source configuration including SimpleStream URL and keyring,
+        then retrieves the currently selected OS/release/architecture combinations
+        that should be synchronized from the upstream source.
+
+        Args:
+            params: Parameters containing MSM API details and boot source ID.
+
+        Returns:
+            GetBootSourceResult with index URL, keyring, and selection keys.
+
+        Raises:
+            ApplicationError: If API requests fail or return unexpected status codes.
+        """
         headers = self._get_header(params.msm_jwt)
 
         boot_source = await self._get_boot_source(
@@ -165,6 +300,21 @@ class BootAssetActivities(BaseActivity):
     async def get_boot_asset_item(
         self, params: GetBootAssetItemParams
     ) -> GetBootAssetItemResult:
+        """Retrieve metadata and sync status for a specific boot asset item.
+
+        Fetches detailed information about an individual boot asset item including
+        its path, integrity hash, total size, and current synchronization progress.
+        Used primarily for download coordination and progress tracking.
+
+        Args:
+            params: Parameters containing MSM API details and asset item ID.
+
+        Returns:
+            GetBootAssetItemResult with file metadata and sync progress.
+
+        Raises:
+            ApplicationError: If the asset item doesn't exist or API request fails.
+        """
         headers = self._get_header(params.msm_jwt)
 
         # get source
@@ -190,6 +340,20 @@ class BootAssetActivities(BaseActivity):
     async def put_available_asset_list(
         self, params: PutAvailableAssetListParams
     ) -> bool:
+        """Update the list of available selections for a boot source.
+
+        Publishes the current list of available OS/release/architecture combinations
+        that can be selected for synchronization from the upstream SimpleStream source.
+
+        Args:
+            params: Parameters containing the boot source ID and available assets list.
+
+        Returns:
+            True if the update was successful.
+
+        Raises:
+            ApplicationError: If the API request fails or returns non-200 status.
+        """
         headers = self._get_header(params.msm_jwt)
 
         url = compose_url(
@@ -224,6 +388,17 @@ class BootAssetActivities(BaseActivity):
     async def put_asset_list(
         self, params: PutAssetListParams
     ) -> PutAssetListResult:
+        """Upload the list of selected products to MSM.
+
+        Args:
+            params: Parameters containing the boot source ID and Product list.
+
+        Returns:
+            PutAssetListResult with IDs of asset items that need downloading.
+
+        Raises:
+            ApplicationError: If the API request fails or returns non-200 status.
+        """
         headers = self._get_header(params.msm_jwt)
 
         url = compose_url(
@@ -251,6 +426,17 @@ class BootAssetActivities(BaseActivity):
     async def get_source_last_sync(
         self, params: GetSourceLastSyncParams
     ) -> AwareDatetime:
+        """Retrieve the timestamp of a boot source's last successful synchronization.
+
+        Args:
+            params: Parameters containing MSM API details and boot source ID.
+
+        Returns:
+            Timezone-aware datetime of the last successful sync operation.
+
+        Raises:
+            ApplicationError: If the boot source doesn't exist or API request fails.
+        """
         headers = self._get_header(params.msm_jwt)
         boot_source = await self._get_boot_source(
             params.msm_base_url, headers, params.boot_source_id
@@ -261,6 +447,17 @@ class BootAssetActivities(BaseActivity):
     async def get_source_versions(
         self, params: GetSourceVersionsParams
     ) -> GetSourceVersionsResult:
+        """Retrieve all assets and their versions for a particular boot source.
+
+        Args:
+            params: Parameters containing MSM API details and boot source ID.
+
+        Returns:
+            GetSourceVersionsResult with list of AssetVersions objects.
+
+        Raises:
+            ApplicationError: If the boot source doesn't exist or API request fails.
+        """
         headers = self._get_header(params.msm_jwt)
         url = compose_url(
             params.msm_base_url,
@@ -281,6 +478,22 @@ class BootAssetActivities(BaseActivity):
         self,
         params: RemoveStaleVersionsParams,
     ) -> None:
+        """Remove stale asset versions based on upstream and retention policies.
+
+        Implements a two-phase cleanup strategy:
+        1. Removes versions that no longer exist upstream (last_seen < source_last_sync)
+        2. Enforces retention limits by keeping only the newest N complete versions
+
+        The cleanup process preserves version integrity by only removing complete
+        versions when enforcing retention limits, ensuring that incomplete downloads
+        are not counted against the retention limit until they finish.
+
+        Args:
+            params: Parameters containing version list, retention policy, and sync timestamp.
+
+        Raises:
+            ApplicationError: If the cleanup API request fails.
+        """
         # first get rid of versions that have been removed from upstream
         versions_removed_from_up: list[tuple[int, dict[str, Any]]] = []
         for i, av in enumerate(params.versions):

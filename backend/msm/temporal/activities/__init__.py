@@ -1,3 +1,9 @@
+# Copyright 2025 Canonical Ltd.
+# See LICENSE file for licensing details.
+"""
+MSM Temporal activities.
+"""
+
 from .bootasset import (
     GET_BOOT_ASSET_ITEM_ACTIVITY,
     GET_BOOT_SOURCE_ACTIVITY,

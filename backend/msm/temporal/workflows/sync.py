@@ -1,3 +1,9 @@
+# Copyright 2025 Canonical Ltd.
+# See LICENSE file for licensing details.
+"""
+Workflows for syncing MSM with upstream SimpleStream source.
+"""
+
 from datetime import timedelta
 import typing
 
@@ -24,14 +30,20 @@ MSM_API_TIMEOUT = timedelta(minutes=2)
 
 @workflow.defn(name=SYNC_UPSTREAM_SOURCE_WF_NAME, sandboxed=False)
 class SyncUpstreamSourceWorkflow:
-    """Synchronizes sources with the upstream.
+    """Comprehensive boot asset synchronization workflow from upstream SimpleStream sources.
 
-    Downloads new assets and new versions of existing assets as needed,
-    as directed by the user selections.
+    This workflow orchestrates the complete synchronization process for a boot source,
+    including discovery, metadata updates, download coordination, and cleanup operations.
+    The workflow is designed to be resilient and handles large-scale asset synchronization
+    efficiently through parallel downloads and child workflow management.
 
-    The removal of stale/obsolete assets/versions is handled in another
-    moment, as we need to complete the download of newer assets before
-    dropping old ones.
+    Workflow Process:
+    1. Retrieves boot source configuration and selections from MSM API
+    2. Fetches SimpleStream index to discover available products
+    3. Processes each product index to build asset metadata
+    4. Updates MSM with new assets and determines what needs downloading
+    5. Initiates parallel download workflows for required assets
+    6. Triggers stale image cleanup in a separate child workflow
     """
 
     async def start_download(
@@ -42,6 +54,23 @@ class SyncUpstreamSourceWorkflow:
         msm_jwt: str,
         boot_asset_item_id: int,
     ) -> workflow.ChildWorkflowHandle[typing.Any, bool]:
+        """Start a child workflow to download a specific boot asset item.
+
+        Creates and launches a dedicated download workflow for a single boot asset
+        item with proper isolation and retry policies. The child workflow is
+        configured to be abandoned on parent close, allowing downloads to continue
+        even if the main sync workflow completes or fails.
+
+        Args:
+            ss_root_url: Base URL of the SimpleStream source for asset retrieval.
+            s3_params: S3 storage configuration for asset persistence.
+            msm_url: Base URL of the MSM API for progress updates.
+            msm_jwt: JWT token for MSM API authentication.
+            boot_asset_item_id: Unique identifier of the asset item to download.
+
+        Returns:
+            Child workflow handle for the download operation.
+        """
         return await workflow.start_child_workflow(
             DOWNLOAD_UPSTREAM_IMAGE_WF_NAME,
             DownloadUpstreamImageParams(
@@ -66,6 +95,17 @@ class SyncUpstreamSourceWorkflow:
         msm_jwt: str,
         boot_source_id: int,
     ) -> None:
+        """Initiate stale image cleanup as a separate child workflow.
+
+        Starts a dedicated workflow to identify and remove obsolete asset versions
+        that are no longer needed. This operation is performed as a child workflow
+        to ensure it can complete independently of the main sync process.
+
+        Args:
+            msm_url: Base URL of the MSM API.
+            msm_jwt: JWT token for MSM API authentication.
+            boot_source_id: Unique identifier of the boot source to clean up.
+        """
         await workflow.start_child_workflow(
             REMOVE_STALE_IMAGES_WF_NAME,
             RemoveStaleImagesParams(
@@ -84,6 +124,15 @@ class SyncUpstreamSourceWorkflow:
 
     @workflow.run
     async def run(self, params: SyncUpstreamSourceParams) -> bool:
+        """Execute the boot source synchronization workflow.
+
+        Args:
+            params: Synchronization parameters including boot source ID, MSM API
+                   details, and S3 storage configuration.
+
+        Returns:
+            True if synchronization completed successfully, False otherwise.
+        """
         workflow.logger.info("Source %d sync started", params.boot_source_id)
 
         # download the source data from API
@@ -173,10 +222,24 @@ class SyncUpstreamSourceWorkflow:
 
 @workflow.defn(name=REFRESH_UPSTREAM_SOURCE_WF_NAME, sandboxed=False)
 class RefreshUpstreamSourceWorkflow:
-    """Refreshes the list of available assets for a given upstream source."""
+    """Lightweight workflow to refresh available asset catalog from upstream sources.
+
+    This workflow provides a fast, metadata-only synchronization operation that
+    updates the list of available assets without downloading actual files. It's
+    designed for scenarios where users need to see what's available upstream
+    before making selection changes or when checking for new releases.
+    """
 
     @workflow.run
     async def run(self, params: RefreshUpstreamSourceParams) -> bool:
+        """Execute the asset catalog refresh workflow.
+
+        Args:
+            params: Refresh parameters containing boot source ID and MSM API details.
+
+        Returns:
+            True if refresh completed successfully, False otherwise.
+        """
         # download the source data from API
         source: act.GetBootSourceResult = await workflow.execute_activity(
             act.GET_BOOT_SOURCE_ACTIVITY,

@@ -1,3 +1,9 @@
+# Copyright 2025 Canonical Ltd.
+# See LICENSE file for licensing details.
+"""
+Workflows for downloading images from upstream SimpleStream source.
+"""
+
 from datetime import timedelta
 
 from temporalio import workflow
@@ -13,8 +19,20 @@ MSM_API_TIMEOUT = timedelta(minutes=2)
 
 @workflow.defn(name=DOWNLOAD_UPSTREAM_IMAGE_WF_NAME, sandboxed=False)
 class DownloadUpstreamImageWorkflow:
+    """Workflow for downloading individual boot asset items from upstream."""
+
     @workflow.run
     async def run(self, params: DownloadUpstreamImageParams) -> bool:
+        """Execute the boot asset item download workflow.
+
+        Args:
+            params: Download parameters including SimpleStream URL, MSM API details,
+                   asset item ID, S3 configuration, and timeout settings.
+
+        Returns:
+            True if the asset was successfully downloaded or already complete,
+            False if download failed or size validation failed.
+        """
         item: act.GetBootAssetItemResult = await workflow.execute_activity(
             act.GET_BOOT_ASSET_ITEM_ACTIVITY,
             act.GetBootAssetItemParams(
