@@ -99,15 +99,7 @@ class TestBootAssetItemsDownloadHandler:
         index = resp.json()
         expected_index = {
             "format": "index:1.0",
-            "index": {
-                "manager.site.maas:stream:v1:download": {
-                    "datatype": "image-ids",
-                    "format": "products:1.0",
-                    "path": "streams/v1/manager.site.maas:stream:v1:download.json",
-                    "updated": index["updated"],
-                    "products": [],
-                }
-            },
+            "index": {},
             "updated": index["updated"],
         }
         assert index == expected_index
@@ -123,12 +115,12 @@ class TestBootAssetItemsDownloadHandler:
             value="https://maas.site.manager",
         )
         resp = await site_client.get(
-            "/images/latest/stable/streams/v1/manager.site.maas:stream:v1:download.json"
+            "/images/latest/stable/streams/v1/manager.site.maas:stream:v1:download-ubuntu.json"
         )
         assert resp.status_code == 200
         dl_index = resp.json()
         expected_index = {
-            "content_id": "manager.site.maas:stream:v1:download",
+            "content_id": "manager.site.maas:stream:v1:download-ubuntu",
             "datatype": "image-ids",
             "format": "products:1.0",
             "products": {},

@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import json
 from typing import cast
 from unittest.mock import call
 
@@ -37,6 +36,7 @@ from msm.apiserver.service import (
 from msm.common.enums import (
     BootAssetKind,
     BootAssetLabel,
+    DownloadPartition,
     IndexType,
     ItemFileType,
 )
@@ -1188,16 +1188,24 @@ class TestImagesIndexService:
             "format": "index:1.0",
             "updated": index["updated"],
             "index": {
-                "manager.site.maas:stream:v1:download": {
-                    "updated": index["updated"],
+                "manager.site.maas:stream:v1:download-bootloaders": {
                     "datatype": "image-ids",
                     "format": "products:1.0",
-                    "path": "streams/v1/manager.site.maas:stream:v1:download.json",
+                    "path": "streams/v1/manager.site.maas:stream:v1:download-bootloaders.json",
                     "products": [
                         "manager.site.maas.stream:grub-efi-signed:uefi:arm64",
+                    ],
+                    "updated": index["updated"],
+                },
+                "manager.site.maas:stream:v1:download-ubuntu": {
+                    "datatype": "image-ids",
+                    "format": "products:1.0",
+                    "path": "streams/v1/manager.site.maas:stream:v1:download-ubuntu.json",
+                    "products": [
                         "manager.site.maas.stream:ubuntu:jammy:amd64:ga-22.04-generic",
                         "manager.site.maas.stream:ubuntu:noble:amd64:hwe-24.04-generic",
                     ],
+                    "updated": index["updated"],
                 },
             },
         }
@@ -1211,130 +1219,156 @@ class TestImagesIndexService:
         items_ubuntu_noble_1: list[BootAssetItem],
         items_grub: list[BootAssetItem],
     ) -> None:
-        mock_now = mocker.patch(
+        mocker.patch(
             "msm.apiserver.service.images.now_utc",
             return_value=datetime.fromtimestamp(0.0),
         )
 
         await index_service.refresh()
 
-        index = await index_service.get(
-            IndexType.DOWNLOAD, "maas.site.manager"
+        ubuntu_index = await index_service.get(
+            IndexType.DOWNLOAD,
+            "maas.site.manager",
+            partition=DownloadPartition.UBUNTU,
         )
-        expected_index = """
-            {
-                "content_id": "manager.site.maas:stream:v1:download",
-                "datatype": "image-ids",
-                "format": "products:1.0",
-                "products": {
-                    "manager.site.maas.stream:ubuntu:jammy:amd64:ga-22.04-generic": {
-                        "arch": "amd64",
-                        "kflavor": "generic",
-                        "label": "stable",
-                        "os": "ubuntu",
-                        "release": "jammy",
-                        "release_title": "22.04 LTS",
-                        "subarch": "ga-22.04",
-                        "support_eol": "2027-04-21",
-                        "support_esm_eol": "2032-04-21",
-                        "versions": {
-                            "20250601": {
-                                "items": {
-                                    "boot-initrd": {
-                                        "ftype": "boot-initrd",
-                                        "path": "2/20250601/ga-22.04/boot-initrd",
-                                        "sha256": "abc456",
-                                        "size": 465
-                                    },
-                                    "squashfs": {
-                                        "ftype": "squashfs",
-                                        "path": "2/20250601/squashfs",
-                                        "sha256": "12345555",
-                                        "size": 12345555
-                                    },
-                                    "boot-kernel": {
-                                        "ftype": "boot-kernel",
-                                        "path": "2/20250601/ga-22.04/boot-kernel",
-                                        "sha256": "abc123",
-                                        "size": 123
-                                    }
-                                }
-                            }
+        expected_ubuntu = {
+            "content_id": "manager.site.maas:stream:v1:download-ubuntu",
+            "datatype": "image-ids",
+            "format": "products:1.0",
+            "products": {
+                "manager.site.maas.stream:ubuntu:jammy:amd64:ga-22.04-generic": {
+                    "arch": "amd64",
+                    "kflavor": "generic",
+                    "label": "stable",
+                    "os": "ubuntu",
+                    "release": "jammy",
+                    "release_title": "22.04 LTS",
+                    "subarch": "ga-22.04",
+                    "support_eol": "2027-04-21",
+                    "support_esm_eol": "2032-04-21",
+                    "versions": {
+                        "20250601": {
+                            "items": {
+                                "boot-initrd": {
+                                    "ftype": "boot-initrd",
+                                    "path": "2/20250601/ga-22.04/boot-initrd",
+                                    "sha256": "abc456",
+                                    "size": 465,
+                                },
+                                "boot-kernel": {
+                                    "ftype": "boot-kernel",
+                                    "path": "2/20250601/ga-22.04/boot-kernel",
+                                    "sha256": "abc123",
+                                    "size": 123,
+                                },
+                                "squashfs": {
+                                    "ftype": "squashfs",
+                                    "path": "2/20250601/squashfs",
+                                    "sha256": "12345555",
+                                    "size": 12345555,
+                                },
+                            },
                         }
                     },
-                    "manager.site.maas.stream:grub-efi-signed:uefi:arm64": {
-                        "arch": "arm64",
-                        "label": "candidate",
-                        "os": "grub-efi-signed",
-                        "bootloader-type": "uefi",
-                        "versions": {
-                            "20250401": {
-                                "items": {
-                                    "grub2-signed": {
-                                        "ftype": "archive.tar.xz",
-                                        "path": "3/20250401/grub2-signed.tar.xz",
-                                        "sha256": "deadbeef",
-                                        "size": 8888,
-                                        "src_package": "grub2-signed",
-                                        "src_release": "focal",
-                                        "src_version": "1.167.2+2.04-1ubuntu44.2"
-                                    },
-                                    "shim-signed": {
-                                        "ftype": "archive.tar.xz",
-                                        "path": "3/20250401/shim-signed.tar.xz",
-                                        "sha256": "deadbeef2",
-                                        "size": 7777,
-                                        "src_package": "shim-signed",
-                                        "src_release": "focal",
-                                        "src_version": "1.167.2+2.04-1ubuntu44.2"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "manager.site.maas.stream:ubuntu:noble:amd64:hwe-24.04-generic": {
-                        "arch": "amd64",
-                        "kflavor": "generic",
-                        "label": "stable",
-                        "os": "ubuntu",
-                        "release": "noble",
-                        "release_title": "24.04 LTS",
-                        "subarch": "hwe-24.04",
-                        "support_eol": "2029-05-31",
-                        "support_esm_eol": "2034-04-25",
-                        "versions": {
-                            "20250701": {
-                                "items": {
-                                    "squashfs": {
-                                        "ftype": "squashfs",
-                                        "path": "2/20250701/squashfs",
-                                        "sha256": "12345555",
-                                        "size": 12345555
-                                    },
-                                    "boot-kernel": {
-                                        "ftype": "boot-kernel",
-                                        "path": "2/20250701/hwe-24.04/boot-kernel",
-                                        "sha256": "abc123",
-                                        "size": 123
-                                    },
-                                    "boot-initrd": {
-                                        "ftype": "boot-initrd",
-                                        "path": "2/20250701/hwe-24.04/boot-initrd",
-                                        "sha256": "abc456",
-                                        "size": 465
-                                    }
-                                }
-                            }
-                        }
-                    }
                 },
-                "updated": "Thu, 01 Jan 1970 00:00:00 "
-            }
-            """
+                "manager.site.maas.stream:ubuntu:noble:amd64:hwe-24.04-generic": {
+                    "arch": "amd64",
+                    "kflavor": "generic",
+                    "label": "stable",
+                    "os": "ubuntu",
+                    "release": "noble",
+                    "release_title": "24.04 LTS",
+                    "subarch": "hwe-24.04",
+                    "support_eol": "2029-05-31",
+                    "support_esm_eol": "2034-04-25",
+                    "versions": {
+                        "20250701": {
+                            "items": {
+                                "boot-initrd": {
+                                    "ftype": "boot-initrd",
+                                    "path": "2/20250701/hwe-24.04/boot-initrd",
+                                    "sha256": "abc456",
+                                    "size": 465,
+                                },
+                                "boot-kernel": {
+                                    "ftype": "boot-kernel",
+                                    "path": "2/20250701/hwe-24.04/boot-kernel",
+                                    "sha256": "abc123",
+                                    "size": 123,
+                                },
+                                "squashfs": {
+                                    "ftype": "squashfs",
+                                    "path": "2/20250701/squashfs",
+                                    "sha256": "12345555",
+                                    "size": 12345555,
+                                },
+                            },
+                        }
+                    },
+                },
+            },
+        }
+        expected_ubuntu["updated"] = ubuntu_index["updated"]
+        assert ubuntu_index == expected_ubuntu
 
-        expected_index_json = json.loads(expected_index)
-        expected_index_json["updated"] = index["updated"]
-        assert index == expected_index_json
+        bootloader_index = await index_service.get(
+            IndexType.DOWNLOAD,
+            "maas.site.manager",
+            partition=DownloadPartition.BOOTLOADERS,
+        )
+        expected_bootloader = {
+            "content_id": "manager.site.maas:stream:v1:download-bootloaders",
+            "datatype": "image-ids",
+            "format": "products:1.0",
+            "products": {
+                "manager.site.maas.stream:grub-efi-signed:uefi:arm64": {
+                    "arch": "arm64",
+                    "label": "candidate",
+                    "os": "grub-efi-signed",
+                    "bootloader-type": "uefi",
+                    "versions": {
+                        "20250401": {
+                            "items": {
+                                "grub2-signed": {
+                                    "ftype": "archive.tar.xz",
+                                    "path": "3/20250401/grub2-signed.tar.xz",
+                                    "sha256": "deadbeef",
+                                    "size": 8888,
+                                    "src_package": "grub2-signed",
+                                    "src_release": "focal",
+                                    "src_version": "1.167.2+2.04-1ubuntu44.2",
+                                },
+                                "shim-signed": {
+                                    "ftype": "archive.tar.xz",
+                                    "path": "3/20250401/shim-signed.tar.xz",
+                                    "sha256": "deadbeef2",
+                                    "size": 7777,
+                                    "src_package": "shim-signed",
+                                    "src_release": "focal",
+                                    "src_version": "1.167.2+2.04-1ubuntu44.2",
+                                },
+                            },
+                        }
+                    },
+                }
+            },
+        }
+        expected_bootloader["updated"] = bootloader_index["updated"]
+        assert bootloader_index == expected_bootloader
+
+        other_index = await index_service.get(
+            IndexType.DOWNLOAD,
+            "maas.site.manager",
+            partition=DownloadPartition.OTHER,
+        )
+        expected_other = {
+            "content_id": "manager.site.maas:stream:v1:download-other",
+            "datatype": "image-ids",
+            "format": "products:1.0",
+            "products": {},
+            "updated": other_index["updated"],
+        }
+        assert other_index == expected_other
 
     async def test_incomplete_set_not_included(
         self,
@@ -1347,16 +1381,29 @@ class TestImagesIndexService:
         index = await index_service.get(
             IndexType.INDEX, fqdn="maas.site.manager"
         )
-        dl_index = await index_service.get(
-            IndexType.DOWNLOAD, fqdn="maas.site.manager"
+        ubuntu_download = await index_service.get(
+            IndexType.DOWNLOAD,
+            fqdn="maas.site.manager",
+            partition=DownloadPartition.UBUNTU,
+        )
+        bootloader_download = await index_service.get(
+            IndexType.DOWNLOAD,
+            fqdn="maas.site.manager",
+            partition=DownloadPartition.BOOTLOADERS,
         )
 
-        # items_ubuntu_noble_2 has incomplete items
-        n_products = len(
-            index["index"]["manager.site.maas:stream:v1:download"]["products"]
+        download_ubuntu_key = "manager.site.maas:stream:v1:download-ubuntu"
+        download_bootloader_key = (
+            "manager.site.maas:stream:v1:download-bootloaders"
         )
-        assert n_products == 2
-        assert len(dl_index["products"]) == 2
+
+        assert download_ubuntu_key in index["index"]
+        assert download_bootloader_key in index["index"]
+        assert index["index"][download_ubuntu_key]["products"] == [
+            "manager.site.maas.stream:ubuntu:jammy:amd64:ga-22.04-generic"
+        ]
+        assert len(ubuntu_download["products"]) == 1
+        assert len(bootloader_download["products"]) == 1
 
     async def test_drop(
         self,
@@ -1365,4 +1412,8 @@ class TestImagesIndexService:
         await index_service.create()
         await index_service.drop()
         with pytest.raises(IndexNotFound):
-            await index_service.get(IndexType.DOWNLOAD, "maas.site.manager")
+            await index_service.get(
+                IndexType.DOWNLOAD,
+                "maas.site.manager",
+                partition=DownloadPartition.UBUNTU,
+            )

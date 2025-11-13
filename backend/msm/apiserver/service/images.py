@@ -38,6 +38,7 @@ from msm.apiserver.service.temporal import (
 from msm.common.enums import (
     BootAssetKind,
     BootAssetLabel,
+    DownloadPartition,
     IndexType,
     ItemFileType,
 )
@@ -887,20 +888,55 @@ ON ver_item.boot_asset_id = asset.id;"""
     async def ensure(self) -> None:
         return await self.create()
 
-    async def get(self, index_type: IndexType, fqdn: str) -> dict[str, Any]:
+    async def get(
+        self,
+        index_type: IndexType,
+        fqdn: str,
+        partition: DownloadPartition | None = None,
+    ) -> dict[str, Any]:
         """
         Get the specified index type.
         """
-        stmt = text("SELECT * FROM images_index;")
         try:
-            result = await self.conn.execute(stmt)
-        except ProgrammingError:
-            raise IndexNotFound()
-        products = [models.IndexProduct(**x._asdict()) for x in result.all()]
+            if index_type == IndexType.INDEX:
+                products_with_partition = await self._fetch_products(None)
+                effective_partition: DownloadPartition | None = None
+            else:
+                if partition is None:
+                    raise ValueError(
+                        "Download partition must be specified for download indices."
+                    )
+                products_with_partition = await self._fetch_products(partition)
+                effective_partition = partition
+        except ProgrammingError as ex:
+            raise IndexNotFound(str(ex))
+        products = [product for product, _ in products_with_partition]
         self._filter_for_fully_downloaded(products)
+        retained_products = {
+            (product.id, product.path, product.ftype) for product in products
+        }
+        products_with_partition = [
+            (product, partition_key)
+            for product, partition_key in products_with_partition
+            if (product.id, product.path, product.ftype) in retained_products
+        ]
         if index_type == IndexType.INDEX:
-            return self.generate_index_json(products, fqdn)
-        return self.generate_download_json(products, fqdn)
+            partitioned_products: dict[
+                DownloadPartition, list[models.IndexProduct]
+            ] = {
+                DownloadPartition.BOOTLOADERS: [],
+                DownloadPartition.UBUNTU: [],
+                DownloadPartition.OTHER: [],
+            }
+            for product, partition_key in products_with_partition:
+                partitioned_products[partition_key].append(product)
+            return self.generate_index_json(partitioned_products, fqdn)
+        assert effective_partition is not None
+        return self.generate_download_json(
+            effective_partition,
+            [product for product, _ in products_with_partition],
+            fqdn,
+        )
 
     def _filter_for_fully_downloaded(
         self, products: list[models.IndexProduct]
@@ -929,58 +965,116 @@ ON ver_item.boot_asset_id = asset.id;"""
         for i in indeces_to_remove:
             products.pop(i)
 
+    async def _fetch_products(
+        self, partition: DownloadPartition | None
+    ) -> list[tuple[models.IndexProduct, DownloadPartition]]:
+        query = text(
+            """
+            WITH partitioned AS (
+                SELECT
+                    *,
+                    CASE
+                        WHEN kind = :bootloader_kind THEN :bootloaders_partition
+                        WHEN LOWER(os) = 'ubuntu' THEN :ubuntu_partition
+                        ELSE :other_partition
+                    END AS partition
+                FROM images_index
+            )
+            SELECT * FROM partitioned
+            WHERE (cast(:target_partition AS text) IS NULL OR partition = cast(:target_partition AS text));
+            """
+        )
+        params: dict[str, Any] = {
+            "bootloader_kind": BootAssetKind.BOOTLOADER.value,
+            "bootloaders_partition": DownloadPartition.BOOTLOADERS.value,
+            "ubuntu_partition": DownloadPartition.UBUNTU.value,
+            "other_partition": DownloadPartition.OTHER.value,
+            "target_partition": partition.value if partition else None,
+        }
+        result = await self.conn.execute(query, params)
+        products_with_partition: list[
+            tuple[models.IndexProduct, DownloadPartition]
+        ] = []
+        for row in result.mappings():
+            partition_value = DownloadPartition(row["partition"])
+            product_data = {k: row[k] for k in row.keys() if k != "partition"}
+            products_with_partition.append(
+                (models.IndexProduct(**product_data), partition_value)
+            )
+        return products_with_partition
+
+    def _product_key(
+        self, product: models.IndexProduct, reversed_fqdn: str
+    ) -> str:
+        if product.kind == BootAssetKind.BOOTLOADER:
+            return f"{reversed_fqdn}.stream:{product.os}:{product.bootloader_type}:{product.arch}"
+        product_key = (
+            f"{reversed_fqdn}.stream:{product.os}:{product.release}:"
+            f"{product.arch}:{product.subarch}"
+        )
+        if product.flavor:
+            product_key += f"-{product.flavor}"
+        return product_key
+
     def generate_index_json(
-        self, products: list[models.IndexProduct], fqdn: str
+        self,
+        partitioned_products: dict[
+            DownloadPartition, list[models.IndexProduct]
+        ],
+        fqdn: str,
     ) -> dict[str, Any]:
         """
         Create the index json from the list of products in the materialized view.
         """
         reversed_fqdn = reverse_fqdn(fqdn)
+        now = now_utc().strftime("%a, %d %b %Y %H:%M:%S %z")
         index_json: dict[str, Any] = {
             "format": "index:1.0",
-            "index": {
-                f"{reversed_fqdn}:stream:v1:download": {
-                    "datatype": "image-ids",
-                    "format": "products:1.0",
-                    "path": f"streams/v1/{reversed_fqdn}:stream:v1:download.json",
-                }
-            },
+            "index": {},
+            "updated": now,
         }
-        product_keys: set[str] = set()
-        for product in products:
-            if product.kind == BootAssetKind.BOOTLOADER:
-                product_key = f"{reversed_fqdn}.stream:{product.os}:{product.bootloader_type}:{product.arch}"
-            else:
-                product_key = f"{reversed_fqdn}.stream:{product.os}:{product.release}:{product.arch}:{product.subarch}"
-                if product.flavor:
-                    product_key += f"-{product.flavor}"
-            product_keys.add(product_key)
-        now = now_utc().strftime("%a, %d %b %Y %H:%M:%S %z")
-        index_json["updated"] = now
-        index_json["index"][f"{reversed_fqdn}:stream:v1:download"][
-            "updated"
-        ] = now
-        index_json["index"][f"{reversed_fqdn}:stream:v1:download"][
-            "products"
-        ] = sorted(product_keys)
+        for partition in (
+            DownloadPartition.BOOTLOADERS,
+            DownloadPartition.UBUNTU,
+            DownloadPartition.OTHER,
+        ):
+            products = partitioned_products.get(partition, [])
+            if not products:
+                continue
+            content_id = partition.content_id(reversed_fqdn)
+            product_keys = {
+                self._product_key(product, reversed_fqdn)
+                for product in products
+            }
+            index_json["index"][content_id] = {
+                "datatype": "image-ids",
+                "format": "products:1.0",
+                "path": f"streams/v1/{content_id}.json",
+                "products": sorted(product_keys),
+                "updated": now,
+            }
         return index_json
 
     def generate_download_json(
-        self, products: list[models.IndexProduct], fqdn: str
+        self,
+        partition: DownloadPartition,
+        products: list[models.IndexProduct],
+        fqdn: str,
     ) -> dict[str, Any]:
         """
         Create the download json from the list of products in the materialized view.
         """
         reversed_fqdn = reverse_fqdn(fqdn)
+        content_id = partition.content_id(reversed_fqdn)
         download_json: dict[str, Any] = {
-            "content_id": f"{reversed_fqdn}:stream:v1:download",
+            "content_id": content_id,
             "datatype": "image-ids",
             "format": "products:1.0",
             "products": {},
         }
         for product in products:
+            product_key = self._product_key(product, reversed_fqdn)
             if product.kind == BootAssetKind.BOOTLOADER:
-                product_key = f"{reversed_fqdn}.stream:{product.os}:{product.bootloader_type}:{product.arch}"
                 item_json = {
                     "ftype": product.ftype.value,
                     "path": f"{product.boot_source_id}/{product.path}",
@@ -992,9 +1086,6 @@ ON ver_item.boot_asset_id = asset.id;"""
                 }
                 item_key = product.source_package
             else:
-                product_key = f"{reversed_fqdn}.stream:{product.os}:{product.release}:{product.arch}:{product.subarch}"
-                if product.flavor:
-                    product_key += f"-{product.flavor}"
                 item_json = {
                     "ftype": product.ftype.value,
                     "path": f"{product.boot_source_id}/{product.path}",

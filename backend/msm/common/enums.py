@@ -6,6 +6,15 @@ class IndexType(StrEnum):
     DOWNLOAD = "download"
 
 
+class DownloadPartition(StrEnum):
+    UBUNTU = "download-ubuntu"
+    BOOTLOADERS = "download-bootloaders"
+    OTHER = "download-other"
+
+    def content_id(self, reversed_fqdn: str) -> str:
+        return f"{reversed_fqdn}:stream:v1:{self.value}"
+
+
 class BootAssetKind(IntEnum):
     OS = 0
     BOOTLOADER = 1

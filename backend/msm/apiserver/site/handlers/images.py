@@ -27,6 +27,7 @@ from msm.apiserver.service import S3Service, ServiceCollection
 from msm.apiserver.service.images import reverse_fqdn
 from msm.apiserver.site.auth import authenticated_site
 from msm.common.enums import (
+    DownloadPartition,
     IndexType,
 )
 
@@ -173,22 +174,32 @@ async def download_index(
     if index_path == "index.json":
         index = await services.index_service.get(IndexType.INDEX, fqdn)
         return IndexStreamResponse(None, index)
-    elif index_path == f"{reversed_fqdn}:stream:v1:download.json":
-        index = await services.index_service.get(IndexType.DOWNLOAD, fqdn)
-        return IndexStreamResponse(None, index)
-    else:
-        raise NotFoundException(
-            code=ExceptionCode.MISSING_RESOURCE,
-            message="Index file does not exist.",
-            details=[
-                BaseExceptionDetail(
-                    reason=ExceptionCode.MISSING_RESOURCE,
-                    messages=[f"Index file '{index_path}' does not exist"],
-                    field="index_path",
-                    location="path",
-                )
-            ],
+
+    download_paths: dict[str, DownloadPartition] = {
+        f"{DownloadPartition.UBUNTU.content_id(reversed_fqdn)}.json": DownloadPartition.UBUNTU,
+        f"{DownloadPartition.BOOTLOADERS.content_id(reversed_fqdn)}.json": DownloadPartition.BOOTLOADERS,
+        f"{DownloadPartition.OTHER.content_id(reversed_fqdn)}.json": DownloadPartition.OTHER,
+    }
+    if partition := download_paths.get(index_path):
+        index = await services.index_service.get(
+            IndexType.DOWNLOAD,
+            fqdn,
+            partition=partition,
         )
+        return IndexStreamResponse(None, index)
+
+    raise NotFoundException(
+        code=ExceptionCode.MISSING_RESOURCE,
+        message="Index file does not exist.",
+        details=[
+            BaseExceptionDetail(
+                reason=ExceptionCode.MISSING_RESOURCE,
+                messages=[f"Index file '{index_path}' does not exist"],
+                field="index_path",
+                location="path",
+            )
+        ],
+    )
 
 
 @v1_router.get(
