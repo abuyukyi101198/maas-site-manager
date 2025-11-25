@@ -1,14 +1,14 @@
-import { config } from "dotenv";
-import { expect, afterEach } from "vitest";
-import { cleanup } from "@testing-library/react";
-import * as matchers from "@testing-library/jest-dom/matchers";
+import "@/testing/customMatchers";
 import { fetch, Request, Response } from "@remix-run/web-fetch";
-import { TextEncoder as NodeTextEncoder, TextDecoder as NodeTextDecoder } from "util";
-import { AbortSignal as NodeAbortSignal, AbortController as NodeAbortController } from "abort-controller";
+import * as matchers from "@testing-library/jest-dom/matchers";
+import { cleanup } from "@testing-library/react";
+import { AbortController as NodeAbortController, AbortSignal as NodeAbortSignal } from "abort-controller";
+import { config } from "dotenv";
+import { configMocks, mockResizeObserver } from "jsdom-testing-mocks";
+import { TextDecoder as NodeTextDecoder, TextEncoder as NodeTextEncoder } from "util";
+import { afterEach, expect } from "vitest";
 import "vitest-canvas-mock";
 import "vitest-webgl-canvas-mock";
-import { mockResizeObserver, configMocks } from "jsdom-testing-mocks";
-import "@/testing/customMatchers";
 //import "@testing-library/jest-dom";
 
 config();
@@ -43,6 +43,7 @@ if (!globalThis.AbortSignal) {
 }
 
 if (!globalThis.TextEncoder || !globalThis.TextDecoder) {
+  // @ts-expect-error because NodeTextEncoder is not a global in jsdom
   globalThis.TextEncoder = NodeTextEncoder;
   // @ts-expect-error because NodeTextDecoder is not a global in jsdom
   globalThis.TextDecoder = NodeTextDecoder;

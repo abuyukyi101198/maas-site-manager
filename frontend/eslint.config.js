@@ -4,12 +4,12 @@ import js from "@eslint/js";
 import { globalIgnores } from "eslint/config";
 
 import noOnlyTests from "eslint-plugin-no-only-tests";
+import noRelativeImportPaths from "eslint-plugin-no-relative-import-paths";
 import prettier from "eslint-plugin-prettier";
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
-import unusedImports from "eslint-plugin-unused-imports";
-import noRelativeImportPaths from "eslint-plugin-no-relative-import-paths";
 import testingLibrary from "eslint-plugin-testing-library";
+import unusedImports from "eslint-plugin-unused-imports";
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -27,7 +27,6 @@ const compat = new FlatCompat({
 export default tseslint.config(
   [globalIgnores(["node_modules/", "dist/", ".prettierrc.js", ".eslintrc.js", "env.d.ts", "**/apiclient/", ".cache/"])],
   tseslint.configs.recommended,
-  reactHooks.configs["recommended-latest"],
   ...fixupConfigRules(
     compat.extends(
       "./.eslintrc-auto-import.json",
@@ -43,6 +42,7 @@ export default tseslint.config(
       "unused-imports": unusedImports,
       "no-relative-import-paths": noRelativeImportPaths,
       react,
+      "react-hooks": reactHooks,
       prettier: fixupPluginRules(prettier),
     },
 
@@ -87,6 +87,8 @@ export default tseslint.config(
         { allowSameFolder: true, rootDir: "frontend/src", prefix: "@" },
       ],
       "no-debugger": process.env.CI ? "error" : "warn",
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
     },
   },
   ...fixupConfigRules(

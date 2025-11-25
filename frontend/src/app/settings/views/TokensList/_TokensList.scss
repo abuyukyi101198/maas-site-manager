@@ -15,7 +15,7 @@ $instructions-height-medium: 10.9375rem;
     display: grid;
     width: 100%;
     grid-template-columns: 1fr 1fr;
-    grid-gap: $spv--small;
+    gap: $spv--small;
     overflow-x: auto;
     white-space: nowrap;
     margin-bottom: $spv--large * 2;

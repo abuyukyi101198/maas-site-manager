@@ -18,6 +18,7 @@ export const apiUrls = {
   alternativeImages: getApiUrl("/image-sources"),
   addImageToSelection: getApiUrl("/selectable-images:select"),
   removeImageFromSelection: getApiUrl("/selected-images:remove"),
+  removeImage: getApiUrl("/images:remove"),
   bootAssets: getApiUrl("/bootassets"),
   images: getApiUrl("/images"),
   removeImages: getApiUrl("/images:remove"),

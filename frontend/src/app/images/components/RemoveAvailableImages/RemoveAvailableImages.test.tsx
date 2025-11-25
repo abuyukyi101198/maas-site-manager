@@ -15,7 +15,7 @@ import {
   waitFor,
 } from "@/utils/test-utils";
 
-const mockServer = setupServer(imageResolvers.removeImageFromSelection.handler());
+const mockServer = setupServer(imageResolvers.removeImageFromSelection.handler(), imageResolvers.removeImage.handler());
 const mockUseAppLayoutContext = vi.spyOn(await import("@/app/context/AppLayoutContext"), "useAppLayoutContext");
 
 const mockSetSidebar = vi.fn();

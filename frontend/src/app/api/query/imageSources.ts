@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type {
@@ -52,7 +54,18 @@ export const useImageSources = (options?: Options<GetBootSourcesV1BootassetSourc
   const data = {
     items: query.data?.pages ? query.data.pages.reduce<BootSource[]>((acc, page) => acc.concat(page.items), []) : [],
   };
-  const { hasNextPage, isFetchingNextPage, fetchNextPage } = query;
+  const {
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isFetching,
+    isSuccess,
+    isPending,
+  } = query;
 
   useEffect(() => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -60,7 +73,19 @@ export const useImageSources = (options?: Options<GetBootSourcesV1BootassetSourc
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  return { ...query, data };
+  return {
+    data,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isFetching,
+    isSuccess,
+    isPending,
+  };
 };
 
 export const useImageSource = (options: Options<GetBootSourceByIdV1BootassetSourcesIdGetData>, enabled = true) => {

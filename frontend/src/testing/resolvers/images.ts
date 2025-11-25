@@ -89,6 +89,15 @@ const imageResolvers = {
       });
     },
   },
+  removeImage: {
+    resolved: false,
+    handler: () => {
+      return http.post(apiUrls.removeImage, async () => {
+        imageResolvers.removeImage.resolved = true;
+        return new HttpResponse(null, { status: 204 });
+      });
+    },
+  },
   uploadCustomImage: {
     resolved: false,
     handler: () => {
@@ -121,4 +130,4 @@ const imageResolvers = {
   },
 };
 
-export { imageResolvers, mockSelectedImages, mockSelectableImages, mockAlternativeImages };
+export { imageResolvers, mockAlternativeImages, mockSelectableImages, mockSelectedImages };
