@@ -12,6 +12,8 @@ class DownloadPartition(StrEnum):
     OTHER = "download-other"
 
     def content_id(self, reversed_fqdn: str) -> str:
+        if self.value == DownloadPartition.UBUNTU:
+            return f"{reversed_fqdn}:stream:v3:{self.value}"
         return f"{reversed_fqdn}:stream:v1:{self.value}"
 
 

@@ -1016,14 +1016,15 @@ ON ver_item.boot_asset_id = asset.id;"""
         self, product: models.IndexProduct, reversed_fqdn: str
     ) -> str:
         if product.kind == BootAssetKind.BOOTLOADER:
-            return f"{reversed_fqdn}.stream:{product.os}:{product.bootloader_type}:{product.arch}"
+            return f"{reversed_fqdn}.stream:1:{product.os}:{product.bootloader_type}:{product.arch}"
+
         product_key = (
-            f"{reversed_fqdn}.stream:{product.os}:{product.release}:"
-            f"{product.arch}:{product.subarch}"
+            f"{product.os}:{product.release}:{product.arch}:{product.subarch}"
         )
         if product.flavor:
             product_key += f"-{product.flavor}"
-        return product_key
+
+        return f"{reversed_fqdn}.stream:v3:{product_key}"
 
     def generate_index_json(
         self,

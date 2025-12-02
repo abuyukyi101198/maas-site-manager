@@ -115,12 +115,12 @@ class TestBootAssetItemsDownloadHandler:
             value="https://maas.site.manager",
         )
         resp = await site_client.get(
-            "/images/latest/stable/streams/v1/manager.site.maas:stream:v1:download-ubuntu.json"
+            "/images/latest/stable/streams/v1/manager.site.maas:stream:v3:download-ubuntu.json"
         )
         assert resp.status_code == 200
         dl_index = resp.json()
         expected_index = {
-            "content_id": "manager.site.maas:stream:v1:download-ubuntu",
+            "content_id": "manager.site.maas:stream:v3:download-ubuntu",
             "datatype": "image-ids",
             "format": "products:1.0",
             "products": {},

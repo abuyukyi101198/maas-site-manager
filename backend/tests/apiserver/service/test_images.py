@@ -1173,7 +1173,7 @@ class TestImagesIndexService:
             "grub-efi-signed/None": {"amd64": 0, "arm64": 0},
         }
         for item in [x._asdict() for x in index.all()]:
-            found_entries[f'{item["os"]}/{item["release"]}'][item["arch"]] += 1
+            found_entries[f"{item['os']}/{item['release']}"][item["arch"]] += 1
         assert expected == found_entries
 
     async def test_get_index(
@@ -1195,17 +1195,17 @@ class TestImagesIndexService:
                     "format": "products:1.0",
                     "path": "streams/v1/manager.site.maas:stream:v1:download-bootloaders.json",
                     "products": [
-                        "manager.site.maas.stream:grub-efi-signed:uefi:arm64",
+                        "manager.site.maas.stream:1:grub-efi-signed:uefi:arm64",
                     ],
                     "updated": index["updated"],
                 },
-                "manager.site.maas:stream:v1:download-ubuntu": {
+                "manager.site.maas:stream:v3:download-ubuntu": {
                     "datatype": "image-ids",
                     "format": "products:1.0",
-                    "path": "streams/v1/manager.site.maas:stream:v1:download-ubuntu.json",
+                    "path": "streams/v1/manager.site.maas:stream:v3:download-ubuntu.json",
                     "products": [
-                        "manager.site.maas.stream:ubuntu:jammy:amd64:ga-22.04-generic",
-                        "manager.site.maas.stream:ubuntu:noble:amd64:hwe-24.04-generic",
+                        "manager.site.maas.stream:v3:ubuntu:jammy:amd64:ga-22.04-generic",
+                        "manager.site.maas.stream:v3:ubuntu:noble:amd64:hwe-24.04-generic",
                     ],
                     "updated": index["updated"],
                 },
@@ -1234,11 +1234,11 @@ class TestImagesIndexService:
             partition=DownloadPartition.UBUNTU,
         )
         expected_ubuntu = {
-            "content_id": "manager.site.maas:stream:v1:download-ubuntu",
+            "content_id": "manager.site.maas:stream:v3:download-ubuntu",
             "datatype": "image-ids",
             "format": "products:1.0",
             "products": {
-                "manager.site.maas.stream:ubuntu:jammy:amd64:ga-22.04-generic": {
+                "manager.site.maas.stream:v3:ubuntu:jammy:amd64:ga-22.04-generic": {
                     "arch": "amd64",
                     "kflavor": "generic",
                     "label": "stable",
@@ -1275,7 +1275,7 @@ class TestImagesIndexService:
                         }
                     },
                 },
-                "manager.site.maas.stream:ubuntu:noble:amd64:hwe-24.04-generic": {
+                "manager.site.maas.stream:v3:ubuntu:noble:amd64:hwe-24.04-generic": {
                     "arch": "amd64",
                     "kflavor": "generic",
                     "label": "stable",
@@ -1327,7 +1327,7 @@ class TestImagesIndexService:
             "datatype": "image-ids",
             "format": "products:1.0",
             "products": {
-                "manager.site.maas.stream:grub-efi-signed:uefi:arm64": {
+                "manager.site.maas.stream:1:grub-efi-signed:uefi:arm64": {
                     "arch": "arm64",
                     "label": "candidate",
                     "os": "grub-efi-signed",
@@ -1398,7 +1398,7 @@ class TestImagesIndexService:
             partition=DownloadPartition.BOOTLOADERS,
         )
 
-        download_ubuntu_key = "manager.site.maas:stream:v1:download-ubuntu"
+        download_ubuntu_key = "manager.site.maas:stream:v3:download-ubuntu"
         download_bootloader_key = (
             "manager.site.maas:stream:v1:download-bootloaders"
         )
@@ -1406,7 +1406,7 @@ class TestImagesIndexService:
         assert download_ubuntu_key in index["index"]
         assert download_bootloader_key in index["index"]
         assert index["index"][download_ubuntu_key]["products"] == [
-            "manager.site.maas.stream:ubuntu:jammy:amd64:ga-22.04-generic"
+            "manager.site.maas.stream:v3:ubuntu:jammy:amd64:ga-22.04-generic"
         ]
         assert len(ubuntu_download["products"]) == 1
         assert len(bootloader_download["products"]) == 1
