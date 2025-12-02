@@ -32,6 +32,32 @@ sudo microceph enable rgw --port 8080
 
 Finally, take note of the IP address shown by `sudo microceph status` and the port you set above for `rgw`.
 
+Before deploying with Terraform, you need to create an RGW user and S3 access keys. This allows the `s3-integrator` charm to connect to your MicroCeph RGW instance.
+
+Create an RGW user:
+
+```bash
+sudo radosgw-admin user create --uid=user --display-name=user
+```
+
+Create S3 access keys for the user:
+
+```bash
+sudo radosgw-admin key create --uid=user --key-type=s3 --access-key=foo --secret-key=bar
+```
+
+Create a bucket for MSM to use:
+
+```bash
+sudo apt-get install s3cmd
+s3cmd --host <IP>:8080 --host-bucket="http://<IP>/msm-images" \
+  --access_key=foo --secret_key=bar --no-ssl mb -P s3://msm-images
+```
+
+Replace `<IP>` with the IP address from `sudo microceph status`.
+
+Use these credentials (`foo`/`bar`) and bucket name (`msm-images`) in your `terraform.tfvars` file.
+
 ## Install Terraform
 
 To install Terraform, simply run:
