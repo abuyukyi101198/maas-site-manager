@@ -27,7 +27,25 @@ need to process the load from your connected Sites.
 
 ## Code Structure
 
-TODO: Describe layers and pages
+MAAS Site Manager consists of three main components: a frontend web application, a backend API server, and a Temporal worker.
+
+### Frontend
+
+The frontend is a React/TypeScript application located in `frontend/` that provides a web interface for managing sites, images, settings, and user accounts. It communicates with the backend API through an axios-based client generated from OpenAPI specifications. React Query manages state for API query data, and Playwright is used for end-to-end testing.
+
+### Backend
+
+The backend API server is located in `backend/msm/apiserver/` and exposes two APIs. The User/Worker API (`/api`) is used by the web interface and the Temporal worker and is handled by `user/handlers/` for site management (list, edit, approve, reject, delete), custom image management (`images.py`), upstream boot asset management (`bootassets.py`), site token management, user management and authentication, application settings, image source configuration, and selections (which images are available to sites from upstream sources). The Site API (`/site`) is used by MAAS instances and is handled by `site/handlers/` for site enrollment (`enroll.py`), heartbeat and status reporting (`report.py`), and image downloads (`images.py`).
+
+The backend is organized into several layers. Handlers in `user/handlers/` and `site/handlers/` process HTTP requests and delegate to services. Services in `service/` provide a wrapper around SQLAlchemy for API handlers and implement business logic for sites, images, tokens, users, S3 operations, and Temporal workflow orchestration. The database layer in `db/` contains SQLAlchemy models in `db/models/` for sites, tokens, users, images, and settings, query utilities in `db/queries/` for counting, searching, and aggregating, and migrations in `db/alembic/versions/`. Schema validation in `schema/` handles pagination, search, and sorting.
+
+### Temporal Worker
+
+The Temporal worker (`backend/msm/temporal/`) handles long-running background tasks such as image synchronization. It contains workflows in `workflows/` that orchestrate image synchronization (`sync.py`), deletion (`delete.py`), and downloading from upstream sources (`download_upstream.py`). Activities in `activities/` perform the actual work such as downloading images from upstream sources, processing boot assets (`bootasset.py`), handling simplestream operations (`simplestream.py`), and managing S3 operations. The worker runs as a separate process and communicates with the Temporal server to execute workflows triggered by the API server.
+
+### Common Utilities
+
+Common utilities shared between the API server and Temporal worker are located in `msm/common/` and include API models in `common/api/`, enums in `common/enums.py`, JWT handling in `common/jwt.py`, and workflow names and parameter definitions in `common/workflows/`.
 
 ## Important processes
 
