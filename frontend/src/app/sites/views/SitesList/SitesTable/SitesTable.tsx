@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 
 import { ContentSection, ExternalLink } from "@canonical/maas-react-components";
 import { useReactTable, flexRender, getCoreRowModel } from "@tanstack/react-table";

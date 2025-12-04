@@ -111,7 +111,7 @@ export const useMarkers = ({ eventHandlers }: UseMarkers) => {
       const handleClick = () => handleClusterExpansion(coords, clusterId);
       const handleKeyPress = (e: KeyboardEvent) => {
         if (e.key === "Enter") {
-          void handleClusterExpansion(coords, clusterId);
+          return handleClusterExpansion(coords, clusterId);
         }
       };
 

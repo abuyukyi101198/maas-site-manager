@@ -99,12 +99,12 @@ export const useCreateImageSource = (mutationOptions?: Options<PostBootSourcesV1
   const queryClient = useQueryClient();
   return useMutation({
     ...postBootSourcesV1BootassetSourcesPostMutation(mutationOptions),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
         queryKey: getBootSourcesV1BootassetSourcesGetQueryKey(),
       });
 
-      void queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: getBootSourcesV1BootassetSourcesGetInfiniteQueryKey(),
       });
     },
@@ -115,17 +115,17 @@ export const useUpdateImageSource = (mutationOptions?: Options<PatchBootSourceV1
   const queryClient = useQueryClient();
   return useMutation({
     ...patchBootSourceV1BootassetSourcesIdPatchMutation(mutationOptions),
-    onSuccess: (variables) => {
-      void queryClient.invalidateQueries({
+    onSuccess: async (variables) => {
+      await queryClient.invalidateQueries({
         queryKey: getBootSourcesV1BootassetSourcesGetQueryKey(),
       });
 
-      void queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: getBootSourcesV1BootassetSourcesGetInfiniteQueryKey(),
       });
 
       if (variables?.id) {
-        void queryClient.invalidateQueries({
+        await queryClient.invalidateQueries({
           queryKey: getBootSourceByIdV1BootassetSourcesIdGetQueryKey({ path: { id: variables.id } }),
         });
       }
@@ -139,12 +139,12 @@ export const useDeleteImageSource = (
   const queryClient = useQueryClient();
   return useMutation({
     ...deleteBootSourceV1BootassetSourcesIdDeleteMutation(mutationOptions),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
         queryKey: getBootSourcesV1BootassetSourcesGetQueryKey(),
       });
 
-      void queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: getBootSourcesV1BootassetSourcesGetInfiniteQueryKey(),
       });
     },

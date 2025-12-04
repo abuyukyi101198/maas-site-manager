@@ -38,8 +38,8 @@ export const useUpdateSettings = (mutationOptions: Options<PatchV1SettingsPatchD
     Options<PatchV1SettingsPatchData>
   >({
     ...patchV1SettingsPatchMutation(mutationOptions),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: getV1SettingsGetQueryKey() });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: getV1SettingsGetQueryKey() });
     },
   });
 };

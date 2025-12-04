@@ -45,8 +45,8 @@ export const useCreateTokens = (mutationOptions?: Options<PostV1TokensPostData>)
 
   return useMutation<PostV1TokensPostResponse, AxiosError<PostV1TokensPostError>, Options<PostV1TokensPostData>>({
     ...postV1TokensPostMutation(mutationOptions),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: getV1TokensGetQueryKey() });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: getV1TokensGetQueryKey() });
     },
   });
 };
@@ -133,8 +133,8 @@ export const useDeleteTokens = (mutationOptions?: Options<DeleteManyV1TokensDele
     Options<DeleteManyV1TokensDeleteData>
   >({
     ...deleteManyV1TokensDeleteMutation(mutationOptions),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: getV1TokensGetQueryKey() });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: getV1TokensGetQueryKey() });
     },
   });
 };

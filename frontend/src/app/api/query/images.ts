@@ -70,9 +70,9 @@ export const useAddImagesToSelection = (
 
   return useMutation({
     ...selectImagesV1SelectableImagesSelectPostMutation(mutationOptions),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: getSelectedImagesV1SelectedImagesGetQueryKey() });
-      void queryClient.invalidateQueries({ queryKey: getSelectableImagesV1SelectableImagesGetQueryKey() });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: getSelectedImagesV1SelectedImagesGetQueryKey() });
+      await queryClient.invalidateQueries({ queryKey: getSelectableImagesV1SelectableImagesGetQueryKey() });
     },
   });
 };
@@ -84,9 +84,9 @@ export const useRemoveImagesFromSelection = (
 
   return useMutation({
     ...removeSelectionsV1SelectedImagesRemovePostMutation(mutationOptions),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: getSelectedImagesV1SelectedImagesGetQueryKey() });
-      void queryClient.invalidateQueries({ queryKey: getSelectableImagesV1SelectableImagesGetQueryKey() });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: getSelectedImagesV1SelectedImagesGetQueryKey() });
+      await queryClient.invalidateQueries({ queryKey: getSelectableImagesV1SelectableImagesGetQueryKey() });
     },
   });
 };
@@ -97,7 +97,7 @@ export const useUploadCustomImage = (mutationOptions?: Omit<Options<PostImagesV1
   return useMutation({
     ...postImagesV1ImagesPostMutation(mutationOptions),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: getSelectedImagesV1SelectedImagesGetQueryKey() });
+      return queryClient.invalidateQueries({ queryKey: getSelectedImagesV1SelectedImagesGetQueryKey() });
     },
   });
 };
@@ -108,7 +108,7 @@ export const useDeleteCustomImage = (mutationOptions?: Options<DeleteImagesV1Ima
   return useMutation({
     ...deleteImagesV1ImagesRemovePostMutation(mutationOptions),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: getSelectedImagesV1SelectedImagesGetQueryKey() });
+      return queryClient.invalidateQueries({ queryKey: getSelectedImagesV1SelectedImagesGetQueryKey() });
     },
   });
 };

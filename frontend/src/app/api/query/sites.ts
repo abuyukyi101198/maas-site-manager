@@ -67,9 +67,9 @@ export const useEditSite = (mutationOptions?: Options<PatchV1SitesIdPatchData>) 
     Options<PatchV1SitesIdPatchData>
   >({
     ...patchV1SitesIdPatchMutation(mutationOptions),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: getV1SitesGetQueryKey() });
-      void queryClient.invalidateQueries({ queryKey: getCoordinatesV1SitesCoordinatesGetQueryKey() });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: getV1SitesGetQueryKey() });
+      await queryClient.invalidateQueries({ queryKey: getCoordinatesV1SitesCoordinatesGetQueryKey() });
     },
   });
 };
@@ -83,8 +83,8 @@ export const useDeleteSites = (mutationOptions?: Options<DeleteManyV1SitesDelete
     Options<DeleteManyV1SitesDeleteData>
   >({
     ...deleteManyV1SitesDeleteMutation(mutationOptions),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: getV1SitesGetQueryKey() });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: getV1SitesGetQueryKey() });
     },
   });
 };
