@@ -5,7 +5,7 @@ from socket import gethostname
 from typing import Annotated, Any
 from urllib.parse import urlparse
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 from starlette.background import BackgroundTask
 from starlette.types import Send
@@ -211,6 +211,7 @@ async def download_index(
     },
 )
 async def download(
+    request: Request,
     services: Annotated[ServiceCollection, Depends(services)],
     site: Annotated[Site, Depends(authenticated_site)],
     track: str,
@@ -236,6 +237,8 @@ async def download(
                 )
             ],
         )
+
+    await request.state.release_db_connection()
     return S3StreamResponse(
         content=None, file_id=str(boot_item.id), s3=services.s3
     )

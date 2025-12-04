@@ -1,8 +1,9 @@
 from collections.abc import AsyncIterator, Awaitable, Callable
-from contextlib import asynccontextmanager
+from contextlib import AbstractAsyncContextManager, asynccontextmanager
 from datetime import timedelta
 import logging
 import time
+from types import TracebackType
 from typing import (
     Any,
 )
@@ -22,7 +23,7 @@ from temporalio.client import (
 from temporalio.common import RetryPolicy
 from temporalio.contrib.pydantic import pydantic_data_converter
 from temporallib.client import Client, Options  # type: ignore
-from temporallib.encryption import EncryptionOptions  #  type: ignore
+from temporallib.encryption import EncryptionOptions  # type: ignore
 
 from msm.apiserver.db import Database
 from msm.common.settings import Settings
@@ -35,10 +36,52 @@ from msm.common.workflows.sync import (
 logger = logging.getLogger("uvicorn.error")
 
 
+class _TransactionHandle:
+    """Manage the lifecycle of a request-scoped database transaction."""
+
+    def __init__(
+        self,
+        request: Request,
+        context_manager: AbstractAsyncContextManager[AsyncConnection],
+        connection: AsyncConnection,
+    ) -> None:
+        self._request = request
+        self._context_manager = context_manager
+        self._connection: AsyncConnection | None = connection
+        self._released = False
+
+    @property
+    def connection(self) -> AsyncConnection | None:
+        return self._connection
+
+    async def release(
+        self,
+        exc_type: type[BaseException] | None = None,
+        exc: BaseException | None = None,
+        tb: TracebackType | None = None,
+    ) -> None:
+        if self._released:
+            return
+        self._released = True
+        try:
+            await self._context_manager.__aexit__(exc_type, exc, tb)
+        finally:
+            state = self._request.state
+            if getattr(state, "conn", None) is self._connection:
+                del state.conn
+            if getattr(state, "release_db_connection", None) == self.release:
+                del state.release_db_connection
+            if getattr(state, "transaction_handle", None) is self:
+                del state.transaction_handle
+            self._connection = None
+
+
 class TransactionMiddleware(BaseHTTPMiddleware):
     """Run a request in a transaction, handling commit/rollback.
 
-    This makes the database connection available as `request.state.conn`.
+    This makes the database connection available as `request.state.conn` and
+    exposes `await request.state.release_db_connection()` so handlers can finish
+    the transaction early, returning the connection to the pool.
     """
 
     def __init__(self, app: ASGIApp, db: Database):
@@ -56,9 +99,22 @@ class TransactionMiddleware(BaseHTTPMiddleware):
         request: Request,
         call_next: Callable[[Request], Awaitable[Response]],
     ) -> Response:
-        async with self.get_connection() as conn:
-            request.state.conn = conn
-            return await call_next(request)
+        connection_context = self.get_connection()
+        conn = await connection_context.__aenter__()
+        handle = _TransactionHandle(request, connection_context, conn)
+
+        request.state.conn = conn
+        request.state.release_db_connection = handle.release
+        request.state.transaction_handle = handle
+
+        try:
+            response = await call_next(request)
+            return response
+        except Exception as exc:
+            await handle.release(type(exc), exc, exc.__traceback__)
+            raise
+        finally:
+            await handle.release()
 
 
 class DatabaseMetricsMiddleware(BaseHTTPMiddleware):
