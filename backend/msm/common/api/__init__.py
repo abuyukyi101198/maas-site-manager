@@ -1,3 +1,9 @@
+# Copyright 2025 Canonical Ltd.
+# See LICENSE file for licensing details.
+"""
+MSM API request and response models.
+"""
+
 from .bootassets import (
     BootAssetItemPatchRequest,
     BootSourceAvailSelectionsPutRequest,

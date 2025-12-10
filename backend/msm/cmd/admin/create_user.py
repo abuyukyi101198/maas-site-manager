@@ -1,3 +1,9 @@
+# Copyright 2025 Canonical Ltd.
+# See LICENSE file for licensing details.
+"""
+Action to create a user.
+"""
+
 from argparse import (
     ArgumentParser,
     Namespace,
@@ -12,10 +18,13 @@ from msm.cmd import (
 
 
 class CreateUserAction(DatabaseAction):
+    """Action to create a user."""
+
     name = "create-user"
     description = "Create a user"
 
     def register_options(self, parser: ArgumentParser) -> None:
+        """Register user parameters."""
         parser.add_argument(
             "username",
             help="Username for the new user",
@@ -42,6 +51,7 @@ class CreateUserAction(DatabaseAction):
         )
 
     async def aexecute(self, options: Namespace) -> int:
+        """Create a user in the database."""
         await self._create_user(
             options.username,
             options.email,
@@ -59,6 +69,7 @@ class CreateUserAction(DatabaseAction):
         password: str,
         admin: bool,
     ) -> None:
+        """Create a user in the database within a transaction."""
         async with self.database_connection() as conn:
             users = UserService(conn)
             if await users.exists(email=email, username=username):

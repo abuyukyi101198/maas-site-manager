@@ -1,3 +1,9 @@
+# Copyright 2025 Canonical Ltd.
+# See LICENSE file for licensing details.
+"""
+Base implementation for MSM Script Actions.
+"""
+
 import argparse
 import asyncio
 from collections.abc import AsyncIterator
@@ -36,8 +42,8 @@ class Action:
         """Add options for the actions to the subparser."""
         self.register_options(parser)
         actions = chain(
-            parser._positionals._group_actions,
-            parser._optionals._group_actions,
+            parser._positionals._group_actions,  # pylint: disable=W0212
+            parser._optionals._group_actions,  # pylint: disable=W0212
         )
         self._actions = {action.dest: action for action in actions}
 
@@ -76,6 +82,7 @@ class DatabaseAction(AsyncAction):
 
     @cached_property
     def db(self) -> Database:
+        """Database object capable of creating transactions."""
         return Database(self.settings.db_dsn())
 
     @asynccontextmanager

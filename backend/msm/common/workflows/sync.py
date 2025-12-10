@@ -1,3 +1,13 @@
+# Copyright 2025 Canonical Ltd.
+# See LICENSE file for licensing details.
+"""
+Temporal workflow names and parameter classes for boot source synchronization.
+
+These definitions are shared between the workflow implementations in the temporal
+package and the API endpoints that initiate workflows, ensuring consistency
+across the entire MSM system.
+"""
+
 from dataclasses import dataclass
 
 SYNC_UPSTREAM_SOURCE_WF_NAME = "SyncUpstreamSource"
@@ -11,6 +21,8 @@ REMOVE_STALE_IMAGES_WF_NAME = "RemoveStaleImages"
 
 @dataclass
 class S3Params:
+    """Configuration parameters for S3-compatible storage operations."""
+
     endpoint: str
     access_key: str
     secret_key: str
@@ -20,6 +32,8 @@ class S3Params:
 
 @dataclass
 class DownloadUpstreamImageParams:
+    """Parameters for the boot asset item download workflow."""
+
     ss_root_url: str
     msm_url: str
     msm_jwt: str
@@ -30,6 +44,8 @@ class DownloadUpstreamImageParams:
 
 @dataclass
 class SyncUpstreamSourceParams:
+    """Parameters for the boot source synchronization workflow."""
+
     msm_url: str
     msm_jwt: str
     boot_source_id: int
@@ -38,6 +54,8 @@ class SyncUpstreamSourceParams:
 
 @dataclass
 class RefreshUpstreamSourceParams:
+    """Parameters for the boot source catalog refresh workflow."""
+
     msm_url: str
     msm_jwt: str
     boot_source_id: int
@@ -45,12 +63,16 @@ class RefreshUpstreamSourceParams:
 
 @dataclass
 class DeleteItemsParams:
+    """Parameters for the bulk boot asset deletion workflow."""
+
     s3_params: S3Params
     item_ids: list[int]
 
 
 @dataclass
 class RemoveStaleImagesParams:
+    """Parameters for the stale boot asset cleanup workflow."""
+
     msm_url: str
     msm_jwt: str
     boot_source_id: int

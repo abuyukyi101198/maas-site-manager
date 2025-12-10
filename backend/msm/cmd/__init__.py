@@ -1,3 +1,9 @@
+# Copyright 2025 Canonical Ltd.
+# See LICENSE file for licensing details.
+"""
+Base implementations for MSM CLI commands.
+"""
+
 from msm.cmd.action import (
     Action,
     AsyncAction,

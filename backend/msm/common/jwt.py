@@ -1,3 +1,9 @@
+# Copyright 2025 Canonical Ltd.
+# See LICENSE file for licensing details.
+"""
+JWT object, exceptions, and utilities.
+"""
+
 import dataclasses
 from datetime import (
     datetime,
@@ -55,6 +61,8 @@ class TokenPurpose(StrEnum):
 
 @dataclasses.dataclass(frozen=True)
 class JWT:
+    """Dataclass representing a JSON Web Token."""
+
     payload: dict[str, Any]
     encoded: str
 
@@ -64,31 +72,38 @@ class JWT:
 
     @cached_property
     def issuer(self) -> str:
+        """The 'iss' field from the JWT payload."""
         return cast(str, self.payload["iss"])
 
     @cached_property
     def subject(self) -> str:
+        """The 'sub' field from the JWT payload."""
         return cast(str, self.payload["sub"])
 
     @cached_property
     def issued(self) -> datetime:
+        """The timezone-aware datetime representation of when the token was issued."""
         return utc_from_timestamp(self.payload["iat"])
 
     @cached_property
     def expiration(self) -> datetime:
+        """The timezone-aware datetime representation of when the token expires."""
         return utc_from_timestamp(self.payload["exp"])
 
     @cached_property
     def audience(self) -> list[TokenAudience]:
+        """The audiences the token represents."""
         return [TokenAudience(entry) for entry in self.payload["aud"]]
 
     @cached_property
     def purpose(self) -> TokenPurpose | None:
+        """The purpose of the token, if specified."""
         value = self.payload.get("purpose")
         return TokenPurpose(value) if value else None
 
     @cached_property
     def data(self) -> dict[str, Any]:
+        """All non-required token payload data."""
         return {
             key: value
             for key, value in self.payload.items()

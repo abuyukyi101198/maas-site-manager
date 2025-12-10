@@ -1,3 +1,9 @@
+# Copyright 2025 Canonical Ltd.
+# See LICENSE file for licensing details.
+"""
+Timestamp utilities.
+"""
+
 from datetime import (
     UTC,
     datetime,

@@ -1,3 +1,9 @@
+# Copyright 2025 Canonical Ltd.
+# See LICENSE file for licensing details.
+"""
+Password utilities.
+"""
+
 from passlib.context import CryptContext
 
 _CONTEXT = CryptContext(schemes=["bcrypt"])

@@ -1,7 +1,15 @@
+# Copyright 2025 Canonical Ltd.
+# See LICENSE file for licensing details.
+"""
+Enums shared by the MSM API and Temporal worker.
+"""
+
 from enum import IntEnum, StrEnum
 
 
 class IndexType(StrEnum):
+    """The types of simplestream indices."""
+
     INDEX = "index"
     DOWNLOAD = "download"
 
@@ -18,16 +26,22 @@ class DownloadPartition(StrEnum):
 
 
 class BootAssetKind(IntEnum):
+    """The types of Boot Assets."""
+
     OS = 0
     BOOTLOADER = 1
 
 
 class BootAssetLabel(StrEnum):
+    """The types of labels for Boot Assets."""
+
     STABLE = "stable"
     CANDIDATE = "candidate"
 
 
 class ItemFileType(StrEnum):
+    """The allowable file types of Boot Asset Items."""
+
     # Tarball of root image.
     ROOT_TGZ = "root-tgz"
     ROOT_TBZ = "root-tbz"

@@ -1,3 +1,9 @@
+# Copyright 2025 Canonical Ltd.
+# See LICENSE file for licensing details.
+"""
+Actions for creating and deleting sample data fixtures.
+"""
+
 from argparse import Namespace
 
 from sqlalchemy.exc import IntegrityError
@@ -21,10 +27,13 @@ from msm.sampledata import (
 
 
 class FixturesAction(DatabaseAction):
+    """Action to create sample data fixtures."""
+
     name = "create-fixtures"
     description = "Create fixed sample data fixtures"
 
     async def aexecute(self, options: Namespace) -> int:
+        """Create sample data fixtures in the database."""
         async with self.database_connection() as conn:
             await self.db.ensure_schema()
             await self.db.execute_in_transaction(ensure_db_entries)
@@ -47,12 +56,14 @@ class FixturesAction(DatabaseAction):
         return 0
 
     async def _get_config(self, conn: AsyncConnection) -> Config:
+        """Retrieve the application configuration."""
         service = ConfigService(conn)
         return await service.get()
 
     async def _make_fixtures(
         self, conn: AsyncConnection, config: Config
     ) -> None:
+        """Create sample data fixtures in the database."""
         users = await make_fixture_users(conn)
         self._print_fixtures("users", ["id", "username", "email"], users)
         sites = await make_fixture_sites(conn)
@@ -69,6 +80,7 @@ class FixturesAction(DatabaseAction):
     def _print_fixtures(
         self, entity: str, attribs: list[str], fixtures: list[SampleDataModel]
     ) -> None:
+        """Print created fixtures to stdout."""
         print(f"Creating {len(fixtures)} {entity}:")
         for entry in fixtures:
             print(
@@ -78,10 +90,13 @@ class FixturesAction(DatabaseAction):
 
 
 class DeleteFixturesAction(FixturesAction):
+    """Action to delete sample data fixtures."""
+
     name = "purge-fixtures"
     description = "Cleanup the database and delete sample data fixtures"
 
     async def aexecute(self, options: Namespace) -> int:
+        """Delete sample data fixtures from the database within a transaction."""
         await self.db.ensure_schema()
         await self.db.execute_in_transaction(ensure_db_entries)
         async with self.database_connection() as conn:
@@ -92,6 +107,7 @@ class DeleteFixturesAction(FixturesAction):
         self,
         conn: AsyncConnection,
     ) -> None:
+        """Delete sample data fixtures from the database."""
         await purge_users(conn)
         await purge_tokens(conn)
         await purge_sites(conn)

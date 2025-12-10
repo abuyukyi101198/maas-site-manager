@@ -1,3 +1,9 @@
+# Copyright 2025 Canonical Ltd.
+# See LICENSE file for licensing details.
+"""
+MSM application settings.
+"""
+
 from pydantic import Field, SecretStr, ValidationInfo, field_validator
 from pydantic_settings import (
     BaseSettings,
@@ -88,6 +94,7 @@ class Settings(BaseSettings):
 
     @property
     def static_dir(self) -> str:
+        """Directory for static files."""
         return "static"
 
     @classmethod
@@ -123,9 +130,14 @@ class Settings(BaseSettings):
         )
 
     @field_validator("conn_lost_threshold_seconds")
+    @classmethod
     def conn_lost_threshold_validator(
         cls, threshold: int, info: ValidationInfo
     ) -> int:
+        """
+        Validate that the connection lost threshold is greater than
+        the heartbeat interval.
+        """
         if (
             "heartbeat_interval_seconds" in info.data
             and threshold <= info.data["heartbeat_interval_seconds"]
@@ -138,9 +150,11 @@ class Settings(BaseSettings):
         return threshold
 
     @field_validator("s3_path")
+    @classmethod
     def s3_path_validator(
         cls, path: str | None, info: ValidationInfo
     ) -> str | None:
+        """Strip the S3 path of leading slashes."""
         if not path:
             return path
         return path.lstrip("/")

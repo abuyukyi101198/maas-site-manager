@@ -1,3 +1,9 @@
+# Copyright 2025 Canonical Ltd.
+# See LICENSE file for licensing details.
+"""
+Boot asset API request and response models.
+"""
+
 from typing import Any, Self
 
 from pydantic import AwareDatetime, BaseModel, Field, model_validator
@@ -8,34 +14,48 @@ from msm.common.enums import BootAssetKind, BootAssetLabel, ItemFileType
 
 
 class BootSourceGetResponse(models.BootSource):
+    """Response model for a boot source."""
+
     @classmethod
     def from_model(cls, model: models.BootSource) -> Self:
+        """Create an instance from a database model."""
         return cls(**model.model_dump())
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Self:
+        """Create an instance from a dictionary."""
         return cls(**data)
 
 
 class BootSourcePatchResponse(models.BootSource):
+    """Response model for updating a boot source."""
+
     @classmethod
     def from_model(cls, model: models.BootSource) -> Self:
+        """Create an instance from a database model."""
         return cls(**model.model_dump())
 
 
 class BootSourcesGetResponse(PaginatedResults[models.BootSource]):
+    """Response model for listing boot sources."""
+
     pass
 
 
 class BootSourceSelectionsGetResponse(
     PaginatedResults[models.BootSourceSelection]
 ):
+    """Response model for listing boot source selections."""
+
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Self:
+        """Create an instance from a dictionary."""
         return cls(**data)
 
 
 class BootSourcesPostRequest(BaseModel):
+    """Request model for creating a boot source."""
+
     priority: int
     url: str
     keyring: str
@@ -44,10 +64,14 @@ class BootSourcesPostRequest(BaseModel):
 
 
 class BootSourcesPostResponse(BaseModel):
+    """Response model for creating a boot source."""
+
     id: int
 
 
 class BootSourcesPatchRequest(BaseModel):
+    """Request model for updating a boot source."""
+
     priority: int | None = None
     keyring: str | None = None
     sync_interval: int | None = Field(default=None, ge=0)
@@ -57,12 +81,15 @@ class BootSourcesPatchRequest(BaseModel):
 
     @model_validator(mode="after")
     def check_at_least_one_field_present(self) -> Self:
+        """ "Ensure at least one field is provided for update."""
         if not self.model_fields_set:
             raise ValueError("At least one field must be set.")
         return self
 
 
 class AvailableBootSourceSelection(BaseModel):
+    """Model representing an available selection."""
+
     os: str
     release: str
     label: BootAssetLabel
@@ -77,14 +104,20 @@ class AvailableBootSourceSelection(BaseModel):
 
 
 class BootSourceAvailSelectionsPutRequest(BaseModel):
+    """Request model for updating available selections."""
+
     available: list[AvailableBootSourceSelection]
 
 
 class BootSourceAvailSelectionsPutResponse(BaseModel):
+    """Response model for updating available selections."""
+
     stale: list[models.BootSourceSelection]
 
 
 class BootAssetItemPatchRequest(BaseModel):
+    """Request model for updating a boot asset item."""
+
     ftype: str | None = None
     source_package: str | None = None
     source_version: str | None = None
@@ -95,18 +128,23 @@ class BootAssetItemPatchRequest(BaseModel):
 
     @model_validator(mode="after")
     def check_at_least_one_field_present(self) -> Self:
+        """ "Ensure at least one field is provided for update."""
         if not self.model_fields_set:
             raise ValueError("At least one field must be set.")
         return self
 
 
 class BootAssetItemPatchResponse(models.BootAssetItem):
+    """Response model for updating a boot asset item."""
+
     @classmethod
     def from_model(cls, model: models.BootAssetItem) -> Self:
         return cls(**model.model_dump())
 
 
 class ProductItem(BaseModel):
+    """Model representing a boot asset item in an upstream SimpleStream."""
+
     ftype: ItemFileType
     sha256: str
     path: str
@@ -117,10 +155,13 @@ class ProductItem(BaseModel):
 
     @classmethod
     def from_item(cls, asset: models.BootAssetItem) -> Self:
+        """Create an instance from a database model."""
         return cls(**asset.model_dump())
 
 
 class Product(BaseModel):
+    """Model representing a boot asset product in an upstream SimpleStream."""
+
     kind: BootAssetKind
     label: BootAssetLabel
     os: str
@@ -148,14 +189,18 @@ class Product(BaseModel):
 
 
 class IdProduct(Product):
+    """Product model with an ID."""
+
     id: int
 
     @classmethod
     def from_asset(cls, asset: models.BootAsset) -> Self:
+        """Create an instance from a database model."""
         return cls(**asset.model_dump(), versions={})
 
     @classmethod
     def from_dict(cls, product: dict[str, Any]) -> Self:
+        """Create an instance from a dictionary."""
         return cls(
             versions={
                 ver: [
@@ -173,24 +218,33 @@ class IdProduct(Product):
 
 
 class BootSourcesAssetsPutRequest(BaseModel):
+    """Request model for updating a boot source's assets."""
+
     products: list[Product]
 
 
 class BootSourcesAssetsPutResponse(BaseModel):
+    """Response model for updating a boot source's assets."""
+
     to_download: list[int]
 
 
 class VersionStatus(BaseModel):
+    """Status of a boot asset version."""
+
     complete: bool
     last_seen: AwareDatetime
 
 
 class AssetVersions(BaseModel):
+    """Version statuses for a boot asset."""
+
     asset_id: int
     versions: dict[str, VersionStatus]
 
     @classmethod
     def from_dict(cls, versions: dict[str, Any]) -> Self:
+        """Create an instance from a dictionary."""
         return cls(
             asset_id=versions["asset_id"],
             versions={
@@ -204,23 +258,33 @@ class AssetVersions(BaseModel):
 
 
 class BootSourceVersionsGetResponse(BaseModel):
+    """Response model for getting boot asset versions."""
+
     versions: list[AssetVersions]
 
 
 class BootAssetItemGetResponse(models.BootAssetItem):
+    """Response model for getting a boot asset item."""
+
     @classmethod
     def from_model(cls, model: models.BootAssetItem) -> Self:
+        """Create an instance from a database model."""
         return cls(**model.model_dump())
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Self:
+        """Create an instance from a dictionary."""
         return cls(**data)
 
 
 class Version(BaseModel):
+    """Simplified version model."""
+
     asset_id: int
     version: str
 
 
 class VersionsRemovePostRequest(BaseModel):
+    """Request model for removing boot asset versions."""
+
     to_remove: list[Version]

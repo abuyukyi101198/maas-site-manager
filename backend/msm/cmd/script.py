@@ -1,3 +1,9 @@
+# Copyright 2025 Canonical Ltd.
+# See LICENSE file for licensing details.
+"""
+Base implementation for MSM CLI scripts.
+"""
+
 import argparse
 from operator import attrgetter
 import sys
