@@ -83,6 +83,7 @@ class SyncUpstreamSourceWorkflow:
             id=f"download-item-{boot_asset_item_id}",
             id_reuse_policy=WorkflowIDReusePolicy.ALLOW_DUPLICATE_FAILED_ONLY,
             parent_close_policy=workflow.ParentClosePolicy.ABANDON,
+            execution_timeout=timedelta(hours=2),
             retry_policy=RetryPolicy(  # don't spin too fast
                 initial_interval=timedelta(seconds=15),
                 maximum_interval=timedelta(seconds=15),
@@ -116,6 +117,7 @@ class SyncUpstreamSourceWorkflow:
             id=f"remove-stale-images-{boot_source_id}",
             id_reuse_policy=WorkflowIDReusePolicy.ALLOW_DUPLICATE,
             parent_close_policy=workflow.ParentClosePolicy.ABANDON,
+            execution_timeout=timedelta(hours=1),
             retry_policy=RetryPolicy(
                 initial_interval=timedelta(seconds=15),
                 maximum_interval=timedelta(seconds=15),

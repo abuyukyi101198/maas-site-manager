@@ -1,4 +1,5 @@
 from mypy_boto3_s3.type_defs import CompletedPartTypeDef
+import pytest
 from pytest_mock import MockerFixture
 
 from msm.apiserver.service import S3Service
@@ -108,4 +109,49 @@ class TestS3Service:
         assert response["Body"] is not None
         mock_client.get_object.assert_called_once_with(
             Bucket="test-bucket", Key="test/path/test/file.txt"
+        )
+
+    async def test_ensure_bucket_exists(
+        self, s3_service: S3Service, mocker: MockerFixture
+    ) -> None:
+        mock_client = mocker.patch.object(s3_service, "s3_client")
+        mock_client.list_buckets.return_value = {
+            "Buckets": [{"Name": s3_service.s3_bucket}]
+        }
+        await s3_service.ensure()
+
+        mock_client.list_buckets.assert_called_once()
+        mock_client.create_bucket.assert_not_called()
+
+    async def test_ensure_bucket_does_not_exist(
+        self, s3_service: S3Service, mocker: MockerFixture
+    ) -> None:
+        mock_client = mocker.patch.object(s3_service, "s3_client")
+        mock_client.list_buckets.return_value = {"Buckets": []}
+        mock_client.create_bucket.return_value = {
+            "ResponseMetadata": {"HTTPStatusCode": 200}
+        }
+
+        await s3_service.ensure()
+
+        mock_client.list_buckets.assert_called_once()
+        mock_client.create_bucket.assert_called_once_with(
+            Bucket=s3_service.s3_bucket
+        )
+
+    async def test_ensure_bucket_creation_failure(
+        self, s3_service: S3Service, mocker: MockerFixture
+    ) -> None:
+        mock_client = mocker.patch.object(s3_service, "s3_client")
+        mock_client.list_buckets.return_value = {"Buckets": []}
+        mock_client.create_bucket.return_value = {
+            "ResponseMetadata": {"HTTPStatusCode": 500}
+        }
+
+        with pytest.raises(RuntimeError, match="Failed to create bucket"):
+            await s3_service.ensure()
+
+        mock_client.list_buckets.assert_called_once()
+        mock_client.create_bucket.assert_called_once_with(
+            Bucket=s3_service.s3_bucket
         )

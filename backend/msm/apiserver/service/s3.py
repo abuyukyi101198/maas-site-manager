@@ -88,6 +88,21 @@ class S3Service(Service):
             config=config,
         )
 
+    async def ensure(self) -> None:
+        """Ensure S3 bucket exists."""
+        self._ensure_bucket()
+
+    def _ensure_bucket(self) -> None:
+        """Create the S3 bucket if it does not exist."""
+        existing_buckets = self.s3_client.list_buckets()
+        bucket_names = [b["Name"] for b in existing_buckets.get("Buckets", [])]
+        if self.s3_bucket not in bucket_names:
+            resp = self.s3_client.create_bucket(Bucket=self.s3_bucket)
+            if resp["ResponseMetadata"]["HTTPStatusCode"] != 200:
+                raise RuntimeError(
+                    f"Failed to create bucket {self.s3_bucket}: {resp}"
+                )
+
     def create_multipart_upload(self, path: str) -> tuple[str, str]:
         """Create a multipart upload for the given path.
 
