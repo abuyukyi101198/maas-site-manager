@@ -54,6 +54,29 @@ The `--autogenerate` parameter can be omitted to create an empty migration which
 
 **NB** the database should be at the correct state previous to the modifications that the path should contain. This should be done by calling the env with `upgrade head` before generating new revisions.
 
+### Fixing Existing Databases After Migration Squash
+
+If you have an existing database from before the migration squash, you need to mark it as compatible with the new squashed migration. The database schema itself doesn't need changes - only the migration history tracking needs to be updated.
+
+**Using alembic (recommended):**
+
+```bash
+tox run -e alembic -- stamp head
+```
+
+**For remote databases (manual SQL approach):**
+
+If you cannot run the alembic command directly (e.g., for remote production databases), you can manually update the migration tracking table:
+
+```sql
+-- Delete old migration history
+DELETE FROM alembic_version;
+
+-- Insert the new squashed migration revision
+INSERT INTO alembic_version (version_num) VALUES ('0000');
+```
+
+This achieves the same result as `alembic stamp head` by directly updating the Alembic version tracking table. After running either approach, future migrations will work normally.
 
 ## Manual setup on your host or on a virtual machine
 
@@ -99,6 +122,7 @@ sudo systemctl restart postgresql
 - deploy Temporal and an S3 storage service
 
 - export the following environment variables
+
 ```
 MSM_DB_HOST=${POSTGRES_HOST}
 MSM_DB_PORT=${POSTGRES_PORT}
