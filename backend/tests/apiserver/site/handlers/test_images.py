@@ -1,5 +1,6 @@
 from collections.abc import AsyncIterator
 from typing import cast
+from unittest.mock import MagicMock
 
 import pytest
 from pytest_mock import MockerFixture, MockType
@@ -31,7 +32,9 @@ def mock_s3_service(mocker: MockerFixture) -> MockType:
     mock.complete_upload.return_value = None
     mock.abort_upload.return_value = None
     mock.delete_object.return_value = None
-    mock.get_object.return_value = {"Body": [b"cadecafe"]}
+    mock_read = MagicMock()
+    mock_read.read.side_effect = [b"cade", b"cafe", b""]
+    mock.get_object.return_value = {"Body": mock_read}
     return cast(MockType, mock)
 
 

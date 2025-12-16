@@ -6,6 +6,7 @@ from typing import Annotated, Any
 from urllib.parse import urlparse
 
 from fastapi import APIRouter, Depends, Request
+from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import StreamingResponse
 from starlette.background import BackgroundTask
 from starlette.types import Send
@@ -30,6 +31,7 @@ from msm.common.enums import (
     DownloadPartition,
     IndexType,
 )
+from msm.common.settings import Settings
 
 logger = getLogger()
 
@@ -46,10 +48,12 @@ class S3StreamResponse(StreamingResponse):
         media_type: str = "application/octet-stream",
         background: BackgroundTask | None = None,
         file_id: str = "",
+        chunk_size: int = 5 * (1024**2),  # 5 MB
     ) -> None:
         super().__init__(content, status_code, headers, media_type, background)
         self.s3 = s3
         self.file_path = file_id
+        self.chunk_size = chunk_size
 
     async def stream_response(self, send: Send) -> None:
         await send(
@@ -61,8 +65,12 @@ class S3StreamResponse(StreamingResponse):
         )
 
         result = await self.s3.get_object(self.file_path)
+        body = result["Body"]
 
-        for chunk in result["Body"]:
+        while True:
+            chunk = await run_in_threadpool(body.read, self.chunk_size)
+            if not chunk:
+                break
             await send(
                 {
                     "type": "http.response.body",
@@ -239,6 +247,10 @@ async def download(
         )
 
     await request.state.release_db_connection()
+    settings = Settings()
     return S3StreamResponse(
-        content=None, file_id=str(boot_item.id), s3=services.s3
+        content=None,
+        file_id=str(boot_item.id),
+        s3=services.s3,
+        chunk_size=settings.image_serving_chunk_size_bytes,
     )

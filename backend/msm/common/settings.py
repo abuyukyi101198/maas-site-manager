@@ -91,6 +91,10 @@ class Settings(BaseSettings):
     metrics_refresh_interval_seconds: int = Field(
         default=300, validation_alias="MSM_METRICS_REFRESH_INTVAL_SEC"
     )
+    image_serving_chunk_size_bytes: int = Field(
+        default=5 * 1024 * 1024,
+        validation_alias="MSM_IMAGE_SERVING_CHUNK_SIZE_BYTES",
+    )
 
     @property
     def static_dir(self) -> str:
