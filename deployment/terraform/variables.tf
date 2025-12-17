@@ -29,7 +29,7 @@ variable s3_path {
 variable "maas_site_manager_channel" {
   description = "Channel to deploy the MAAS Site Manager charm from"
   type        = string
-  default     = "latest/edge"
+  default     = "1.0/beta"
 }
 
 variable "maas_site_manager_revision" {
