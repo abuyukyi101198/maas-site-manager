@@ -43,9 +43,7 @@ if (!globalThis.AbortSignal) {
 }
 
 if (!globalThis.TextEncoder || !globalThis.TextDecoder) {
-  // @ts-expect-error because NodeTextEncoder is not a global in jsdom
   globalThis.TextEncoder = NodeTextEncoder;
-  // @ts-expect-error because NodeTextDecoder is not a global in jsdom
   globalThis.TextDecoder = NodeTextDecoder;
 }
 

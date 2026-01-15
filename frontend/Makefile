@@ -93,4 +93,5 @@ e2e-test:
 	export PATH=$$(pwd)/node-22/bin:$$PATH && \
 	PLAYWRIGHT_BROWSERS_PATH=$(PLAYWRIGHT_PATH) \
 	PLAYWRIGHT_JUNIT_OUTPUT_NAME=../junit-e2e.xml \
-	npx playwright test --reporter=junit
+	npx playwright test --reporter=junit & \
+	yarn cypress-run
