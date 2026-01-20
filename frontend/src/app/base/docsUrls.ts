@@ -1,8 +1,10 @@
+const baseDocsLink = "https://charmhub.io/maas-site-manager-k8s/docs";
+
 const docsUrls = {
-  baseDocsLink: "/",
-  configFile: "/",
-  enrollmentRequest: "/",
-  troubleshooting: "/",
+  baseDocsLink,
+  configFile: `${baseDocsLink}/`,
+  enrollmentRequest: `${baseDocsLink}/`,
+  troubleshooting: `${baseDocsLink}/`,
 };
 
 export default docsUrls;
