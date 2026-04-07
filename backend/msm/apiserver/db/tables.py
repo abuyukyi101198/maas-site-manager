@@ -5,6 +5,7 @@ from sqlalchemy import (
     BigInteger,
     Boolean,
     Column,
+    Enum,
     ForeignKey,
     Index,
     Integer,
@@ -21,6 +22,7 @@ from sqlalchemy.schema import Sequence
 from sqlalchemy.types import DateTime
 
 from msm.apiserver.db.types import Point
+from msm.common.enums import TaskStatus
 from msm.common.time import now_utc, utc_from_timestamp
 
 METADATA = MetaData(
@@ -72,6 +74,18 @@ Site = Table(
     ),
     Column("deleted", DateTime(timezone=True), nullable=True, default=None),
     Column("cluster_uuid", Text, nullable=False, unique=True, default=""),
+    Column("known_config_options", ARRAY(Text), nullable=False, default=[]),
+    Column("version", Text, nullable=True),
+    Column("trigger_image_sync", Boolean, nullable=False, default=False),
+    Column(
+        "site_profile_id",
+        Integer,
+        ForeignKey(
+            "site_profile.id",
+            ondelete="RESTRICT",
+        ),
+        nullable=True,
+    ),
 )
 
 
@@ -248,4 +262,54 @@ BootAssetItem = Table(
     Column("source_release", Text, nullable=True),
     Column("bytes_synced", BigInteger, nullable=False, default=0),
     UniqueConstraint("boot_asset_version_id", "ftype", "path"),
+)
+
+
+SiteProfile = Table(
+    "site_profile",
+    METADATA,
+    Column(
+        "id",
+        Integer,
+        Sequence("site_profile_id_sequence", start=2, increment=1),
+        primary_key=True,
+    ),
+    Column("name", Text, unique=True, nullable=False),
+    Column("selections", ARRAY(Text), nullable=False),
+    Column("global_config", JSONB, nullable=True),
+)
+
+SiteStateStatus = Table(
+    "site_state_status",
+    METADATA,
+    Column("id", Integer, primary_key=True),
+    Column(
+        "site_id",
+        Integer,
+        ForeignKey("site.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
+    ),
+    Column(
+        "status", Enum(TaskStatus), nullable=False, default=TaskStatus.UNKNOWN
+    ),
+    Column(
+        "selections_status",
+        Enum(TaskStatus),
+        nullable=False,
+        default=TaskStatus.UNKNOWN,
+    ),
+    Column(
+        "global_config_status",
+        Enum(TaskStatus),
+        nullable=False,
+        default=TaskStatus.UNKNOWN,
+    ),
+    Column(
+        "image_sync_status",
+        Enum(TaskStatus),
+        nullable=False,
+        default=TaskStatus.UNKNOWN,
+    ),
+    Column("errors", ARRAY(Text), nullable=False, default=[]),
 )
