@@ -290,7 +290,7 @@ async def patch(
 )
 async def delete(
     services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[models.Site, Depends(authenticated_user)],
+    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
     id: int,
 ) -> None:
     """Delete a site from the database."""
@@ -308,7 +308,7 @@ async def delete(
 )
 async def delete_many(
     services: Annotated[ServiceCollection, Depends(services)],
-    authenticated_user: Annotated[models.Site, Depends(authenticated_user)],
+    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
     ids: Annotated[list[int], Query()],
 ) -> None:
     """Delete multiple sites from the database."""
@@ -330,3 +330,36 @@ async def delete_many(
             ],
         )
     return None
+
+
+@v1_router.get(
+    "/site-status/{site_id}",
+    responses={
+        401: {"model": UnauthorizedErrorResponseModel},
+        404: {"model": NotFoundErrorResponseModel},
+        422: {"model": ValidationErrorResponseModel},
+    },
+)
+async def get_status(
+    services: Annotated[ServiceCollection, Depends(services)],
+    authenticated_user: Annotated[models.User, Depends(authenticated_user)],
+    site_id: int,
+) -> models.SiteStateStatus:
+    """Get the status of a site's configuration tasks by the site ID."""
+    status = await services.site_state.get_by_site_id(site_id)
+    if status is None:
+        raise NotFoundException(
+            code=ExceptionCode.MISSING_RESOURCE,
+            message=f"Status for Site ID not found.",
+            details=[
+                BaseExceptionDetail(
+                    reason=ExceptionCode.MISSING_RESOURCE,
+                    messages=[
+                        f"The status for Site ID {site_id} was not found."
+                    ],
+                    field="site_id",
+                    location="path",
+                )
+            ],
+        )
+    return status
