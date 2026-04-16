@@ -1,6 +1,6 @@
 import pytest
 
-from msm.apiserver.db.models import Site
+from msm.apiserver.db import models
 from msm.common.settings import Settings
 from msm.common.time import now_utc
 from tests.fixtures.client import Client
@@ -52,7 +52,7 @@ class TestDetailsPostHandler:
         assert site_data["last_seen"] < now_utc()
 
     async def test_update_stats(
-        self, factory: Factory, api_site: Site, site_client: Client
+        self, factory: Factory, api_site: models.Site, site_client: Client
     ) -> None:
         machine_counts = {
             "allocated": 10,
@@ -77,7 +77,7 @@ class TestDetailsPostHandler:
         assert site_data["last_seen"] < now_utc()
 
     async def test_update_empty(
-        self, factory: Factory, api_site: Site, site_client: Client
+        self, factory: Factory, api_site: models.Site, site_client: Client
     ) -> None:
         before_post = now_utc()
         response = await site_client.post("/details", json={})
@@ -95,7 +95,7 @@ class TestDetailsPostHandler:
         assert site_data["last_seen"] < now_utc()
 
     async def test_heartbeat_in_response(
-        self, factory: Factory, api_site: Site, site_client: Client
+        self, factory: Factory, api_site: models.Site, site_client: Client
     ) -> None:
         machine_counts = {
             "allocated": 10,
