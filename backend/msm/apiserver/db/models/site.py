@@ -55,6 +55,8 @@ class Site(BaseModel):
     connection_status: ConnectionStatus
     trigger_image_sync: bool = False
     stats: SiteData | None = None
+    version: str | None = None
+    known_config_options: list[str] = []
 
 
 class PendingSite(BaseModel):
@@ -94,6 +96,7 @@ class SiteUpdate(BaseModel):
     # XXX: mypy can't grok that this is an str/enum with lots of members
     timezone: TimeZone | None = None  # type: ignore[valid-type]
     trigger_image_sync: bool | None = None
+    site_profile_id: int | None = None
 
 
 class SiteDetailsUpdate(BaseModel):
@@ -101,6 +104,8 @@ class SiteDetailsUpdate(BaseModel):
 
     name: str | None
     url: str | None
+    version: str | None
+    known_config_options: list[str] | None
 
 
 class SiteDataUpdate(BaseModel):
