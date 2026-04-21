@@ -58,6 +58,16 @@ class SiteProfileService(Service):
             return models.SiteProfile(**row._asdict())
         return None
 
+    async def get_stored_config_by_id(self, profile_id: int) -> dict[str, Any]:
+        """Get the raw stored config without default filling."""
+        stmt = select(SiteProfile.c.global_config).where(
+            SiteProfile.c.id == profile_id
+        )
+        result = await self.conn.execute(stmt)
+        if row := result.one_or_none():
+            return row.global_config or {}
+        return {}
+
     async def create(
         self, details: models.SiteProfileCreate
     ) -> models.SiteProfile:
@@ -72,7 +82,7 @@ class SiteProfileService(Service):
     async def update(
         self, site_profile_id: int, details: models.SiteProfileUpdate
     ) -> models.SiteProfile:
-        data = details.model_dump(exclude_none=True)
+        data = details.model_dump(exclude_unset=True)
         stmt = (
             update(SiteProfile)
             .where(SiteProfile.c.id == site_profile_id)
