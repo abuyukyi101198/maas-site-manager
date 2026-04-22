@@ -19,6 +19,7 @@ from msm.apiserver.exceptions.responses import (
 )
 from msm.apiserver.service import ServiceCollection
 from msm.apiserver.site.auth import authenticated_site
+from msm.apiserver.utils import desired_config, hash_desired_config
 from msm.common.time import now_utc
 
 v1_router = APIRouter(prefix="/v1")
@@ -56,6 +57,7 @@ class DetailsPostResponse(BaseModel):
     """Response model for POST request to /details"""
 
     config_options_requested: bool = False
+    config_hash: str = ""
 
 
 @v1_router.post(
@@ -99,6 +101,11 @@ async def details(
     interval = await services.sites.get_heartbeat_interval()
     response.headers["MSM-Heartbeat-Interval-Seconds"] = str(interval)
 
+    profile = await services.site_profiles.get_stored_by_site_id(site.id)
+    state = desired_config(profile, site.trigger_image_sync)
+    config_hash = hash_desired_config(state) if state is not None else ""
+
     return DetailsPostResponse(
-        config_options_requested=site.version != post_request.version
+        config_options_requested=site.version != post_request.version,
+        config_hash=config_hash,
     )

@@ -60,7 +60,7 @@ async def get(
             ],
         )
     return SiteConfigResponse(
-        global_config=profile.global_config,
+        global_config=profile.global_config or {},
         selections=profile.selections,
         trigger_image_sync=site.trigger_image_sync,
     )
