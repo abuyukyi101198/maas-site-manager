@@ -6,7 +6,12 @@ from fastapi import (
 )
 from pydantic import BaseModel, Field, model_validator
 
-from msm.apiserver.db.models import Site, SiteStateStatusUpdate, SiteUpdate
+from msm.apiserver.db.models import (
+    Site,
+    SiteStateStatusCreate,
+    SiteStateStatusUpdate,
+    SiteUpdate,
+)
 from msm.apiserver.dependencies import services
 from msm.apiserver.exceptions.catalog import (
     BaseExceptionDetail,
@@ -92,7 +97,6 @@ class SiteStateStatusPatchRequest(BaseModel):
     status_code=204,
     responses={
         401: {"model": UnauthorizedErrorResponseModel},
-        404: {"model": NotFoundErrorResponseModel},
         422: {"model": ValidationErrorResponseModel},
     },
 )
@@ -104,19 +108,10 @@ async def update_status(
     """Update a site's configuration task status."""
     status = await services.site_state.get_by_site_id(site.id)
     if status is None:
-        raise NotFoundException(
-            code=ExceptionCode.MISSING_RESOURCE,
-            message="Site state status does not exist.",
-            details=[
-                BaseExceptionDetail(
-                    reason=ExceptionCode.MISSING_RESOURCE,
-                    messages=[
-                        f"Site state status for site ID {site.id} does not exist"
-                    ],
-                    field="id",
-                    location="token",
-                )
-            ],
+        await services.site_state.create(
+            SiteStateStatusCreate(
+                site_id=site.id,
+            )
         )
     await services.site_state.update_by_site_id(
         site.id,
