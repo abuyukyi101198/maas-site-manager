@@ -1,0 +1,49 @@
+.image-source-table {
+  th.status, td.status {
+    .status-icon, .status-text {
+      padding-left: $connection-status-icon-width;
+    }
+  }
+
+  .name {
+    width: 20%;
+  }
+
+  .url {
+    width: 25%;
+  }
+
+  .status {
+    width: 15%;
+  }
+
+  .syncing, .keyring {
+    text-align: center;
+  }
+
+  .priority {
+    text-align: right;
+  }
+
+  .status-icon::before {
+    top: -5px;
+  }
+
+  .status-icon.is-lost {
+    color: $color-negative;
+  }
+
+  td.p-generic-table__skeleton-cell {
+    &.actions > div {
+      display: flex;
+      flex-direction: row;
+      justify-content: end;
+      gap: 0.5rem;
+      padding-right: 0.5rem;
+    }
+
+    .p-placeholder {
+      height: $sp-large;
+    }
+  }
+}

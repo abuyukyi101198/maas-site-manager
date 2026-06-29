@@ -1,3 +1,4 @@
+import { Placeholder } from "@canonical/maas-react-components";
 import { Button, Icon, Tooltip } from "@canonical/react-components";
 import type { ColumnDef } from "@tanstack/react-table";
 
@@ -19,6 +20,9 @@ export const useImageSourceTableColumns = () => {
         enableSorting: true,
         accessorFn: createAccessor("name"),
         accessorKey: "name",
+        meta: {
+          skeleton: () => <Placeholder variant="block" width="40%" />,
+        },
         cell: ({ getValue }) => {
           const { name } = getValue();
           return <div>{name}</div>;
@@ -27,9 +31,12 @@ export const useImageSourceTableColumns = () => {
       {
         id: "url",
         enableSorting: false,
-        header: () => <div>Source</div>,
         accessorFn: createAccessor("url"),
         accessorKey: "url",
+        meta: {
+          skeleton: () => <Placeholder variant="block" width="90%" />,
+        },
+        header: "Source",
         cell: ({ getValue }) => {
           const { url } = getValue();
           return (
@@ -79,9 +86,12 @@ export const useImageSourceTableColumns = () => {
       {
         id: "syncing",
         enableSorting: false,
-        header: () => <div>Syncing</div>,
         accessorFn: createAccessor(["sync_interval", "url"]),
         accessorKey: "syncing",
+        meta: {
+          skeleton: () => <Placeholder variant="block" width="1.5rem" />,
+        },
+        header: "Syncing",
         cell: ({ getValue }) => {
           const { sync_interval, url } = getValue();
           if (url === "custom") {
@@ -114,9 +124,12 @@ export const useImageSourceTableColumns = () => {
       {
         id: "keyring",
         enableSorting: false,
-        header: () => <div>Signed with GPG key</div>,
         accessorFn: createAccessor(["keyring", "url"]),
         accessorKey: "keyring",
+        meta: {
+          skeleton: () => <Placeholder variant="block" width="1.5rem" />,
+        },
+        header: "Signed with GPG key",
         cell: ({ getValue }) => {
           const { keyring, url } = getValue();
           if (url === "custom") {
@@ -130,20 +143,23 @@ export const useImageSourceTableColumns = () => {
       },
       {
         id: "priority",
-        enableSorting: false,
+        enableSorting: true,
+        accessorFn: createAccessor("priority"),
+        accessorKey: "priority",
+        meta: {
+          skeleton: () => <Placeholder variant="block" width="20%" />,
+        },
         header: () => (
-          <div>
-            Priority{" "}
+          <>
+            Priority
             <Tooltip
               message="If the same image is available from several sources, the image from the source with the higher priority takes precedence. 1 is the highest priority."
               position="btm-center"
             >
               <Icon name="help" />
             </Tooltip>
-          </div>
+          </>
         ),
-        accessorFn: createAccessor("priority"),
-        accessorKey: "priority",
         cell: ({ getValue }) => {
           const { priority } = getValue();
           return <div>{priority}</div>;
@@ -152,9 +168,17 @@ export const useImageSourceTableColumns = () => {
       {
         id: "actions",
         enableSorting: false,
-        header: () => <div>Actions</div>,
         accessorFn: createAccessor(["url", "id"]),
         accessorKey: "url",
+        meta: {
+          skeleton: () => (
+            <div>
+              <Placeholder variant="block" width="1.5rem" />
+              <Placeholder variant="block" width="1.5rem" />
+            </div>
+          ),
+        },
+        header: "Actions",
         cell: ({ getValue }) => {
           const { url, id } = getValue();
           return (
