@@ -1,0 +1,37 @@
+.p-generic-table.users-table {
+  thead {
+    padding-top: $sp-medium;
+  }
+
+  .username, .full-name {
+    width: 20%;
+  }
+
+  .email {
+    min-width: 24rem;
+  }
+
+  .role {
+    width: 10%;
+  }
+
+  .u-table-cell-padding-overlap {
+    margin-right: 0;
+    padding-left: $sph--small;
+    padding-right: $sph--small;
+  }
+
+  td.p-generic-table__skeleton-cell {
+    &.actions > div {
+      display: flex;
+      flex-direction: row;
+      justify-content: end;
+      gap: 0.5rem;
+      padding-right: 0.5rem;
+    }
+
+    .p-placeholder {
+      height: $sp-large;
+    }
+  }
+}
