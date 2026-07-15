@@ -1,4 +1,4 @@
-import { ContentSection, ExternalLink, MainToolbar } from "@canonical/maas-react-components";
+import { ContentSection, ExternalLink, MainToolbar, useSidePanel } from "@canonical/maas-react-components";
 import { Button, Notification } from "@canonical/react-components";
 import pluralize from "pluralize";
 
@@ -9,13 +9,16 @@ import ErrorMessage from "@/app/base/components/ErrorMessage";
 import RemoveButton from "@/app/base/components/RemoveButton";
 import docsUrls from "@/app/base/docsUrls";
 import usePagination from "@/app/base/hooks/usePagination";
-import { useAppLayoutContext, useRowSelection } from "@/app/context";
+import { lazySidePanel } from "@/app/base/sidePanel";
+import { useRowSelection } from "@/app/context";
 import { saveToFile } from "@/utils";
 
 const DEFAULT_PAGE_SIZE = 50;
 
+const TokensCreate = lazySidePanel(() => import("@/app/settings/views/Tokens/components/TokensCreate"));
+
 const TokensList = () => {
-  const { setSidebar } = useAppLayoutContext();
+  const { openSidePanel } = useSidePanel();
   const { page, debouncedPage, size, handlePageSizeChange, setPage } = usePagination(DEFAULT_PAGE_SIZE);
   const { rowSelection, setRowSelection, clearRowSelection } = useRowSelection("tokens", {
     currentPage: page,
@@ -97,7 +100,7 @@ const TokensList = () => {
             <Button
               className="p-button--positive"
               onClick={() => {
-                setSidebar("createToken");
+                openSidePanel({ component: TokensCreate, title: "Generate tokens" });
               }}
               type="button"
             >

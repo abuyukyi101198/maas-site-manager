@@ -1,11 +1,14 @@
+import { useSidePanel } from "@canonical/maas-react-components";
 import { Button, Icon, Tooltip } from "@canonical/react-components";
 
-import { useAppLayoutContext } from "@/app/context";
+import { lazySidePanel } from "@/app/base/sidePanel";
+
+const SitesMissingData = lazySidePanel(() => import("@/app/sites/components/SitesMissingData"));
 
 const MAP_Z_INDEX = 18;
 
 const SitesHiddenButton = () => {
-  const { setSidebar } = useAppLayoutContext();
+  const { openSidePanel } = useSidePanel();
 
   return (
     <div className="sites-hidden-btn-container">
@@ -25,7 +28,7 @@ const SitesHiddenButton = () => {
           className="sites-hidden-btn"
           hasIcon
           onClick={() => {
-            setSidebar("sitesMissingData");
+            openSidePanel({ component: SitesMissingData, title: "Sites with missing data" });
           }}
         >
           <Icon name="warning" />

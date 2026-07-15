@@ -1,24 +1,12 @@
 import ImagesTable from "@/app/images/components/ImagesTable/ImagesTable";
 import { selectedImageFactory } from "@/mocks/factories";
 import { imageResolvers } from "@/testing/resolvers/images";
-import { renderWithMemoryRouter, screen, setupServer, userEvent, waitFor } from "@/utils/test-utils";
+import { mockSidePanel, renderWithMemoryRouter, screen, setupServer, userEvent, waitFor } from "@/utils/test-utils";
 
 const images = selectedImageFactory.buildList(2, { os: "Hannah Montana Linux" });
 const mockServer = setupServer(imageResolvers.selectedImages.handler(images));
 
-const mockUseAppLayoutContext = vi.spyOn(await import("@/app/context/AppLayoutContext"), "useAppLayoutContext");
-
-const mockSetSidebar = vi.fn();
-
-beforeEach(() => {
-  vi.clearAllMocks();
-
-  mockUseAppLayoutContext.mockReturnValue({
-    previousSidebar: null,
-    setSidebar: mockSetSidebar,
-    sidebar: null,
-  });
-});
+const { mockOpen } = await mockSidePanel();
 
 beforeAll(() => {
   mockServer.listen();
@@ -77,7 +65,7 @@ describe("ImagesTable", () => {
       await userEvent.click(screen.getByRole("button", { name: "Delete" }));
 
       await waitFor(() => {
-        expect(mockSetSidebar).toHaveBeenCalledWith("removeAvailableImages");
+        expect(mockOpen).toHaveBeenCalledWith(expect.objectContaining({ title: "Remove available images" }));
       });
     });
   });

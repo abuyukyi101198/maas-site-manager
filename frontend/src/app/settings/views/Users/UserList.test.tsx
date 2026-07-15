@@ -1,19 +1,11 @@
 import UserList from "./UserList";
 
-import { renderWithMemoryRouter, screen, userEvent } from "@/utils/test-utils";
+import { mockSidePanel, renderWithMemoryRouter, screen, userEvent } from "@/utils/test-utils";
 
-const mockUseAppLayoutContext = vi.spyOn(await import("@/app/context"), "useAppLayoutContext");
-
-const mockSetSidebar = vi.fn();
+const { mockOpen } = await mockSidePanel();
 
 beforeEach(() => {
   vi.clearAllMocks();
-
-  mockUseAppLayoutContext.mockReturnValue({
-    previousSidebar: null,
-    setSidebar: mockSetSidebar,
-    sidebar: null,
-  });
 });
 
 describe("UserList", () => {
@@ -34,7 +26,7 @@ describe("UserList", () => {
 
       await userEvent.click(screen.getByRole("button", { name: "Add user" }));
 
-      expect(mockSetSidebar).toHaveBeenCalledWith("addUser");
+      expect(mockOpen).toHaveBeenCalledWith(expect.objectContaining({ title: "Add user" }));
     });
   });
 });

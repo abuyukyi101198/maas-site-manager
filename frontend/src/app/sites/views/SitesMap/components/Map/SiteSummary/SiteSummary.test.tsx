@@ -6,7 +6,17 @@ import { SiteMarkerSvg } from "@/app/sites/views/SitesMap/components/Map/SiteMar
 import { siteFactory, statsFactory } from "@/mocks/factories";
 import { sitesResolvers } from "@/testing/resolvers/sites";
 import { apiUrls } from "@/utils/test-urls";
-import { renderWithMemoryRouter, waitFor, screen, setupServer, userEvent, fireEvent } from "@/utils/test-utils";
+import {
+  fireEvent,
+  mockSidePanel,
+  renderWithMemoryRouter,
+  screen,
+  setupServer,
+  userEvent,
+  waitFor,
+} from "@/utils/test-utils";
+
+const { mockOpen } = await mockSidePanel();
 
 const stats = statsFactory.build();
 const site = siteFactory.build({ url: "https://example.com", stats });
@@ -58,18 +68,6 @@ it("displays an error notification when site fetch fails", async () => {
 });
 
 it("opens the edit site sidebar when the edit button is clicked", async () => {
-  // Mocks get hoisted to the top of the file, so we also have to hoist this function
-  // to avoid "setSidebar is undefined" errors
-  const setSidebar = vi.hoisted(() => vi.fn());
-
-  vi.mock("@/app/context", async () => {
-    const actualContext = await vi.importActual("@/app/context");
-    return {
-      ...actualContext,
-      useAppLayoutContext: () => ({ setSidebar }),
-    };
-  });
-
   renderWithMemoryRouter(<SiteSummary id={site.id} />);
 
   await waitFor(() => {
@@ -78,9 +76,7 @@ it("opens the edit site sidebar when the edit button is clicked", async () => {
 
   await userEvent.click(screen.getByRole("button", { name: "Edit" }));
 
-  expect(setSidebar).toHaveBeenCalledWith("editSite");
-
-  vi.restoreAllMocks();
+  expect(mockOpen).toHaveBeenCalledWith(expect.objectContaining({ title: "Edit site" }));
 });
 
 it("keeps the increased marker size when hovering over the site summary", async () => {

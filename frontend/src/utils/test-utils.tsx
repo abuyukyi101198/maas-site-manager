@@ -2,12 +2,13 @@
 import type { ReactElement } from "react";
 import * as React from "react";
 
+import { SidePanelContextProvider } from "@canonical/maas-react-components";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { RenderOptions, RenderResult } from "@testing-library/react";
-import { screen, render, waitForElementToBeRemoved } from "@testing-library/react";
+import { render, screen, waitForElementToBeRemoved } from "@testing-library/react";
 
 import Layout from "@/app/base/components/Layout";
-import { AppLayoutContextProvider, AuthContextProvider, RowSelectionContextProviders } from "@/app/context";
+import { AuthContextProvider, RowSelectionContextProviders } from "@/app/context";
 import type { MemoryRouterProps } from "@/utils/router";
 import { MemoryRouter } from "@/utils/router";
 
@@ -21,7 +22,11 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
     },
   });
 
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <SidePanelContextProvider>{children}</SidePanelContextProvider>
+    </QueryClientProvider>
+  );
 };
 
 const makeProvidersWithMemoryRouter =
@@ -30,14 +35,12 @@ const makeProvidersWithMemoryRouter =
     return (
       <Providers>
         <MemoryRouter {...memoryRouterProps}>
-          <AppLayoutContextProvider>
-            <AuthContextProvider>
-              <RowSelectionContextProviders>
-                {withMainLayout ? <Layout /> : null}
-                {children}
-              </RowSelectionContextProviders>
-            </AuthContextProvider>
-          </AppLayoutContextProvider>
+          <AuthContextProvider>
+            <RowSelectionContextProviders>
+              {withMainLayout ? <Layout /> : null}
+              {children}
+            </RowSelectionContextProviders>
+          </AuthContextProvider>
         </MemoryRouter>
       </Providers>
     );
@@ -76,12 +79,71 @@ export const getByTextContent = (text: RegExp | string) => {
   });
 };
 
+/**
+ * Mocks the generic side panel context
+ * @returns A mock functions for opening and closing the side panel
+ */
+export const mockSidePanel = async () => {
+  const mockUseSidePanel = vi.spyOn(await import("@canonical/maas-react-components"), "useSidePanel");
+
+  const mockOpen = vi.fn();
+  const mockClose = vi.fn();
+
+  let isOpen = false;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    isOpen = false;
+
+    mockOpen.mockImplementation(() => {
+      isOpen = true;
+      mockUseSidePanel.mockReturnValue({
+        isOpen: true,
+        title: "",
+        size: "regular",
+        component: null,
+        props: {},
+        openSidePanel: mockOpen,
+        closeSidePanel: mockClose,
+        setSidePanelSize: vi.fn(),
+      });
+    });
+
+    mockClose.mockImplementation(() => {
+      isOpen = false;
+      mockUseSidePanel.mockReturnValue({
+        isOpen: false,
+        title: "",
+        size: "regular",
+        component: null,
+        props: {},
+        openSidePanel: mockOpen,
+        closeSidePanel: mockClose,
+        setSidePanelSize: vi.fn(),
+      });
+    });
+
+    mockUseSidePanel.mockReturnValue({
+      isOpen,
+      title: "",
+      size: "regular",
+      component: null,
+      props: {},
+      openSidePanel: mockOpen,
+      closeSidePanel: mockClose,
+      setSidePanelSize: vi.fn(),
+    });
+  });
+
+  return { mockOpen, mockClose };
+};
+
 export const waitForLoadingToFinish = () => waitForElementToBeRemoved(screen.queryByText(/loading/i));
 
-export { screen, within, waitFor, act, renderHook, fireEvent } from "@testing-library/react";
+export { act, fireEvent, renderHook, screen, waitFor, within } from "@testing-library/react";
 
 export type { RenderResult } from "@testing-library/react";
 
-export { customRender as render };
 export { default as userEvent } from "@testing-library/user-event";
 export { setupServer } from "msw/node";
+export { customRender as render };

@@ -7,6 +7,7 @@ import { imageResolvers } from "@/testing/resolvers/images";
 import { apiUrls } from "@/utils/test-urls";
 import {
   getByTextContent,
+  mockSidePanel,
   render,
   renderWithMemoryRouter,
   screen,
@@ -16,9 +17,9 @@ import {
 } from "@/utils/test-utils";
 
 const mockServer = setupServer(imageResolvers.removeImageFromSelection.handler(), imageResolvers.removeImage.handler());
-const mockUseAppLayoutContext = vi.spyOn(await import("@/app/context/AppLayoutContext"), "useAppLayoutContext");
 
-const mockSetSidebar = vi.fn();
+const { mockClose } = await mockSidePanel();
+
 const clearRowSelection = vi.fn();
 
 beforeEach(() => {
@@ -29,11 +30,6 @@ beforeEach(() => {
     setRowSelection: vi.fn(),
     clearRowSelection,
   }));
-  mockUseAppLayoutContext.mockReturnValue({
-    previousSidebar: null,
-    setSidebar: mockSetSidebar,
-    sidebar: null,
-  });
 });
 
 beforeAll(() => {
@@ -64,7 +60,7 @@ describe("RemoveAvailableImages", () => {
       expect(screen.getByRole("button", { name: /Cancel/i })).toBeInTheDocument();
     });
     await userEvent.click(screen.getByRole("button", { name: /Cancel/i }));
-    expect(mockSetSidebar).toHaveBeenCalledWith(null);
+    expect(mockClose).toHaveBeenCalled();
 
     expect(clearRowSelection).toHaveBeenCalled();
 

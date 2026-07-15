@@ -1,17 +1,22 @@
 import type { ReactElement } from "react";
 
-import { MainToolbar, ContentSection } from "@canonical/maas-react-components";
+import { ContentSection, MainToolbar, useSidePanel } from "@canonical/maas-react-components";
 import { Button } from "@canonical/react-components";
 
 import ImagesTable from "../../components/ImagesTable";
 
 import RemoveButton from "@/app/base/components/RemoveButton";
-import { useAppLayoutContext, useRowSelection } from "@/app/context";
+import { lazySidePanel } from "@/app/base/sidePanel";
+import { useRowSelection } from "@/app/context";
+
+const RemoveAvailableImages = lazySidePanel(() => import("@/app/images/components/RemoveAvailableImages"));
+const AddToAvailableImages = lazySidePanel(() => import("@/app/images/components/AddToAvailableImages"));
+const UploadCustomImage = lazySidePanel(() => import("@/app/images/components/UploadCustomImage"));
 
 const ImagesList = (): ReactElement => {
   const { rowSelection } = useRowSelection("images");
   const isDeleteDisabled = Object.keys(rowSelection).length <= 0;
-  const { setSidebar } = useAppLayoutContext();
+  const { openSidePanel } = useSidePanel();
 
   return (
     <ContentSection>
@@ -23,13 +28,13 @@ const ImagesList = (): ReactElement => {
               disabled={isDeleteDisabled}
               label="Remove available images"
               onClick={() => {
-                setSidebar("removeAvailableImages");
+                openSidePanel({ component: RemoveAvailableImages, title: "Remove available images" });
               }}
               type="button"
             />
             <Button
               onClick={() => {
-                setSidebar("addToAvailableImages");
+                openSidePanel({ component: AddToAvailableImages, title: "Add to available images" });
               }}
               type="button"
             >
@@ -37,7 +42,7 @@ const ImagesList = (): ReactElement => {
             </Button>
             <Button
               onClick={() => {
-                setSidebar("uploadCustomImage");
+                openSidePanel({ component: UploadCustomImage, title: "Upload custom image" });
               }}
               type="button"
             >

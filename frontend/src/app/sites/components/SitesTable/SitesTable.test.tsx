@@ -5,16 +5,23 @@ import SitesTable from "./SitesTable";
 import { TimeZone } from "@/app/apiclient";
 import { enrollmentRequestFactory, siteFactory, sitesQueryResultFactory, statsFactory } from "@/mocks/factories";
 import { enrollmentRequestsResolvers } from "@/testing/resolvers/enrollmentRequests";
-import { renderWithMemoryRouter, screen, setupServer, userEvent, waitFor, within } from "@/utils/test-utils";
+import {
+  mockSidePanel,
+  renderWithMemoryRouter,
+  screen,
+  setupServer,
+  userEvent,
+  waitFor,
+  within,
+} from "@/utils/test-utils";
 
 const enrollmentRequests = enrollmentRequestFactory.buildList(2);
 const mockServer = setupServer(enrollmentRequestsResolvers.listEnrollmentRequests.handler(enrollmentRequests));
 
-const mockUseAppLayoutContext = vi.spyOn(await import("@/app/context"), "useAppLayoutContext");
-const mockUseAppLayoutContextDirect = vi.spyOn(await import("@/app/context/AppLayoutContext"), "useAppLayoutContext");
+const { mockOpen } = await mockSidePanel();
+
 const mockUseSiteDetailsContext = vi.spyOn(await import("@/app/context/SiteDetailsContext"), "useSiteDetailsContext");
 
-const mockSetSidebar = vi.fn();
 const mockSetSiteId = vi.fn();
 
 const paginationProps = {
@@ -60,14 +67,6 @@ beforeEach(() => {
   localStorage.clear();
   vi.clearAllMocks();
 
-  const appLayoutContextValue = {
-    previousSidebar: null,
-    setSidebar: mockSetSidebar,
-    sidebar: null,
-  };
-
-  mockUseAppLayoutContext.mockReturnValue(appLayoutContextValue);
-  mockUseAppLayoutContextDirect.mockReturnValue(appLayoutContextValue);
   mockUseSiteDetailsContext.mockReturnValue({
     selected: null,
     setSelected: mockSetSiteId,
@@ -221,7 +220,7 @@ describe("SitesTable", () => {
       await userEvent.click(within(row).getByRole("button", { name: "Edit" }));
 
       expect(mockSetSiteId).toHaveBeenCalledWith(item.id);
-      expect(mockSetSidebar).toHaveBeenCalledWith("editSite");
+      expect(mockOpen).toHaveBeenCalledWith(expect.objectContaining({ title: "Edit site" }));
     });
 
     it("opens the remove sites sidebar when delete is clicked", async () => {
@@ -240,7 +239,7 @@ describe("SitesTable", () => {
 
       await userEvent.click(within(row).getByRole("button", { name: "Delete" }));
 
-      expect(mockSetSidebar).toHaveBeenCalledWith("removeSites");
+      expect(mockOpen).toHaveBeenCalledWith(expect.objectContaining({ title: "Remove sites" }));
     });
 
     it("enables bulk remove when a row is selected and opens the remove sidebar", async () => {
@@ -265,7 +264,7 @@ describe("SitesTable", () => {
 
       await userEvent.click(removeButton);
 
-      expect(mockSetSidebar).toHaveBeenCalledWith("removeSites");
+      expect(mockOpen).toHaveBeenCalledWith(expect.objectContaining({ title: "Remove sites" }));
     });
   });
 });

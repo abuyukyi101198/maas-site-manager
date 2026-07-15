@@ -1,16 +1,18 @@
 import { useMemo } from "react";
 
-import { formatBytes, Placeholder } from "@canonical/maas-react-components";
+import { formatBytes, Placeholder, useSidePanel } from "@canonical/maas-react-components";
 import { Icon } from "@canonical/react-components";
 import type { Column, ColumnDef, Header, Row, Table } from "@tanstack/react-table";
 import pluralize from "pluralize";
 
 import TableActions from "@/app/base/components/TableActions";
-import { useAppLayoutContext } from "@/app/context";
+import { lazySidePanel } from "@/app/base/sidePanel";
 import { ChangeSourceDropdown } from "@/app/images/components/ImagesTable/ChangeSourceDropdown";
 import type { ImageWithId } from "@/app/images/components/ImagesTable/ImagesTable";
 import SyncStatus from "@/app/images/components/ImagesTable/SyncStatus";
 import { toTitleCase } from "@/utils";
+
+const RemoveAvailableImages = lazySidePanel(() => import("@/app/images/components/RemoveAvailableImages"));
 
 export type ImageColumnDef = ColumnDef<ImageWithId, Partial<ImageWithId>>;
 
@@ -25,7 +27,7 @@ export const filterCells = (row: Row<ImageWithId>, column: Column<ImageWithId>) 
 };
 
 const useImagesTableColumns = () => {
-  const { setSidebar } = useAppLayoutContext();
+  const { openSidePanel } = useSidePanel();
 
   return useMemo<ImageColumnDef[]>(
     () =>
@@ -157,7 +159,7 @@ const useImagesTableColumns = () => {
                     if (!row.getIsSelected()) {
                       row.toggleSelected();
                     }
-                    setSidebar("removeAvailableImages");
+                    openSidePanel({ component: RemoveAvailableImages, title: "Remove available images" });
                   }
                 }}
               />
@@ -165,7 +167,7 @@ const useImagesTableColumns = () => {
           },
         },
       ] as ImageColumnDef[],
-    [setSidebar],
+    [openSidePanel],
   );
 };
 export default useImagesTableColumns;

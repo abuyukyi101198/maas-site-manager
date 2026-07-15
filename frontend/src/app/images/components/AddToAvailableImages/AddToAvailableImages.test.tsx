@@ -6,7 +6,7 @@ import type { SelectableImage } from "@/app/apiclient";
 import { selectableImageFactory } from "@/mocks/factories";
 import { imageResolvers } from "@/testing/resolvers/images";
 import { apiUrls } from "@/utils/test-urls";
-import { renderWithMemoryRouter, screen, setupServer, userEvent, waitFor } from "@/utils/test-utils";
+import { mockSidePanel, renderWithMemoryRouter, screen, setupServer, userEvent, waitFor } from "@/utils/test-utils";
 
 const ubuntuImages = selectableImageFactory.buildList(5, { os: "Ubuntu" });
 const centOsImages = selectableImageFactory.buildList(5, { os: "CentOS" });
@@ -17,19 +17,7 @@ const mockServer = setupServer(
   imageResolvers.addImageToSelection.handler(),
 );
 
-const mockUseAppLayoutContext = vi.spyOn(await import("@/app/context/AppLayoutContext"), "useAppLayoutContext");
-
-const mockSetSidebar = vi.fn();
-
-beforeEach(() => {
-  vi.clearAllMocks();
-
-  mockUseAppLayoutContext.mockReturnValue({
-    previousSidebar: null,
-    setSidebar: mockSetSidebar,
-    sidebar: null,
-  });
-});
+const { mockClose } = await mockSidePanel();
 
 beforeAll(() => {
   mockServer.listen();
@@ -62,7 +50,7 @@ describe("AddToAvailableImages", () => {
       expect(screen.getByRole("button", { name: /Cancel/i })).toBeInTheDocument();
     });
     await userEvent.click(screen.getByRole("button", { name: /Cancel/i }));
-    expect(mockSetSidebar).toHaveBeenCalledWith(null);
+    expect(mockClose).toHaveBeenCalled();
   });
 
   it("enabled submission when form is edited and calls add image on save click", async () => {

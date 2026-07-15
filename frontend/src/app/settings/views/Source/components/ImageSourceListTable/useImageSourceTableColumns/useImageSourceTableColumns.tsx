@@ -1,16 +1,24 @@
-import { Placeholder } from "@canonical/maas-react-components";
+import { Placeholder, useSidePanel } from "@canonical/maas-react-components";
 import { Button, Icon, Tooltip } from "@canonical/react-components";
 import type { ColumnDef } from "@tanstack/react-table";
 
 import type { BootSource } from "@/app/apiclient";
-import { useAppLayoutContext } from "@/app/context";
+import { lazySidePanel } from "@/app/base/sidePanel";
 import { useBootSourceContext } from "@/app/context/BootSourceContext";
 import { createAccessor } from "@/utils";
+
+const EditCustomImagesSourceForm = lazySidePanel(
+  () => import("@/app/settings/views/Source/components/ImageSourceForm/EditCustomImagesSourceForm"),
+);
+const EditImageSourceForm = lazySidePanel(
+  () => import("@/app/settings/views/Source/components/ImageSourceForm/EditImageSourceForm"),
+);
+const DeleteImageSource = lazySidePanel(() => import("@/app/settings/views/Source/components/DeleteImageSource"));
 
 type BootSourceColumnDef = ColumnDef<BootSource, Partial<BootSource>>;
 
 export const useImageSourceTableColumns = () => {
-  const { setSidebar } = useAppLayoutContext();
+  const { openSidePanel } = useSidePanel();
   const { setSelected } = useBootSourceContext();
 
   return useMemo<BootSourceColumnDef[]>(
@@ -191,9 +199,9 @@ export const useImageSourceTableColumns = () => {
                 onClick={() => {
                   setSelected(id!);
                   if (url === "custom") {
-                    setSidebar("editCustomImagesSource");
+                    openSidePanel({ component: EditCustomImagesSourceForm, title: "Edit custom images" });
                   } else {
-                    setSidebar("editBootSource");
+                    openSidePanel({ component: EditImageSourceForm, title: "Edit image source" });
                   }
                 }}
               >
@@ -206,7 +214,7 @@ export const useImageSourceTableColumns = () => {
                   className="is-dense u-table-cell-padding-overlap"
                   onClick={() => {
                     setSelected(id!);
-                    setSidebar("deleteBootSource");
+                    openSidePanel({ component: DeleteImageSource, title: "Delete image source" });
                   }}
                 >
                   <Icon name="delete" />
@@ -217,6 +225,6 @@ export const useImageSourceTableColumns = () => {
         },
       },
     ],
-    [setSidebar, setSelected],
+    [openSidePanel, setSelected],
   );
 };

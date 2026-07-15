@@ -2,10 +2,11 @@ import { setupServer } from "msw/node";
 
 import EditCustomImagesSourceForm from "./EditCustomImagesSourceForm";
 
-import { AppLayoutContext } from "@/app/context";
 import { BootSourceContext } from "@/app/context/BootSourceContext";
 import { imageSourceResolvers, mockImageSources } from "@/testing/resolvers/imageSources";
-import { render, screen, userEvent, waitFor } from "@/utils/test-utils";
+import { mockSidePanel, render, screen, userEvent, waitFor } from "@/utils/test-utils";
+
+const { mockClose } = await mockSidePanel();
 
 const mockServer = setupServer(
   imageSourceResolvers.getImageSource.handler(),
@@ -64,14 +65,11 @@ it("enables the submit button when a valid priority is entered", async () => {
 
 it("closes the side panel and resets selected source when 'Cancel' is clicked", async () => {
   const setSelected = vi.fn();
-  const setSidebar = vi.fn();
 
   render(
-    <AppLayoutContext.Provider value={{ sidebar: null, setSidebar, previousSidebar: null }}>
-      <BootSourceContext.Provider value={{ selected: mockImageSources[0].id, setSelected }}>
-        <EditCustomImagesSourceForm />
-      </BootSourceContext.Provider>
-    </AppLayoutContext.Provider>,
+    <BootSourceContext.Provider value={{ selected: mockImageSources[0].id, setSelected }}>
+      <EditCustomImagesSourceForm />
+    </BootSourceContext.Provider>,
   );
 
   await waitFor(() => {
@@ -83,7 +81,7 @@ it("closes the side panel and resets selected source when 'Cancel' is clicked", 
     expect(setSelected).toHaveBeenCalledWith(null);
   });
   await waitFor(() => {
-    expect(setSidebar).toHaveBeenCalledWith(null);
+    expect(mockClose).toHaveBeenCalled();
   });
 });
 
