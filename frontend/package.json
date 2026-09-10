@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@canonical/ds-assets": "0.33.0",
-    "@canonical/maas-react-components": "2.8.0",
+    "@canonical/maas-react-components": "2.8.4",
     "@canonical/react-components": "3.6.0",
     "@canonical/react-ds-global": "0.33.0",
     "@canonical/react-ds-global-form": "0.33.0",

@@ -115,6 +115,7 @@ jobs:
             fe-sites
             fe-settings
             fe-tokens
+            fe-deps
             be-config
             be-settings
             be-sites
@@ -224,7 +225,15 @@ jobs:
   ci-check:
     runs-on: ubuntu-latest
     if: always()
-    needs: [changes, validate-conventional-commit, lint, test-backend, test-frontend, test-docs]
+    needs:
+      [
+        changes,
+        validate-conventional-commit,
+        lint,
+        test-backend,
+        test-frontend,
+        test-docs,
+      ]
     steps:
       - name: Determine overall CI status
         id: status

@@ -20,5 +20,17 @@ export const checkPageA11y =
       { exclude: [".p-accordion"] },
       // TODO: https://warthogs.atlassian.net/browse/MAASENG-2043
       { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"] } },
+      (violations) => {
+        cy.task("log", `${violations.length} accessibility violation${violations.length === 1 ? "" : "s"} detected`);
+
+        const violationData = violations.map(({ id, impact, description, nodes }) => ({
+          id,
+          impact,
+          description,
+          nodes: nodes.length,
+        }));
+
+        cy.task("table", violationData);
+      },
     );
   };
